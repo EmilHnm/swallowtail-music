@@ -1,0 +1,33 @@
+@import "./base.css";
+body {
+  background-color: var(--background-color-primary);
+  color: var(--text-primary-color);
+  font-family: Consolas;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  transition: 0.3s;
+}
+a {
+  text-decoration: none;
+}
+svg {
+  fill: var(--text-primary-color);
+}
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--background-color-secondary);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--background-color-primary);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  width: 0px;
+}
