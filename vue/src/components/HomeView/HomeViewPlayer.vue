@@ -277,7 +277,7 @@ $tablet-width: 768px;
   .now_playing__menu {
     display: flex;
     width: 30%;
-    margin-right: 30px;
+    margin-right: 20px;
     &--container {
       width: 100%;
       height: 100%;

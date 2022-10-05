@@ -81,7 +81,7 @@ export default defineComponent({
     right: 0;
     bottom: 0;
     width: 100%;
-    z-index: 50;
+    z-index: 2;
     pointer-events: none;
     &::before {
       content: "";

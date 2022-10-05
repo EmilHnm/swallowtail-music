@@ -9,7 +9,7 @@ export default createStore({
         email: "emil@gmail.com",
         imgUrl: "",
       },
-      token: "123456789",
+      token: "123",
     },
   },
   getters: {},

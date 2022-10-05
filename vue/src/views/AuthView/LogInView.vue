@@ -13,7 +13,7 @@
           :type="'email'"
           :required="true"
           :id="'email'"
-          @input="onEmailInput"
+          v-model="email"
         ></BaseInput>
       </div>
       <div class="login__form__input">
@@ -22,14 +22,18 @@
           :type="'password'"
           :required="true"
           :id="'password'"
-          @input="onPasswordInput"
+          v-model="password"
         ></BaseInput>
       </div>
       <div class="login__form__input">
-        Forgot your password? <a>Reset it</a>
+        <input type="checkbox" name="remember_me" id="rememer_me" />
+        <label>Remember Me</label>
       </div>
       <div class="login__form__input">
         <BaseButton :type="'submit'">Log In</BaseButton>
+      </div>
+      <div class="login__form__input">
+        Forgot your password? <a>Reset it</a>
       </div>
       <div class="login__form__input">
         Have no account?
@@ -41,6 +45,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { environment } from "@/environment/environment";
 import BaseInput from "../../components/UI/BaseInput.vue";
 import BaseButton from "../../components/UI/BaseButton.vue";
 
@@ -54,13 +59,22 @@ export default defineComponent({
     };
   },
   methods: {
-    onEmailInput(value: string) {
-      this.email = value;
+    onSubmitForm() {
+      fetch(environment.api + "/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: this.email,
+          password: this.password,
+        }),
+      })
+        .then((response) => response.trim().json())
+        .then((data) => {
+          console.log(data);
+        });
     },
-    onPasswordInput(value: string) {
-      this.password = value;
-    },
-    onSubmitForm() {},
   },
 });
 </script>

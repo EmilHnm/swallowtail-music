@@ -24,7 +24,6 @@
       <button
         class="header__left--sidebar-toggle"
         @click="$emit('toggleLeftSideBar')"
-        :class="{ active: isLeftSideBarActive }"
       >
         <icon-menu />
       </button>
@@ -122,6 +121,9 @@ $tablet-width: 768px;
     &--sidebar-toggle {
       width: 40px;
       height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       background-color: transparent;
       border: none;
       padding: 0;
@@ -214,6 +216,8 @@ $tablet-width: 768px;
         font-weight: bolder;
         color: var(--text-primary-color);
         padding-left: 20px;
+        white-space: nowrap;
+        overflow: hidden;
         user-select: none;
       }
       &--img {

@@ -18,6 +18,7 @@ svg {
 /* Chrome, Edge, and Safari */
 *::-webkit-scrollbar {
   width: 6px;
+  height: 0px;
 }
 
 *::-webkit-scrollbar-track {

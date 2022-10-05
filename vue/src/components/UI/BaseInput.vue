@@ -8,8 +8,9 @@
         class="base-input__input"
         :id="id"
         :type="type"
-        v-model="value"
+        v-model="modelValue"
         :required="required"
+        :placeholder="placeholder"
         @input="onInput"
       />
       <span></span>
@@ -18,7 +19,7 @@
 </template>
 <script lang="ts">
 export default {
-  emits: ["input"],
+  emits: ["update:modelValue"],
   props: {
     id: {
       type: String,
@@ -40,15 +41,18 @@ export default {
       type: Boolean,
       default: false,
     },
+    placeholder: {
+      type: String,
+      default: "",
+    },
+    modelValue: {
+      default: "",
+    },
   },
-  data() {
-    return {
-      value: "",
-    };
-  },
+  computed: {},
   methods: {
     onInput() {
-      this.$emit("input", this.value);
+      this.$emit("update:modelValue", this.modelValue);
     },
   },
 };

@@ -7,13 +7,13 @@
           <div class="nav__navigation--title">Home</div>
         </base-list-item>
       </router-link>
-      <router-link :to="{ name: 'home' }">
+      <router-link :to="{ name: 'searchPage' }">
         <base-list-item>
           <IconSearch />
           <div class="nav__navigation--title">Search</div>
         </base-list-item>
       </router-link>
-      <router-link :to="{ name: 'home' }">
+      <router-link :to="{ name: 'libraryPage' }">
         <base-list-item>
           <IconLibrary />
           <div class="nav__navigation--title">Library</div>
@@ -21,7 +21,7 @@
       </router-link>
     </div>
     <div class="nav__navigation">
-      <router-link :to="{ name: 'home' }">
+      <router-link :to="{ name: 'uploadPage' }">
         <base-list-item>
           <IconUpload />
           <div class="nav__navigation--title">Upload</div>
@@ -107,7 +107,7 @@ $tablet-width: 768px;
       cursor: pointer;
     }
   }
-  &__playlist {
+  .nav__playlist {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -140,7 +140,7 @@ $tablet-width: 768px;
   padding: 10px 0px;
   height: 100%;
   overflow: auto;
-  border-right: 0.5px solid var(--text-subdued);
+
   transition: 0.5s;
   .nav__navigation {
     display: flex;

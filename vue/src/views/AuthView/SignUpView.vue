@@ -13,7 +13,7 @@
           :id="'username'"
           :type="'text'"
           :required="false"
-          @input="onUsernameInput"
+          v-model="username"
         ></BaseInput>
       </div>
       <div class="signup__form__input">
@@ -22,25 +22,25 @@
           :id="'email'"
           :type="'email'"
           :required="true"
-          @input="onUsernameInput"
+          v-model="email"
         ></BaseInput>
       </div>
       <div class="signup__form__input">
         <BaseInput
           :label="'Password'"
           :id="'password'"
-          type="'password'"
+          :type="'password'"
           :required="true"
-          @input="onPasswordInput"
+          v-model="password"
         ></BaseInput>
       </div>
       <div class="signup__form__input">
         <BaseInput
           :label="'Confirm password'"
-          :id="'confirm_password'"
+          :id="'password_confirmation'"
           :type="'password'"
           :required="true"
-          @input="onConfirmPasswordInput"
+          v-model="password_confirmation"
         ></BaseInput>
       </div>
       <div class="signup__form__input">
@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
+import { environment } from "@/environment/environment";
 import BaseInput from "../../components/UI/BaseInput.vue";
 import BaseButton from "../../components/UI/BaseButton.vue";
 
@@ -68,23 +68,37 @@ export default defineComponent({
       username: "",
       email: "",
       password: "",
-      confirm_password: "",
+      password_confirmation: "",
     };
   },
   methods: {
-    onUsernameInput(value: string) {
-      this.username = value;
+    onSubmitForm() {
+      console.log(
+        JSON.stringify({
+          username: this.username,
+          email: this.email,
+          password: this.password,
+          password_confirmation: this.password_confirmation,
+        })
+      );
+      fetch(environment.api + "/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: this.username,
+          email: this.email,
+          password: this.password,
+          password_confirmation: this.password_confirmation,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        });
     },
-    onEmailInput(value: string) {
-      this.email = value;
-    },
-    onPasswordInput(value: string) {
-      this.password = value;
-    },
-    onConfirmPasswordInput(value: string) {
-      this.confirm_password = value;
-    },
-    onSubmitForm() {},
   },
 });
 </script>

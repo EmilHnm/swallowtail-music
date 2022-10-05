@@ -21,6 +21,26 @@ const router = createRouter({
           name: "mainPage",
           component: () => import("../views/HomeView/MainPageView.vue"),
         },
+        {
+          path: "/search",
+          name: "searchPage",
+          component: () => import("../views/HomeView/SearchPageView.vue"),
+        },
+        {
+          path: "/library",
+          name: "libraryPage",
+          component: () => import("../views/HomeView/LibraryView.vue"),
+        },
+        {
+          path: "/playlist/:id",
+          name: "playlistPage",
+          component: () => import("../views/HomeView/PlaylistDetails.vue"),
+        },
+        {
+          path: "upload",
+          name: "uploadPage",
+          component: () => import("../views/HomeView/UploadView.vue"),
+        },
       ],
     },
 

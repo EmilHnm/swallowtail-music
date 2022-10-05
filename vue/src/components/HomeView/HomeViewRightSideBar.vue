@@ -10,71 +10,25 @@
         </div>
       </base-list-item>
     </div>
-    <div class="playing-list__queue">
+    <div class="playing-list__queue" ref="queue">
       <div class="playing-list--title"><h3>In Queue</h3></div>
-      <base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">1</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div> </base-list-item
-      ><base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">2</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div> </base-list-item
-      ><base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">3</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div> </base-list-item
-      ><base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">4</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div> </base-list-item
-      ><base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">5</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div> </base-list-item
-      ><base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">6</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div> </base-list-item
-      ><base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">7</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div> </base-list-item
-      ><base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">8</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div>
-      </base-list-item>
-      <base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">9</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div>
-      </base-list-item>
-      <base-list-item>
-        <div class="playing-list__song">
-          <div class="playing-list__song--order">10</div>
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
-        </div>
-      </base-list-item>
+      <div
+        class="playing-list__queue--item"
+        v-for="item in test"
+        :key="item"
+        draggable="true"
+        @dragstart="dragStart($event, item)"
+        @dragend="onDrop($event, item)"
+        @dragenter="dragEnter($event, item)"
+      >
+        <base-list-item>
+          <div class="playing-list__song">
+            <div class="playing-list__song--order">{{ item }}</div>
+            <div class="playing-list__song--title">Future Parade</div>
+            <div class="playing-list__song--duration">3:00</div>
+          </div>
+        </base-list-item>
+      </div>
     </div>
   </div>
 </template>
@@ -87,6 +41,29 @@ export default defineComponent({
     isActive: {
       type: Boolean,
       default: false,
+    },
+  },
+  data() {
+    return {
+      test: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+      tempArray: [],
+      movingIndex: -1,
+      movingOverIndex: -1,
+    };
+  },
+  methods: {
+    dragStart(e: DragEvent, item: string) {
+      if (e.target) e.target.classList.add("dragging");
+      this.movingIndex = this.test.findIndex((i) => i === item);
+      console.log("movingIndex", this.movingIndex);
+    },
+    onDrop(e: DragEvent, item: string) {
+      e.target.classList.remove("dragging");
+      this.test.splice(this.movingIndex, 1);
+      this.test.splice(this.movingOverIndex, 0, item);
+    },
+    dragEnter(e: DragEvent, item: string) {
+      this.movingOverIndex = this.test.findIndex((i) => i == item);
     },
   },
   components: { IconPlay },
@@ -146,8 +123,11 @@ $tablet-width: 768px;
   }
   .playing-list__queue {
     width: 100%;
-    & > * {
+    &--item {
       margin-bottom: 10px;
+      &.dragging {
+        opacity: 0.5;
+      }
     }
   }
 }
