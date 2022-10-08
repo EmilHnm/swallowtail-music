@@ -34,7 +34,10 @@
       </div>
     </div>
     <keep-alive v-if="testArr.length !== 0">
-      <component :is="selectedSearchFilter"></component>
+      <component
+        :is="selectedSearchFilter"
+        @changeSearchPage="changeComponent"
+      ></component>
     </keep-alive>
   </div>
 </template>

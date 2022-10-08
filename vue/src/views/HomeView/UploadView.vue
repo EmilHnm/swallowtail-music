@@ -20,7 +20,7 @@ import SongUpload from "../../components/UploadPage/SongUpload.vue";
 import AlbumUpload from "../../components/UploadPage/AlbumUpload.vue";
 export default defineComponent({
   data() {
-    return { componentName: "AlbumUpload" };
+    return { componentName: "SongUpload" };
   },
   methods: {
     toggleComponent(component: string) {

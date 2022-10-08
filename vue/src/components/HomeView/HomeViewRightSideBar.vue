@@ -5,29 +5,56 @@
       <base-list-item :selected="true">
         <div class="playing-list__song">
           <IconPlay />
-          <div class="playing-list__song--title">Future Parade</div>
-          <div class="playing-list__song--duration">3:00</div>
+          <div class="playing-list__song--title">{{ playingAudio.title }}</div>
+          <div class="playing-list__song--duration">
+            {{
+              Math.floor(playingAudio.duration / 60) +
+              ":" +
+              Math.floor(playingAudio.duration % 60)
+            }}
+          </div>
         </div>
       </base-list-item>
     </div>
-    <div class="playing-list__queue" ref="queue">
+    <div class="playing-list__queue" ref="queue" v-if="!shuffle">
       <div class="playing-list--title"><h3>In Queue</h3></div>
       <div
         class="playing-list__queue--item"
-        v-for="item in test"
+        v-for="(item, index) in playlist"
         :key="item"
         draggable="true"
         @dragstart="dragStart($event, item)"
         @dragend="onDrop($event, item)"
         @dragenter="dragEnter($event, item)"
+        @click="setPlaySong(index)"
       >
-        <base-list-item>
+        <base-list-item :selected="index === audioIndex ? true : false">
           <div class="playing-list__song">
-            <div class="playing-list__song--order">{{ item }}</div>
-            <div class="playing-list__song--title">Future Parade</div>
+            <div class="playing-list__song--order">{{ index + 1 }}</div>
+            <div class="playing-list__song--title">{{ item.title }}</div>
             <div class="playing-list__song--duration">3:00</div>
           </div>
         </base-list-item>
+      </div>
+    </div>
+    <div class="playing-list__queue" ref="queue" v-else>
+      <div class="playing-list--title"><h3>In Queue</h3></div>
+      <div
+        class="playing-list__queue--item"
+        v-for="(item, index) in shuffledPlaylist"
+        :key="item"
+        draggable="true"
+        @dragstart="dragStart($event, item)"
+        @dragend="onDrop($event, item)"
+        @dragenter="dragEnter($event, item)"
+        @click="setPlaySong(index)"
+      >
+        <base-list-item>
+          <div class="playing-list__song">
+            <div class="playing-list__song--order">{{ index + 1 }}</div>
+            <div class="playing-list__song--title">{{ item.title }}</div>
+          </div> </base-list-item
+        >>
       </div>
     </div>
   </div>
@@ -42,11 +69,29 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    playlist: {
+      type: Array,
+      required: true,
+    },
+    shuffledPlaylist: {
+      type: Array,
+      required: true,
+    },
+    playingAudio: {
+      type: Object,
+      required: true,
+    },
+    audioIndex: {
+      type: Number,
+      required: true,
+    },
+    shuffle: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
-      test: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
-      tempArray: [],
       movingIndex: -1,
       movingOverIndex: -1,
     };
@@ -54,16 +99,27 @@ export default defineComponent({
   methods: {
     dragStart(e: DragEvent, item: string) {
       if (e.target) e.target.classList.add("dragging");
-      this.movingIndex = this.test.findIndex((i) => i === item);
-      console.log("movingIndex", this.movingIndex);
+      if (this.shuffle) {
+        this.movingIndex = this.shuffledPlaylist.findIndex((i) => i === item);
+      } else {
+        this.movingIndex = this.playlist.findIndex((i) => i === item);
+      }
     },
     onDrop(e: DragEvent, item: string) {
       e.target.classList.remove("dragging");
-      this.test.splice(this.movingIndex, 1);
-      this.test.splice(this.movingOverIndex, 0, item);
+      this.$emit("onDrop", this.movingIndex, this.movingOverIndex);
     },
     dragEnter(e: DragEvent, item: string) {
-      this.movingOverIndex = this.test.findIndex((i) => i == item);
+      if (this.shuffle) {
+        this.movingOverIndex = this.shuffledPlaylist.findIndex(
+          (i) => i === item
+        );
+      } else {
+        this.movingOverIndex = this.playlist.findIndex((i) => i === item);
+      }
+    },
+    setPlaySong(index: number) {
+      this.$emit("setPlaySong", index);
     },
   },
   components: { IconPlay },

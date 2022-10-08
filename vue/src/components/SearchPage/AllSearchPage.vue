@@ -23,7 +23,7 @@
           :songCount="6"
         />
       </BaseHorizontalScroll>
-      <span>See more</span>
+      <span @click="changeSearchPage('AlbumSearchPage')">See more</span>
     </div>
     <div class="search-result__container--artist">
       <h3>Artist</h3>
@@ -34,7 +34,7 @@
           :title="'虹ヶ咲学園スクールアイドル同好会'"
         />
       </BaseHorizontalScroll>
-      <span>See more</span>
+      <span @click="changeSearchPage('ArtistSearchPage')">See more</span>
     </div>
     <div class="search-result__container--user">
       <h3>User</h3>
@@ -46,7 +46,7 @@
           :songCount="6"
         />
       </BaseHorizontalScroll>
-      <span>See more</span>
+      <span @click="changeSearchPage('UserSearchPage')">See more</span>
     </div>
   </div>
 </template>
@@ -59,8 +59,10 @@ import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
 import BaseCardUser from "../../components/UI/BaseCardUser.vue";
 import BaseSongItem from "../UI/BaseSongItem.vue";
 export default defineComponent({
-  setup() {
-    return {};
+  methods: {
+    changeSearchPage(componentName: string) {
+      this.$emit("changeSearchPage", componentName);
+    },
   },
   inject: ["testArr"],
   components: {

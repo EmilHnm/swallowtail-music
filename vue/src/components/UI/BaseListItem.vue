@@ -154,6 +154,7 @@ export default defineComponent({
     position: relative;
     left: 0;
     width: 100%;
+    overflow: hidden;
     padding: 10px 20px;
     background: var(--background-glass-color-primary);
     box-shadow: 0 0px 15px rgba(0, 0, 0, 0.5);

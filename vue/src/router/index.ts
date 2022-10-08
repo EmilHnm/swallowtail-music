@@ -37,9 +37,24 @@ const router = createRouter({
           component: () => import("../views/HomeView/PlaylistDetails.vue"),
         },
         {
+          path: "/playlist/create",
+          name: "playlistCreatePage",
+          component: () => import("../views/HomeView/PlaylistCreate.vue"),
+        },
+        {
+          path: "/collection",
+          name: "CollectionPage",
+          component: () => import("../views/HomeView/CollectionView.vue"),
+        },
+        {
           path: "upload",
           name: "uploadPage",
           component: () => import("../views/HomeView/UploadView.vue"),
+        },
+        {
+          path: "user/:id",
+          name: "profilePage",
+          component: () => import("../views/HomeView/ProfileView.vue"),
         },
       ],
     },

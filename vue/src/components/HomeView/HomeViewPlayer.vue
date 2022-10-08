@@ -5,9 +5,11 @@
         <img src="../../assets/music/cover.jpg" alt="cover" />
       </div>
       <div class="now_playing__info--title">
-        <div class="now_playing__info--title--name">Future Parade</div>
+        <div class="now_playing__info--title--name">
+          {{ playingAudio.title }}
+        </div>
         <div class="now_playing__info--title--artist">
-          虹ヶ咲学園スクールアイドル同好会
+          {{ playingAudio.artist }}
         </div>
       </div>
       <div class="now_playing__info--heart">
@@ -16,36 +18,61 @@
     </div>
     <div class="now_playing__controls">
       <div class="now_playing__controls--button">
-        <button class="now_playing__controls--button--shuffle">
-          <IconSuffle />
+        <button
+          class="now_playing__controls--button--shuffle"
+          :class="{ active: shuffle }"
+          @click="shuffleToggle"
+        >
+          <Iconshuffle />
         </button>
-        <button class="now_playing__controls--button--prev">
+        <button class="now_playing__controls--button--prev" @click="prevSong">
           <IconPrevious />
         </button>
-        <button class="now_playing__controls--button--play">
-          <IconPlay />
+        <button class="now_playing__controls--button--play" @click="playToggle">
+          <IconPause v-if="isPlaying" />
+          <IconPlay v-else />
         </button>
-        <button class="now_playing__controls--button--next">
+        <button class="now_playing__controls--button--next" @click="nextSong">
           <IconNext />
         </button>
-        <button class="now_playing__controls--button--repeat">
-          <IconRepeat />
+        <button
+          class="now_playing__controls--button--repeat"
+          :class="{ active: repeat !== 'off' }"
+          @click="repeatToggle"
+        >
+          <IconRepeatOne v-if="repeat === 'one'" />
+          <IconRepeat v-else />
         </button>
       </div>
       <div class="now_playing__controls--progress">
-        <div class="now_playing__controls--progress--time--current">0:00</div>
+        <div class="now_playing__controls--progress--time--current">
+          {{
+            Math.floor(progress / 60) +
+            ":" +
+            (Math.floor(progress % 60) < 10
+              ? "0" + Math.floor(progress % 60)
+              : Math.floor(progress % 60))
+          }}
+        </div>
         <div class="now_playing__controls--progress--bar">
           <div
             class="now_playing__controls--progress--bar--progress"
-            :style="{ width: songProgress + '%' }"
+            :style="{ width: (progress / playingAudio.duration) * 100 + '%' }"
           ></div>
           <input
             type="range"
             class="now_playing__controls--progress--bar--range"
-            v-model="songProgress"
+            :value="(progress / playingAudio.duration) * 100"
+            @input="setProgress"
           />
         </div>
-        <div class="now_playing__controls--progress--time--duration">3:00</div>
+        <div class="now_playing__controls--progress--time--duration">
+          {{
+            Math.floor(playingAudio.duration / 60) +
+            ":" +
+            Math.floor(playingAudio.duration % 60)
+          }}
+        </div>
       </div>
     </div>
     <div class="now_playing__menu">
@@ -58,8 +85,9 @@
           <IconQueue />
         </button>
         <div class="now_playing__menu--volume">
-          <button class="now_playing__menu--volume--mute">
-            <IconVolume />
+          <button class="now_playing__menu--volume--mute" @click="setMuted">
+            <IconVolume v-if="volume !== 0" />
+            <IconMuted v-else />
           </button>
           <div class="now_playing__menu--volume--bar">
             <div
@@ -68,8 +96,9 @@
             ></div>
             <input
               type="range"
-              v-model="volume"
+              :value="volume"
               class="now_playing__menu--volume--bar--range"
+              @input="setVolume"
             />
           </div>
         </div>
@@ -81,37 +110,96 @@
 import { defineComponent } from "vue";
 import IconHeartFilled from "../icons/IconHeartFilled.vue";
 import IconPrevious from "../icons/IconPrevious.vue";
-import IconSuffle from "../icons/IconSuffle.vue";
+import Iconshuffle from "../icons/IconShuffle.vue";
 import IconPlay from "../icons/IconPlay.vue";
 import IconRepeat from "../icons/IconRepeat.vue";
 import IconNext from "../icons/IconNext.vue";
 import IconQueue from "../icons/IconQueue.vue";
 import IconVolume from "../icons/IconVolume.vue";
+import IconPause from "../icons/IconPause.vue";
+import IconRepeatOne from "../icons/IconRepeatOne.vue";
+import IconMuted from "../icons/IconMuted.vue";
 
 export default defineComponent({
   name: "HomeViewPlayer",
-  setup() {},
+  props: {
+    playingAudio: {
+      required: true,
+      type: Object,
+    },
+    isPlaying: {
+      required: true,
+      type: Boolean,
+    },
+    progress: {
+      required: true,
+      type: Number,
+    },
+    volume: {
+      required: true,
+      type: Number,
+    },
+    repeat: {
+      required: true,
+      type: String,
+    },
+    shuffle: {
+      required: true,
+      type: Boolean,
+    },
+  },
   components: {
     IconHeartFilled,
     IconPrevious,
-    IconSuffle,
+    Iconshuffle,
     IconPlay,
     IconRepeat,
     IconNext,
     IconQueue,
     IconVolume,
+    IconPause,
+    IconRepeatOne,
+    IconMuted,
   },
   data() {
     return {
-      songProgress: 0,
-      volume: 100,
       isRightSideBarActive: false,
+      currentTime: "0:00",
+      durationTime: "",
     };
   },
   methods: {
     toggleRightSideBar() {
       this.isRightSideBarActive = !this.isRightSideBarActive;
       this.$emit("toggleRightSideBar", this.isRightSideBarActive);
+    },
+    shuffleToggle() {
+      this.$emit("shuffleToggle");
+    },
+    repeatToggle() {
+      this.$emit("repeatToggle");
+    },
+    playToggle() {
+      if (!this.isPlaying) {
+        this.$emit("playSong");
+      } else {
+        this.$emit("pauseSong");
+      }
+    },
+    setProgress(e: any) {
+      this.$emit("setProgress", e.target.value);
+    },
+    nextSong() {
+      this.$emit("nextSong");
+    },
+    prevSong() {
+      this.$emit("prevSong");
+    },
+    setVolume(e: any) {
+      this.$emit("setVolume", e.target.value);
+    },
+    setMuted() {
+      this.$emit("setMuted");
     },
   },
 });
@@ -230,6 +318,12 @@ $tablet-width: 768px;
         svg {
           width: 100%;
           height: 100%;
+        }
+      }
+      &--shuffle.active,
+      &--repeat.active {
+        svg {
+          fill: var(--color-primary);
         }
       }
     }

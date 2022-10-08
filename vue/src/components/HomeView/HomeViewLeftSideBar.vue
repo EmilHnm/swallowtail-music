@@ -27,13 +27,13 @@
           <div class="nav__navigation--title">Upload</div>
         </base-list-item>
       </router-link>
-      <router-link :to="{ name: 'home' }">
+      <router-link :to="{ name: 'playlistCreatePage' }">
         <base-list-item>
           <IconPlus />
           <div class="nav__navigation--title">New Playlist</div>
         </base-list-item>
       </router-link>
-      <router-link :to="{ name: 'home' }">
+      <router-link :to="{ name: 'CollectionPage' }">
         <base-list-item>
           <IconHeartFilled />
           <div class="nav__navigation--title">Liked Songs</div>
@@ -41,7 +41,7 @@
       </router-link>
     </div>
     <div class="nav__playlist">
-      <router-link :to="{ name: 'home' }">
+      <router-link :to="{ name: 'playlistPage', params: { id: 1 } }">
         <base-list-item>
           <div class="nav__navigation--title">BangDream</div>
         </base-list-item>
