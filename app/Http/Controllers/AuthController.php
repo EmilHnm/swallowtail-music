@@ -2,40 +2,75 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Date;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
     //
     public function login(Request $request)
     {
-        $validateData = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+        $credentials = $request->validate([
+            'email' => 'required|email|string|exists:users,email',
+            'password' => [
+                'required',
+            ],
+            'remember_me' => 'boolean'
+        ]);
+        $remember = $credentials['remember_me'] ?? false;
+        unset($credentials['remember_me']);
+        if (!Auth::attempt($credentials, $remember)) {
+            return response([
+                'error' => 'The Provided credentials are not correct'
+            ], 422);
+        }
+        $user = Auth::user();
+        $token = $user->createToken('main')->plainTextToken;
+
+        return response([
+            'user' => $user,
+            'token' => $token
         ]);
     }
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        $user->currentAccessToken()->delete();
+        return response([
+            'message' => 'Logged out'
+        ], Response::HTTP_OK);
     }
     public function register(Request $request)
     {
+
         $validateData = $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|email|unique:users',
             'password' => 'required|string|confirmed'
         ]);
-        $user = User::create([
-            'id' => DateTime()->format(DateTime::ATOM),
-            'name' => $validateData['name'],
-            'email' => $validateData['email'],
-            'password' => bcrypt($validateData['password'])
-        ]);
+
+        // $user = User::create([
+        //     'name' => $validateData['name'],
+        //     'email' => $validateData['email'],
+        //     'user_id' => Carbon::now()->timestamp,
+        //     'password' => bcrypt($validateData['password'])
+        // ]);
+
+        $user = new User();
+        $user->name = $validateData['name'];
+        $user->email = $validateData['email'];
+        $user->user_id = Carbon::now()->timestamp;
+        $user->password = bcrypt($validateData['password']);
+        $user->save();
+
         $token = $user->createToken('main')->plainTextToken;
+
         return response()->json([
             'token' => $token,
             'user' => $user
-        ]);
+        ], Response::HTTP_OK);
     }
 }

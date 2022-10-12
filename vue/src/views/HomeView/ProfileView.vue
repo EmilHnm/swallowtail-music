@@ -17,16 +17,60 @@
   <div class="control">
     <BaseButton>Edit Profile</BaseButton>
   </div>
-  <div class="detail" ref="detail"></div>
+  <div class="detail" ref="detail">
+    <div class="topArtist">
+      <h2>Top artist this month</h2>
+      <span>This only visible to you</span>
+      <BaseHorizontalScroll>
+        <BaseCardArtist
+          v-for="album in albums"
+          :key="album"
+          :title="' 虹ヶ咲学園スクールアイドル同好会 '"
+        />
+      </BaseHorizontalScroll>
+    </div>
+    <div class="topTracks">
+      <h2>Top artist this month</h2>
+      <span>This only visible to you</span>
+      <BaseSongItem
+        v-for="song in songs"
+        :key="song"
+        :title="' Future Parade '"
+        :artist="' 虹ヶ咲学園スクールアイドル同好会 '"
+        :album="' Future Parade '"
+        :duration="' 3:21 '"
+        :hears="1000"
+      />
+    </div>
+    <div class="publicPlaylist">
+      <h2>Public Playlist</h2>
+      <BaseHorizontalScroll>
+        <BaseCardAlbum
+          v-for="playlist in playlists"
+          :key="playlist"
+          :songCount="4"
+          :title="' 虹ヶ咲学園スクールアイドル同好会 '"
+        />
+      </BaseHorizontalScroll>
+    </div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
 import BaseButton from "../../components/UI/BaseButton.vue";
+import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
+import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
+import BaseSongItem from "../../components/UI/BaseSongItem.vue";
+import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
 
 export default defineComponent({
   setup() {},
   components: {
     BaseButton,
+    BaseHorizontalScroll,
+    BaseCardArtist,
+    BaseSongItem,
+    BaseCardAlbum,
   },
   data() {
     return {
@@ -34,10 +78,12 @@ export default defineComponent({
       isSearchBarOpen: false,
       filterText: "",
       detailWidth: 0,
-      observer: null,
+      observer: null as ResizeObserver | null,
       small: false,
       medium: false,
-      testArr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      albums: [1, 2, 3, 4, 5],
+      songs: [1, 2, 3, 4, 5],
+      playlists: [1, 2, 3, 4],
     };
   },
   methods: {

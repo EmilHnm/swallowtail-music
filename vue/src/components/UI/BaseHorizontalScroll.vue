@@ -38,7 +38,7 @@ import IconRightArrow from "../icons/IconRightArrow.vue";
 export default defineComponent({
   data() {
     return {
-      observer: null,
+      observer: null as ResizeObserver | null,
       wrapperWidth: 0,
       containerWidth: 0,
       rollableWidth: 0,
@@ -81,20 +81,23 @@ export default defineComponent({
   mounted() {
     this.containerWidth = this.$refs.container.clientWidth;
     const wrapper = this.$refs.wrapper;
-    this.wrapperWidth = wrapper.clientWidth;
+    if (wrapper) this.wrapperWidth = wrapper.clientWidth;
 
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         this.wrapperWidth = entry.contentRect.width;
       }
     });
-    this.observer.observe(wrapper);
+    if (wrapper) this.observer.observe(wrapper);
   },
   beforeUnmount() {
-    this.observer.disconnect();
+    if (this.observer) this.observer.disconnect();
   },
   watch: {
     wrapperWidth(o) {
+      if (o > 900 && o < 920) {
+        return;
+      }
       if (550 < o && o <= 900) {
         this.medium = true;
         this.small = false;

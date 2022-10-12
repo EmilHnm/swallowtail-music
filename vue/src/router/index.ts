@@ -8,6 +8,12 @@ import SignUpView from "../views/AuthView/SignUpView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to: number, from: number, savedPosittion) {
+    if (savedPosittion) {
+      return savedPosittion;
+    }
+    return { left: 0, top: 0 };
+  },
   routes: [
     {
       path: "/",
@@ -50,6 +56,11 @@ const router = createRouter({
           path: "upload",
           name: "uploadPage",
           component: () => import("../views/HomeView/UploadView.vue"),
+        },
+        {
+          path: "playing",
+          name: "playingPage",
+          component: () => import("../views/HomeView/PlayingSongView.vue"),
         },
         {
           path: "user/:id",

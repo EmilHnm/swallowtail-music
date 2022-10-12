@@ -1,6 +1,6 @@
 <template>
   <div class="song-item" ref="songItem">
-    <BaseListItem>
+    <BaseListItem :selected="selected">
       <div class="song-item__left">
         <div class="song-item__left--image">
           <img src="../../assets/music/cover.jpg" alt="" srcset="" />
@@ -14,8 +14,19 @@
         <div class="song-item__right--album" :class="{ small: small }">
           <span>{{ album }}</span>
         </div>
-        <div class="song-item__right--hears" :class="{ medium: medium }">
+        <div
+          class="song-item__right--hears"
+          v-if="hears"
+          :class="{ medium: medium }"
+        >
           <span>{{ hears }}</span>
+        </div>
+        <div
+          class="song-item__right--addDate"
+          v-else
+          :class="{ medium: medium }"
+        >
+          <span>{{ addedDate }}</span>
         </div>
         <div
           class="song-item__right--duration"
@@ -55,7 +66,10 @@
           <BaseListItem @click="changeMenuMode('playlist')"
             >Add to Playlist</BaseListItem
           >
-          <BaseListItem>Add to Queue</BaseListItem>
+          <BaseListItem v-if="inQueue" @click="deleteFromQueue"
+            >Delete from Queue</BaseListItem
+          >
+          <BaseListItem v-else>Add to Queue</BaseListItem>
           <BaseListItem>View Album</BaseListItem>
           <BaseListItem @click="changeMenuMode('artist')"
             >View Artist</BaseListItem
@@ -78,9 +92,10 @@ import BaseListItem from "./BaseListItem.vue";
 import IconThreeDots from "../icons/IconThreeDots.vue";
 
 export default defineComponent({
+  emits: ["deleteFromQueue"],
   data() {
     return {
-      observer: null,
+      observer: null as ResizeObserver | null,
       songItemWidth: 0,
       small: false,
       medium: false,
@@ -103,15 +118,23 @@ export default defineComponent({
     },
     hears: {
       type: Number,
-      required: true,
+      default: -1,
+    },
+    inQueue: {
+      type: Boolean,
+      default: false,
     },
     duration: {
       type: String,
       required: true,
     },
-    zindex: {
-      type: Number,
-      required: true,
+    addedDate: {
+      type: String,
+      default: "",
+    },
+    selected: {
+      type: Boolean,
+      default: false,
     },
   },
   methods: {
@@ -122,6 +145,9 @@ export default defineComponent({
     changeMenuMode(mode: string) {
       this.menuMode = mode;
     },
+    deleteFromQueue() {
+      this.$emit("deleteFromQueue");
+    },
   },
   mounted() {
     const songItem = this.$refs.songItem;
@@ -131,6 +157,9 @@ export default defineComponent({
       }
     });
     if (this.observer && songItem) this.observer.observe(songItem);
+  },
+  beforeUnmount() {
+    if (this.observer) this.observer.disconnect();
   },
   watch: {
     songItemWidth(o) {
@@ -333,6 +362,20 @@ $tablet-width: 768px;
       }
     }
     &--hears {
+      width: 20%;
+      overflow: hidden;
+      text-align: center;
+      &.medium {
+        display: none;
+      }
+      span {
+        font-size: 1rem;
+        color: var(--text-subdued);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+    &--addDate {
       width: 20%;
       overflow: hidden;
       text-align: center;

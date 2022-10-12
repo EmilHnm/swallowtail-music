@@ -28,13 +28,15 @@
         @dragenter="dragEnter($event, item)"
         @click="setPlaySong(index)"
       >
-        <base-list-item :selected="index === audioIndex ? true : false">
-          <div class="playing-list__song">
-            <div class="playing-list__song--order">{{ index + 1 }}</div>
-            <div class="playing-list__song--title">{{ item.title }}</div>
-            <div class="playing-list__song--duration">3:00</div>
-          </div>
-        </base-list-item>
+        <BaseSongItem
+          :selected="index === audioIndex ? true : false"
+          :title="item.title"
+          :artist="item.artist"
+          :album="'Future Paradise'"
+          :duration="'3:30'"
+          :inQueue="true"
+          @deleteFromQueue="deleteFromQueue(index)"
+        />
       </div>
     </div>
     <div class="playing-list__queue" ref="queue" v-else>
@@ -49,12 +51,15 @@
         @dragenter="dragEnter($event, item)"
         @click="setPlaySong(index)"
       >
-        <base-list-item>
-          <div class="playing-list__song">
-            <div class="playing-list__song--order">{{ index + 1 }}</div>
-            <div class="playing-list__song--title">{{ item.title }}</div>
-          </div> </base-list-item
-        >>
+        <BaseSongItem
+          :selected="index === audioIndex ? true : false"
+          :title="item.title"
+          :artist="item.artist"
+          :album="'Future Paradise'"
+          :duration="'3:30'"
+          :inQueue="true"
+          @deleteFromQueue="deleteFromQueue(index)"
+        />
       </div>
     </div>
   </div>
@@ -62,8 +67,10 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import IconPlay from "../icons/IconPlay.vue";
+import BaseSongItem from "../UI/BaseSongItem.vue";
 
 export default defineComponent({
+  emits: ["onDrop", "setPlaySong", "deleteFromQueue"],
   props: {
     isActive: {
       type: Boolean,
@@ -121,8 +128,11 @@ export default defineComponent({
     setPlaySong(index: number) {
       this.$emit("setPlaySong", index);
     },
+    deleteFromQueue(index: number) {
+      this.$emit("deleteFromQueue", index);
+    },
   },
-  components: { IconPlay },
+  components: { IconPlay, BaseSongItem },
 });
 </script>
 

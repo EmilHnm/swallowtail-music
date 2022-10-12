@@ -26,3 +26,4 @@ app.component("base-dialog", BaseDialog);
 app.component("icon-logo", IconLogo);
 
 app.mount("#app");
+app.config.unwrapInjectedRef = true;

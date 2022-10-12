@@ -11,13 +11,4 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
-    public function register(Request $request)
-    {
-        $validateData = $request->validate([
-            'name' => 'required|string',
-            'email' => 'email|required|string|unique:user,email',
-            'password' => 'required|confirmed'
-        ]);
-    }
 }

@@ -1,7 +1,7 @@
 <template>
   <nav class="nav" :class="{ active: isActive }">
     <div class="nav__navigation">
-      <router-link :to="{ name: 'home' }">
+      <router-link :to="{ name: 'mainPage' }">
         <base-list-item>
           <IconHome />
           <div class="nav__navigation--title">Home</div>

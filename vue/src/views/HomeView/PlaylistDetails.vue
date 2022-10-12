@@ -94,7 +94,7 @@
     </div>
     <div class="songList__content">
       <BaseSongItem
-        v-for="(item, index) in testArr"
+        v-for="item in testArr"
         :key="item"
         :title="'Future Parade'"
         :artist="'虹ヶ咲学園スクールアイドル同好会'"
@@ -128,7 +128,7 @@ export default defineComponent({
       isSearchBarOpen: false,
       filterText: "",
       songListWidth: 0,
-      observer: null,
+      observer: null as ResizeObserver | null,
       small: false,
       medium: false,
       testArr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],

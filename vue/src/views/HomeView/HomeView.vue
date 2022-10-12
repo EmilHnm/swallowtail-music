@@ -1,4 +1,5 @@
 <script lang="ts">
+import { computed } from "vue";
 import HomeViewLeftSideBar from "../../components/HomeView/HomeViewLeftSideBar.vue";
 import HomeViewRightSideBar from "../../components/HomeView/HomeViewRightSideBar.vue";
 import HomeViewPlayer from "../../components/HomeView/HomeViewPlayer.vue";
@@ -15,7 +16,7 @@ export default {
     return {
       isLeftSideBarActive: false,
       isRightSideBarActive: false,
-      audio: null,
+      audio: null as typeof Audio | null,
       audioList: [
         {
           title: "Future Parade",
@@ -42,7 +43,7 @@ export default {
         title: "",
         artist: "",
         album: "",
-        duration: "",
+        duration: 0,
         hears: 0,
         src: "",
       },
@@ -54,6 +55,21 @@ export default {
       repeat: "off",
       isOnShuffle: false,
       shuffledList: [],
+      // visualizer
+      ctx: null as AudioContext | null,
+      audioSource: null as MediaElementAudioSourceNode | null,
+      analayzer: null as AnalyserNode | null,
+      frequencyData: null as Uint8Array | null,
+      frequencyDataArray: Array(100).fill(2),
+    };
+  },
+  provide() {
+    return {
+      playingAudio: computed(() => this.playingAudio),
+      progress: computed(() => this.progress),
+      isPlaying: computed(() => this.isPlaying),
+      audio: computed(() => this.audio),
+      frequencyDataArray: computed(() => this.frequencyDataArray),
     };
   },
   methods: {
@@ -146,6 +162,16 @@ export default {
         this.audioIndex++;
       }
     },
+    // visualizer
+    renderFrame() {
+      if (this.frequencyData) {
+        this.analayzer.getByteFrequencyData(this.frequencyData);
+        this.frequencyDataArray = [];
+        for (let i = 0; i < 100; i++) {
+          this.frequencyDataArray.push(this.frequencyData[i]);
+        }
+      }
+    },
     // Other Method
     shuffleArr(array) {
       let currentIndex = array.length,
@@ -206,11 +232,50 @@ export default {
     volume() {
       this.audio.volume = this.volume / 100;
     },
+    // visualizer
+    isPlaying() {
+      if (this.isPlaying) {
+        if (this.ctx === null) {
+          this.ctx = new AudioContext();
+          this.audioSource = this.ctx.createMediaElementSource(this.audio);
+          this.analayzer = this.ctx.createAnalyser();
+          if (this.analayzer) {
+            this.audioSource.connect(this.analayzer);
+            this.audioSource.connect(this.ctx.destination);
+            this.frequencyData = new Uint8Array(
+              this.analayzer.frequencyBinCount
+            );
+            if (this.frequencyData)
+              this.analayzer.getByteFrequencyData(this.frequencyData);
+          }
+        }
+      }
+    },
+    progress() {
+      if (this.isPlaying) {
+        this.renderFrame();
+      }
+    },
   },
   mounted() {
     this.audio = this.$refs["audio"];
     this.audio.volume = this.volume / 100;
     this.playingAudio = this.audioList[this.audioIndex];
+    document.addEventListener("keyup", (e) => {
+      if (e.code === "Space") {
+        if (this.isPlaying) {
+          this.pauseSong();
+        } else {
+          this.playSong();
+        }
+      }
+      if (e.code === "ArrowRight") {
+        this.nextSong();
+      }
+      if (e.code === "ArrowLeft") {
+        this.prevSong();
+      }
+    });
   },
 };
 </script>

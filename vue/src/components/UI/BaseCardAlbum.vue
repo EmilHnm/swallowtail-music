@@ -26,7 +26,7 @@ export default {
     },
     uploader: {
       type: String,
-      required: true,
+      default: "",
     },
     songCount: {
       type: Number,

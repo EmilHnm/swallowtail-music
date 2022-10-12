@@ -1,11 +1,11 @@
 <template>
   <footer class="now_playing">
     <div class="now_playing__info">
-      <div class="now_playing__info--cover">
+      <div class="now_playing__info--cover" @click="navigateToPlaying">
         <img src="../../assets/music/cover.jpg" alt="cover" />
       </div>
       <div class="now_playing__info--title">
-        <div class="now_playing__info--title--name">
+        <div class="now_playing__info--title--name" @click="navigateToPlaying">
           {{ playingAudio.title }}
         </div>
         <div class="now_playing__info--title--artist">
@@ -201,6 +201,11 @@ export default defineComponent({
     setMuted() {
       this.$emit("setMuted");
     },
+    navigateToPlaying() {
+      this.$router.push({
+        name: "playingPage",
+      });
+    },
   },
 });
 </script>
@@ -233,6 +238,7 @@ $tablet-width: 768px;
       overflow: hidden;
       flex: 0 0 auto;
       margin-right: 5px;
+      cursor: pointer;
       img {
         width: 100%;
         height: 100%;
@@ -246,6 +252,7 @@ $tablet-width: 768px;
       user-select: none;
       text-overflow: ellipsis;
       max-width: 260px;
+      cursor: pointer;
       &--name {
         font-weight: 600;
         color: var(--text-color-primary);

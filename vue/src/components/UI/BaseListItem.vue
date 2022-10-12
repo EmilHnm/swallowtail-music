@@ -170,7 +170,15 @@ export default defineComponent({
     }
   }
 }
-
+.router-link-active.router-link-exact-active {
+  .box {
+    &:before,
+    &:after {
+      width: 70%;
+      height: 50%;
+    }
+  }
+}
 @keyframes animate {
   0%,
   100% {
