@@ -18,6 +18,7 @@
     </div>
     <div class="playing-list__queue" ref="queue" v-if="!shuffle">
       <div class="playing-list--title"><h3>In Queue</h3></div>
+      <!-- TODO: bug  -->
       <transition-group tag="ul" name="queue-list">
         <li
           class="playing-list__queue--item"
