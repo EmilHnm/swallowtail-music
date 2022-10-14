@@ -2,7 +2,7 @@
   <base-dialog
     :title="'Waring!!!'"
     :mode="'warning'"
-    v-if="isLogOutConfirm"
+    :open="isLogOutConfirm"
     @close="onCloseLogOutConfirm"
   >
     <template #default>
@@ -45,36 +45,39 @@
         <div class="header__right--account--img">
           <img src="@/assets/default-avatar.png" alt="" srcset="" />
         </div>
-        <div class="header__right--account--menu" v-if="isAccountMenuActive">
-          <div class="header__right--account--menu-item">
-            <base-list-item>
-              <a href="">Account</a>
-            </base-list-item>
+        <transition name="menu">
+          <div class="header__right--account--menu" v-if="isAccountMenuActive">
+            <div class="header__right--account--menu-item">
+              <base-list-item>
+                <a href="">Account</a>
+              </base-list-item>
+            </div>
+            <div class="header__right--account--menu-item">
+              <base-list-item>
+                <a href="">Profile</a>
+              </base-list-item>
+            </div>
+            <div class="header__right--account--menu-item">
+              <base-list-item>
+                <a href="">Settings</a>
+              </base-list-item>
+            </div>
+            <hr />
+            <div class="header__right--account--menu-item">
+              <base-list-item>
+                <a @click="logOutConfirm">Logout</a>
+              </base-list-item>
+            </div>
           </div>
-          <div class="header__right--account--menu-item">
-            <base-list-item>
-              <a href="">Profile</a>
-            </base-list-item>
-          </div>
-          <div class="header__right--account--menu-item">
-            <base-list-item>
-              <a href="">Settings</a>
-            </base-list-item>
-          </div>
-          <hr />
-          <div class="header__right--account--menu-item">
-            <base-list-item>
-              <a @click="logOutConfirm">Logout</a>
-            </base-list-item>
-          </div>
-        </div>
+        </transition>
       </div>
     </div>
   </header>
 </template>
-<script>
+<script lang="ts">
+import { defineComponent } from "vue";
 import IconMenu from "../icons/IconMenu.vue";
-export default {
+export default defineComponent({
   components: {
     IconMenu,
   },
@@ -100,7 +103,7 @@ export default {
     },
   },
   emits: ["toggleLeftSideBar"],
-};
+});
 </script>
 <style lang="scss">
 $mobile-width: 480px;
@@ -278,5 +281,28 @@ $tablet-width: 768px;
       }
     }
   }
+}
+
+.menu-enter-from {
+  opacity: 0;
+  top: 55%;
+}
+.menu-enter-to {
+  opacity: 1;
+  top: 105%;
+}
+.menu-enter-active {
+  transition: all 0.5s;
+}
+.menu-leave-from {
+  opacity: 1;
+  top: 105%;
+}
+.menu-leave-to {
+  opacity: 0;
+  top: 55%;
+}
+.menu-leave-active {
+  transition: all 0.5s;
 }
 </style>

@@ -39,17 +39,17 @@ const router = createRouter({
         },
         {
           path: "/playlist/:id",
-          name: "playlistPage",
+          name: "playlistViewPage",
           component: () => import("../views/HomeView/PlaylistDetails.vue"),
         },
         {
           path: "/playlist/create",
           name: "playlistCreatePage",
-          component: () => import("../views/HomeView/PlaylistCreate.vue"),
+          component: () => import("../views/HomeView/PlaylistCreateView.vue"),
         },
         {
           path: "/collection",
-          name: "CollectionPage",
+          name: "collectionPage",
           component: () => import("../views/HomeView/CollectionView.vue"),
         },
         {
@@ -66,6 +66,31 @@ const router = createRouter({
           path: "user/:id",
           name: "profilePage",
           component: () => import("../views/HomeView/ProfileView.vue"),
+        },
+        {
+          path: "artist/:id",
+          name: "artistPage",
+          redirect: "artist/:id/overview",
+          component: () =>
+            import("../views/HomeView/ArtistDetailsView/ArtistDetailsView.vue"),
+          children: [
+            {
+              path: "overview",
+              name: "artistOverviewPage",
+              component: () =>
+                import(
+                  "../views/HomeView/ArtistDetailsView/ArtistDetailsMain.vue"
+                ),
+            },
+            {
+              path: "albums",
+              name: "artistAlbumsPage",
+              component: () =>
+                import(
+                  "../views/HomeView/ArtistDetailsView/ArtistDetailsAlbum.vue"
+                ),
+            },
+          ],
         },
       ],
     },

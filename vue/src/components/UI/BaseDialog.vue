@@ -1,22 +1,24 @@
 <template>
   <teleport to="body">
-    <div class="dialog-bg" @click="$emit('close')"></div>
-    <div class="dialog" :class="mode">
-      <span></span>
-      <div class="content">
-        <header>
-          <h2>{{ title }}</h2>
-        </header>
-        <section>
-          <slot></slot>
-        </section>
-        <menu>
-          <slot name="action">
-            <base-button @click="$emit('close')">Close</base-button>
-          </slot>
-        </menu>
+    <div v-if="open" class="dialog-bg" @click="$emit('close')"></div>
+    <transition name="dialog">
+      <div class="dialog" :class="mode" v-if="open">
+        <span></span>
+        <div class="content">
+          <header>
+            <h2>{{ title }}</h2>
+          </header>
+          <section>
+            <slot></slot>
+          </section>
+          <menu>
+            <slot name="action">
+              <base-button @click="$emit('close')">Close</base-button>
+            </slot>
+          </menu>
+        </div>
       </div>
-    </div>
+    </transition>
   </teleport>
 </template>
 <script lang="ts">
@@ -32,8 +34,12 @@ export default defineComponent({
       type: String,
       default: "Warning!!!",
     },
+    open: {
+      type: Boolean,
+      default: false,
+    },
   },
-  emit: ["close"],
+  emits: ["close"],
 });
 </script>
 <style lang="scss" scoped>
@@ -197,5 +203,28 @@ export default defineComponent({
       }
     }
   }
+}
+
+.dialog-enter-from {
+  opacity: 0;
+  top: 25%;
+}
+.dialog-enter-to {
+  opacity: 1;
+  top: 50%;
+}
+.dialog-enter-active {
+  transition: all 0.5s;
+}
+.dialog-leave-from {
+  opacity: 1;
+  top: 50%;
+}
+.dialog-leave-to {
+  opacity: 0;
+  top: 75%;
+}
+.dialog-leave-active {
+  transition: all 0.5s;
 }
 </style>

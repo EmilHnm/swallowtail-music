@@ -49,8 +49,9 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+export default defineComponent({
   props: {
     diameter: {
       type: Number,
@@ -97,7 +98,7 @@ export default {
         cy: 0.5,
         r: 0.65,
       },
-      gradientAnimation: null,
+      gradientAnimation: null as number | null,
       currentAngle: 0,
       strokeDashoffset: 0,
     };
@@ -152,10 +153,6 @@ export default {
       return 1000 / 60;
     },
 
-    hasGradient() {
-      return this.startColor !== this.stopColor;
-    },
-
     containerStyle() {
       return {
         height: `${this.diameter}px`,
@@ -181,14 +178,6 @@ export default {
       };
     },
 
-    percentStyle() {
-      return {
-        fontSize: `${this.diameter / 2}px`,
-        color: `${this.percentColor}`,
-        display: "block",
-      };
-    },
-
     innerCircleStyle() {
       return {
         width: `${this.innerCircleDiameter}px`,
@@ -197,7 +186,7 @@ export default {
   },
 
   methods: {
-    getStopPointsOfCircle(steps) {
+    getStopPointsOfCircle(steps: number) {
       const points = [];
 
       for (let i = 0; i < steps; i++) {
@@ -208,7 +197,7 @@ export default {
       return points;
     },
 
-    getPointOfCircle(angle) {
+    getPointOfCircle(angle: number) {
       const radius = 0.5;
 
       const x = radius + radius * Math.cos(angle);
@@ -247,7 +236,7 @@ export default {
           (isMoveForward && i >= this.totalPoints) ||
           (!isMoveForward && i < this.totalPoints)
         ) {
-          clearInterval(this.gradientAnimation);
+          if (this.gradientAnimation) clearInterval(this.gradientAnimation);
           return;
         }
 
@@ -285,7 +274,7 @@ export default {
   created() {
     this.changeProgress({ isAnimate: false });
   },
-};
+});
 </script>
 
 <style>

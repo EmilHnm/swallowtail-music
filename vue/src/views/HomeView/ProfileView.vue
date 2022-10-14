@@ -95,7 +95,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    const detail = this.$refs.detail;
+    const detail = this.$refs.detail as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         this.detailWidth = entry.contentRect.width;

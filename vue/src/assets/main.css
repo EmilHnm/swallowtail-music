@@ -15,6 +15,14 @@ a {
 svg {
   fill: var(--text-primary-color);
 }
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+img {
+  pointer-events: none;
+}
 /* Chrome, Edge, and Safari */
 *::-webkit-scrollbar {
   width: 6px;

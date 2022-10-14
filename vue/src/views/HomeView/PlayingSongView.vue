@@ -42,10 +42,10 @@
     </div>
     <div class="visualizer" :class="{ mobile: mobile }">
       <div
-        v-for="(frequency, index) in frequencyDataArray"
+        v-for="index in 100"
         :key="index"
         class="visualizer__col"
-        :style="{ height: isPlaying ? frequency + 2 + 'px' : '2px' }"
+        :style="{ height: isPlaying ? frequencyData[index] + 2 + 'px' : '2px' }"
       ></div>
     </div>
   </div>
@@ -54,6 +54,15 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import BaseCircleProgress from "../../components/UI/BaseCircleProgress.vue";
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    playingAudio: Object;
+    progress: number;
+    isPlaying: boolean;
+    frequencyData: Array<number>;
+    audio: HTMLAudioElement;
+  }
+}
 export default defineComponent({
   data() {
     return {
@@ -61,18 +70,10 @@ export default defineComponent({
       mobile: true,
     };
   },
-  inject: [
-    "playingAudio",
-    "progress",
-    "isPlaying",
-    "audio",
-    "frequencyDataArray",
-  ],
+  inject: ["playingAudio", "progress", "isPlaying", "audio", "frequencyData"],
   components: { BaseCircleProgress },
-  methods: {},
-  watch: {},
   mounted() {
-    const container = this.$refs.container;
+    const container: HTMLElement = this.$refs.container as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         if (entry.contentRect.width < 600) {
@@ -136,6 +137,7 @@ export default defineComponent({
       border-radius: 50%;
       overflow: hidden;
       position: relative;
+      user-select: none;
       & img {
         width: 100%;
         height: 100%;

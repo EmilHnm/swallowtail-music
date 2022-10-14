@@ -6,7 +6,7 @@
     </div>
     <div class="info">
       <div class="info__type">Public</div>
-      <div class="info__title">LoveLive Song</div>
+      <div class="info__title">Liked Song</div>
       <div class="info__other">
         <div class="info__other--owner">Emil</div>
         <div class="info__other--songCount">- 4 Songs -</div>
@@ -97,7 +97,7 @@ export default defineComponent({
       isSearchBarOpen: false,
       filterText: "",
       songListWidth: 0,
-      observer: null,
+      observer: null as ResizeObserver | null,
       small: false,
       medium: false,
       testArr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -112,7 +112,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    const songList = this.$refs.songList;
+    const songList = this.$refs.songList as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         this.songListWidth = entry.contentRect.width;

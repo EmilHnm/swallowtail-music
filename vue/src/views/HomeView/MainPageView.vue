@@ -184,14 +184,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import IconPlay from "../../components/icons/IconPlay.vue";
-import BaseCard from "../../components/UI/BaseCard.vue";
 import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
 import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
 export default defineComponent({
   components: {
     IconPlay,
-    BaseCard,
     BaseHorizontalScroll,
     BaseCardArtist,
     BaseCardAlbum,
@@ -200,14 +198,14 @@ export default defineComponent({
   data() {
     return {
       news: 0,
-      observer: null,
+      observer: null as ResizeObserver | null,
       min: false,
       medium: false,
       testArr: [1, 2, 3, 4, 5, 6, 7, 8],
     };
   },
   mounted() {
-    const newsEle = this.$refs.news;
+    const newsEle = this.$refs.news as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         this.news = entry.contentRect.width;
@@ -216,10 +214,10 @@ export default defineComponent({
     this.observer.observe(newsEle);
   },
   beforeUnmount() {
-    this.observer.disconnect();
+    if (this.observer) this.observer.disconnect();
   },
   watch: {
-    news(o: number, n) {
+    news(o: number) {
       if (550 < o && o <= 900) {
         this.medium = true;
         this.min = false;

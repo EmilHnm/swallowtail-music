@@ -35,14 +35,16 @@
             @click="toggleMenu"
           ></div>
         </teleport>
-        <div class="playlist-menu" :class="{ active: isMenuOpen }">
-          <BaseListItem>Add Song</BaseListItem>
-          <BaseListItem>Add to Queue</BaseListItem>
-          <BaseListItem>Add to Other Playlist</BaseListItem>
-          <BaseListItem>Make Private</BaseListItem>
-          <BaseListItem>Make Public</BaseListItem>
-          <BaseListItem>Delete Playlist</BaseListItem>
-        </div>
+        <transition name="playlist-menu">
+          <div class="playlist-menu" v-if="isMenuOpen">
+            <BaseListItem>Add Song</BaseListItem>
+            <BaseListItem>Add to Queue</BaseListItem>
+            <BaseListItem>Add to Other Playlist</BaseListItem>
+            <BaseListItem>Make Private</BaseListItem>
+            <BaseListItem>Make Public</BaseListItem>
+            <BaseListItem>Delete Playlist</BaseListItem>
+          </div>
+        </transition>
       </div>
     </div>
     <div class="control__right">
@@ -50,12 +52,14 @@
         <button :class="{ active: isSearchBarOpen }" @click="toggleSearchBar">
           <IconSearch />
         </button>
-        <input
-          type="text"
-          placeholder="Search"
-          v-model="filterText"
-          :class="{ active: isSearchBarOpen }"
-        />
+        <transition name="search-input">
+          <input
+            type="text"
+            placeholder="Search"
+            v-model="filterText"
+            v-if="isSearchBarOpen"
+          />
+        </transition>
       </div>
       <div class="control__right--sort">
         <select name="sort" id="">
@@ -143,7 +147,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    const songList = this.$refs.songList;
+    const songList = this.$refs.songList as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         this.songListWidth = entry.contentRect.width;
@@ -255,10 +259,14 @@ $tablet-width: 768px;
       border-radius: 50%;
       cursor: pointer;
       background: var(--color-primary);
+      transition: all 0.2s ease-in-out;
       & svg {
         width: 25px;
         height: 25px;
         fill: #fff;
+      }
+      &:hover {
+        transform: scale(1.1);
       }
     }
     &--menu {
@@ -288,13 +296,9 @@ $tablet-width: 768px;
         border-radius: 10px;
         z-index: 20;
         padding: 10px 0px;
-        display: none;
         background: var(--background-glass-color-primary);
         & > * {
           margin: 5px auto;
-        }
-        &.active {
-          display: block;
         }
       }
     }
@@ -323,7 +327,6 @@ $tablet-width: 768px;
         align-items: center;
         justify-content: center;
         fill: var(--text-subdued);
-
         cursor: pointer;
         &.active {
           border-radius: 50% 0 0 50%;
@@ -332,23 +335,21 @@ $tablet-width: 768px;
 
       & input {
         height: 40px;
-        width: 200px;
-        display: none;
+        display: block;
         border-radius: 0px 10px 10px 0px;
         border: none;
         outline: none;
         line-height: 50px;
         padding: 0 10px;
-
         background: var(--background-glass-color-primary);
         color: var(--text-primary-color);
         font-size: 16px;
         font-weight: 400;
+        transition: all 0.5s forwards;
+        -webkit-transition: width 0.5s;
+        -moz-transition: width 0.5s;
         &::placeholder {
           color: var(--text-subdued);
-        }
-        &.active {
-          display: block;
         }
       }
     }
@@ -476,5 +477,36 @@ $tablet-width: 768px;
   &.active {
     display: block;
   }
+}
+.playlist-menu-enter-from {
+  opacity: 0;
+  top: 55%;
+}
+.playlist-menu-enter-to {
+  opacity: 1;
+  top: 105%;
+}
+.playlist-menu-enter-active {
+  transition: all 0.5s;
+}
+.playlist-menu-leave-from {
+  opacity: 1;
+  top: 105%;
+}
+.playlist-menu-leave-to {
+  opacity: 0;
+  top: 55%;
+}
+.playlist-menu-leave-active {
+  transition: all 0.5s;
+}
+
+.search-input-enter-from,
+.search-input-leave-to {
+  width: 0;
+}
+.search-input-enter-to,
+.search-input-leave-from {
+  width: 200px;
 }
 </style>

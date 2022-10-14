@@ -16,7 +16,7 @@ export default {
     return {
       isLeftSideBarActive: false,
       isRightSideBarActive: false,
-      audio: null as typeof Audio | null,
+      audio: null as HTMLAudioElement | null,
       audioList: [
         {
           title: "Future Parade",
@@ -54,13 +54,12 @@ export default {
       volume: 100,
       repeat: "off",
       isOnShuffle: false,
-      shuffledList: [],
+      shuffledList: [] as Array<any>,
       // visualizer
       ctx: null as AudioContext | null,
       audioSource: null as MediaElementAudioSourceNode | null,
       analayzer: null as AnalyserNode | null,
       frequencyData: null as Uint8Array | null,
-      frequencyDataArray: Array(100).fill(2),
     };
   },
   provide() {
@@ -69,7 +68,7 @@ export default {
       progress: computed(() => this.progress),
       isPlaying: computed(() => this.isPlaying),
       audio: computed(() => this.audio),
-      frequencyDataArray: computed(() => this.frequencyDataArray),
+      frequencyData: computed(() => this.frequencyData),
     };
   },
   methods: {
@@ -126,7 +125,7 @@ export default {
     setProgress(progress: number) {
       this.audio.currentTime = (progress * this.playingAudio.duration) / 100;
     },
-    setVolume(value) {
+    setVolume(value: string) {
       this.volume = +value;
     },
     setMuted() {
@@ -165,15 +164,12 @@ export default {
     // visualizer
     renderFrame() {
       if (this.frequencyData) {
-        this.analayzer.getByteFrequencyData(this.frequencyData);
-        this.frequencyDataArray = [];
-        for (let i = 0; i < 100; i++) {
-          this.frequencyDataArray.push(this.frequencyData[i]);
-        }
+        if (this.analayzer)
+          this.analayzer.getByteFrequencyData(this.frequencyData);
       }
     },
     // Other Method
-    shuffleArr(array) {
+    shuffleArr(array: Array<any>) {
       let currentIndex = array.length,
         randomIndex;
       // While there remain elements to shuffle.
@@ -258,7 +254,7 @@ export default {
     },
   },
   mounted() {
-    this.audio = this.$refs["audio"];
+    (this.audio as HTMLAudioElement) = this.$refs["audio"];
     this.audio.volume = this.volume / 100;
     this.playingAudio = this.audioList[this.audioIndex];
     document.addEventListener("keyup", (e) => {

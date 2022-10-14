@@ -79,8 +79,8 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.containerWidth = this.$refs.container.clientWidth;
-    const wrapper = this.$refs.wrapper;
+    this.containerWidth = (this.$refs.container as HTMLElement).clientWidth;
+    const wrapper = this.$refs.wrapper as HTMLElement;
     if (wrapper) this.wrapperWidth = wrapper.clientWidth;
 
     this.observer = new ResizeObserver((entries) => {

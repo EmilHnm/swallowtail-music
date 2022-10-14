@@ -150,7 +150,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    const songItem = this.$refs.songItem;
+    const songItem = this.$refs.songItem as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         this.songItemWidth = entry.contentRect.width;

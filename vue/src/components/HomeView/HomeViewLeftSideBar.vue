@@ -33,7 +33,7 @@
           <div class="nav__navigation--title">New Playlist</div>
         </base-list-item>
       </router-link>
-      <router-link :to="{ name: 'CollectionPage' }">
+      <router-link :to="{ name: 'collectionPage' }">
         <base-list-item>
           <IconHeartFilled />
           <div class="nav__navigation--title">Liked Songs</div>
@@ -41,7 +41,7 @@
       </router-link>
     </div>
     <div class="nav__playlist">
-      <router-link :to="{ name: 'playlistPage', params: { id: 1 } }">
+      <router-link :to="{ name: 'playlistViewPage', params: { id: 1 } }">
         <base-list-item>
           <div class="nav__navigation--title">BangDream</div>
         </base-list-item>

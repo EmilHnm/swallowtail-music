@@ -18,49 +18,53 @@
     </div>
     <div class="playing-list__queue" ref="queue" v-if="!shuffle">
       <div class="playing-list--title"><h3>In Queue</h3></div>
-      <div
-        class="playing-list__queue--item"
-        v-for="(item, index) in playlist"
-        :key="item"
-        draggable="true"
-        @dragstart="dragStart($event, item)"
-        @dragend="onDrop($event, item)"
-        @dragenter="dragEnter($event, item)"
-        @click="setPlaySong(index)"
-      >
-        <BaseSongItem
-          :selected="index === audioIndex ? true : false"
-          :title="item.title"
-          :artist="item.artist"
-          :album="'Future Paradise'"
-          :duration="'3:30'"
-          :inQueue="true"
-          @deleteFromQueue="deleteFromQueue(index)"
-        />
-      </div>
+      <transition-group tag="ul" name="queue-list">
+        <li
+          class="playing-list__queue--item"
+          v-for="(item, index) in playlist"
+          :key="index"
+          draggable="true"
+          @dragstart="dragStart($event, item)"
+          @dragend="onDrop($event)"
+          @dragenter="dragEnter($event, item)"
+          @click="setPlaySong(index)"
+        >
+          <BaseSongItem
+            :selected="index === audioIndex ? true : false"
+            :title="item.title"
+            :artist="item.artist"
+            :album="'Future Paradise'"
+            :duration="'3:30'"
+            :inQueue="true"
+            @deleteFromQueue="deleteFromQueue(index)"
+          />
+        </li>
+      </transition-group>
     </div>
     <div class="playing-list__queue" ref="queue" v-else>
       <div class="playing-list--title"><h3>In Queue</h3></div>
-      <div
-        class="playing-list__queue--item"
-        v-for="(item, index) in shuffledPlaylist"
-        :key="item"
-        draggable="true"
-        @dragstart="dragStart($event, item)"
-        @dragend="onDrop($event, item)"
-        @dragenter="dragEnter($event, item)"
-        @click="setPlaySong(index)"
-      >
-        <BaseSongItem
-          :selected="index === audioIndex ? true : false"
-          :title="item.title"
-          :artist="item.artist"
-          :album="'Future Paradise'"
-          :duration="'3:30'"
-          :inQueue="true"
-          @deleteFromQueue="deleteFromQueue(index)"
-        />
-      </div>
+      <transition-group tag="ul" name="queue-list">
+        <li
+          class="playing-list__queue--item"
+          v-for="(item, index) in shuffledPlaylist"
+          :key="index"
+          draggable="true"
+          @dragstart="dragStart($event, item)"
+          @dragend="onDrop($event)"
+          @dragenter="dragEnter($event, item)"
+          @click="setPlaySong(index)"
+        >
+          <BaseSongItem
+            :selected="index === audioIndex ? true : false"
+            :title="item.title"
+            :artist="item.artist"
+            :album="'Future Paradise'"
+            :duration="'3:30'"
+            :inQueue="true"
+            @deleteFromQueue="deleteFromQueue(index)"
+          />
+        </li>
+      </transition-group>
     </div>
   </div>
 </template>
@@ -77,11 +81,11 @@ export default defineComponent({
       default: false,
     },
     playlist: {
-      type: Array,
+      type: Array as () => Array<Object>,
       required: true,
     },
     shuffledPlaylist: {
-      type: Array,
+      type: Array as () => Array<Object>,
       required: true,
     },
     playingAudio: {
@@ -104,19 +108,19 @@ export default defineComponent({
     };
   },
   methods: {
-    dragStart(e: DragEvent, item: string) {
-      if (e.target) e.target.classList.add("dragging");
+    dragStart(e: DragEvent, item: Object) {
+      if (e.target) (e.target as HTMLLIElement).classList.add("dragging");
       if (this.shuffle) {
         this.movingIndex = this.shuffledPlaylist.findIndex((i) => i === item);
       } else {
         this.movingIndex = this.playlist.findIndex((i) => i === item);
       }
     },
-    onDrop(e: DragEvent, item: string) {
-      e.target.classList.remove("dragging");
+    onDrop(e: DragEvent) {
+      if (e.target) (e.target as HTMLLIElement).classList.remove("dragging");
       this.$emit("onDrop", this.movingIndex, this.movingOverIndex);
     },
-    dragEnter(e: DragEvent, item: string) {
+    dragEnter(e: DragEvent, item: Object) {
       if (this.shuffle) {
         this.movingOverIndex = this.shuffledPlaylist.findIndex(
           (i) => i === item
@@ -216,5 +220,19 @@ $tablet-width: 768px;
       }
     }
   }
+}
+.queue-list-enter-active,
+.queue-list-leave-active {
+  transition: all 5s;
+}
+.queue-list-enter-from,
+.queue-list-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+.queue-list-enter-to,
+.queue-list-leave-from {
+  opacity: 1;
+  transform: translateX(0px);
 }
 </style>
