@@ -254,7 +254,7 @@ export default {
     },
   },
   mounted() {
-    (this.audio as HTMLAudioElement) = this.$refs["audio"];
+    this.audio = this.$refs["audio"];
     this.audio.volume = this.volume / 100;
     this.playingAudio = this.audioList[this.audioIndex];
     document.addEventListener("keyup", (e) => {
