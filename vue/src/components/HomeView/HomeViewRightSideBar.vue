@@ -43,7 +43,7 @@
     </div>
     <div class="playing-list__queue" ref="queue" v-else>
       <div class="playing-list--title"><h3>In Queue</h3></div>
-      <transition-group tag="ul" name="queue-list">
+      <transition-group tag="ul" name="queue-list" mode="out-in">
         <li
           class="playing-list__queue--item"
           v-for="(item, index) in shuffledPlaylist"
@@ -221,18 +221,32 @@ $tablet-width: 768px;
     }
   }
 }
-.queue-list-enter-active,
-.queue-list-leave-active {
-  transition: all 5s;
-}
-.queue-list-enter-from,
-.queue-list-leave-to {
+.queue-list-enter-from {
   opacity: 0;
   transform: translateX(-30px);
 }
+
+.queue-list-enter-active {
+  transition: all 0.5s ease-out;
+}
+
 .queue-list-enter-to,
 .queue-list-leave-from {
   opacity: 1;
-  transform: translateX(0px);
+  transform: translateX(0);
+}
+
+.queue-list-leave-active {
+  transition: all 0.5s ease-in;
+  position: absolute;
+}
+
+.queue-list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.queue-list-move {
+  transition: transform 0.8s ease;
 }
 </style>
