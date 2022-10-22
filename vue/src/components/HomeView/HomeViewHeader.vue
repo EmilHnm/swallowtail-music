@@ -41,9 +41,19 @@
         <darkmode-button />
       </div>
       <div class="header__right--account" @click="toggleAccountMenu">
-        <div class="header__right--account--username">Hoa NgoMinh</div>
+        <div class="header__right--account--username">
+          {{ userData.username }}
+        </div>
         <div class="header__right--account--img">
-          <img src="@/assets/default-avatar.png" alt="" srcset="" />
+          <img
+            :src="
+              userData.profile_photo_url
+                ? userData.profile_photo_url
+                : environment.default + '/default-avatar.jpg'
+            "
+            alt=""
+            srcset=""
+          />
         </div>
         <transition name="menu">
           <div class="header__right--account--menu" v-if="isAccountMenuActive">
@@ -54,7 +64,13 @@
             </div>
             <div class="header__right--account--menu-item">
               <base-list-item>
-                <a href="">Profile</a>
+                <router-link
+                  :to="{
+                    name: 'profilePage',
+                    params: { id: userData.user_id },
+                  }"
+                  >Profile</router-link
+                >
               </base-list-item>
             </div>
             <div class="header__right--account--menu-item">
@@ -76,7 +92,10 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapGetters, mapMutations, mapActions } from "vuex";
+import { environment } from "@/environment/environment";
 import IconMenu from "../icons/IconMenu.vue";
+
 export default defineComponent({
   components: {
     IconMenu,
@@ -86,6 +105,7 @@ export default defineComponent({
     return {
       isAccountMenuActive: false,
       isLogOutConfirm: false,
+      environment: environment,
     };
   },
   methods: {
@@ -100,7 +120,24 @@ export default defineComponent({
     },
     onConfirmLogOut() {
       this.isLogOutConfirm = false;
+      this.logOut().then((res) => {
+        if (res.status < 300) {
+          this.clearUser();
+          this.$router.push({ name: "login" });
+        }
+      });
     },
+    ...mapActions({
+      logOut: "auth/logOut",
+    }),
+    ...mapMutations({
+      clearUser: "auth/clearUser",
+    }),
+  },
+  computed: {
+    ...mapGetters({
+      userData: "auth/userData",
+    }),
   },
   emits: ["toggleLeftSideBar"],
 });

@@ -28,7 +28,6 @@
           @dragstart="dragStart($event, item)"
           @dragend="onDrop($event)"
           @dragenter="dragEnter($event, item)"
-          @click="setPlaySong(index)"
         >
           <BaseSongItem
             :selected="index === audioIndex ? true : false"
@@ -38,6 +37,7 @@
             :duration="'3:30'"
             :inQueue="true"
             @deleteFromQueue="deleteFromQueue(index)"
+            @selectSong="setPlaySong(index)"
           />
         </li>
       </transition-group>
@@ -53,7 +53,6 @@
           @dragstart="dragStart($event, item)"
           @dragend="onDrop($event)"
           @dragenter="dragEnter($event, item)"
-          @click="setPlaySong(index)"
         >
           <BaseSongItem
             :selected="index === audioIndex ? true : false"
@@ -63,6 +62,7 @@
             :duration="'3:30'"
             :inQueue="true"
             @deleteFromQueue="deleteFromQueue(index)"
+            @selectSong="setPlaySong(index)"
           />
         </li>
       </transition-group>
@@ -131,6 +131,7 @@ export default defineComponent({
       }
     },
     setPlaySong(index: number) {
+      console.log("setPlaySong: " + index);
       this.$emit("setPlaySong", index);
     },
     deleteFromQueue(index: number) {

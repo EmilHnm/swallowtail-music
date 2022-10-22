@@ -2,11 +2,11 @@
   <div class="song-item" ref="songItem">
     <BaseListItem :selected="selected">
       <div class="song-item__left">
-        <div class="song-item__left--image">
+        <div class="song-item__left--image" @click="selectSong">
           <img src="../../assets/music/cover.jpg" alt="" srcset="" />
         </div>
         <div class="song-item__left--title">
-          <span>{{ title }}</span>
+          <span @click="selectSong">{{ title }}</span>
           <span>{{ artist }}</span>
         </div>
       </div>
@@ -92,7 +92,7 @@ import BaseListItem from "./BaseListItem.vue";
 import IconThreeDots from "../icons/IconThreeDots.vue";
 
 export default defineComponent({
-  emits: ["deleteFromQueue"],
+  emits: ["deleteFromQueue", "selectSong"],
   data() {
     return {
       observer: null as ResizeObserver | null,
@@ -146,7 +146,11 @@ export default defineComponent({
       this.menuMode = mode;
     },
     deleteFromQueue() {
+      this.isMenuOpen = false;
       this.$emit("deleteFromQueue");
+    },
+    selectSong() {
+      this.$emit("selectSong");
     },
   },
   mounted() {

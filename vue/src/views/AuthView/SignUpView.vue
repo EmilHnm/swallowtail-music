@@ -1,4 +1,16 @@
 <template>
+  <teleport to="body">
+    <BaseDialog
+      :open="dialogWaring.show"
+      :title="dialogWaring.title"
+      :mode="dialogWaring.mode"
+      @close="closeDialog"
+    >
+      <template #default>
+        <p>{{ dialogWaring.content }}</p>
+      </template>
+    </BaseDialog>
+  </teleport>
   <div class="signup">
     <div class="signup__header">
       <h1 class="signup__title">Sign Up</h1>
@@ -10,10 +22,10 @@
       <div class="signup__form__input">
         <BaseInput
           :label="'Username'"
-          :id="'username'"
+          :id="'name'"
           :type="'text'"
           :required="false"
-          v-model="username"
+          v-model="name"
         ></BaseInput>
       </div>
       <div class="signup__form__input">
@@ -56,47 +68,48 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { environment } from "@/environment/environment";
 import BaseInput from "../../components/UI/BaseInput.vue";
 import BaseButton from "../../components/UI/BaseButton.vue";
+import BaseDialog from "../../components/UI/BaseDialog.vue";
 
 export default defineComponent({
   name: "SignUpView",
-  components: { BaseInput, BaseButton },
+  components: { BaseInput, BaseButton, BaseDialog },
   data() {
     return {
-      username: "",
+      name: "",
       email: "",
       password: "",
       password_confirmation: "",
+      dialogWaring: {
+        title: "Warning",
+        mode: "warning",
+        content: "Please fill in all the fields",
+        show: false,
+      },
     };
   },
   methods: {
+    closeDialog() {
+      this.dialogWaring.show = false;
+    },
     onSubmitForm() {
-      console.log(
-        JSON.stringify({
-          username: this.username,
+      this.$store
+        .dispatch("auth/register", {
+          name: this.name,
           email: this.email,
           password: this.password,
           password_confirmation: this.password_confirmation,
         })
-      );
-      fetch(environment.api + "/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          name: this.username,
-          email: this.email,
-          password: this.password,
-          password_confirmation: this.password_confirmation,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
+        .then((res: any) => res.json())
+        .then((data: any) => {
+          if (!data.message) {
+            this.$store.commit("auth/setUser", data);
+            this.$router.push({ name: "home" });
+          } else {
+            this.dialogWaring.content = data.message;
+            this.dialogWaring.show = true;
+          }
         });
     },
   },

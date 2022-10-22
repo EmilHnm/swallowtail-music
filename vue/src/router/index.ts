@@ -20,7 +20,12 @@ const router = createRouter({
       name: "home",
       component: HomeView,
       redirect: "home",
-      meta: { requiresAuth: true },
+      meta: {
+        requiresAuth: true,
+        goToIndexIf: () => {
+          return store.getters["auth/userData"].user_id;
+        },
+      },
       children: [
         {
           path: "/home",
@@ -114,16 +119,77 @@ const router = createRouter({
         },
       ],
     },
+
+    {
+      path: "/account",
+      redirect: "account/overview",
+      name: "account",
+      meta: {
+        requiresAuth: true,
+        goToIndexIf: () => {
+          return store.getters["auth/userData"].user_id;
+        },
+      },
+    },
+
+    {
+      path: "/test",
+      meta: {
+        requiresAuth: true,
+        goToIndexIf: () => {
+          return store.getters["auth/userData"].user_id;
+        },
+      },
+      component: () => import("../views/test.vue"),
+    },
   ],
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !store.state.user.token) {
-    next({ name: "auth" });
-  } else if (store.state.user.token && to.meta.isGuest) {
-    next({ name: "home" });
+  if (store.getters["auth/checkLocalToken"]) {
+    if (!store.getters["auth/userToken"]) {
+      store.commit("auth/checkToken");
+      store
+        .dispatch("auth/checkAuth")
+        .then((res) => {
+          if (res) {
+            return res.json();
+          }
+        })
+        .then((res) => {
+          if (res.message === "Unauthenticated.") {
+            store.commit("auth/clearUser");
+            next({ name: "auth" });
+          } else {
+            const data = {
+              user: {
+                user_id: res.user_id,
+                name: res.name,
+                email: res.email,
+                profile_photo_url: res.profile_photo_url,
+              },
+            };
+
+            store.commit("auth/setUser", data);
+            if (to.meta.requiresAuth) {
+              console.log(true);
+              next();
+            } else {
+              next({ name: "home" });
+            }
+          }
+        });
+    } else {
+      if (to.meta.requiresAuth) {
+        next();
+      } else {
+        next({ name: "home" });
+      }
+    }
   } else {
-    next();
+    console.log("token not exists");
+    if (to.meta.isGuest) next();
+    else next({ name: "auth" });
   }
 });
 export default router;

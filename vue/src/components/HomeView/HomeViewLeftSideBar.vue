@@ -41,9 +41,18 @@
       </router-link>
     </div>
     <div class="nav__playlist">
-      <router-link :to="{ name: 'playlistViewPage', params: { id: 1 } }">
+      <router-link
+        v-for="playlist in playlistArray"
+        :key="playlist.playlist_id"
+        :to="{
+          name: 'playlistViewPage',
+          params: { id: playlist.playlist_id ? playlist.playlist_id : '0' },
+        }"
+      >
         <base-list-item>
-          <div class="nav__navigation--title">BangDream</div>
+          <div class="nav__navigation--title">
+            {{ playlist.title ? playlist.title : "default" }}
+          </div>
         </base-list-item>
       </router-link>
     </div>
@@ -57,6 +66,7 @@ import IconLibrary from "../icons/IconLibrary.vue";
 import IconPlus from "../icons/IconPlus.vue";
 import IconHeartFilled from "../icons/IconHeartFilled.vue";
 import IconUpload from "../icons/IconUpload.vue";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 export default defineComponent({
   components: {
     IconHome,
@@ -71,6 +81,27 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+  },
+  data() {
+    return {};
+  },
+  methods: {
+    ...mapActions("playlist", ["getAccountPlaylist"]),
+    ...mapMutations("playlist", ["setPlaylists"]),
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+      playlistArray: "playlist/getPlaylist",
+    }),
+  },
+  created() {
+    this.getAccountPlaylist(this.token)
+      .then((res) => res.json())
+      .then((res) => {
+        const playlist = res.playlist;
+        this.setPlaylists(playlist);
+      });
   },
 });
 </script>

@@ -20,9 +20,7 @@ class AuthController extends Controller
             ],
             'remember_me' => 'boolean'
         ]);
-        $remember = $credentials['remember_me'] ?? false;
-        unset($credentials['remember_me']);
-        if (!Auth::attempt($credentials, $remember)) {
+        if (!Auth::attempt($credentials)) {
             return response([
                 'error' => 'The Provided credentials are not correct'
             ], 422);
@@ -45,7 +43,6 @@ class AuthController extends Controller
     }
     public function register(Request $request)
     {
-
         $validateData = $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|email|unique:users',
@@ -72,5 +69,11 @@ class AuthController extends Controller
             'token' => $token,
             'user' => $user
         ], Response::HTTP_OK);
+    }
+
+    public function user(Request $request)
+    {
+        $user = Auth::user();
+        return response()->json($user);
     }
 }

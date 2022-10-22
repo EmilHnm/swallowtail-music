@@ -14,9 +14,6 @@ import IconLogo from "./components/icons/IconLogo.vue";
 
 const app = createApp(App);
 
-app.use(router);
-app.use(store);
-
 app.component("base-card", BaseCard);
 app.component("base-button", BaseButton);
 app.component("darkmode-button", DarkModeButton);
@@ -24,6 +21,7 @@ app.component("base-input", BaseInput);
 app.component("base-list-item", BaseListItem);
 app.component("base-dialog", BaseDialog);
 app.component("icon-logo", IconLogo);
-
+app.use(router);
+app.use(store);
 app.mount("#app");
 app.config.unwrapInjectedRef = true;

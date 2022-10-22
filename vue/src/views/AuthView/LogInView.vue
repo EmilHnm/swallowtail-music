@@ -1,4 +1,16 @@
 <template>
+  <teleport to="body">
+    <BaseDialog
+      :open="dialogWaring.show"
+      :title="dialogWaring.title"
+      :mode="dialogWaring.mode"
+      @close="closeDialog"
+    >
+      <template #default>
+        <p>{{ dialogWaring.content }}</p>
+      </template>
+    </BaseDialog>
+  </teleport>
   <div class="login">
     <div class="login__header">
       <h1 class="login__title">Log In</h1>
@@ -27,7 +39,7 @@
       </div>
       <div class="login__form__input">
         <input type="checkbox" name="remember_me" id="rememer_me" />
-        <label>Remember Me</label>
+        <label for="rememer_me">Remember Me</label>
       </div>
       <div class="login__form__input">
         <BaseButton :type="'submit'">Log In</BaseButton>
@@ -45,35 +57,48 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { environment } from "@/environment/environment";
 import BaseInput from "../../components/UI/BaseInput.vue";
 import BaseButton from "../../components/UI/BaseButton.vue";
+import { mapActions, mapMutations } from "vuex";
+import BaseDialog from "../../components/UI/BaseDialog.vue";
 
 export default defineComponent({
   name: "LogInView",
-  components: { BaseInput, BaseButton },
+  components: { BaseInput, BaseButton, BaseDialog },
   data() {
     return {
       email: "",
       password: "",
+      dialogWaring: {
+        title: "Warning",
+        mode: "warning",
+        content: "Please fill in all the fields",
+        show: false,
+      },
     };
   },
   methods: {
     onSubmitForm() {
-      fetch(environment.api + "/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: this.email,
-          password: this.password,
-        }),
-      })
-        .then((response) => response.trim().json())
-        .then((data) => {
-          console.log(data);
-        });
+      if (this.email === "" || this.password === "") {
+        this.dialogWaring.show = true;
+      } else {
+        this.login({ email: this.email, password: this.password })
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.error) {
+              this.dialogWaring.content = res.error;
+              this.dialogWaring.show = true;
+            } else {
+              this.setUser(res);
+              this.$router.push({ name: "mainPage" });
+            }
+          });
+      }
+    },
+    ...mapMutations("auth", ["setUser"]),
+    ...mapActions("auth", ["login"]),
+    closeDialog() {
+      this.dialogWaring.show = false;
     },
   },
 });

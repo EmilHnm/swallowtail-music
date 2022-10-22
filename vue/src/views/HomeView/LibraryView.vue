@@ -1,23 +1,35 @@
 <template>
   <div class="container">
+    <!-- TODO: move redirect to BaseCardAlbum -->
     <BaseCardAlbum
-      v-for="item in testArr"
-      :key="item"
-      :title="'Future Parade'"
+      v-for="item in playlist"
+      :key="item.playlist_id"
+      :id="item.playlist_id"
+      :title="item.title"
       :uploader="'Emil'"
       :songCount="6"
+      :type="'playlist'"
+      @redirect="redirect"
     />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapGetters } from "vuex";
 import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
 
 export default defineComponent({
-  data() {
-    return { testArr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] };
-  },
   components: { BaseCardAlbum },
+  computed: {
+    ...mapGetters({
+      playlist: "playlist/getPlaylist",
+    }),
+  },
+  methods: {
+    redirect({ id, type }: { id: string; type: string }) {
+      this.$router.push({ name: "playlistViewPage", params: { id: id } });
+    },
+  },
 });
 </script>
 <style lang="scss" scoped>

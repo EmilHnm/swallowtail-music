@@ -1,29 +1,15 @@
 import { createStore } from "vuex";
-
+import { albumModule } from "./module/albumModule";
+import { authModule } from "./module/authModule";
+import { playlistModule } from "./module/playlistModule";
+import { songModule } from "./module/songModule";
+import { testModule } from "./module/testModule";
 export default createStore({
-  state: {
-    user: {
-      data: {
-        user_id: "adc0",
-        username: "emil",
-        email: "emil@gmail.com",
-        imgUrl: "",
-      },
-      token: "123",
-    },
+  modules: {
+    auth: authModule,
+    song: songModule,
+    album: albumModule,
+    playlist: playlistModule,
+    test: testModule,
   },
-  getters: {},
-  mutations: {
-    logOut: (state) => {
-      state.user.token = "";
-      state.user.data = {
-        user_id: "",
-        username: "",
-        email: "",
-        imgUrl: "",
-      };
-    },
-  },
-  actions: {},
-  modules: {},
 });

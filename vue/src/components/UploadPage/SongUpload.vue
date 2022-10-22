@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <BaseDialog
-      v-if="dialogWaring.show"
+      :open="dialogWaring.show"
       :title="dialogWaring.title"
       :mode="dialogWaring.mode"
       @close="closeDialog"
@@ -43,7 +43,7 @@
         <BaseTag
           v-for="(artist, index) in artistArray"
           @click="removeItemFormArr(index, artistArray)"
-          >{{ artist }}</BaseTag
+          >{{ artist.name }}</BaseTag
         >
         <BaseTag
           v-for="(artist, index) in newArtistArray"
@@ -57,7 +57,9 @@
         :placeholder="'Enter Artist Name'"
         :id="'artistName'"
         v-model="artistName"
-        @keyup.enter="pushItemtoNewArray(artistName, newArtistArray)"
+        @keyup.enter="
+          pushItemtoNewArray(artistName, newArtistArray, templateArtistArray)
+        "
       />
       <div
         class="uploadform__control--artistSearch"
@@ -73,7 +75,7 @@
           :key="artist"
           @click="pushItemtoArray(artist, artistArray)"
         >
-          {{ artist }}
+          {{ artist.name }}
         </div>
       </div>
     </div>
@@ -83,7 +85,7 @@
         <BaseTag
           v-for="(genre, index) in genreArray"
           @click="removeItemFormArr(index, genreArray)"
-          >{{ genre }}</BaseTag
+          >{{ genre.name }}</BaseTag
         >
         <BaseTag
           v-for="(genre, index) in newGenreArray"
@@ -97,7 +99,9 @@
         :id="'genre'"
         :placeholder="'Enter Genre'"
         v-model="genreName"
-        @keyup.enter="pushItemtoNewArray(genreName, newGenreArray)"
+        @keyup.enter="
+          pushItemtoNewArray(genreName, newGenreArray, templateGenreArray)
+        "
       />
       <div
         class="uploadform__control--genreSearch"
@@ -110,10 +114,10 @@
             templateGenreArray,
             genreArray
           )"
-          :key="genre"
+          :key="genre.genre_id"
           @click="pushItemtoArray(genre, genreArray)"
         >
-          {{ genre }}
+          {{ genre.name }}
         </div>
       </div>
     </div>
@@ -123,7 +127,9 @@
         <BaseRadio
           :name="'displayMode'"
           v-model="displayMode"
-          :disable="artistArray.length != 0 && genreArray != 0 ? false : true"
+          :disable="
+            artistArray.length != 0 && genreArray.length != 0 ? false : true
+          "
           :value="'public'"
           >Public</BaseRadio
         >
@@ -144,71 +150,80 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapActions, mapGetters } from "vuex";
+import type { genre } from "@/model/genreModel";
+import type { artist } from "@/model/artistModel";
 import BaseInput from "../UI/BaseInput.vue";
 import BaseRadio from "../UI/BaseRadio.vue";
 import BaseButton from "../UI/BaseButton.vue";
 import BaseTag from "../UI/BaseTag.vue";
 import BaseDialog from "../UI/BaseDialog.vue";
-
+import Loading from "vue-loading-overlay";
 export default defineComponent({
   data() {
     return {
       songName: "",
       displayMode: "private",
       inputDragging: false,
-      templateArtistArray: [
-        "LiSA",
-        "Aqours",
-        "The Cab",
-        "Imagine Dragon",
-        "Linkin Park",
-      ],
-      templateGenreArray: ["Rock", "Pop", "Jazz", "Rap", "Hip Hop"],
-      artistArray: [],
-      genreArray: [],
-      newArtistArray: [],
-      newGenreArray: [],
+      templateArtistArray: [] as artist[],
+      templateGenreArray: [] as genre[],
+      artistArray: [] as artist[],
+      genreArray: [] as genre[],
+      newArtistArray: [] as string[],
+      newGenreArray: [] as string[],
       artistName: "",
       genreName: "",
-      songFile: null,
+      songFile: null as FileList | null,
       dialogWaring: {
         title: "Warning",
         mode: "warning",
         content: "Please fill in all the fields",
         show: false,
       },
+      isLoading: true,
     };
   },
   methods: {
+    ...mapActions("song", ["getGenreList", "getArtistList", "uploadSong"]),
     previewFile(event: Event) {
       this.songFile = (<HTMLInputElement>event.target).files[0];
     },
     checkIncludeString(
       str: string,
-      arrayTemp: string[],
-      endpointArr: string[]
-    ): string[] {
-      arrayTemp = arrayTemp.filter((item) => !endpointArr.includes(item));
-      return arrayTemp.filter((item) =>
-        item.toLowerCase().includes(str.toLowerCase())
+      arrayTemp: genre[] | artist[],
+      endpointArr: genre[] | artist[]
+    ) {
+      arrayTemp = arrayTemp.filter(
+        (item: genre | artist) => !endpointArr.includes(item)
       );
+      return arrayTemp.filter((item: genre | artist) => {
+        if (item.name)
+          return item.name.toLowerCase().includes(str.toLowerCase());
+      });
     },
-    pushItemtoArray(item: string, array: string[]): void {
+    pushItemtoArray(item: genre | artist, array: genre[] | artist[]): void {
       array.push(item);
       this.artistName = "";
       this.genreName = "";
     },
-    pushItemtoNewArray(item: string, array: string[]): void {
+    pushItemtoNewArray(
+      item: string,
+      array: string[],
+      tempArr: genre[] | artist[]
+    ): void {
       if (
-        !this.templateGenreArray
-          .map((i) => i.trim().toLowerCase())
+        !tempArr
+          .map((i) => i.name.trim().toLowerCase())
           .includes(item.trim().toLowerCase())
       )
         array.push(item);
       this.artistName = "";
       this.genreName = "";
     },
-    removeItemFormArr(index: number, array: string[]): void {
+    removeItemFormArr(
+      index: number,
+      array: genre[] | artist[] | string[]
+    ): void {
       array.splice(index, 1);
     },
     validateFileType(file: File): boolean {
@@ -218,6 +233,7 @@ export default defineComponent({
         "audio/aac",
         "audio/ogg",
         "audio/flac",
+        "audio/x-flac",
         "audio/alac",
         "audio/wav",
         "audio/aiff",
@@ -250,8 +266,8 @@ export default defineComponent({
       }
       if (this.displayMode === "public") {
         if (
-          (this.artistArray.length === 0 || this.newArtistArray.length === 0) &&
-          (this.genreArray.length === 0 || this.newGenreArray.length) === 0
+          (this.artistArray.length === 0 && this.newArtistArray.length === 0) ||
+          (this.genreArray.length === 0 && this.newGenreArray.length) === 0
         ) {
           this.dialogWaring.content =
             "If you want to public, please fill in the artist and genre";
@@ -266,11 +282,46 @@ export default defineComponent({
       const songForm = new FormData();
       songForm.append("songName", this.songName);
       songForm.append("displayMode", this.displayMode);
-      songForm.append("artist", JSON.stringify(this.artistArray));
+      let artistArrUpload: string[] = [];
+      this.artistArray.forEach((artist: artist) => {
+        if (artist.artist_id) artistArrUpload.push(artist.artist_id);
+      });
+      songForm.append("artist", JSON.stringify(artistArrUpload));
       songForm.append("newArtist", JSON.stringify(this.newArtistArray));
-      songForm.append("genre", JSON.stringify(this.genreArray));
+      let genreArrUpload: string[] = [];
+      this.genreArray.forEach((genre: genre) => {
+        if (genre.genre_id) genreArrUpload.push(genre.genre_id);
+      });
+      songForm.append("genre", JSON.stringify(genreArrUpload));
       songForm.append("newGenre", JSON.stringify(this.newGenreArray));
       songForm.append("songFile", this.songFile);
+      this.dialogWaring.content =
+        "Uploading Song! Please do not close tab when uploading";
+      this.dialogWaring.show = true;
+      this.uploadSong({ songForm: songForm, token: this.userToken })
+        .then((res) => {
+          this.isLoading = false;
+          return res.json();
+        })
+        .then((res) => {
+          if (res.status === "success") {
+            this.dialogWaring.content = res.message;
+            this.dialogWaring.mode = res.announcement;
+            this.dialogWaring.title = res.status;
+            this.dialogWaring.show = true;
+            this.songName = "";
+            this.artistName = "";
+            this.genreName = "";
+            this.songFile = null;
+            this.artistArray = [];
+            this.genreArray = [];
+            this.newArtistArray = [];
+            this.newGenreArray = [];
+          } else {
+            this.dialogWaring.content = res.error;
+            this.dialogWaring.show = true;
+          }
+        });
     },
   },
   components: {
@@ -279,6 +330,25 @@ export default defineComponent({
     BaseButton,
     BaseTag,
     BaseDialog,
+    Loading,
+  },
+  computed: {
+    ...mapGetters({
+      userToken: "auth/userToken",
+    }),
+  },
+  created() {
+    //get Genres list
+    this.getGenreList(this.userToken)
+      .then((res) => res.json())
+      .then((res) => {
+        this.templateGenreArray = res;
+      });
+    this.getArtistList(this.userToken)
+      .then((res) => res.json())
+      .then((res) => {
+        this.templateArtistArray = res;
+      });
   },
 });
 </script>

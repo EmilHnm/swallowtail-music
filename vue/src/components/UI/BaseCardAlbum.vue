@@ -7,7 +7,7 @@
           <IconPlay />
         </div>
       </div>
-      <div class="album__title">{{ title }}</div>
+      <div class="album__title" @click="redirect">{{ title }}</div>
       <div class="album__uploader">{{ uploader }}</div>
       <div class="album__songCount">{{ songCount }} songs</div>
     </div>
@@ -31,6 +31,19 @@ export default {
     songCount: {
       type: Number,
       required: true,
+    },
+    id: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      default: "album",
+    },
+  },
+  methods: {
+    redirect() {
+      this.$emit("redirect", { id: this.id, type: this.type });
     },
   },
 };

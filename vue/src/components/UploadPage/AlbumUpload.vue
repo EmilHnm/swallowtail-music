@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <BaseDialog
-      v-if="dialogWaring.show"
+      :open="dialogWaring.show"
       :title="dialogWaring.title"
       :mode="dialogWaring.mode"
       @close="closeDialog"
@@ -12,8 +12,8 @@
     </BaseDialog>
   </teleport>
   <form class="uploadform" @submit.prevent="onFormSubmit">
-    <div class="uploadform__control">
-      <div class="uploadform__control--album">
+    <div class="uploadform__control" ref="wrapper">
+      <div class="uploadform__control--album" :class="{ mobile: mobile }">
         <div class="uploadform__control--albumImage">
           <input
             type="file"
@@ -47,6 +47,19 @@
             :id="'albumReleaseYear'"
             v-model="albumReleaseYear"
           />
+          <div class="albumType">
+            <label for="albumType">Album Type</label>
+            <select name="albumType" id="albumType" v-model="albumType">
+              <option value="" disable>Select album type</option>
+              <option value="single">Single</option>
+              <option value="album">Album</option>
+              <option value="mixtape">Mixtape</option>
+              <option value="DJ Mix">DJ Mix</option>
+              <option value="bootleg">Bootleg / Unauthorized</option>
+              <option value="soundtracks">Soundtracks</option>
+              <option value="live albums">Live albums</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -54,8 +67,9 @@
     <div class="uploadform__control">
       <div
         class="uploadform__control--song"
+        :class="{ mobile: mobile }"
         v-for="(item, index) in songForm"
-        :key="item"
+        :key="index"
       >
         <div class="uploadform__control--songFile">
           <input
@@ -84,7 +98,7 @@
           <BaseButton
             v-if="index > 0"
             :mode="'danger'"
-            @click="removeSong($event, index)"
+            @click="removeSong(index)"
             >Remove Song</BaseButton
           >
         </div>
@@ -102,15 +116,16 @@ import { defineComponent, reactive } from "vue";
 import BaseInput from "../UI/BaseInput.vue";
 import BaseButton from "../UI/BaseButton.vue";
 import BaseDialog from "../UI/BaseDialog.vue";
+import { mapActions, mapGetters } from "vuex";
 
 export default defineComponent({
   data() {
     return {
-      albumImage: null,
-      albumImageTempPath: null,
+      albumImage: null as File | null,
+      albumImageTempPath: "",
       albumTitle: "",
       albumReleaseYear: "",
-      songCount: 1,
+      albumType: "",
       songForm: reactive([
         {
           songName: "",
@@ -123,10 +138,25 @@ export default defineComponent({
         content: "Please fill in all the fields",
         show: false,
       },
+      observer: null as ResizeObserver | null,
+      mobile: false,
     };
   },
-  mounted() {},
+  mounted() {
+    const wrapper = this.$refs.wrapper as HTMLElement;
+    this.observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        if (entry.contentRect.width < 700) {
+          this.mobile = true;
+        } else {
+          this.mobile = false;
+        }
+      }
+    });
+    if (wrapper) this.observer.observe(wrapper);
+  },
   methods: {
+    ...mapActions("album", ["uploadAlbum"]),
     albumImageChange(e: any) {
       if (e.target.files.length > 0) {
         if (!this.validateImageFileType(e.target.files[0])) {
@@ -144,7 +174,7 @@ export default defineComponent({
     },
     songFileChange(e: any, index: number) {
       if (e.target.files.length > 0) {
-        if (!this.validateSongFileType(e.target.files[0].type)) {
+        if (this.validateSongFileType(e.target.files[0].type)) {
           this.dialogWaring.content = "Please upload valid audio file";
           this.dialogWaring.show = true;
           return;
@@ -157,11 +187,9 @@ export default defineComponent({
         songName: "",
         songFile: null,
       });
-      this.songCount++;
     },
     removeSong(id: number) {
       this.songForm.splice(id, 1);
-      this.songCount--;
     },
 
     onFormSubmit() {
@@ -172,6 +200,11 @@ export default defineComponent({
       }
       if (this.albumTitle === "") {
         this.dialogWaring.content = "Please enter album title";
+        this.dialogWaring.show = true;
+        return;
+      }
+      if (this.albumType === "") {
+        this.dialogWaring.content = "Please select a album type";
         this.dialogWaring.show = true;
         return;
       }
@@ -189,17 +222,40 @@ export default defineComponent({
         }
         i++;
       });
-      let formData = new FormData();
-      formData.append("albumImage", this.albumImage);
-      formData.append("albumTitle", this.albumTitle);
-      formData.append("albumReleaseYear", this.albumReleaseYear);
+      let albumForm = new FormData();
+      albumForm.append("albumImage", this.albumImage);
+      albumForm.append("albumTitle", this.albumTitle);
+      albumForm.append("albumReleaseYear", this.albumReleaseYear);
+      albumForm.append("albumType", this.albumType);
       i = 0;
       this.songForm.forEach((item) => {
-        formData.append("songName-" + i, item.songName);
-        formData.append("songFile-" + i, item.songFile);
+        albumForm.append("songName_" + i, item.songName);
+        if (item.songFile) albumForm.append("songFile_" + i, item.songFile);
         i++;
       });
-      console.log(formData.get("albumImage"));
+      albumForm.append("songCount", this.songForm.length.toString());
+      this.dialogWaring.content =
+        "Uploading Album! Please do not close tab when uploading";
+      this.dialogWaring.show = true;
+      this.uploadAlbum({ albumForm: albumForm, token: this.userToken })
+        .then((res) => res.json())
+        .then((res) => {
+          this.dialogWaring.content = res.message;
+          this.dialogWaring.mode = res.announcement;
+          this.dialogWaring.title = res.status;
+          this.dialogWaring.show = true;
+          this.albumImage = null;
+          this.albumImageTempPath = "";
+          this.albumTitle = "";
+          this.albumReleaseYear = "";
+          this.albumType = "";
+          this.songForm = [
+            {
+              songName: "",
+              songFile: null as File | null,
+            },
+          ];
+        });
     },
     closeDialog() {
       this.dialogWaring.show = false;
@@ -236,7 +292,11 @@ export default defineComponent({
       return true;
     },
   },
-
+  computed: {
+    ...mapGetters({
+      userToken: "auth/userToken",
+    }),
+  },
   components: { BaseInput, BaseButton, BaseDialog },
 });
 </script>
@@ -251,6 +311,20 @@ export default defineComponent({
       align-items: center;
       justify-content: space-between;
       height: 300px;
+      &.mobile {
+        flex-direction: column;
+        height: auto;
+        .uploadform__control--albumImage {
+          height: 300px;
+        }
+        .uploadform__control--albumDetail {
+          margin: 5px auto;
+          & > * {
+            margin: 5px auto;
+            width: 100%;
+          }
+        }
+      }
       &Image {
         aspect-ratio: 1/1;
         height: 100%;
@@ -291,6 +365,35 @@ export default defineComponent({
         display: flex;
         flex-direction: column;
         justify-content: space-evenly;
+        & .albumType {
+          & label {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: block;
+          }
+          & select {
+            height: 40px;
+            width: 100%;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            line-height: 50px;
+            padding: 0 10px;
+            margin-right: 10px;
+            background: var(--background-glass-color-primary);
+            color: var(--text-primary-color);
+            font-size: 16px;
+            font-weight: 400;
+            &::placeholder {
+              color: var(--text-primary-color);
+            }
+            & > * {
+              color: var(--text-primary-color);
+              background: var(--background-color-primary);
+            }
+          }
+        }
       }
     }
     &--song {
@@ -299,6 +402,18 @@ export default defineComponent({
       justify-content: space-between;
       height: 100px;
       margin: 20px auto;
+
+      &.mobile {
+        display: block;
+        height: auto;
+        & .uploadform__control--songFile {
+          height: 100px;
+          width: 100%;
+        }
+        & .uploadform__control--songName {
+          margin: 5px auto;
+        }
+      }
       &File {
         aspect-ratio: 4/3;
         height: 100%;

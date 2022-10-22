@@ -161,6 +161,20 @@ export default {
         this.audioIndex++;
       }
     },
+    deleteFromQueue(index: number) {
+      if (index === this.audioIndex) {
+        return;
+      }
+      if (this.isOnShuffle) {
+        this.shuffledList.splice(index, 1);
+      } else {
+        this.audioList.splice(index, 1);
+      }
+      if (index < this.audioIndex) {
+        this.audioIndex++;
+        console.log(true);
+      }
+    },
     // visualizer
     renderFrame() {
       if (this.frequencyData) {
@@ -257,21 +271,6 @@ export default {
     this.audio = this.$refs["audio"];
     this.audio.volume = this.volume / 100;
     this.playingAudio = this.audioList[this.audioIndex];
-    document.addEventListener("keyup", (e) => {
-      if (e.code === "Space") {
-        if (this.isPlaying) {
-          this.pauseSong();
-        } else {
-          this.playSong();
-        }
-      }
-      if (e.code === "ArrowRight") {
-        this.nextSong();
-      }
-      if (e.code === "ArrowLeft") {
-        this.prevSong();
-      }
-    });
   },
 };
 </script>
@@ -280,7 +279,9 @@ export default {
   <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
   <div class="main-body">
     <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
-    <main><RouterView /></main>
+    <main>
+      <RouterView />
+    </main>
     <HomeViewRightSideBar
       :isActive="isRightSideBarActive"
       :playlist="audioList"
@@ -290,6 +291,7 @@ export default {
       :shuffledPlaylist="shuffledList"
       @onDrop="onDrop"
       @setPlaySong="setPlaySong"
+      @deleteFromQueue="deleteFromQueue"
     />
   </div>
   <HomeViewPlayer

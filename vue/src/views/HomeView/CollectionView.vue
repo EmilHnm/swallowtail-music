@@ -8,15 +8,17 @@
       <div class="info__type">Public</div>
       <div class="info__title">Liked Song</div>
       <div class="info__other">
-        <div class="info__other--owner">Emil</div>
-        <div class="info__other--songCount">- 4 Songs -</div>
-        <div class="info__other--totalDuration">20:00</div>
+        <div class="info__other--owner">{{ user.username }}</div>
+        <div class="info__other--songCount">- {{ songCount }} Songs -</div>
+        <div class="info__other--totalDuration">{{ totalDuration }}</div>
       </div>
     </div>
   </div>
   <div class="control">
     <div class="control__left">
-      <div class="control__left--play"><IconPlay /></div>
+      <div class="control__left--play" v-if="likedList.length > 0">
+        <IconPlay />
+      </div>
       <div class="control__left--menu">
         <IconHorizontalThreeDot @click="toggleMenu" />
         <teleport to="body">
@@ -28,14 +30,12 @@
         </teleport>
         <div class="collection-menu" :class="{ active: isMenuOpen }">
           <BaseListItem>Add to Queue</BaseListItem>
-          <BaseListItem>Make Private</BaseListItem>
-          <BaseListItem>Make Public</BaseListItem>
         </div>
       </div>
     </div>
   </div>
   <div class="songList" ref="songList">
-    <div class="songList__header">
+    <div class="songList__header" v-if="likedList.length > 0">
       <div class="songList__header--left">
         <div class="songList__header--left--img"></div>
         <div class="songList__header--left--title">Title</div>
@@ -59,10 +59,13 @@
         ></div>
       </div>
     </div>
+    <div class="songList__empty" v-else>
+      <h3>Just like some songs to fill the list!</h3>
+    </div>
     <div class="songList__content">
       <BaseSongItem
-        v-for="(item, index) in testArr"
-        :key="item"
+        v-for="item in likedList"
+        :key="item.song_id"
         :title="'Future Parade'"
         :artist="'虹ヶ咲学園スクールアイドル同好会'"
         :album="'Future Parade'"
@@ -75,17 +78,17 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import IconPlay from "../../components/icons/IconPlay.vue";
-import IconSearch from "../../components/icons/IconSearch.vue";
 import IconHorizontalThreeDot from "../../components/icons/IconHorizontalThreeDot.vue";
 import BaseListItem from "../../components/UI/BaseListItem.vue";
 import BaseSongItem from "../../components/UI/BaseSongItem.vue";
 import IconHeartFilled from "../../components/icons/IconHeartFilled.vue";
+import type { song } from "@/model/songModel";
+import { mapActions, mapGetters } from "vuex";
 
 export default defineComponent({
   setup() {},
   components: {
     IconPlay,
-    IconSearch,
     IconHorizontalThreeDot,
     BaseListItem,
     BaseSongItem,
@@ -100,10 +103,13 @@ export default defineComponent({
       observer: null as ResizeObserver | null,
       small: false,
       medium: false,
-      testArr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      likedList: [] as song[],
+      songCount: 0,
+      totalDuration: "",
     };
   },
   methods: {
+    ...mapActions("playlist", ["getLikedSongList"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
     },
@@ -119,6 +125,23 @@ export default defineComponent({
       }
     });
     if (this.observer && songList) this.observer.observe(songList);
+  },
+  created() {
+    this.getLikedSongList(this.token)
+      .then((res) => res.json())
+      .then((res) => {
+        this.likedList = res.likedList;
+        this.songCount = res.songCount;
+        this.totalDuration = new Date(res.totalDuration * 1000)
+          .toISOString()
+          .substr(11, 8);
+      });
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+      user: "auth/userData",
+    }),
   },
   watch: {
     songListWidth(o) {
@@ -336,6 +359,14 @@ $tablet-width: 768px;
       &--control {
         width: 30px;
       }
+    }
+  }
+
+  &__empty {
+    h3 {
+      width: 100%;
+      text-align: center;
+      user-select: none;
     }
   }
 }

@@ -23,20 +23,35 @@
 import { defineComponent } from "vue";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
+import { mapActions, mapGetters } from "vuex";
 export default defineComponent({
   data() {
     return {
       isLoading: true,
     };
   },
+  methods: {
+    ...mapActions("playlist", ["createPlaylist"]),
+  },
   mounted() {
-    setTimeout(() => {
-      this.isLoading = false;
-      this.$router.push({ name: "playlistPage", params: { id: 1 } });
-    }, 3000);
+    this.createPlaylist(this.token)
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.status == "success") {
+          this.$router.push({
+            name: "playlistViewPage",
+            params: { id: res.playlist_id },
+          });
+        }
+      });
   },
   components: {
     Loading,
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
   },
 });
 </script>

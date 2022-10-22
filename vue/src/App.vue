@@ -1,5 +1,7 @@
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from "vue";
 import { RouterView } from "vue-router";
+export default {};
 </script>
 
 <template>

@@ -54,4 +54,8 @@ class AccountController extends Controller
         $user->save();
         return response(Response::HTTP_OK);
     }
+
+    public function updateProfilePicture(Request $requets)
+    {
+    }
 }
