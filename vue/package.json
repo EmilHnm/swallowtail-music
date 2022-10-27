@@ -11,6 +11,9 @@
     },
     "dependencies": {
         "vue": "^3.2.36",
+        "vue-cropper": "^0.5.8",
+        "vue-cropperjs": "^5.0.0",
+        "vue-image-crop-upload": "^3.0.3",
         "vue-loading-overlay": "5.0",
         "vue-router": "^4.1.5"
     },

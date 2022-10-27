@@ -35,6 +35,12 @@ class AlbumController extends Controller
         $album->album_id = $album_id;
         $album->release_year = $release_year;
         $album->type = $type;
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Album uploaded successfully!
+            All songs uploaded will be ready in some minutes and saved as private by default when finish.
+            Please go to Account/Upload Management/Song to update song infomation.'
+        ]);
         for ($i = 0; $i < $songCount; $i++) {
             $song = new Song();
             $song->song_id = 'song_' . date('YmdHi') . Str::random(10);
@@ -72,11 +78,5 @@ class AlbumController extends Controller
         }
 
         $album->save();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Album uploaded successfully!
-            All songs uploaded will be saved as private by default.
-            Please go to Account/Song Edit to update song infomation.'
-        ]);
     }
 }

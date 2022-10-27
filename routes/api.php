@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AlbumController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,7 @@ use App\Http\Controllers\SongController;
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/logoutAll', [AuthController::class, 'logoutAllDevice']);
         Route::get('/user', [AuthController::class, 'user']);
     });
 
@@ -38,6 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('song')->group(function () {
         Route::post('/upload', [SongController::class, 'uploadSong']);
+        Route::get('/uploaded', [SongController::class, 'uploadedSong']);
+        Route::get('/{id}', [SongController::class, 'getSongInfo']);
     });
 
     Route::prefix('album')->group(function () {
@@ -51,6 +55,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [PlaylistController::class, 'getPlaylist']);
         Route::get('/{id}/song', [PlaylistController::class, 'getPlaylistSong']);
         Route::delete('/{id}/delete', [PlaylistController::class, 'deletePlaylistSong']);
+    });
+
+    Route::prefix('account')->group(function () {
+        Route::post('/update', [AccountController::class, 'updateAccount']);
+        Route::post('/profile-image', [AccountController::class, 'updateProfilePicture']);
+        Route::post('/password', [AccountController::class, 'updatePassword']);
     });
 });
 Route::prefix('auth')->group(function () {

@@ -41,6 +41,15 @@ class AuthController extends Controller
             'message' => 'Logged out'
         ], Response::HTTP_OK);
     }
+    public function logoutAllDevice(Request $request)
+    {
+        $user = Auth::user();
+        $user->tokens()->delete();
+        return response([
+            'status' => 'success',
+            'message' => 'Logged out from all devices'
+        ], Response::HTTP_OK);
+    }
     public function register(Request $request)
     {
         $validateData = $request->validate([

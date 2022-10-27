@@ -3,8 +3,8 @@
     "include": ["vite.config.*", "vitest.config.*", "cypress.config.*"],
     "compilerOptions": {
         "composite": true,
-        "strict": true,
-        "noImplicitThis": true,
+
+        "lib": ["ES2022.Object"],
         "types": ["node"]
     }
 }

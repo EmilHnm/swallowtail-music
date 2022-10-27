@@ -19,20 +19,23 @@ class AccountController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function saveAccount(Request $request)
+    public function updateAccount(Request $request)
     {
-        $validateData = $request->validate([
-            'name' => 'required|string',
+        $credentials = $request->validate([
+            'username' => 'required|string',
+            'email' => 'required|string|email:strict|unique:users,email,' . Auth::user()->id,
             'gender' => 'required|string',
             'dob' => 'required|string',
             'region' => 'required|string',
+            'isUpadateDisabled' => 'required',
         ]);
         $authUser = Auth::user();
         $user = User::where('user_id', $authUser->user_id)->first();
-        $user->name = $validateData['name'];
-        $user->gender = $validateData['gender'];
-        $user->dob = $validateData['dob'];
-        $user->region = $validateData['region'];
+        $user->name = $credentials['username'];
+        $user->gender = $credentials['gender'];
+        if (!$credentials['isUpadateDisabled'])
+            $user->dob = $credentials['dob'];
+        $user->region = $credentials['region'];
         $user->save();
         return response(Response::HTTP_OK);
     }
@@ -40,22 +43,47 @@ class AccountController extends Controller
     public function updatePassword(Request $request)
     {
         $validateData = $request->validate([
-            'old_password' => 'required',
+            'current_password' => 'required',
             'password' => 'required|string|confirmed'
         ]);
         $authUser = Auth::user();
         $user = User::where('user_id', $authUser->user_id)->first();
-        if (!Hash::check($request->old_password, $user->password)) {
+        if (!Hash::check($request->current_password, $authUser->password)) {
             return response([
-                'error' => 'The old password is not correct'
+                'status' => 'error',
+                'message' => 'The old password is not correct'
             ], 422);
         }
         $user->password = bcrypt($request->password);
         $user->save();
-        return response(Response::HTTP_OK);
+        return response([
+            'status' => 'success',
+            'message' => 'Password was saved successfully'
+        ], Response::HTTP_OK);
     }
 
     public function updateProfilePicture(Request $requets)
     {
+        $validateData = $requets->validate([
+            'profile_image' => 'required|image'
+        ]);
+        if ($requets->file('profile_image')) {
+
+            $imageFile = $requets->file('profile_image');
+            $fileName = Auth::user()->user_id . '.jpg';
+            @unlink(public_path('storage/upload/profile_image/') . $fileName);
+            $imageFile->move(public_path('storage/upload/profile_image/'), $fileName);
+            $user = User::where('user_id', Auth::user()->user_id)->first();
+            $user->profile_photo_url = $fileName;
+            $user->save();
+            return response(json_encode([
+                'status' => 'success',
+                'message' => 'Profile image updated successfully'
+            ]), Response::HTTP_OK);
+        }
+        return response(json_encode([
+            'status' => 'error',
+            'message' => 'Profile image not updated'
+        ]), Response::HTTP_OK);
     }
 }

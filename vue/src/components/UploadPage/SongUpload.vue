@@ -42,12 +42,12 @@
         <span>Artist List </span>
         <BaseTag
           v-for="(artist, index) in artistArray"
-          @click="removeItemFormArr(index, artistArray)"
+          @click="functionModule.removeItemFormArr(index, artistArray)"
           >{{ artist.name }}</BaseTag
         >
         <BaseTag
           v-for="(artist, index) in newArtistArray"
-          @click="removeItemFormArr(index, newArtistArray)"
+          @click="functionModule.removeItemFormArr(index, newArtistArray)"
           >{{ artist }}</BaseTag
         >
       </div>
@@ -67,7 +67,7 @@
       >
         <div
           class="artistSearch--item"
-          v-for="artist in checkIncludeString(
+          v-for="artist in functionModule.checkIncludeString(
             artistName,
             templateArtistArray,
             artistArray
@@ -84,12 +84,12 @@
         <span>Genre List</span>
         <BaseTag
           v-for="(genre, index) in genreArray"
-          @click="removeItemFormArr(index, genreArray)"
+          @click="functionModule.removeItemFormArr(index, genreArray)"
           >{{ genre.name }}</BaseTag
         >
         <BaseTag
           v-for="(genre, index) in newGenreArray"
-          @click="removeItemFormArr(index, newGenreArray)"
+          @click="functionModule.removeItemFormArr(index, newGenreArray)"
           >{{ genre }}</BaseTag
         >
       </div>
@@ -109,7 +109,7 @@
       >
         <div
           class="genreSearch--item"
-          v-for="genre in checkIncludeString(
+          v-for="genre in functionModule.checkIncludeString(
             genreName,
             templateGenreArray,
             genreArray
@@ -151,6 +151,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
+import { functionModule } from "../../store/module/functionModule";
 import type { genre } from "@/model/genreModel";
 import type { artist } from "@/model/artistModel";
 import BaseInput from "../UI/BaseInput.vue";
@@ -181,6 +182,7 @@ export default defineComponent({
         show: false,
       },
       isLoading: true,
+      functionModule: functionModule,
     };
   },
   methods: {
@@ -188,21 +190,8 @@ export default defineComponent({
     previewFile(event: Event) {
       this.songFile = (<HTMLInputElement>event.target).files[0];
     },
-    checkIncludeString(
-      str: string,
-      arrayTemp: genre[] | artist[],
-      endpointArr: genre[] | artist[]
-    ) {
-      arrayTemp = arrayTemp.filter(
-        (item: genre | artist) => !endpointArr.includes(item)
-      );
-      return arrayTemp.filter((item: genre | artist) => {
-        if (item.name)
-          return item.name.toLowerCase().includes(str.toLowerCase());
-      });
-    },
     pushItemtoArray(item: genre | artist, array: genre[] | artist[]): void {
-      array.push(item);
+      functionModule.pushItemtoArray(item, array);
       this.artistName = "";
       this.genreName = "";
     },
@@ -211,39 +200,9 @@ export default defineComponent({
       array: string[],
       tempArr: genre[] | artist[]
     ): void {
-      if (
-        !tempArr
-          .map((i) => i.name.trim().toLowerCase())
-          .includes(item.trim().toLowerCase())
-      )
-        array.push(item);
+      functionModule.pushItemNotIncludedtoNewArray(item, array, tempArr);
       this.artistName = "";
       this.genreName = "";
-    },
-    removeItemFormArr(
-      index: number,
-      array: genre[] | artist[] | string[]
-    ): void {
-      array.splice(index, 1);
-    },
-    validateFileType(file: File): boolean {
-      const validTypes = [
-        "audio/mpeg",
-        "audio/mp3",
-        "audio/aac",
-        "audio/ogg",
-        "audio/flac",
-        "audio/x-flac",
-        "audio/alac",
-        "audio/wav",
-        "audio/aiff",
-        "audio/dsd",
-        "audio/pcm",
-      ];
-      if (validTypes.indexOf(file.type) === -1) {
-        return false;
-      }
-      return true;
     },
     closeDialog(): void {
       this.dialogWaring.show = false;
@@ -254,7 +213,7 @@ export default defineComponent({
         this.dialogWaring.show = true;
         return;
       }
-      if (this.validateFileType(this.songFile) === false) {
+      if (functionModule.validateSongFileType(this.songFile) === false) {
         this.dialogWaring.content = "Please upload a valid song file";
         this.dialogWaring.show = true;
         return;

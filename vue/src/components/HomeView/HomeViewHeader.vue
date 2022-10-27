@@ -48,8 +48,8 @@
           <img
             :src="
               userData.profile_photo_url
-                ? userData.profile_photo_url
-                : environment.default + '/default-avatar.jpg'
+                ? `${environment.profile_image}/${userData.profile_photo_url}`
+                : 'http://127.0.0.1:5173/src/assets/default/default-avatar.jpg'
             "
             alt=""
             srcset=""
@@ -59,7 +59,9 @@
           <div class="header__right--account--menu" v-if="isAccountMenuActive">
             <div class="header__right--account--menu-item">
               <base-list-item>
-                <a href="">Account</a>
+                <router-link :to="{ name: 'account' }" target="_blank"
+                  >Account</router-link
+                >
               </base-list-item>
             </div>
             <div class="header__right--account--menu-item">

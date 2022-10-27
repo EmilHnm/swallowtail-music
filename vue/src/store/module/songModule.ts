@@ -8,11 +8,12 @@ export const songModule = {
   getters: {},
   mutations: {},
   actions: {
-    getSong(context: any, songId: string) {
-      return fetch(`${environment.api}/song/${songId}`, {
+    getSong(context: any, payload: { token: string; song_id: string }) {
+      return fetch(`${environment.api}/song/${payload.song_id}`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${payload.token}`,
         },
       });
     },
@@ -37,6 +38,15 @@ export const songModule = {
     },
     getArtistList(context: any, userToken: string): Promise<Response> {
       return fetch(`${environment.api}/artist`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+    },
+    getUploadedSongs(context: any, userToken: string): Promise<Response> {
+      return fetch(`${environment.api}/song/uploaded`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

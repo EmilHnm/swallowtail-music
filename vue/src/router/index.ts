@@ -1,10 +1,12 @@
 import store from "@/store";
 import { createRouter, createWebHistory } from "vue-router";
 
+import AccountView from "../views/AccountView/AccountView.vue";
 import HomeView from "../views/HomeView/HomeView.vue";
 import AuthView from "../views/AuthView/AuthView.vue";
 import LogInView from "../views/AuthView/LogInView.vue";
 import SignUpView from "../views/AuthView/SignUpView.vue";
+import NotFoundView from "../views/NotFoundView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -75,7 +77,7 @@ const router = createRouter({
         {
           path: "artist/:id",
           name: "artistPage",
-          redirect: "artist/:id/overview",
+          //redirect: "artist/:id/overview",
           component: () =>
             import("../views/HomeView/ArtistDetailsView/ArtistDetailsView.vue"),
           children: [
@@ -122,25 +124,86 @@ const router = createRouter({
 
     {
       path: "/account",
-      redirect: "account/overview",
       name: "account",
+      component: AccountView,
+      redirect: "/account/overview",
       meta: {
         requiresAuth: true,
-        goToIndexIf: () => {
-          return store.getters["auth/userData"].user_id;
-        },
       },
+      children: [
+        {
+          path: "overview",
+          name: "accountOverview",
+          component: () =>
+            import("../views/AccountView/AccountOverviewView.vue"),
+        },
+        {
+          path: "profile",
+          name: "accountProfile",
+          component: () =>
+            import("../views/AccountView/AccountProfileView.vue"),
+        },
+        {
+          path: "security",
+          name: "accountSecurity",
+          component: () =>
+            import("../views/AccountView/AccountSecurityView.vue"),
+        },
+        {
+          path: "avatar",
+          name: "accountAvatar",
+          component: () => import("../views/AccountView/AccountAvatarView.vue"),
+        },
+        {
+          path: "upload",
+          name: "accountUpload",
+          redirect: "upload/song",
+          component: () =>
+            import(
+              "../views/AccountView/AccountUpload/AccountUploadManagementView.vue"
+            ),
+          children: [
+            {
+              path: "album",
+              name: "accountUploadAlbum",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountUpload/AccountUploadAlbum/AccountUploadAlbum.vue"
+                ),
+              children: [],
+            },
+            {
+              path: "song",
+              name: "accountUploadSong",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountUpload/AccountUploadSong/AccountUploadSong.vue"
+                ),
+            },
+            {
+              path: "song/edit",
+              name: "accountUploadSongEdit",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountUpload/AccountUploadSong/AccountUploadSongEdit.vue"
+                ),
+            },
+          ],
+        },
+      ],
     },
 
     {
       path: "/test",
       meta: {
         requiresAuth: true,
-        goToIndexIf: () => {
-          return store.getters["auth/userData"].user_id;
-        },
       },
       component: () => import("../views/test.vue"),
+    },
+    {
+      path: "/:notFound(.*)",
+      component: NotFoundView,
+      name: "notFound",
     },
   ],
 });
@@ -172,7 +235,6 @@ router.beforeEach((to, from, next) => {
 
             store.commit("auth/setUser", data);
             if (to.meta.requiresAuth) {
-              console.log(true);
               next();
             } else {
               next({ name: "home" });

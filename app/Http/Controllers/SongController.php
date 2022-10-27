@@ -10,6 +10,7 @@ use App\Models\SongArtist;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use FFMpeg\Format\Audio\Vorbis;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use ProtoneMedia\LaravelFFMpeg\FFMpeg\FFProbe;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
@@ -72,6 +73,10 @@ class SongController extends Controller
 
         if ($request->file('songFile')) {
             try {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Song uploaded successfully. It will ready in some minutes.'
+                ]);
                 // dd($request->file('songFile'));
                 $file = $request->file('songFile');
                 $filename = date('YmdHi') . $file->getClientOriginalName();
@@ -88,15 +93,41 @@ class SongController extends Controller
                 $song->duration = $duration;
                 $song->save();
                 FFMpeg::cleanupTemporaryFiles();
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Song uploaded successfully'
-                ]);
             } catch (EncodingException $exception) {
                 $command = $exception->getCommand();
                 $errorLog = $exception->getErrorOutput();
                 dd($command, $errorLog);
             }
         }
+    }
+
+    public function uploadedSong()
+    {
+        $songsData = DB::select(
+            'SELECT songs.*,  artists.name AS artist_name,artists.artist_id AS artist_id
+                        FROM songs
+                        JOIN song_artists ON songs.song_id = song_artists.song_id
+                        JOIN artists ON song_artists.artist_id =artists.artist_id
+                        WHERE songs.user_id= ?',
+            [Auth::user()->user_id]
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'songs' => $songsData
+        ]);
+    }
+
+    public function getSongInfo($id)
+    {
+        $song = Song::where('song_id', $id)->first();
+        $genre = $song->genre()->where('song_id', $id)->get();
+        $artist = $song->artist()->where('song_id', $id)->get();
+        return response()->json([
+            'status' => 'success',
+            'song' => $song,
+            'genre' => $genre,
+            'artist' => $artist
+        ]);
     }
 }
