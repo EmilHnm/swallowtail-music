@@ -40,12 +40,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('song')->group(function () {
         Route::post('/upload', [SongController::class, 'uploadSong']);
+        Route::post('/update', [SongController::class, 'updateSong']);
         Route::get('/uploaded', [SongController::class, 'uploadedSong']);
         Route::get('/{id}', [SongController::class, 'getSongInfo']);
+        Route::delete('/{id}/delete', [SongController::class, 'deleteSong']);
     });
 
     Route::prefix('album')->group(function () {
         Route::post('/upload', [AlbumController::class, 'uploadAlbum']);
+        Route::get('/uploaded', [AlbumController::class, 'getUploadedAlbum']);
+        Route::post('/update', [AlbumController::class, 'updateAlbum']);
+        Route::get('/addable', [AlbumController::class, 'getSongNotInAlbum']);
+        Route::post('/song-remove', [AlbumController::class, 'removeAlbumSong']);
+        Route::post('/song-add', [AlbumController::class, 'addAlbumSong']);
+        Route::get('/{id}', [AlbumController::class, 'getAlbumInfo']);
+        Route::get('/{id}/song', [AlbumController::class, 'getAlbumSongs']);
+        Route::delete('/{id}/delete', [AlbumController::class, 'deleteAlbum']);
     });
 
     Route::prefix('playlist')->group(function () {

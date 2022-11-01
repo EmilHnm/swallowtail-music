@@ -10,6 +10,16 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseFlatDialog>
+    <BaseFlatDialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseCircleLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseFlatDialog>
   </teleport>
   <div class="container">
     <h2>Security</h2>
@@ -52,9 +62,10 @@
 </template>
 
 <script lang="ts">
-import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
+import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
 export default defineComponent({
   data() {
@@ -65,6 +76,7 @@ export default defineComponent({
         content: "Please fill in all the fields",
         show: false,
       },
+      isLoading: false,
       current_password: "",
       password: "",
       password_confirmation: "",
@@ -76,6 +88,7 @@ export default defineComponent({
       this.dialogWaring.show = false;
     },
     onSubmit() {
+      this.isLoading = true;
       this.updatePassword({
         password: {
           current_password: this.current_password,
@@ -90,6 +103,7 @@ export default defineComponent({
             this.current_password = "";
             this.password = "";
             this.password_confirmation = "";
+            this.isLoading = false;
             this.dialogWaring = {
               title: "Success",
               mode: "success",
@@ -107,10 +121,12 @@ export default defineComponent({
         });
     },
     logOut() {
+      this.isLoading = true;
       this.logOutAll(this.token)
         .then((res) => res.json())
         .then((data) => {
           if (data.status === "success") {
+            this.isLoading = false;
             this.dialogWaring = {
               title: "Success",
               mode: "success",
@@ -142,7 +158,7 @@ export default defineComponent({
       token: "auth/userToken",
     }),
   },
-  components: { BaseFlatDialog },
+  components: { BaseFlatDialog, BaseCircleLoad },
 });
 </script>
 

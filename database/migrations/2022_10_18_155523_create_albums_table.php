@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('albums', function (Blueprint $table) {
             $table->id();
             $table->string('album_id');
+            $table->string('user_id');
             $table->string('name');
             $table->integer('release_year');
             $table->string('image_path');

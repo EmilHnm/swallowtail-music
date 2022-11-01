@@ -1,17 +1,50 @@
 <template>
+  <teleport to="body">
+    <BaseFlatDialog
+      :open="dialogWaring.show"
+      :title="dialogWaring.title"
+      :mode="dialogWaring.mode"
+      @close="closeDialog"
+    >
+      <template #default>
+        <p>{{ dialogWaring.content }}</p>
+      </template>
+    </BaseFlatDialog>
+    <BaseFlatDialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseCircleLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseFlatDialog>
+  </teleport>
   <div class="main" ref="main">
     <h3>Song Uploaded Management</h3>
     <div class="data" v-if="Object.keys(uploadedSongList).length">
       <div class="filter">
-        <label for=""><IconSearch /></label>
-        <input type="text" name="" id="" v-model="filterText" />
+        <label for="filterText"><IconSearch /></label>
+        <input
+          type="text"
+          name="filterText"
+          id="filterText"
+          v-model="filterText"
+        />
       </div>
       <table v-if="!filterText">
         <thead>
           <tr>
             <td class="index">#</td>
             <td class="title" @click="sortList('title')">Title</td>
-            <td class="artist" @click="sortList('artist')">Artist</td>
+            <td
+              class="artist"
+              @click="sortList('artist')"
+              v-if="mainWidth > 600"
+            >
+              Artist
+            </td>
             <td class="uploadDate" @click="sortList('uploadDate')">Upload</td>
             <td class="control">Control</td>
           </tr>
@@ -20,7 +53,7 @@
           <tr v-for="(song, index, i) in uploadedSongList" :key="index">
             <td>{{ i + 1 }}</td>
             <td>{{ song[0].title }}</td>
-            <td>
+            <td v-if="song[0].artist_name && mainWidth > 600">
               <router-link
                 v-for="artist in song"
                 :key="artist.artist_id"
@@ -32,12 +65,15 @@
                 {{ artist.artist_name }}
               </router-link>
             </td>
+            <td v-if="!song[0].artist_name && mainWidth > 600">Unset</td>
             <td>{{ new Date(song[0].created_at).toLocaleDateString() }}</td>
             <td>
               <button class="edit" @click="navigateToEdit(song[0].song_id)">
                 Edit
               </button>
-              <button class="delete">Delete</button>
+              <button class="delete" @click="deleteItem(song[0].song_id)">
+                Delete
+              </button>
             </td>
           </tr>
         </tbody>
@@ -47,7 +83,13 @@
           <tr>
             <td class="index">#</td>
             <td class="title" @click="sortList('title')">Title</td>
-            <td class="artist" @click="sortList('artist')">Artist</td>
+            <td
+              class="artist"
+              @click="sortList('artist')"
+              v-if="mainWidth > 600"
+            >
+              Artist
+            </td>
             <td class="uploadDate" @click="sortList('uploadDate')">Upload</td>
             <td class="control">Control</td>
           </tr>
@@ -56,7 +98,7 @@
           <tr v-for="(song, index, i) in filteredUploadedSongList" :key="index">
             <td>{{ i + 1 }}</td>
             <td>{{ song[0].title }}</td>
-            <td>
+            <td v-if="song[0].artist_name && mainWidth > 600">
               <router-link
                 v-for="artist in song"
                 :key="artist.artist_id"
@@ -68,12 +110,15 @@
                 {{ artist.artist_name }}
               </router-link>
             </td>
+            <td v-if="!song[0].artist_name && mainWidth > 600">Unset</td>
             <td>{{ new Date(song[0].created_at).toLocaleDateString() }}</td>
             <td>
               <button class="edit" @click="navigateToEdit(song[0].song_id)">
                 Edit
               </button>
-              <button class="delete">Delete</button>
+              <button class="delete" @click="deleteItem(song[0].song_id)">
+                Delete
+              </button>
             </td>
           </tr>
         </tbody>
@@ -87,8 +132,10 @@
 
 <script lang="ts">
 import IconSearch from "@/components/icons/IconSearch.vue";
+import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
 type songData = {
   [song_id: string]: {
@@ -108,15 +155,22 @@ export default defineComponent({
       observer: null as ResizeObserver | null,
       mainWidth: 0,
       filterText: "",
+      isLoading: false,
       sortMode: {
         title: "asc",
         artist: "asc",
         uploadDate: "asc",
       },
+      dialogWaring: {
+        title: "Warning",
+        mode: "warning",
+        content: "Please fill in all the fields",
+        show: false,
+      },
     };
   },
   methods: {
-    ...mapActions("song", ["getUploadedSongs"]),
+    ...mapActions("song", ["getUploadedSongs", "deleteSong"]),
     sortList(colname: string) {
       if (colname === "title") {
         if (this.sortMode.title == "asc") {
@@ -185,6 +239,37 @@ export default defineComponent({
         query: { id },
       });
     },
+    deleteItem(id: string) {
+      this.isLoading = true;
+      this.deleteSong({ userToken: this.token, songId: id })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.getUploadedSongs(this.token)
+              .then((res) => res.json())
+              .then((res) => {
+                this.uploadedSongList = res.songs.reduce((r: any, a: any) => {
+                  r[a.song_id] = r[a.song_id] || [];
+                  r[a.song_id].push(a);
+                  return r;
+                }, Object.create(null));
+              });
+            this.dialogWaring.mode = "announcement";
+            this.dialogWaring.content = res.message;
+            this.dialogWaring.title = "Success";
+            this.dialogWaring.show = true;
+          } else {
+            this.dialogWaring.mode = "warning";
+            this.dialogWaring.content = res.message;
+            this.dialogWaring.title = "Warning";
+            this.dialogWaring.show = true;
+          }
+          this.isLoading = false;
+        });
+    },
+    closeDialog() {
+      this.dialogWaring.show = false;
+    },
   },
   computed: {
     ...mapGetters({
@@ -198,19 +283,21 @@ export default defineComponent({
         return;
       }
       this.filteredUploadedSongList = Object.fromEntries(
-        Object.entries(this.uploadedSongList).filter(
-          (song: songData) =>
+        Object.entries(this.uploadedSongList).filter((song: songData) => {
+          return (
             song[1][0].title
               .toLowerCase()
               .includes(this.filterText.toLowerCase()) ||
             song[1][0].artist_name
-              .toLowerCase()
+              ?.toLowerCase()
               .includes(this.filterText.toLowerCase())
-        )
+          );
+        })
       );
     },
   },
   mounted() {
+    this.isLoading = true;
     this.getUploadedSongs(this.token)
       .then((res) => res.json())
       .then((res) => {
@@ -219,19 +306,20 @@ export default defineComponent({
           r[a.song_id].push(a);
           return r;
         }, Object.create(null));
+        this.isLoading = false;
       });
-    const songItem = this.$refs.songItem as HTMLElement;
+    const main = this.$refs.main as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         this.mainWidth = entry.contentRect.width;
       }
     });
-    if (this.observer && songItem) this.observer.observe(songItem);
+    if (this.observer && main) this.observer.observe(main);
   },
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();
   },
-  components: { IconSearch },
+  components: { IconSearch, BaseFlatDialog, BaseCircleLoad },
 });
 </script>
 
@@ -240,6 +328,9 @@ export default defineComponent({
   width: 100%;
   display: flex;
   flex-direction: column;
+  h3 {
+    text-align: center;
+  }
   .data {
     & .filter {
       display: flex;
@@ -297,6 +388,7 @@ export default defineComponent({
             font-size: 1rem;
             background: var(--background-glass-color-secondary);
             text-align: center;
+            border-bottom: 1px solid var(--background-glass-color-primary);
             a {
               color: var(--color-primary);
               text-decoration: none;
@@ -308,7 +400,7 @@ export default defineComponent({
               font-size: 1rem;
               cursor: pointer;
               transition: all 0.3s ease-in-out;
-              margin: 5px 0;
+              margin: 5px 2px;
               &.edit {
                 border: 1px solid var(--color-primary);
                 color: var(--color-primary);

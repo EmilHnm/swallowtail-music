@@ -10,6 +10,16 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseFlatDialog>
+    <BaseFlatDialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseCircleLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseFlatDialog>
   </teleport>
   <div class="container">
     <h2>Edit Profile</h2>
@@ -107,7 +117,7 @@
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseFlatDialog from "../../components/UI/BaseFlatDialog.vue";
-
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 export default defineComponent({
   setup() {
     return {};
@@ -341,6 +351,7 @@ export default defineComponent({
         content: "Please fill in all the fields",
         show: false,
       },
+      isLoading: false,
       isUpadateDisabled: false,
       email: "",
       username: "",
@@ -363,6 +374,7 @@ export default defineComponent({
         this.dialogWaring.show = true;
         return;
       }
+      this.isLoading = true;
       this.updateAccount({
         account: {
           email: this.email,
@@ -376,6 +388,7 @@ export default defineComponent({
       })
         .then((res) => res.json())
         .then((res) => {
+          this.isLoading = false;
           if (res.message) {
             this.dialogWaring.content = res.message;
             this.dialogWaring.show = true;
@@ -404,6 +417,7 @@ export default defineComponent({
     }),
   },
   created() {
+    this.isLoading = true;
     this.checkAuth()
       .then((res) => res.json())
       .then((res) => {
@@ -418,9 +432,10 @@ export default defineComponent({
         this.username = res.name;
         this.gender = res.gender == "" ? "" : res.gender;
         this.region = res.region == "" ? "" : res.region;
+        this.isLoading = false;
       });
   },
-  components: { BaseFlatDialog },
+  components: { BaseFlatDialog, BaseCircleLoad },
 });
 </script>
 

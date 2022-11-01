@@ -17,8 +17,24 @@ export const songModule = {
         },
       });
     },
-    uploadSong(context: any, data: any): Promise<Response> {
+    uploadSong(
+      context: any,
+      data: { token: string; songForm: FormData }
+    ): Promise<Response> {
       return fetch(`${environment.api}/song/upload`, {
+        method: "POST",
+        headers: {
+          Accept: "multipart/form-data",
+          Authorization: `Bearer ${data.token}`,
+        },
+        body: data.songForm,
+      });
+    },
+    updateSong(
+      context: any,
+      data: { token: string; songForm: FormData }
+    ): Promise<Response> {
+      return fetch(`${environment.api}/song/update`, {
         method: "POST",
         headers: {
           Accept: "multipart/form-data",
@@ -51,6 +67,15 @@ export const songModule = {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
+        },
+      });
+    },
+    deleteSong(context: any, payload: { userToken: string; songId: string }) {
+      return fetch(`${environment.api}/song/${payload.songId}/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
         },
       });
     },

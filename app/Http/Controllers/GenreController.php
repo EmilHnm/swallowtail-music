@@ -11,13 +11,13 @@ class GenreController extends Controller
     //
     public function getAll()
     {
-        $listArtist = Genre::all();
-        return response()->json($listArtist, Response::HTTP_OK);
+        $genres = Genre::all();
+        return response()->json($genres, Response::HTTP_OK);
     }
 
     public function show($id)
     {
-        $artist = Genre::where('genre_id', $id)->first();
-        return response()->json($artist, Response::HTTP_OK);
+        $genre = Genre::where('genre_id', $id)->first();
+        return response()->json($genre, Response::HTTP_OK);
     }
 }

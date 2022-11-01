@@ -170,7 +170,14 @@ const router = createRouter({
                 import(
                   "../views/AccountView/AccountUpload/AccountUploadAlbum/AccountUploadAlbum.vue"
                 ),
-              children: [],
+            },
+            {
+              path: "album/edit",
+              name: "accountUploadAlbumEdit",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountUpload/AccountUploadAlbum/AccountUploadAlbumEdit.vue"
+                ),
             },
             {
               path: "song",

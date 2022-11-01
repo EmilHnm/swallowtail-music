@@ -10,6 +10,23 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseDialog>
+    <BaseDialog
+      :open="dialogProgress.progress > 0"
+      :title="dialogProgress.title"
+      :mode="dialogProgress.mode"
+    >
+      <template #default>
+        <div class="progress">
+          <div
+            class="progress-bar"
+            :style="{ width: dialogProgress.progress + '%' }"
+          ></div>
+        </div>
+      </template>
+      <template #action>
+        <div></div>
+      </template>
+    </BaseDialog>
   </teleport>
   <form class="uploadform" @submit.prevent="onFormSubmit">
     <div class="uploadform__control" ref="wrapper">
@@ -113,10 +130,11 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
+import { mapGetters } from "vuex";
+import { environment } from "@/environment/environment";
 import BaseInput from "../UI/BaseInput.vue";
 import BaseButton from "../UI/BaseButton.vue";
 import BaseDialog from "../UI/BaseDialog.vue";
-import { mapActions, mapGetters } from "vuex";
 
 export default defineComponent({
   data() {
@@ -126,6 +144,7 @@ export default defineComponent({
       albumTitle: "",
       albumReleaseYear: "",
       albumType: "",
+      observableData: null as any,
       songForm: reactive([
         {
           songName: "",
@@ -137,6 +156,12 @@ export default defineComponent({
         mode: "warning",
         content: "Please fill in all the fields",
         show: false,
+      },
+      dialogProgress: {
+        title: "Uploading! Do not close this tab",
+        mode: "anouncement",
+        progress: 0,
+        show: true,
       },
       observer: null as ResizeObserver | null,
       mobile: false,
@@ -156,7 +181,6 @@ export default defineComponent({
     if (wrapper) this.observer.observe(wrapper);
   },
   methods: {
-    ...mapActions("album", ["uploadAlbum"]),
     albumImageChange(e: any) {
       if (e.target.files.length > 0) {
         if (!this.validateImageFileType(e.target.files[0])) {
@@ -192,7 +216,7 @@ export default defineComponent({
       this.songForm.splice(id, 1);
     },
 
-    onFormSubmit() {
+    async onFormSubmit() {
       if (!this.albumImage) {
         this.dialogWaring.content = "Please upload album image";
         this.dialogWaring.show = true;
@@ -234,28 +258,37 @@ export default defineComponent({
         i++;
       });
       albumForm.append("songCount", this.songForm.length.toString());
-      this.dialogWaring.content =
-        "Uploading Album! Please do not close tab when uploading";
-      this.dialogWaring.show = true;
-      this.uploadAlbum({ albumForm: albumForm, token: this.userToken })
-        .then((res) => res.json())
-        .then((res) => {
-          this.dialogWaring.content = res.message;
-          this.dialogWaring.mode = res.announcement;
-          this.dialogWaring.title = res.status;
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${environment.api}/album/upload`, true);
+      xhr.setRequestHeader("Authorization", `Bearer ${this.userToken}`);
+      xhr.setRequestHeader("Accept", "multipart/form-data");
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = (e.loaded / e.total) * 100;
+          this.dialogProgress.progress = percentComplete;
+        }
+      };
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const response = xhr.response.json();
+          if (response.status == "success") {
+            this.dialogWaring.content = response.message;
+            this.dialogWaring.show = true;
+            this.dialogWaring.mode = "anouncement";
+          } else {
+            this.dialogWaring.content = response.message;
+            this.dialogWaring.show = true;
+            this.dialogWaring.mode = "warning";
+          }
+          this.dialogProgress.progress = 0;
+        } else {
+          this.dialogWaring.content = "Something went wrong";
           this.dialogWaring.show = true;
-          this.albumImage = null;
-          this.albumImageTempPath = "";
-          this.albumTitle = "";
-          this.albumReleaseYear = "";
-          this.albumType = "";
-          this.songForm = [
-            {
-              songName: "",
-              songFile: null as File | null,
-            },
-          ];
-        });
+          this.dialogWaring.mode = "warning";
+        }
+      };
+      xhr.send(albumForm);
     },
     closeDialog() {
       this.dialogWaring.show = false;
@@ -296,6 +329,11 @@ export default defineComponent({
     ...mapGetters({
       userToken: "auth/userToken",
     }),
+  },
+  watch: {
+    data() {
+      console.log(this.data);
+    },
   },
   components: { BaseInput, BaseButton, BaseDialog },
 });
@@ -454,6 +492,21 @@ export default defineComponent({
         }
       }
     }
+  }
+}
+.progress {
+  width: 100%;
+  height: 10px;
+  background: var(--background-color-primary);
+  border-radius: 10px;
+  position: relative;
+  & > div {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 }
 </style>

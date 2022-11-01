@@ -1,7 +1,6 @@
 export const functionModule = {
   // validate
   validateSongFileType(file: File): boolean {
-    console.log(file);
     const validTypes = [
       "audio/mpeg",
       "audio/mp3",
@@ -20,9 +19,35 @@ export const functionModule = {
     }
     return true;
   },
+  validateImageFileType(file: File): boolean {
+    const validTypes = [
+      "image/jpg",
+      "image/jpeg",
+      "image/bmp",
+      "image/gif",
+      "image/png",
+    ];
+    if (validTypes.indexOf(file.type) === -1) {
+      return false;
+    }
+    return true;
+  },
   //filter
+  objectsAreSame(x: any, y: any) {
+    let objectsAreSame = true;
+    for (const propertyName in x) {
+      if (x[propertyName] !== y[propertyName]) {
+        objectsAreSame = false;
+        break;
+      }
+    }
+    return objectsAreSame;
+  },
   checkIncludeString(str: string, arrayTemp: any[], endpointArr: any[]): any[] {
-    arrayTemp = arrayTemp.filter((item) => !endpointArr.includes(item));
+    arrayTemp = arrayTemp.filter((item) => {
+      return !endpointArr.some((i) => i.id === item.id);
+      //return !endpointArr.includes(item);
+    });
     return arrayTemp.filter((item) => {
       if (item.name) return item.name.toLowerCase().includes(str.toLowerCase());
     });

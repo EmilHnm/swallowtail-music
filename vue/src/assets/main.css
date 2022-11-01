@@ -22,6 +22,7 @@ ul {
 }
 img {
   pointer-events: none;
+  user-select: none;
 }
 /* Chrome, Edge, and Safari */
 *::-webkit-scrollbar {

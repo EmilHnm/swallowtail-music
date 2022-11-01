@@ -1,4 +1,16 @@
 <template>
+  <teleport to="body">
+    <BaseFlatDialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseCircleLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseFlatDialog>
+  </teleport>
   <div class="container">
     <h2>Account Overview</h2>
     <div class="accounts">
@@ -44,17 +56,20 @@
 <script lang="ts">
 import type { user } from "@/model/userModel";
 import { mapActions } from "vuex";
-
+import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 export default {
   data() {
     return {
       user: null as user | null,
+      isLoading: false,
     };
   },
   methods: {
     ...mapActions("auth", ["checkAuth"]),
   },
   created() {
+    this.isLoading = true;
     this.checkAuth()
       .then((res) => res.json())
       .then((res) => {
@@ -63,8 +78,10 @@ export default {
           this.user.created_at = new Date(res.created_at).toLocaleDateString(
             "en-US"
           );
+        this.isLoading = false;
       });
   },
+  components: { BaseFlatDialog, BaseCircleLoad },
 };
 </script>
 

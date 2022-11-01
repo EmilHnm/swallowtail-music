@@ -111,6 +111,7 @@ nav {
       border-bottom: 1px solid rgba(0, 0, 0, 0.2);
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       width: 100%;
+      cursor: pointer;
       a {
         display: flex;
         align-items: center;
@@ -131,12 +132,12 @@ nav {
       }
       &:hover {
         border-left: 6px solid var(--color-primary);
+      }
+      &:has(.router-link-active) {
+        border-left: 6px solid var(--color-primary);
         span {
           color: var(--text-primary-color);
         }
-      }
-      &.active {
-        border-left: 6px solid var(--color-primary);
       }
     }
   }

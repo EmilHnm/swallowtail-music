@@ -10,6 +10,8 @@ class Genre extends Model
     use HasFactory;
 
     protected $primaryKey = 'genre_id';
+    public $incrementing = false;
+    public $timestamps = true;
 
     public function song()
     {

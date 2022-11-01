@@ -9,6 +9,8 @@ class Artist extends Model
 {
     use HasFactory;
     protected $primaryKey = 'artist_id';
+    public $incrementing = false;
+    public $timestamps = true;
     public function song()
     {
         return $this->belongsToMany(

@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Song;
 use App\Models\Genre;
 use App\Models\Artist;
+use App\Models\LikedSong;
 use App\Models\SongGenre;
 use App\Models\SongArtist;
 use Illuminate\Support\Str;
+use App\Models\PlaylistSong;
 use Illuminate\Http\Request;
-use FFMpeg\Format\Audio\Vorbis;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use ProtoneMedia\LaravelFFMpeg\FFMpeg\FFProbe;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
 
@@ -101,14 +101,56 @@ class SongController extends Controller
         }
     }
 
+    public function updateSong(Request $request)
+    {
+        $artist = json_decode($request->artist);
+        $newArtist = json_decode($request->newArtist);
+        $genre = json_decode($request->genre);
+        $newGenre = json_decode($request->newGenre);
+        $song = Song::find($request->song_id);
+        if ($song->user_id !== Auth::user()->user_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not allowed to update this song.'
+            ]);
+        }
+        $song->title = $request->songName;
+        $song->display = $request->displayMode;
+        $song->save();
+        $song->artist()->detach();
+        $song->genre()->detach();
+        $song->artist()->attach($artist);
+        $song->genre()->attach($genre);
+        foreach ($newArtist as $name) {
+            $saveNewArtist = new Artist();
+            $saveNewArtist->artist_id = 'artist_' . Str::random(10);
+            $saveNewArtist->name = $name;
+            $saveNewArtist->image_path = "";
+            $saveNewArtist->save();
+            $song->artist()->attach([$saveNewArtist->artist_id]);
+        }
+        foreach ($newGenre as $name) {
+            $savenewGenre = new Genre();
+            $savenewGenre->genre_id = 'genre_' . Str::random(10);
+            $savenewGenre->name = $name;
+            $savenewGenre->save();
+            $song->genre()->attach([$genre->genre_id]);
+        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Song Updated Successfully'
+        ]);
+    }
+
+
     public function uploadedSong()
     {
         $songsData = DB::select(
             'SELECT songs.*,  artists.name AS artist_name,artists.artist_id AS artist_id
                         FROM songs
-                        JOIN song_artists ON songs.song_id = song_artists.song_id
-                        JOIN artists ON song_artists.artist_id =artists.artist_id
-                        WHERE songs.user_id= ?',
+                        LEFT JOIN song_artists ON songs.song_id = song_artists.song_id
+                        LEFT JOIN artists ON song_artists.artist_id =artists.artist_id
+                        WHERE songs.user_id = ?',
             [Auth::user()->user_id]
         );
 
@@ -121,6 +163,12 @@ class SongController extends Controller
     public function getSongInfo($id)
     {
         $song = Song::where('song_id', $id)->first();
+        if (!$song->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Song not found'
+            ]);
+        }
         $genre = $song->genre()->where('song_id', $id)->get();
         $artist = $song->artist()->where('song_id', $id)->get();
         return response()->json([
@@ -128,6 +176,34 @@ class SongController extends Controller
             'song' => $song,
             'genre' => $genre,
             'artist' => $artist
+        ]);
+    }
+
+
+
+    public function deleteSong($id)
+    {
+        $song = Song::where('song_id', $id)->first();
+        if (!$song->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Song not found'
+            ]);
+        }
+        if ($song->user_id != Auth::user()->user_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not allowed to delete this song!'
+            ]);
+        }
+        SongArtist::where('song_id', $id)->delete();
+        SongGenre::where('song_id', $id)->delete();
+        PlaylistSong::where('song_id', $id)->delete();
+        LikedSong::where('song_id', $id)->delete();
+        $song->delete();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Song deleted successfully'
         ]);
     }
 }

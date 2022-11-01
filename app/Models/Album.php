@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Album extends Model
 {
     use HasFactory;
+    protected $primaryKey = 'album_id';
+    public $incrementing = false;
+    public $timestamps = true;
 }

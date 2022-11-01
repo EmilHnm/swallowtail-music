@@ -1,4 +1,5 @@
 export interface artist {
+  id: number;
   artist_id?: string;
   name?: string;
   image_path?: string;

@@ -1,4 +1,16 @@
 <template>
+  <teleport to="body">
+    <BaseFlatDialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseCircleLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseFlatDialog>
+  </teleport>
   <header class="header">
     <div
       class="header__menuToggle"
@@ -39,8 +51,8 @@
           <IconUpArrow v-else />
         </div>
         <ul class="header__account--menu" v-if="menuActive">
-          <li>Account</li>
-          <li>Log Out</li>
+          <li @click="navigateToOverview">Account</li>
+          <li @click="logout">Log Out</li>
         </ul>
       </div>
     </div>
@@ -50,12 +62,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import IconLogo from "../icons/IconLogo.vue";
 import IconDownArrow from "../icons/IconDownArrow.vue";
 import IconUpArrow from "../icons/IconUpArrow.vue";
 import DarkModeButton from "../UI/DarkModeButton.vue";
 import IconMenu from "../icons/IconMenu.vue";
-import { mapGetters } from "vuex";
+import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
 export default defineComponent({
   props: ["isSideBarActive"],
@@ -63,9 +77,12 @@ export default defineComponent({
     return {
       menuActive: false,
       environment: environment,
+      isLoading: false,
     };
   },
   methods: {
+    ...mapActions("auth", ["logOut"]),
+    ...mapMutations("auth", ["clearUser"]),
     toggleMenu() {
       this.menuActive = !this.menuActive;
     },
@@ -75,6 +92,19 @@ export default defineComponent({
       } else {
         this.$emit("toggleLeftSideBar", true);
       }
+    },
+    navigateToOverview() {
+      this.$router.push({ name: "accountOverview" });
+    },
+    logout() {
+      this.isLoading = true;
+      this.logOut().then((res) => {
+        if (res.status < 300) {
+          this.isLoading = false;
+          this.clearUser();
+          this.$router.push({ name: "login" });
+        }
+      });
     },
   },
   computed: {
@@ -88,6 +118,8 @@ export default defineComponent({
     IconUpArrow,
     DarkModeButton,
     IconMenu,
+    BaseFlatDialog,
+    BaseCircleLoad,
   },
 });
 </script>

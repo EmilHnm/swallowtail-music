@@ -1,18 +1,100 @@
 <template>
+  <teleport to="body">
+    <BaseFlatDialog
+      :open="dialogWaring.show"
+      :title="dialogWaring.title"
+      :mode="dialogWaring.mode"
+      @close="closeDialog"
+    >
+      <template #default>
+        <p>{{ dialogWaring.content }}</p>
+      </template>
+    </BaseFlatDialog>
+  </teleport>
   <div class="main">
     <h3>Song Edit</h3>
-    <form @submit.prevent="onSubmit">
+    <form class="form" @submit.prevent="onSubmit">
       <div class="form__row">
         <label for="">Song Name</label>
-        <input type="text" />
+        <input type="text" placeholder="Song Name" v-model="songName" />
       </div>
       <div class="form__row">
+        <div class="tagList">
+          <BaseTag
+            v-for="(artist, index) in artistArray"
+            @click="functionModule.removeItemFormArr(index, artistArray)"
+            :key="artist.artist_id"
+            >{{ artist.name }}</BaseTag
+          >
+          <BaseTag
+            v-for="(artist, index) in newArtistArray"
+            @click="functionModule.removeItemFormArr(index, newArtistArray)"
+            :key="index"
+            >{{ artist }}</BaseTag
+          >
+        </div>
         <label for="">Artist Name</label>
-        <input type="text" />
+        <input
+          type="text"
+          placeholder="Artist Name"
+          v-model="artistName"
+          @keydown.enter.prevent="
+            pushItemtoNewArray(artistName, newArtistArray, templateArtistArray)
+          "
+        />
+        <div class="form__row--searchBox" v-if="artistName">
+          <div
+            class="form__row--searchBox--item"
+            v-for="artist in functionModule.checkIncludeString(
+              artistName,
+              templateArtistArray,
+              artistArray
+            )"
+            :key="artist"
+            @click="pushItemtoArray(artist, artistArray)"
+          >
+            {{ artist.name }}
+          </div>
+        </div>
       </div>
       <div class="form__row">
+        <div class="tagList">
+          <BaseTag
+            v-for="(genre, index) in genreArray"
+            :key="genre.genre_id"
+            @click="functionModule.removeItemFormArr(index, genreArray)"
+            >{{ genre.name }}</BaseTag
+          >
+          <BaseTag
+            v-for="(genre, index) in newGenreArray"
+            @click="functionModule.removeItemFormArr(index, newGenreArray)"
+            :key="genre"
+            >{{ genre }}</BaseTag
+          >
+        </div>
         <label for="">Genre</label>
-        <input type="text" />
+        <input
+          type="text"
+          placeholder="Genre"
+          v-model="genreName"
+          @keydown.enter.prevent="
+            pushItemtoNewArray(genreName, newGenreArray, templateGenreArray)
+          "
+        />
+        <div class="form__row--searchBox" v-if="genreName">
+          <div
+            class="form__row--searchBox--item"
+            v-for="genre in functionModule.checkIncludeString(
+              genreName,
+              templateGenreArray,
+              genreArray
+            )"
+            :key="genre.genre_id"
+            @click="pushItemtoArray(genre, genreArray)"
+          >
+            {{ genre.name }}
+          </div>
+        </div>
       </div>
       <div class="form__row">
         <label for="">Display Mode</label>
@@ -47,10 +129,13 @@ import type { LocationQueryValue } from "vue-router";
 import { functionModule } from "@/store/module/functionModule";
 import { mapActions, mapGetters } from "vuex";
 import BaseRadio from "@/components/UI/BaseRadio.vue";
+import BaseTag from "@/components/UI/BaseTag.vue";
+import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 
 export default {
   data() {
     return {
+      functionModule: functionModule,
       song_id: null as LocationQueryValue | LocationQueryValue[],
       templateArtistArray: [] as artist[],
       templateGenreArray: [] as genre[],
@@ -71,13 +156,30 @@ export default {
     };
   },
   methods: {
-    ...mapActions("song", ["getSong", "getGenreList", "getArtistList"]),
+    ...mapActions("song", [
+      "getSong",
+      "getGenreList",
+      "getArtistList",
+      "updateSong",
+    ]),
+    pushItemtoArray(item: genre | artist, array: genre[] | artist[]): void {
+      functionModule.pushItemtoArray(item, array);
+      this.artistName = "";
+      this.genreName = "";
+    },
+    pushItemtoNewArray(
+      item: string,
+      array: string[],
+      tempArr: genre[] | artist[]
+    ): void {
+      functionModule.pushItemNotIncludedtoNewArray(item, array, tempArr);
+      this.artistName = "";
+      this.genreName = "";
+    },
+    closeDialog() {
+      this.dialogWaring.show = false;
+    },
     onSubmit() {
-      if (functionModule.validateSongFileType(this.songFile) === false) {
-        this.dialogWaring.content = "Please upload a valid song file";
-        this.dialogWaring.show = true;
-        return;
-      }
       if (this.songName == "") {
         this.dialogWaring.content = "Please fill in the song name";
         this.dialogWaring.show = true;
@@ -94,6 +196,36 @@ export default {
           return;
         }
       }
+      const songForm = new FormData();
+      songForm.append("song_id", this.song_id as string);
+      songForm.append("songName", this.songName);
+      songForm.append("displayMode", this.displayMode);
+      let artistArrUpload: string[] = [];
+      this.artistArray.forEach((artist: artist) => {
+        if (artist.artist_id) artistArrUpload.push(artist.artist_id);
+        console.log(artist);
+      });
+      songForm.append("artist", JSON.stringify(artistArrUpload));
+      songForm.append("newArtist", JSON.stringify(this.newArtistArray));
+      let genreArrUpload: string[] = [];
+      this.genreArray.forEach((genre: genre) => {
+        if (genre.genre_id) genreArrUpload.push(genre.genre_id);
+      });
+      songForm.append("genre", JSON.stringify(genreArrUpload));
+      songForm.append("newGenre", JSON.stringify(this.newGenreArray));
+      this.updateSong({ token: this.token, songForm: songForm })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.dialogWaring.content = res.message;
+            this.dialogWaring.mode = "announcement";
+            this.dialogWaring.title = "Success";
+            this.dialogWaring.show = true;
+          } else {
+            this.dialogWaring.content = res.message;
+            this.dialogWaring.show = true;
+          }
+        });
     },
   },
   computed: {
@@ -103,15 +235,41 @@ export default {
   },
   components: {
     BaseRadio,
+    BaseTag,
+    BaseFlatDialog,
   },
   created() {
     this.song_id = this.$route.query.id;
     if (this.song_id) {
-      console.log(this.song_id);
       this.getSong({ token: this.token, song_id: this.song_id })
         .then((res) => res.json())
         .then((res) => {
-          console.log(res);
+          if (res.status === "success") {
+            this.songName = res.song.title;
+            this.displayMode = res.song.display;
+            for (const artist of res.artist) {
+              this.artistArray.push({
+                id: artist.id,
+                artist_id: artist.artist_id,
+                name: artist.name,
+                image_path: artist.image_path,
+                created_at: artist.created_at,
+                updated_at: artist.updated_at,
+              });
+            }
+            for (const genre of res.genre as genre[]) {
+              this.genreArray.push({
+                id: genre.id,
+                genre_id: genre.genre_id,
+                name: genre.name,
+                description: genre.description,
+                created_at: genre.created_at,
+                updated_at: genre.updated_at,
+              });
+            }
+          } else {
+            this.$router.push({ name: "accountUploadSong" });
+          }
         });
     }
     this.getGenreList(this.token)
@@ -128,4 +286,90 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.main {
+  width: 90%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  h3 {
+    margin-bottom: 20px;
+    font-weight: 900;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  .form {
+    display: flex;
+    flex-direction: column;
+    &__row {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 10px;
+      position: relative;
+      &--searchBox {
+        position: absolute;
+        max-height: 200px;
+        width: 100%;
+        overflow: scroll;
+        z-index: 20;
+        background: var(--background-glass-color-primary);
+        backdrop-filter: blur(10px);
+        top: 100%;
+        &--item {
+          width: 100%;
+          font-size: 1.2rem;
+          padding: 3px 10px;
+          cursor: pointer;
+          &:hover {
+            background: var(--background-color-secondary);
+          }
+        }
+      }
+      .tagList {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      label {
+        font-size: 1rem;
+        font-weight: 900;
+        margin-bottom: 5px;
+      }
+      input {
+        height: 40px;
+        border: 1px solid var(--text-primary-color);
+        background: var(--background-color-secondary);
+        color: var(--text-primary-color);
+        padding: 0 10px;
+        font-size: 1rem;
+        &:focus {
+          outline: none;
+        }
+      }
+      & button {
+        height: 40px;
+        background: transparent;
+        color: var(--color-primary);
+        padding: 0 20px;
+        font-size: 1rem;
+        border: 1px solid var(--color-primary);
+        width: max-content;
+        float: right;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        &:focus {
+          outline: none;
+        }
+        &:hover {
+          transform: scale(1.05);
+          background: var(--color-primary);
+          color: var(--background-color-secondary);
+        }
+      }
+    }
+  }
+}
+</style>
