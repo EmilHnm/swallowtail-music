@@ -2,14 +2,15 @@
   <BaseCard>
     <div class="album">
       <div class="album__image">
-        <img class="img" src="../../assets/music/cover.jpg" />
+        <img class="img" :src="`${environment.album_cover}/${img}`" />
         <div class="album__image--play">
           <IconPlay />
         </div>
       </div>
       <div class="album__title" @click="redirect">{{ title }}</div>
       <div class="album__uploader">{{ uploader }}</div>
-      <div class="album__songCount">{{ songCount }} songs</div>
+      <div class="album__songCount" v-if="songCount">{{ songCount }} songs</div>
+      <div class="album__songCount" v-if="listens">{{ listens }} listens</div>
     </div>
   </BaseCard>
 </template>
@@ -17,6 +18,7 @@
 <script lang="ts">
 import BaseCard from "./BaseCard.vue";
 import IconPlay from "../icons/IconPlay.vue";
+import { environment } from "@/environment/environment";
 export default {
   components: { BaseCard, IconPlay },
   props: {
@@ -30,7 +32,9 @@ export default {
     },
     songCount: {
       type: Number,
-      required: true,
+    },
+    listens: {
+      type: String,
     },
     id: {
       type: String,
@@ -40,10 +44,24 @@ export default {
       type: String,
       default: "album",
     },
+    img: {
+      type: String,
+      default: "",
+    },
+  },
+  data() {
+    return {
+      environment: environment,
+    };
   },
   methods: {
     redirect() {
-      this.$emit("redirect", { id: this.id, type: this.type });
+      this.$router.push({
+        name: "album",
+        params: {
+          id: this.id,
+        },
+      });
     },
   },
 };
@@ -96,6 +114,8 @@ export default {
     font-size: 1.2rem;
     font-weight: 600;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
     margin-top: 0.5rem;
     user-select: none;
   }

@@ -103,5 +103,23 @@ export const albumModule = {
         },
       });
     },
+    getLatestAlbums(context: any, userToken: string): Promise<Response> {
+      return fetch(`${environment.api}/album/latest`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+    },
+    getTopAlbums(context: any, userToken: string): Promise<Response> {
+      return fetch(`${environment.api}/album/top`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+    },
   },
 };

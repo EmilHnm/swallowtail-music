@@ -10,6 +10,16 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseFlatDialog>
+    <BaseFlatDialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseCircleLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseFlatDialog>
   </teleport>
   <div class="main">
     <h3>Song Edit</h3>
@@ -131,7 +141,7 @@ import { mapActions, mapGetters } from "vuex";
 import BaseRadio from "@/components/UI/BaseRadio.vue";
 import BaseTag from "@/components/UI/BaseTag.vue";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
-
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 export default {
   data() {
     return {
@@ -147,6 +157,7 @@ export default {
       genreName: "",
       songName: "",
       displayMode: "",
+      isLoading: false,
       dialogWaring: {
         title: "Warning",
         mode: "warning",
@@ -203,7 +214,6 @@ export default {
       let artistArrUpload: string[] = [];
       this.artistArray.forEach((artist: artist) => {
         if (artist.artist_id) artistArrUpload.push(artist.artist_id);
-        console.log(artist);
       });
       songForm.append("artist", JSON.stringify(artistArrUpload));
       songForm.append("newArtist", JSON.stringify(this.newArtistArray));
@@ -213,9 +223,11 @@ export default {
       });
       songForm.append("genre", JSON.stringify(genreArrUpload));
       songForm.append("newGenre", JSON.stringify(this.newGenreArray));
+      this.isLoading = true;
       this.updateSong({ token: this.token, songForm: songForm })
         .then((res) => res.json())
         .then((res) => {
+          this.isLoading = false;
           if (res.status === "success") {
             this.dialogWaring.content = res.message;
             this.dialogWaring.mode = "announcement";
@@ -237,13 +249,16 @@ export default {
     BaseRadio,
     BaseTag,
     BaseFlatDialog,
+    BaseCircleLoad,
   },
   created() {
     this.song_id = this.$route.query.id;
     if (this.song_id) {
+      this.isLoading = true;
       this.getSong({ token: this.token, song_id: this.song_id })
         .then((res) => res.json())
         .then((res) => {
+          this.isLoading = false;
           if (res.status === "success") {
             this.songName = res.song.title;
             this.displayMode = res.song.display;

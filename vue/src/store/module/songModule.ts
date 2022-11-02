@@ -79,5 +79,14 @@ export const songModule = {
         },
       });
     },
+    getLatestSong(context: any, userToken: string): Promise<Response> {
+      return fetch(`${environment.api}/song/latest`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+    },
   },
 };

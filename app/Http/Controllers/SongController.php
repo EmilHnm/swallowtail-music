@@ -206,4 +206,20 @@ class SongController extends Controller
             'message' => 'Song deleted successfully'
         ]);
     }
+
+    public function latestSong()
+    {
+
+        $songs = DB::table('songs')
+            ->leftJoin('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
+            ->leftJoin('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
+            ->select('songs.*', 'artists.name AS artist_name', 'artists.artist_id AS artist_id')
+            ->orderBy('songs.created_at', 'DESC')
+            ->limit(5)
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'songs' => $songs
+        ]);
+    }
 }

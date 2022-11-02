@@ -29,8 +29,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('artist')->group(function () {
-        Route::get('/{id}', [ArtistController::class, 'show']);
         Route::get('/', [ArtistController::class, 'getAll']);
+        Route::get('/top', [ArtistController::class, 'getTop']);
+        Route::get('/{id}', [ArtistController::class, 'show']);
     });
 
     Route::prefix('genre')->group(function () {
@@ -40,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('song')->group(function () {
         Route::post('/upload', [SongController::class, 'uploadSong']);
+        Route::get('/latest', [SongController::class, 'latestSong']);
         Route::post('/update', [SongController::class, 'updateSong']);
         Route::get('/uploaded', [SongController::class, 'uploadedSong']);
         Route::get('/{id}', [SongController::class, 'getSongInfo']);
@@ -50,6 +52,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/upload', [AlbumController::class, 'uploadAlbum']);
         Route::get('/uploaded', [AlbumController::class, 'getUploadedAlbum']);
         Route::post('/update', [AlbumController::class, 'updateAlbum']);
+        Route::get('/latest', [AlbumController::class, 'getLatestAlbum']);
+        Route::get('/top', [AlbumController::class, 'getTopAlbum']);
         Route::get('/addable', [AlbumController::class, 'getSongNotInAlbum']);
         Route::post('/song-remove', [AlbumController::class, 'removeAlbumSong']);
         Route::post('/song-add', [AlbumController::class, 'addAlbumSong']);

@@ -1,67 +1,39 @@
 <template>
   <div class="wrapper">
     <div class="news" ref="news">
-      <div class="latest-songs">
+      <div class="latest-songs" v-if="latestSongs">
         <h2>Latest Songs Update</h2>
         <div
           class="latest-song__container"
           :class="{ min: min, medium: medium }"
         >
-          <base-list-item>
+          <base-list-item v-for="(song, index) in latestSongs" :key="index">
             <div class="latest-song__song">
               <div class="latest-song__song--title">
-                <h3>Future Parade</h3>
-                <h4>虹ヶ咲学園スクールアイドル同好会</h4>
+                <h3>{{ song[0].title }}</h3>
+                <h4>
+                  <router-link
+                    v-for="(artist, i) in song"
+                    :key="artist.artist_id"
+                    :to="{
+                      name: 'artistOverviewPage',
+                      params: { id: artist.artist_id },
+                    }"
+                  >
+                    {{ artist.artist_name }}
+                    <span v-if="i != song.length - 1">,</span>
+                  </router-link>
+                </h4>
               </div>
-              <div class="latest-song__song--duration">3:00</div>
-              <div class="latest-song__song--add-queue">
-                <IconPlay />
+              <div class="latest-song__song--duration">
+                {{
+                  Math.floor(song[0].duration / 60) +
+                  ":" +
+                  (Math.floor(song[0].duration % 60) < 10
+                    ? "0" + Math.floor(song[0].duration % 60)
+                    : Math.floor(song[0].duration % 60))
+                }}
               </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="latest-song__song">
-              <div class="latest-song__song--title">
-                <h3>Future Parade</h3>
-                <h4>虹ヶ咲学園スクールアイドル同好会</h4>
-              </div>
-              <div class="latest-song__song--duration">3:00</div>
-              <div class="latest-song__song--add-queue">
-                <IconPlay />
-              </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="latest-song__song">
-              <div class="latest-song__song--title">
-                <h3>Future Parade</h3>
-                <h4>虹ヶ咲学園スクールアイドル同好会</h4>
-              </div>
-              <div class="latest-song__song--duration">3:00</div>
-              <div class="latest-song__song--add-queue">
-                <IconPlay />
-              </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="latest-song__song">
-              <div class="latest-song__song--title">
-                <h3>Future Parade</h3>
-                <h4>虹ヶ咲学園スクールアイドル同好会</h4>
-              </div>
-              <div class="latest-song__song--duration">3:00</div>
-              <div class="latest-song__song--add-queue">
-                <IconPlay />
-              </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="latest-song__song">
-              <div class="latest-song__song--title">
-                <h3>Future Parade</h3>
-                <h4>虹ヶ咲学園スクールアイドル同好会</h4>
-              </div>
-              <div class="latest-song__song--duration">3:00</div>
               <div class="latest-song__song--add-queue">
                 <IconPlay />
               </div>
@@ -69,38 +41,42 @@
           </base-list-item>
         </div>
       </div>
-      <div class="latest-album">
+      <div class="latest-album" v-if="latestAlbums.length > 0">
         <h2>Latest Album Update</h2>
         <BaseHorizontalScroll>
           <BaseCardAlbum
-            v-for="item in testArr"
-            :key="item"
-            :title="'Future Parade'"
-            :uploader="'Emil'"
-            :songCount="6"
+            v-for="album in latestAlbums"
+            :key="album.album_id"
+            :title="album.name"
+            :uploader="album.user_name"
+            :id="album.album_id"
+            :img="album.image_path"
+            :songCount="album.songCount"
         /></BaseHorizontalScroll>
       </div>
     </div>
     <div class="top">
-      <div class="top__album">
+      <div class="top__album" v-if="topAlbums.length > 0">
         <h2>Top Album All Time</h2>
         <BaseHorizontalScroll>
           <BaseCardAlbum
-            v-for="item in testArr"
-            :key="item"
-            :title="'Future Parade'"
-            :uploader="'Emil'"
-            :songCount="6"
+            v-for="album in topAlbums"
+            :key="album.album_id"
+            :title="album.name"
+            :uploader="album.user_name"
+            :id="album.album_id"
+            :img="album.image_path"
+            :listens="album.totalListen"
           />
         </BaseHorizontalScroll>
       </div>
-      <div class="top__artist">
+      <div class="top__artist" v-if="topArtist.length > 0">
         <h2>Top Artist All Time</h2>
         <BaseHorizontalScroll>
           <BaseCardArtist
-            v-for="item in testArr"
-            :key="item"
-            :title="'虹ヶ咲学園スクールアイドル同好会'"
+            v-for="artist in topArtist"
+            :key="artist.artist_id"
+            :title="artist.name"
           />
         </BaseHorizontalScroll>
       </div>
@@ -168,16 +144,6 @@
           </base-list-item>
         </div>
       </div>
-      <div class="favorite__artist">
-        <h2>Top Artist All Time</h2>
-        <BaseHorizontalScroll>
-          <BaseCardArtist
-            v-for="item in testArr"
-            :key="item"
-            :title="'虹ヶ咲学園スクールアイドル同好会'"
-          />
-        </BaseHorizontalScroll>
-      </div>
     </div>
   </div>
 </template>
@@ -187,6 +153,30 @@ import IconPlay from "../../components/icons/IconPlay.vue";
 import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
 import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
+import { mapActions, mapGetters } from "vuex";
+import type { album } from "@/model/albumModel";
+import type { artist } from "@/model/artistModel";
+
+type songData = {
+  [song_id: string]: {
+    song_id: string;
+    title: string;
+    artist_name: string;
+    artist_id: string;
+    duration: number;
+    created_at: string;
+  }[];
+};
+
+type LatestAlbum = album & {
+  user_name: string;
+  songCount: number;
+};
+type TopAlbum = album & {
+  user_name: string;
+  totalListen: number;
+};
+
 export default defineComponent({
   components: {
     IconPlay,
@@ -194,7 +184,6 @@ export default defineComponent({
     BaseCardArtist,
     BaseCardAlbum,
   },
-  setup() {},
   data() {
     return {
       news: 0,
@@ -202,7 +191,45 @@ export default defineComponent({
       min: false,
       medium: false,
       testArr: [1, 2, 3, 4, 5, 6, 7, 8],
+      latestSongs: {} as songData,
+      latestAlbums: [] as LatestAlbum[],
+      topAlbums: [] as TopAlbum[],
+      topArtist: [] as artist[],
     };
+  },
+  methods: {
+    ...mapActions("song", ["getLatestSong"]),
+    ...mapActions("artist", ["getTopArtists"]),
+    ...mapActions("album", ["getLatestAlbums", "getTopAlbums"]),
+  },
+  computed: {
+    ...mapGetters({ token: "auth/userToken" }),
+  },
+  created() {
+    this.getLatestSong(this.token)
+      .then((res) => res.json())
+      .then((res) => {
+        this.latestSongs = res.songs.reduce((r: any, a: any) => {
+          r[a.song_id] = r[a.song_id] || [];
+          r[a.song_id].push(a);
+          return r;
+        }, Object.create(null));
+      });
+    this.getLatestAlbums(this.token)
+      .then((res) => res.json())
+      .then((res) => {
+        this.latestAlbums = [...res.albums];
+      });
+    this.getTopAlbums(this.token)
+      .then((res) => res.json())
+      .then((res) => {
+        this.topAlbums = [...res.albums];
+      });
+    this.getTopArtists(this.token)
+      .then((res) => res.json())
+      .then((res) => {
+        this.topArtist = [...res.artists];
+      });
   },
   mounted() {
     const newsEle = this.$refs.news as HTMLElement;
@@ -284,8 +311,11 @@ export default defineComponent({
       width: 100%;
       &--title {
         font-size: 1.2rem;
+        width: 100%;
         font-weight: 600;
         overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         & > h3 {
           width: 100%;
           font-size: 1.2rem;
@@ -302,6 +332,12 @@ export default defineComponent({
           color: var(--text-subdued);
           user-select: none;
           margin: 0;
+          a {
+            color: var(--text-subdued);
+            &:hover {
+              color: var(--color-primary);
+            }
+          }
           &:hover {
             text-decoration: underline;
           }
@@ -310,6 +346,7 @@ export default defineComponent({
       &--duration {
         font-size: 1rem;
         font-weight: 500;
+        flex: 0 0 auto;
       }
 
       &--add-queue {

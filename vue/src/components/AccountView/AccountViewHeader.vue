@@ -73,6 +73,7 @@ import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
 export default defineComponent({
   props: ["isSideBarActive"],
+  emits: ["toggleLeftSideBar"],
   data() {
     return {
       menuActive: false,

@@ -38,7 +38,8 @@ import IconRightArrow from "../icons/IconRightArrow.vue";
 export default defineComponent({
   data() {
     return {
-      observer: null as ResizeObserver | null,
+      wrapperWidthObserver: null as ResizeObserver | null,
+      containerWidthObserver: null as ResizeObserver | null,
       wrapperWidth: 0,
       containerWidth: 0,
       rollableWidth: 0,
@@ -82,19 +83,45 @@ export default defineComponent({
     this.containerWidth = (this.$refs.container as HTMLElement).clientWidth;
     const wrapper = this.$refs.wrapper as HTMLElement;
     if (wrapper) this.wrapperWidth = wrapper.clientWidth;
-
-    this.observer = new ResizeObserver((entries) => {
+    this.wrapperWidthObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
         this.wrapperWidth = entry.contentRect.width;
       }
     });
-    if (wrapper) this.observer.observe(wrapper);
+    if (wrapper) this.wrapperWidthObserver.observe(wrapper);
+
+    const container = this.$refs.container as HTMLElement;
+    if (container) this.containerWidth = container.clientWidth;
+    this.containerWidthObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        this.containerWidth = entry.contentRect.width;
+      }
+    });
+    if (container) this.containerWidthObserver.observe(container);
   },
   beforeUnmount() {
-    if (this.observer) this.observer.disconnect();
+    if (this.wrapperWidthObserver) this.wrapperWidthObserver.disconnect();
+    if (this.containerWidthObserver) this.containerWidthObserver.disconnect();
   },
   watch: {
     wrapperWidth(o) {
+      if (o > 900 && o < 920) {
+        return;
+      }
+      if (550 < o && o <= 900) {
+        this.medium = true;
+        this.small = false;
+      } else if (o <= 550) {
+        this.small = true;
+        this.medium = false;
+      } else {
+        this.small = false;
+        this.medium = false;
+      }
+      this.currentPosition = 0;
+      this.rollableWidth = this.containerWidth - this.wrapperWidth;
+    },
+    containerWidth(o) {
       if (o > 900 && o < 920) {
         return;
       }

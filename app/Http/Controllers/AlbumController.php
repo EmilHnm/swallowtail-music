@@ -84,7 +84,7 @@ class AlbumController extends Controller
     public function getUploadedAlbum()
     {
         $albumUploaded = DB::table('albums')
-            ->join('songs', 'songs.album_id', '=', 'albums.album_id')
+            ->leftJoin('songs', 'albums.album_id', '=', 'songs.album_id')
             ->select('albums.*', DB::raw('count(songs.song_id) as songCount'))
             ->where('albums.user_id', Auth::user()->user_id)
             ->groupBy('albums.id')
@@ -213,6 +213,43 @@ class AlbumController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Album deleted successfully!'
+        ]);
+    }
+
+
+    public function getLatestAlbum()
+    {
+        // $album = Album::orderBy('created_at', 'desc')
+        //     ->take(8)
+        //     ->with('user')
+        //     ->get();
+        $album = DB::table('albums')
+            ->join('users', 'users.user_id', '=', 'albums.user_id')
+            ->leftJoin('songs', 'songs.album_id', '=', 'albums.album_id')
+            ->select('albums.*', 'users.name as user_name', DB::raw('count(songs.song_id) as songCount'))
+            ->orderBy('albums.created_at', 'desc')
+            ->groupBy('albums.album_id')
+            ->take(8)
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'albums' => $album
+        ]);
+    }
+
+    public function getTopAlbum()
+    {
+        $album = DB::table('albums')
+            ->join('users', 'users.user_id', '=', 'albums.user_id')
+            ->leftJoin('songs', 'songs.album_id', '=', 'albums.album_id')
+            ->select('albums.*', 'users.name as user_name', DB::raw('sum(songs.listens) as totalListen'))
+            ->orderBy('totalListen', 'desc')
+            ->groupBy('albums.album_id')
+            ->take(8)
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'albums' => $album
         ]);
     }
 

@@ -8,7 +8,7 @@ export const testModule = {
   mutations: {
     increment(state: any) {
       state.counter = state.counter + 2;
-      console.log(state.counter);
+      console.log("increment", state.counter);
     },
   },
   actions: {

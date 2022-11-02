@@ -11,4 +11,14 @@ class Album extends Model
     protected $primaryKey = 'album_id';
     public $incrementing = false;
     public $timestamps = true;
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function song()
+    {
+        return $this->hasMany(Song::class, 'album_id', 'album_id');
+    }
 }

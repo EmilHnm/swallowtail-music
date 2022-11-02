@@ -197,16 +197,34 @@ export default defineComponent({
           this.sortMode.artist = "desc";
           this.uploadedSongList = Object.fromEntries(
             Object.entries(this.uploadedSongList).sort(
-              (a: songData, b: songData) =>
-                -a[1][0].artist_name.localeCompare(b[1][0].artist_name)
+              (a: songData, b: songData) => {
+                if (a[1][0].artist_name === null) {
+                  return -1;
+                }
+                if (b[1][0].artist_name === null) {
+                  return 1;
+                }
+                return -a[1][0].artist_name
+                  .toString()
+                  .localeCompare(b[1][0].artist_name.toString());
+              }
             )
           );
         } else {
           this.sortMode.artist = "asc";
           this.uploadedSongList = Object.fromEntries(
             Object.entries(this.uploadedSongList).sort(
-              (a: songData, b: songData) =>
-                a[1][0].artist_name.localeCompare(b[1][0].artist_name)
+              (a: songData, b: songData) => {
+                if (a[1][0].artist_name === null) {
+                  return 1;
+                }
+                if (b[1][0].artist_name === null) {
+                  return -1;
+                }
+                return a[1][0].artist_name
+                  .toString()
+                  .localeCompare(b[1][0].artist_name.toString());
+              }
             )
           );
         }
