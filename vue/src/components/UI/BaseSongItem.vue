@@ -1,42 +1,74 @@
 <template>
+  <teleport to="body">
+    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseDialog>
+  </teleport>
   <div class="song-item" ref="songItem">
     <BaseListItem :selected="selected">
       <div class="song-item__left">
         <div class="song-item__left--image" @click="selectSong">
-          <img src="../../assets/music/cover.jpg" alt="" srcset="" />
+          <img
+            :src="`${environment.album_cover}/${data[0].image_path}`"
+            alt=""
+            srcset=""
+          />
         </div>
         <div class="song-item__left--title">
-          <span @click="selectSong">{{ title }}</span>
-          <span>{{ artist }}</span>
+          <span @click="selectSong">{{ data[0].title }}</span>
+          <span v-if="data.length > 0">
+            <span>
+              <router-link
+                :to="{
+                  name: 'artistPage',
+                  params: { id: artistitem.artist_id },
+                }"
+                v-for="(artistitem, index) in data"
+                :key="artistitem.artist_id"
+                >{{ artistitem.artist_name }}
+                <span v-if="index !== data.length - 1">,</span>
+              </router-link></span
+            >
+          </span>
+          <span v-else><BaseLineLoad /></span>
         </div>
       </div>
       <div class="song-item__right">
         <div class="song-item__right--album" :class="{ small: small }">
-          <span>{{ album }}</span>
+          <span v-if="data[0].album_id">{{ data[0].album_name }}</span>
+          <span v-else><BaseLineLoad /></span>
         </div>
         <div
           class="song-item__right--hears"
-          v-if="hears"
+          v-if="data[0].listens"
           :class="{ medium: medium }"
         >
-          <span>{{ hears }}</span>
+          <span>{{ data[0].listens }}</span>
         </div>
         <div
           class="song-item__right--addDate"
           v-else
           :class="{ medium: medium }"
         >
-          <span>{{ addedDate }}</span>
+          <span v-if="data[0].added_date">{{
+            new Date(data[0].added_date).toLocaleDateString()
+          }}</span>
         </div>
         <div
           class="song-item__right--duration"
           :class="{ medium: medium, small: small }"
         >
-          <span>{{ duration }}</span>
+          <span>{{
+            new Date(data[0].duration * 1000).toISOString().substring(14, 19)
+          }}</span>
         </div>
         <div
           class="song-item__right--control"
           :class="{ medium: medium, small: small }"
+          v-if="control"
         >
           <div class="song-item__right--control--button" @click="toggleMenu">
             <IconThreeDots />
@@ -47,17 +79,30 @@
   </div>
   <teleport to="body">
     <div class="bg" @click="toggleMenu" v-if="isMenuOpen"></div>
-    <div class="menu" v-if="isMenuOpen">
+    <div class="menu" v-if="isMenuOpen && control">
       <div class="menu__song">
         <div class="menu__song--img">
-          <img src="../../assets/music/cover.jpg" alt="" srcset="" />
+          <img
+            :src="`${environment.album_cover}/${data[0].image_path}`"
+            alt=""
+            srcset=""
+          />
         </div>
         <div class="menu__song--title">
-          <span>{{ title }}</span>
-          <span>{{ artist }}</span>
+          <span class="title">{{ data[0].title }}</span>
+          <span class="artist">
+            <router-link
+              :to="{ name: 'artistPage', params: { id: artistitem.artist_id } }"
+              v-for="(artistitem, index) in data"
+              :key="artistitem.artist_id"
+              >{{ artistitem.artist_name }}
+              <span v-if="index !== data.length - 1">,</span>
+            </router-link>
+          </span>
         </div>
         <div class="menu__song--album">
-          <span>{{ album }}</span>
+          <span v-if="data[0].album_id">{{ data[0].album_name }}</span>
+          <span v-else><BaseLineLoad /></span>
         </div>
       </div>
       <div class="menu__btn">
@@ -69,17 +114,30 @@
           <BaseListItem v-if="inQueue" @click="deleteFromQueue"
             >Delete from Queue</BaseListItem
           >
+          <BaseListItem v-if="inPlaylist" @click="deleteFromPlaylist"
+            >Delete from Queue</BaseListItem
+          >
           <BaseListItem v-else>Add to Queue</BaseListItem>
-          <BaseListItem>View Album</BaseListItem>
           <BaseListItem @click="changeMenuMode('artist')"
             >View Artist</BaseListItem
           >
         </div>
         <div class="" v-if="menuMode === 'artist'">
-          <BaseListItem>虹ヶ咲学園スクールアイドル同好会</BaseListItem>
+          <router-link
+            :to="{ name: 'artistPage', params: { id: artistitem.artist_id } }"
+            v-for="artistitem in data"
+            :key="artistitem.artist_id"
+          >
+            <BaseListItem>{{ artistitem.artist_name }}</BaseListItem>
+          </router-link>
         </div>
         <div class="" v-if="menuMode === 'playlist'">
-          <BaseListItem>BangDream</BaseListItem>
+          <BaseListItem
+            v-for="playlist in userPlaylist"
+            :key="playlist.playlist_id"
+            @click="onAddSongToPlaylistlist(playlist.playlist_id)"
+            >{{ playlist.title }}</BaseListItem
+          >
         </div>
       </div>
     </div>
@@ -88,56 +146,65 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { environment } from "@/environment/environment";
 import BaseListItem from "./BaseListItem.vue";
 import IconThreeDots from "../icons/IconThreeDots.vue";
+import BaseLineLoad from "./BaseLineLoad.vue";
+import { mapActions, mapGetters } from "vuex";
+import BaseDialog from "./BaseDialog.vue";
+
+type songData = {
+  song_id: string;
+  title: string;
+  artist_name: string;
+  artist_id: string;
+  added_date?: string;
+  album_name: string;
+  album_id: string;
+  duration: number;
+  image_path: string;
+  listens?: number;
+}[];
 
 export default defineComponent({
-  emits: ["deleteFromQueue", "selectSong"],
+  emits: ["deleteFromQueue", "deleteFromPlaylist", "selectSong"],
+  inject: ["userPlaylist"],
   data() {
     return {
+      environment: environment,
       observer: null as ResizeObserver | null,
       songItemWidth: 0,
       small: false,
       medium: false,
       isMenuOpen: false,
       menuMode: "default",
+      isLoading: false,
     };
   },
   props: {
-    title: {
-      type: String,
+    data: {
+      type: Object as () => songData,
       required: true,
-    },
-    artist: {
-      type: String,
-      required: true,
-    },
-    album: {
-      type: String,
-      required: true,
-    },
-    hears: {
-      type: Number,
-      default: -1,
-    },
-    inQueue: {
-      type: Boolean,
-      default: false,
-    },
-    duration: {
-      type: String,
-      required: true,
-    },
-    addedDate: {
-      type: String,
-      default: "",
     },
     selected: {
       type: Boolean,
       default: false,
     },
+    inQueue: {
+      type: Boolean,
+      default: false,
+    },
+    inPlaylist: {
+      type: Boolean,
+      default: false,
+    },
+    control: {
+      type: Boolean,
+      default: true,
+    },
   },
   methods: {
+    ...mapActions("playlist", ["addSongToPlaylist"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
       this.changeMenuMode("default");
@@ -149,8 +216,23 @@ export default defineComponent({
       this.isMenuOpen = false;
       this.$emit("deleteFromQueue");
     },
+    deleteFromPlaylist() {
+      this.isMenuOpen = false;
+      this.$emit("deleteFromPlaylist");
+    },
     selectSong() {
-      this.$emit("selectSong");
+      this.$emit("selectSong", this.data[0].song_id);
+    },
+    onAddSongToPlaylistlist(id: string) {
+      this.isLoading = true;
+      this.addSongToPlaylist({
+        token: this.token,
+        song_id: this.data[0].song_id,
+        playlist_id: id,
+      }).then(() => {
+        this.isLoading = false;
+        this.toggleMenu();
+      });
     },
   },
   mounted() {
@@ -162,6 +244,7 @@ export default defineComponent({
     });
     if (this.observer && songItem) this.observer.observe(songItem);
   },
+  created() {},
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();
   },
@@ -179,7 +262,12 @@ export default defineComponent({
       }
     },
   },
-  components: { BaseListItem, IconThreeDots },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
+  },
+  components: { BaseListItem, IconThreeDots, BaseLineLoad, BaseDialog },
 });
 </script>
 
@@ -203,15 +291,20 @@ $tablet-width: 768px;
   width: 250px;
   border-radius: 10px;
   z-index: 20;
-  padding: 10px 20px;
+  padding: 30px 20px;
   transform: translate(-50%, -50%);
   background: var(--background-color-primary);
   user-select: none;
+  max-height: 70%;
+  overflow: scroll;
+  &::-webkit-scrollbar {
+    width: 0;
+  }
   &__song {
     width: 100%;
     &--img {
       aspect-ratio: 1/1;
-      width: 90%;
+      width: calc(100% - 40px);
       height: auto;
       display: flex;
       justify-content: center;
@@ -226,19 +319,28 @@ $tablet-width: 768px;
     }
     &--title {
       margin: 10px auto;
+      width: calc(100% - 40px);
       span {
-        display: block;
         font-size: 1rem;
-        &:first-child {
-          color: var(--text-color-primary);
-          font-size: 1.2rem;
-          font-weight: 900;
+
+        &.artist {
+          display: flex;
+          a {
+            color: var(--text-color-primary);
+            text-decoration: none;
+            margin-right: 2px;
+            &:hover {
+              text-decoration: underline;
+            }
+          }
         }
-        &:last-child {
-          color: var(--text-color-secondary);
-          font-size: 0.8rem;
-          white-space: nowrap;
+        &.title {
+          font-weight: 600;
+          width: 100%;
+          overflow-x: hidden;
           text-overflow: ellipsis;
+          white-space: nowrap;
+          display: block;
         }
       }
     }
@@ -287,6 +389,7 @@ $tablet-width: 768px;
       &--title {
         & > span {
           text-align: center;
+          justify-content: center;
         }
       }
       &--album {
@@ -306,10 +409,11 @@ $tablet-width: 768px;
   &__left {
     width: 70%;
     display: flex;
+    overflow: hidden;
     &--image {
       width: 50px;
       height: 50px;
-      flex: 1 0 50px;
+      flex: 0 0 auto;
       margin-right: 10px;
       img {
         width: 100%;
@@ -324,17 +428,23 @@ $tablet-width: 768px;
       overflow: hidden;
       width: 100%;
       user-select: none;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
       span {
         &:first-child {
           font-size: 1rem;
           font-weight: 600;
           white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
         }
-        &:last-child {
+        a {
           font-size: 0.8rem;
           color: var(--text-subdued);
           white-space: nowrap;
           text-overflow: ellipsis;
+          overflow: hidden;
           &:hover {
             text-decoration: underline;
           }
