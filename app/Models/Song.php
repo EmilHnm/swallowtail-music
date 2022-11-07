@@ -32,4 +32,14 @@ class Song extends Model
             'artist_id'
         )->withTimestamps();
     }
+
+    public function playlist()
+    {
+        return $this->belongsToMany(
+            Playlist::class,
+            'playlist_songs',
+            'song_id',
+            'playlist_id'
+        )->withTimestamps();
+    }
 }

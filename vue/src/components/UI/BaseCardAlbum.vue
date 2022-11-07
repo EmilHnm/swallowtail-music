@@ -2,14 +2,16 @@
   <BaseCard>
     <div class="album">
       <div class="album__image">
-        <img class="img" :src="`${environment.album_cover}/${img}`" />
+        <img class="img" :src="img" />
         <div class="album__image--play">
           <IconPlay />
         </div>
       </div>
       <div class="album__title" @click="redirect">{{ title }}</div>
-      <div class="album__uploader">{{ uploader }}</div>
-      <div class="album__songCount" v-if="songCount">{{ songCount }} songs</div>
+      <div class="album__uploader" v-if="uploader">{{ uploader }}</div>
+      <div class="album__songCount" v-if="songCount !== null">
+        {{ songCount }} songs
+      </div>
       <div class="album__songCount" v-if="listens">{{ listens }} listens</div>
     </div>
   </BaseCard>
@@ -18,7 +20,7 @@
 <script lang="ts">
 import BaseCard from "./BaseCard.vue";
 import IconPlay from "../icons/IconPlay.vue";
-import { environment } from "@/environment/environment";
+
 export default {
   components: { BaseCard, IconPlay },
   props: {
@@ -34,7 +36,7 @@ export default {
       type: Number,
     },
     listens: {
-      type: String,
+      type: Number,
     },
     id: {
       type: String,
@@ -49,19 +51,16 @@ export default {
       default: "",
     },
   },
-  data() {
-    return {
-      environment: environment,
-    };
-  },
   methods: {
     redirect() {
-      this.$router.push({
-        name: "album",
-        params: {
-          id: this.id,
-        },
-      });
+      if (this.type === "playlist")
+        this.$router.push({
+          name: "playlistViewPage",
+          params: {
+            id: this.id,
+          },
+        });
+      //if (this.type === "album")
     },
   },
 };

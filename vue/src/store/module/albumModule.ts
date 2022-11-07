@@ -19,7 +19,7 @@ export const albumModule = {
     },
     getUploadedAlbums(context: any, userToken: string): Promise<Response> {
       // getUploadedAlbums
-      return fetch(`${environment.api}/album/uploaded`, {
+      return fetch(`${environment.api}/account/album/uploaded`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -29,9 +29,9 @@ export const albumModule = {
     },
     getAlbumSongs(
       context: any,
-      payload: { userToken: string; albumId: string }
+      payload: { userToken: string; album_id: string }
     ): Promise<Response> {
-      return fetch(`${environment.api}/album/${payload.albumId}/song`, {
+      return fetch(`${environment.api}/album/${payload.album_id}/song`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +44,7 @@ export const albumModule = {
       context: any,
       payload: { userToken: string; songId: string }
     ): Promise<Response> {
-      return fetch(`${environment.api}/album/song-remove`, {
+      return fetch(`${environment.api}/account/album/song-remove`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export const albumModule = {
       context: any,
       payload: { userToken: string; songId: string; albumId: string }
     ): Promise<Response> {
-      return fetch(`${environment.api}/album/song-add`, {
+      return fetch(`${environment.api}/account/album/song-add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export const albumModule = {
       context: any,
       payload: { userToken: string; albumInfo: FormData }
     ): Promise<Response> {
-      return fetch(`${environment.api}/album/update`, {
+      return fetch(`${environment.api}/account/album/update`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${payload.userToken}`,
@@ -85,7 +85,7 @@ export const albumModule = {
       });
     },
     getAddableSong(context: any, userToken: string): Promise<Response> {
-      return fetch(`${environment.api}/album/addable`, {
+      return fetch(`${environment.api}/account/album/addable`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -95,13 +95,16 @@ export const albumModule = {
       });
     },
     deleteAlbum(context: any, payload: { userToken: string; albumId: string }) {
-      return fetch(`${environment.api}/album/${payload.albumId}/delete`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${payload.userToken}`,
-        },
-      });
+      return fetch(
+        `${environment.api}/account/album/${payload.albumId}/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+          },
+        }
+      );
     },
     getLatestAlbums(context: any, userToken: string): Promise<Response> {
       return fetch(`${environment.api}/album/latest`, {
@@ -118,6 +121,18 @@ export const albumModule = {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
+        },
+      });
+    },
+    getAlbumById(
+      context: any,
+      payload: { userToken: string; albumId: string }
+    ) {
+      return fetch(`${environment.api}/album/${payload.albumId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
         },
       });
     },

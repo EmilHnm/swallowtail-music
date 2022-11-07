@@ -77,7 +77,7 @@ const router = createRouter({
         {
           path: "artist/:id",
           name: "artistPage",
-          //redirect: "artist/:id/overview",
+          redirect: "overview",
           component: () =>
             import("../views/HomeView/ArtistDetailsView/ArtistDetailsView.vue"),
           children: [

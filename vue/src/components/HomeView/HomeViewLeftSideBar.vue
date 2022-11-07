@@ -42,7 +42,7 @@
     </div>
     <div class="nav__playlist">
       <router-link
-        v-for="playlist in playlistArray"
+        v-for="playlist in userPlaylist"
         :key="playlist.playlist_id"
         :to="{
           name: 'playlistViewPage',
@@ -66,7 +66,12 @@ import IconLibrary from "../icons/IconLibrary.vue";
 import IconPlus from "../icons/IconPlus.vue";
 import IconHeartFilled from "../icons/IconHeartFilled.vue";
 import IconUpload from "../icons/IconUpload.vue";
-import { mapActions, mapGetters, mapMutations } from "vuex";
+import type { playlist } from "@/model/playlistModel";
+
+type playlistData = playlist & {
+  songCount: number;
+};
+
 export default defineComponent({
   components: {
     IconHome,
@@ -82,27 +87,16 @@ export default defineComponent({
       default: false,
     },
   },
+  inject: {
+    userPlaylist: {
+      from: "userPlaylist",
+      default: [] as playlistData[],
+    },
+  },
   data() {
     return {};
   },
-  methods: {
-    ...mapActions("playlist", ["getAccountPlaylist"]),
-    ...mapMutations("playlist", ["setPlaylists"]),
-  },
-  computed: {
-    ...mapGetters({
-      token: "auth/userToken",
-      playlistArray: "playlist/getPlaylist",
-    }),
-  },
-  created() {
-    this.getAccountPlaylist(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        const playlist = res.playlist;
-        this.setPlaylists(playlist);
-      });
-  },
+  methods: {},
 });
 </script>
 <style lang="scss" scoped>

@@ -29,16 +29,16 @@
           @dragend="onDrop($event)"
           @dragenter="dragEnter($event, item)"
         >
-          <BaseSongItem
+          <!-- <BaseSongItem
             :selected="index === audioIndex ? true : false"
             :title="item.title"
             :artist="item.artist"
             :album="'Future Paradise'"
-            :duration="'3:30'"
+            :duration="500"
             :inQueue="true"
             @deleteFromQueue="deleteFromQueue(index)"
             @selectSong="setPlaySong(index)"
-          />
+          /> -->
         </li>
       </transition-group>
     </div>
@@ -54,7 +54,7 @@
           @dragend="onDrop($event)"
           @dragenter="dragEnter($event, item)"
         >
-          <BaseSongItem
+          <!-- <BaseSongItem
             :selected="index === audioIndex ? true : false"
             :title="item.title"
             :artist="item.artist"
@@ -63,7 +63,7 @@
             :inQueue="true"
             @deleteFromQueue="deleteFromQueue(index)"
             @selectSong="setPlaySong(index)"
-          />
+          /> -->
         </li>
       </transition-group>
     </div>

@@ -1,9 +1,18 @@
 <script lang="ts">
 import { computed } from "vue";
+import { _function } from "@/mixins";
+import { mapActions, mapGetters } from "vuex";
+import type { playlist } from "@/model/playlistModel";
 import HomeViewLeftSideBar from "../../components/HomeView/HomeViewLeftSideBar.vue";
 import HomeViewRightSideBar from "../../components/HomeView/HomeViewRightSideBar.vue";
 import HomeViewPlayer from "../../components/HomeView/HomeViewPlayer.vue";
 import HomeViewHeader from "../../components/HomeView/HomeViewHeader.vue";
+import BaseDialog from "../../components/UI/BaseDialog.vue";
+
+type playlistData = playlist & {
+  songCount: number;
+};
+
 export default {
   name: "HomeView",
   components: {
@@ -11,6 +20,7 @@ export default {
     HomeViewRightSideBar,
     HomeViewPlayer,
     HomeViewHeader,
+    BaseDialog,
   },
   data() {
     return {
@@ -60,6 +70,15 @@ export default {
       audioSource: null as MediaElementAudioSourceNode | null,
       analayzer: null as AnalyserNode | null,
       frequencyData: null as Uint8Array | null,
+      // playlist
+      userPlaylist: [] as playlistData[],
+      //dialog
+      dialogWaring: {
+        title: "Warning",
+        mode: "warning",
+        content: "Please fill in all the fields",
+        show: false,
+      },
     };
   },
   provide() {
@@ -69,16 +88,19 @@ export default {
       isPlaying: computed(() => this.isPlaying),
       audio: computed(() => this.audio),
       frequencyData: computed(() => this.frequencyData),
+      userPlaylist: computed(() => this.userPlaylist),
     };
   },
   methods: {
+    ...mapActions("playlist", ["getAccountPlaylist", "deletePlaylist"]),
+    // NOTE: Sidebar control
     toggleLeftSideBar() {
       this.isLeftSideBarActive = !this.isLeftSideBarActive;
     },
     toggleRightSideBar(value: boolean) {
       this.isRightSideBarActive = value;
     },
-    // Song event control
+    // NOTE: Song event control
     playSong() {
       this.audio.play();
       this.isPlaying = true;
@@ -142,7 +164,7 @@ export default {
       if (this.audioIndex === index) return;
       this.audioIndex = index;
     },
-    //playlist
+    // NOTE:playinglist
     onDrop(start: number, end: number) {
       if (this.isOnShuffle) {
         const temp = this.shuffledList[start];
@@ -175,29 +197,49 @@ export default {
         console.log(true);
       }
     },
-    // visualizer
+    // NOTE:visualizer
     renderFrame() {
       if (this.frequencyData) {
         if (this.analayzer)
           this.analayzer.getByteFrequencyData(this.frequencyData);
       }
     },
-    // Other Method
-    shuffleArr(array: Array<any>) {
-      let currentIndex = array.length,
-        randomIndex;
-      // While there remain elements to shuffle.
-      while (currentIndex != 0) {
-        // Pick a remaining element.
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-          array[randomIndex],
-          array[currentIndex],
-        ];
-      }
-      return array;
+    // NOTE:playlist
+    loadPlaylist() {
+      this.getAccountPlaylist(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          this.userPlaylist = res.playlist;
+        });
+    },
+    removePlaylist(id: string) {
+      this.deletePlaylist({ playlist_id: id, token: this.token })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.loadPlaylist();
+            this.dialogWaring = {
+              title: "Success",
+              mode: "announcement",
+              content: res.message,
+              show: true,
+            };
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
+    },
+    playPlaylist(id: string) {
+      console.log(id);
+    },
+    // NOTE: dialog
+    closeDialog() {
+      this.dialogWaring.show = false;
     },
   },
   watch: {
@@ -216,7 +258,7 @@ export default {
         );
         this.shuffledList = [
           playing,
-          ...this.shuffleArr(listNotContainPlaying),
+          ..._function.shuffleArr(listNotContainPlaying),
         ];
         this.audioIndex = 0;
         console.log("shuffle", this.audioIndex);
@@ -267,6 +309,14 @@ export default {
       }
     },
   },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
+  },
+  created() {
+    this.loadPlaylist();
+  },
   mounted() {
     this.audio = this.$refs["audio"];
     this.audio.volume = this.volume / 100;
@@ -276,11 +326,27 @@ export default {
 </script>
 
 <template>
+  <teleport to="body">
+    <BaseDialog
+      :open="dialogWaring.show"
+      :title="dialogWaring.title"
+      :mode="dialogWaring.mode"
+      @close="closeDialog"
+    >
+      <template #default>
+        <p>{{ dialogWaring.content }}</p>
+      </template>
+    </BaseDialog>
+  </teleport>
   <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
   <div class="main-body">
     <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
     <main>
-      <RouterView />
+      <RouterView
+        @updatePlaylist="loadPlaylist"
+        @deletePlaylist="removePlaylist"
+        @playPlaylist="playPlaylist"
+      />
     </main>
     <HomeViewRightSideBar
       :isActive="isRightSideBarActive"

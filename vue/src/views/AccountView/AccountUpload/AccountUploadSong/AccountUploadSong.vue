@@ -55,7 +55,7 @@
             <td>{{ song[0].title }}</td>
             <td v-if="song[0].artist_name && mainWidth > 600">
               <router-link
-                v-for="artist in song"
+                v-for="(artist, index) in song"
                 :key="artist.artist_id"
                 :to="{
                   name: 'artistOverviewPage',
@@ -63,6 +63,7 @@
                 }"
               >
                 {{ artist.artist_name }}
+                <span v-if="index !== song.length - 1">,</span>
               </router-link>
             </td>
             <td v-if="!song[0].artist_name && mainWidth > 600">Unset</td>

@@ -34,7 +34,7 @@ export const songModule = {
       context: any,
       data: { token: string; songForm: FormData }
     ): Promise<Response> {
-      return fetch(`${environment.api}/song/update`, {
+      return fetch(`${environment.api}/account/song/update`, {
         method: "POST",
         headers: {
           Accept: "multipart/form-data",
@@ -52,17 +52,8 @@ export const songModule = {
         },
       });
     },
-    getArtistList(context: any, userToken: string): Promise<Response> {
-      return fetch(`${environment.api}/artist`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
-    },
     getUploadedSongs(context: any, userToken: string): Promise<Response> {
-      return fetch(`${environment.api}/song/uploaded`, {
+      return fetch(`${environment.api}/account/song/uploaded`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +62,7 @@ export const songModule = {
       });
     },
     deleteSong(context: any, payload: { userToken: string; songId: string }) {
-      return fetch(`${environment.api}/song/${payload.songId}/delete`, {
+      return fetch(`${environment.api}/account/song/${payload.songId}/delete`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

@@ -68,16 +68,81 @@ export const playlistModule = {
         },
       });
     },
-    addSongToPlaylist(context: any, data: any): Promise<Response> {
-      return fetch(`${environment.api}/playlist/${data.playlist_id}/song`, {
+    updateDetailsPlaylist(context: any, data: any): Promise<Response> {
+      return fetch(`${environment.api}/playlist/update`, {
         method: "POST",
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${data.token}`,
         },
+        body: data.formData,
+      });
+    },
+    setPlaylistType(context: any, data: any): Promise<Response> {
+      return fetch(`${environment.api}/playlist/set-type`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${data.token}`,
+        },
+        body: JSON.stringify(data.type),
+      });
+    },
+    getAddableSongs(context: any, data: any): Promise<Response> {
+      return fetch(
+        `${environment.api}/playlist/${data.playlist_id}/addable/?query=${data.query}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${data.token}`,
+          },
+        }
+      );
+    },
+    addSongToPlaylist(context: any, data: any): Promise<Response> {
+      return fetch(`${environment.api}/playlist/song-add`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           song_id: data.song_id,
-          playlist: data.playlist_id,
+          playlist_id: data.playlist_id,
+        }),
+      });
+    },
+    addAlbumToPlaylist(context: any, data: any): Promise<Response> {
+      return fetch(`${environment.api}/playlist/album-add`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          album_id: data.album_id,
+          playlist_id: data.playlist_id,
+        }),
+      });
+    },
+    addToPlaylist(
+      context: any,
+      data: { from: string; to: string; token: string }
+    ): Promise<Response> {
+      return fetch(`${environment.api}/playlist/add-to-playlist`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: data.from,
+          to: data.to,
         }),
       });
     },

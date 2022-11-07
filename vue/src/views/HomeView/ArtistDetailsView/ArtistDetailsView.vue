@@ -1,15 +1,33 @@
 <template>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseDialog>
   <div class="artist-header">
     <div class="header__background"></div>
     <div class="header__image">
-      <img src="../../../assets/music/cover.jpg" alt="" srcset="" />
+      <img
+        :src="
+          artist.image_path
+            ? `${environment.artist_image}/${artist.image_path}`
+            : `${environment.default}/no_image.jpg`
+        "
+        alt=""
+        srcset=""
+      />
     </div>
     <div class="info">
       <div class="info__type">Artist</div>
-      <div class="info__title">虹ヶ咲学園スクールアイドル同好会</div>
+      <div class="info__title">{{ artist.name }}</div>
       <div class="info__other">
-        <div class="info__other--monthlyListeners">4,000 monthly listeners</div>
-        <div class="info__other--albumCount">- 1 Album</div>
+        <div class="info__other--monthlyListeners">
+          {{ artist.total_listens }} listeners
+        </div>
+        <div class="info__other--albumCount">
+          - {{ artist.total_album }} Album(s)
+        </div>
       </div>
     </div>
   </div>
@@ -41,9 +59,19 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapActions, mapGetters } from "vuex";
+import type { artist } from "@/model/artistModel";
+import { environment } from "@/environment/environment";
 import BaseListItem from "../../../components/UI/BaseListItem.vue";
 import IconHorizontalThreeDot from "../../../components/icons/IconHorizontalThreeDot.vue";
 import IconPlay from "../../../components/icons/IconPlay.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+
+type artistData = artist & {
+  total_listens: number;
+  total_album: number;
+};
 
 export default defineComponent({
   setup() {
@@ -51,11 +79,15 @@ export default defineComponent({
   },
   data() {
     return {
+      environment: environment,
       isMenuOpen: false,
       isSongListOpen: false,
+      artist: {} as artistData,
+      isLoading: true,
     };
   },
   methods: {
+    ...mapActions("artist", ["getArtist"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
     },
@@ -63,10 +95,32 @@ export default defineComponent({
       this.isSongListOpen = !this.isSongListOpen;
     },
   },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
+  },
+  created() {
+    this.getArtist({
+      token: this.token,
+      artist_id: this.$route.params.id,
+    })
+      .then((res: any) => {
+        return res.json();
+      })
+      .then((res) => {
+        this.isLoading = false;
+        if (res.status === "success") {
+          this.artist = res.artist;
+        }
+      });
+  },
   components: {
     BaseListItem,
     IconHorizontalThreeDot,
     IconPlay,
+    BaseDialog,
+    BaseLineLoad,
   },
 });
 </script>

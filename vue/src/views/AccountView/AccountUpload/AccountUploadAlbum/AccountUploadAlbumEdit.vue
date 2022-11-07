@@ -186,7 +186,7 @@ import type { LocationQueryValue } from "vue-router";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
 import type { song } from "@/model/songModel";
-import { functionModule } from "@/store/module/functionModule";
+import { _function } from "@/mixins
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
@@ -320,7 +320,7 @@ export default defineComponent({
     imageFileChange(e: Event) {
       const target = e.target as HTMLInputElement;
       if (target.files) {
-        if (!functionModule.validateImageFileType(target.files[0])) {
+        if (!_function.validateImageFileType(target.files[0])) {
           this.dialogWaring.title = "Warning";
           this.dialogWaring.content = "Please upload image file";
           this.dialogWaring.show = true;

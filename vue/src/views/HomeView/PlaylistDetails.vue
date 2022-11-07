@@ -1,6 +1,56 @@
 <template>
   <teleport to="body">
     <BaseDialog
+      v-if="playlistDetail.user_id === user.user_id"
+      :open="playlistEditDialog.show"
+      :title="playlistEditDialog.title"
+      :mode="playlistEditDialog.mode"
+      @close="closeEditDetailsDialog"
+    >
+      <template #default>
+        <div class="playlist-edit-container">
+          <div class="edit__image">
+            <input type="file" id="file" @change="onImageFileChange" />
+            <img v-if="edit.img" :src="edit.img" />
+            <img
+              v-else
+              :src="
+                playlistDetail.image_path
+                  ? `${environment.playlist_cover}/${playlistDetail.image_path}`
+                  : `${environment.default}/no_image.jpg`
+              "
+            />
+            <label>
+              <span><IconBallPen /></span>
+              <span>Choose Photo</span>
+            </label>
+          </div>
+          <div class="edit__detail">
+            <div class="edit__detail--title">
+              <label for="title">Title</label>
+              <input type="text" id="title" v-model="edit.title" />
+            </div>
+            <div class="edit__detail--description">
+              <label for="title">Description</label>
+              <textarea
+                name="description"
+                id="description"
+                cols="30"
+                rows="10"
+                v-model="edit.description"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template #action>
+        <BaseButton @click="onUpdateDetails">Update</BaseButton>
+        <BaseButton :mode="'warning'" @click="closeEditDetailsDialog"
+          >Cancel</BaseButton
+        >
+      </template>
+    </BaseDialog>
+    <BaseDialog
       :open="dialogWaring.show"
       :title="dialogWaring.title"
       :mode="dialogWaring.mode"
@@ -10,23 +60,58 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseDialog>
+    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseDialog>
+    <BaseDialog
+      :open="addToPlaylistDialog.show"
+      :title="addToPlaylistDialog.title"
+      :mode="addToPlaylistDialog.mode"
+      @close="closeAddToPlaylist"
+    >
+      <template #default>
+        <div v-for="playlist in userPlaylist" :key="playlist.playlist_id">
+          <BaseListItem
+            v-if="playlist.playlist_id != playlistDetail.playlist_id"
+            @click="onAddToPlaylist(playlist.playlist_id)"
+          >
+            {{ playlist.title }}
+          </BaseListItem>
+        </div>
+      </template>
+    </BaseDialog>
   </teleport>
   <div class="playlist-header" :class="{ medium: medium, small: small }">
     <div
       class="header__background"
-      style="
-        background: url('http://127.0.0.1:5173/src/assets/music/cover.jpg');
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-      "
+      :style="[
+        playlistDetail.image_path
+          ? {
+              background: `url(${environment.playlist_cover}/${playlistDetail.image_path})
+              no-repeat center center / cover`,
+            }
+          : {
+              background: `url(${environment.default}/no_image.jpg) no-repeat center center / cover`,
+            },
+      ]"
     ></div>
-    <div class="header__image">
-      <img src="../../assets/music/cover.jpg" alt="" srcset="" />
+    <div class="header__image" @click="openEditDetailsDialog">
+      <img
+        :src="
+          playlistDetail.image_path
+            ? `${environment.playlist_cover}/${playlistDetail.image_path}`
+            : `${environment.default}/no_image.jpg`
+        "
+      />
     </div>
     <div class="info">
       <div class="info__type">{{ playlistDetail.type }}</div>
-      <div class="info__title">{{ playlistDetail.title }}</div>
+      <div class="info__title" @click="openEditDetailsDialog">
+        {{ playlistDetail.title }}
+      </div>
       <div class="info__description">{{ playlistDetail.description }}</div>
       <div class="info__other">
         <router-link
@@ -38,7 +123,7 @@
         >
         <div class="info__other--songCount">- {{ songCount }} Songs -</div>
         <div class="info__other--totalDuration">
-          {{ songDuration }}
+          {{ totalDuration }}
         </div>
       </div>
     </div>
@@ -46,7 +131,7 @@
   <div class="control">
     <div class="control__left">
       <div class="control__left--play" v-if="songCount > 0">
-        <IconPlay />
+        <IconPlay @click="playPlaylist" />
       </div>
       <div class="control__left--menu">
         <IconHorizontalThreeDot @click="toggleMenu" />
@@ -61,16 +146,22 @@
           <div class="playlist-menu" v-if="isMenuOpen">
             <BaseListItem>Add Song</BaseListItem>
             <BaseListItem>Add to Queue</BaseListItem>
-            <BaseListItem>Add to Other Playlist</BaseListItem>
+            <BaseListItem @click="openAddToPlaylist"
+              >Add to Other Playlist</BaseListItem
+            >
             <div v-if="playlistDetail.user_id == user.user_id">
-              <BaseListItem v-if="playlistDetail.type === 'Private'"
+              <BaseListItem
+                v-if="playlistDetail.type === 'Private'"
+                @click="onUpdateType('Public')"
                 >Make Public</BaseListItem
               >
-              <BaseListItem v-else>Make Private</BaseListItem>
+              <BaseListItem v-else @click="onUpdateType('Private')"
+                >Make Private</BaseListItem
+              >
             </div>
             <BaseListItem
               v-if="playlistDetail.user_id == user.user_id"
-              @click="deleteList"
+              @click="onDeletePlaylist"
               >Delete Playlist</BaseListItem
             >
           </div>
@@ -92,7 +183,7 @@
         </transition>
       </div>
       <div class="control__right--sort">
-        <select name="sort" id="">
+        <select name="sort" id="" @change="onSortSong">
           <option value="date">Sort by added date</option>
           <option value="title">Sort by title</option>
           <option value="artist">Sort by artist</option>
@@ -112,7 +203,7 @@
           Album
         </div>
         <div class="songList__header--right--hears" :class="{ medium: medium }">
-          Hears
+          Added
         </div>
         <div
           class="songList__header--right--duration"
@@ -126,15 +217,21 @@
         ></div>
       </div>
     </div>
-    <div class="songList__content">
+    <div class="songList__content" v-if="isSongLoading">
+      <BaseCircleLoad />
+    </div>
+    <div class="songList__content" v-else-if="filterText === ''">
       <BaseSongItem
-        v-for="item in songList"
-        :key="item"
-        :title="'Future Parade'"
-        :artist="'虹ヶ咲学園スクールアイドル同好会'"
-        :album="'Future Parade'"
-        :duration="'4:36'"
-        :hears="1000000"
+        v-for="song in songList"
+        :data="song"
+        :key="song[0].song_id"
+      />
+    </div>
+    <div class="songList__content" v-else>
+      <BaseSongItem
+        v-for="song in songFilterResuilt"
+        :data="song"
+        :key="song[0].song_id"
       />
     </div>
   </div>
@@ -146,17 +243,29 @@
       </button>
       <input type="text" placeholder="Search" v-model="searchText" />
     </div>
-    <div class="searchMore__result">
+    <div class="searchMore__result" v-if="isGettingSongSearch">
+      <BaseCircleLoad />
+    </div>
+    <div
+      class="searchMore__result"
+      v-else-if="Object.keys(songSearchResuilt).length > 0"
+    >
       <BaseSongItem
         v-for="song in songSearchResuilt"
-        :key="song"
-        :title="'Future Parade'"
-        :artist="'虹ヶ咲学園スクールアイドル同好会'"
-        :album="'Future Parade'"
-        :duration="'4:36'"
-        :hears="1000000"
-        @selectSong="addSong(song)"
+        :data="song"
+        :key="song[0].song_id"
+        :control="false"
+        @selectSong="onAddSongToList"
       />
+    </div>
+    <div class="searchMore__result">
+      <h3
+        v-if="
+          Object.keys(songSearchResuilt).length === 0 && !isGettingSongSearch
+        "
+      >
+        No result
+      </h3>
     </div>
   </div>
 </template>
@@ -164,16 +273,37 @@
 import { defineComponent } from "vue";
 import type { playlist } from "@/model/playlistModel";
 import type { user } from "@/model/userModel";
+import { mapActions, mapGetters } from "vuex";
+import { environment } from "@/environment/environment";
+import { _function } from "@/mixins";
 import IconPlay from "../../components/icons/IconPlay.vue";
 import IconSearch from "../../components/icons/IconSearch.vue";
 import IconHorizontalThreeDot from "../../components/icons/IconHorizontalThreeDot.vue";
 import BaseListItem from "../../components/UI/BaseListItem.vue";
+import BaseLineLoad from "../../components/UI/BaseLineLoad.vue";
+import BaseCircleLoad from "../../components/UI/BaseCircleLoad.vue";
 import BaseSongItem from "../../components/UI/BaseSongItem.vue";
-import { mapActions, mapGetters, mapMutations } from "vuex";
 import BaseDialog from "../../components/UI/BaseDialog.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
+import IconBallPen from "@/components/icons/IconBallPen.vue";
+
+type songPlaylist = {
+  [song_id: string]: {
+    song_id: string;
+    title: string;
+    artist_name: string;
+    artist_id: string;
+    added_date?: string;
+    album_name: string;
+    album_id: string;
+    image_path: string;
+    duration: number;
+    listens?: number;
+  }[];
+};
 
 export default defineComponent({
-  setup() {},
+  emits: ["updatePlaylist", "deletePlaylist", "playPlaylist"],
   components: {
     IconPlay,
     IconSearch,
@@ -181,27 +311,42 @@ export default defineComponent({
     BaseListItem,
     BaseSongItem,
     BaseDialog,
+    BaseButton,
+    IconBallPen,
+    BaseLineLoad,
+    BaseCircleLoad,
   },
+  inject: ["userPlaylist"],
   data() {
     return {
-      playlistDetail: {} as playlist,
-      playlistOwner: {
-        user_id: "1",
-      } as user,
-      isMenuOpen: false,
-      isSearchBarOpen: false,
-      filterText: "",
+      environment: environment,
       songListWidth: 0,
       observer: null as ResizeObserver | null,
       small: false,
       medium: false,
-      //song list part
-      songList: [] as string[],
       songCount: 0,
-      songDuration: "",
+      totalDuration: "",
+      //song list part
+      playlistDetail: {} as playlist,
+      songList: {} as songPlaylist,
+      playlistOwner: {
+        user_id: "1",
+      } as user,
+      isMenuOpen: false,
+      //filter
+      isSearchBarOpen: false,
+      filterText: "",
+      filteredSongList: {} as songPlaylist,
       //search part
       searchText: "",
-      songSearchResuilt: [] as string[],
+      songSearchResuilt: {} as songPlaylist,
+      //Edit part
+      edit: {
+        file: null as File | null,
+        img: "",
+        title: "",
+        description: "",
+      },
       //dialog
       dialogWaring: {
         title: "Warning",
@@ -209,6 +354,19 @@ export default defineComponent({
         content: "Please fill in all the fields",
         show: false,
       },
+      playlistEditDialog: {
+        title: "Edit details",
+        mode: "announcement",
+        show: false,
+      },
+      addToPlaylistDialog: {
+        title: "Add to playlist",
+        mode: "announcement",
+        show: false,
+      },
+      isLoading: false,
+      isSongLoading: false,
+      isGettingSongSearch: false,
     };
   },
   methods: {
@@ -218,49 +376,232 @@ export default defineComponent({
     toggleSearchBar() {
       this.isSearchBarOpen = !this.isSearchBarOpen;
     },
-    addSong(song_id: string) {
-      this.addSongToPlaylist({
-        playlist_id: this.playlistDetail.playlist_id,
-        song_id: song_id,
+    loadPlaylist() {
+      this.isLoading = true;
+      this.getPlaylist({
+        playlist_id: this.$route.params.id,
         token: this.token,
       })
         .then((res) => res.json())
         .then((res) => {
-          if (res.status === "success") {
-            this.searchText = "";
-            this.songList.push(song_id);
-          } else if (res.status === "error") {
-            this.dialogWaring.content = res.message;
-            this.dialogWaring.show = true;
+          this.isLoading = false;
+          if (res.status === "error") {
+            this.$router.push({ name: "mainPage", replace: true });
+          } else {
+            this.playlistDetail = res.playlistDetail;
+            this.playlistOwner = res.owner;
+            this.edit.title = this.playlistDetail.title ?? "";
+            this.edit.description = this.playlistDetail.description ?? "";
           }
         });
     },
-    deleteList() {
-      this.deletePlaylist({
-        playlist_id: this.playlistDetail.playlist_id,
+    loadPlaylistSong() {
+      this.isSongLoading = true;
+      this.getPlaylistSongs({
+        playlist_id: this.$route.params.id,
         token: this.token,
       })
         .then((res) => res.json())
         .then((res) => {
-          if (res.status === "success") {
-            this.cleanDeletedPlaylist(this.playlistDetail.playlist_id);
-            this.$router.push({ name: "mainPage" });
-          } else if (res.status === "error") {
-            this.dialogWaring.content = res.message;
-            this.dialogWaring.show = true;
+          this.isSongLoading = false;
+          if (res.status !== "error") {
+            this.songList = res.songList.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.songCount = res.songCount;
+            let duration = Object.keys(this.songList).reduce(
+              (a: number, key: any) => {
+                return a + this.songList[key][0].duration;
+              },
+              0
+            );
+            this.totalDuration = new Date(duration * 1000)
+              .toISOString()
+              .substring(11, 19);
+          }
+        });
+    },
+    loadSearchResult(query: string) {
+      this.getAddableSongs({
+        token: this.token,
+        playlist_id: this.playlistDetail.playlist_id,
+        query: query,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isGettingSongSearch = false;
+          if (res.status !== "error") {
+            this.songSearchResuilt = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
           }
         });
     },
     closeDialog() {
       this.dialogWaring.show = false;
     },
+    closeEditDetailsDialog() {
+      this.playlistEditDialog.show = false;
+      this.edit.img = "";
+      this.edit.file = null;
+    },
+    openEditDetailsDialog() {
+      this.playlistEditDialog.show = true;
+    },
+    closeAddToPlaylist() {
+      this.addToPlaylistDialog.show = false;
+    },
+    openAddToPlaylist() {
+      this.addToPlaylistDialog.show = true;
+    },
+    onImageFileChange(e: Event) {
+      const target = e.target as HTMLInputElement;
+      if (target.files)
+        if (target.files.length > 0) {
+          if (!_function.validateImageFileType(target.files[0])) {
+            this.dialogWaring.content = "Please upload valid image file";
+            this.dialogWaring.show = true;
+            return;
+          }
+          let reader = new FileReader();
+          reader.readAsDataURL(target.files[0]);
+          reader.onload = () => {
+            this.edit.img = reader.result as string;
+          };
+          this.edit.file = target.files[0];
+        }
+    },
+    onUpdateDetails() {
+      if (this.edit.title === "") {
+        this.dialogWaring.content = "Please fill title field";
+        this.dialogWaring.show = true;
+        return;
+      }
+      //update playlist
+      this.isLoading = true;
+      const formData = new FormData();
+      if (this.playlistDetail.playlist_id)
+        formData.append("playlist_id", this.playlistDetail.playlist_id);
+      formData.append("title", this.edit.title);
+      formData.append("description", this.edit.description);
+      if (this.edit.file) formData.append("image", this.edit.file);
+      this.updateDetailsPlaylist({
+        token: this.token,
+        formData: formData,
+      })
+        .then((res) => {
+          this.closeEditDetailsDialog();
+          this.isLoading = false;
+          return res.json();
+        })
+        .then((res) => {
+          if (res.status === "success") {
+            this.loadPlaylist();
+            this.$emit("updatePlaylist");
+          }
+        });
+    },
+    onUpdateType(type: string) {
+      this.isLoading = true;
+      this.setPlaylistType({
+        token: this.token,
+        type: {
+          playlist_id: this.playlistDetail.playlist_id,
+          type: type,
+        },
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success") {
+            this.playlistDetail.type = type;
+          }
+        });
+    },
+    onDeletePlaylist() {
+      this.$emit("deletePlaylist", this.playlistDetail.playlist_id);
+      this.$router.push({ name: "libraryPage", replace: true });
+    },
+    onAddSongToList(id: string) {
+      this.isLoading = true;
+      this.addSongToPlaylist({
+        token: this.token,
+        song_id: id,
+        playlist_id: this.playlistDetail.playlist_id,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success") {
+            this.loadPlaylistSong();
+            this.loadSearchResult(this.searchText);
+          }
+        });
+    },
+    onSortSong(e: Event): void {
+      const target = e.target as HTMLSelectElement;
+      if (this.filterText === "") {
+        if (target.value === "title") {
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
+              (a: songPlaylist, b: songPlaylist) =>
+                a[1][0].title.localeCompare(b[1][0].title)
+            )
+          );
+        } else if (target.value === "artist") {
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
+              (a: songPlaylist, b: songPlaylist) =>
+                a[1][0].artist_name.localeCompare(b[1][0].artist_name)
+            )
+          );
+        } else if (target.value === "album") {
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
+              (a: songPlaylist, b: songPlaylist) =>
+                a[1][0].album_name.localeCompare(b[1][0].album_name)
+            )
+          );
+        } else if (target.value === "date") {
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
+              (a: songPlaylist, b: songPlaylist) =>
+                a[1][0].added_date.localeCompare(b[1][0].added_date)
+            )
+          );
+        }
+      }
+    },
+    onAddToPlaylist(id: string) {
+      this.addToPlaylistDialog.show = false;
+      this.addToPlaylist({
+        from: this.playlistDetail.playlist_id,
+        to: id,
+        token: this.token,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.$emit("updatePlaylist");
+          }
+        });
+    },
+    playPlaylist() {
+      this.$emit("playPlaylist", this.playlistDetail.playlist_id);
+    },
     ...mapActions("playlist", [
       "getPlaylist",
       "getPlaylistSongs",
+      "updateDetailsPlaylist",
+      "setPlaylistType",
+      "getAddableSongs",
       "addSongToPlaylist",
-      "deletePlaylist",
+      "addToPlaylist",
     ]),
-    ...mapMutations("playlist", ["cleanDeletedPlaylist"]),
   },
   mounted() {
     const songList = this.$refs.songList as HTMLElement;
@@ -272,39 +613,23 @@ export default defineComponent({
     if (this.observer && songList) this.observer.observe(songList);
   },
   created() {
-    this.getPlaylist({
-      playlist_id: this.$route.params.id,
-      token: this.token,
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.status === "error") {
-          this.$router.push({ name: "mainPage", replace: true });
-        } else {
-          this.playlistDetail = res.playlistDetail;
-          this.playlistOwner = res.owner;
-        }
-      });
-    this.getPlaylistSongs({
-      playlist_id: this.$route.params.id,
-      token: this.token,
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.status !== "error") {
-          this.songList = res.songList;
-          this.songCount = res.songCount;
-          this.songDuration = new Date(res.songDuration * 1000)
-            .toISOString()
-            .substring(11, 16);
-        }
-      });
+    this.loadPlaylist();
+    this.loadPlaylistSong();
   },
   computed: {
     ...mapGetters({
       token: "auth/userToken",
       user: "auth/userData",
     }),
+    songFilterResuilt() {
+      if (this.filterText === "") return this.songList;
+      const resuilt = Object.fromEntries(
+        Object.entries(this.songList).filter((song: songPlaylist) =>
+          song[1][0].title.toLowerCase().includes(this.filterText.toLowerCase())
+        )
+      );
+      return resuilt;
+    },
   },
   watch: {
     songListWidth(o) {
@@ -318,6 +643,23 @@ export default defineComponent({
         this.small = false;
         this.medium = false;
       }
+    },
+    searchText(o) {
+      this.isGettingSongSearch = true;
+      if (o !== "") {
+        this.loadSearchResult(o);
+      } else {
+        this.isGettingSongSearch = false;
+        this.songSearchResuilt = {};
+      }
+    },
+    "$route.params.id": {
+      handler() {
+        this.loadPlaylist();
+        this.loadPlaylistSong();
+      },
+      deep: true,
+      immediate: true,
     },
   },
 });
@@ -357,7 +699,7 @@ $tablet-width: 768px;
     height: 190px;
     overflow: hidden;
     flex: 0 0 auto;
-
+    cursor: pointer;
     & img {
       width: 100%;
       height: 100%;
@@ -371,7 +713,12 @@ $tablet-width: 768px;
     padding: 0 20px;
     display: flex;
     flex-direction: column;
-
+    a {
+      color: #fff;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
     &__type {
       font-size: 14px;
       color: #fff;
@@ -382,12 +729,15 @@ $tablet-width: 768px;
       font-size: 32px;
       color: #fff;
       font-weight: 900;
+      cursor: pointer;
+      word-break: break-all;
     }
 
     &__description {
       font-size: 16px;
       color: #fff;
       font-weight: 400;
+      word-break: break-all;
     }
 
     &__other {
@@ -705,6 +1055,116 @@ $tablet-width: 768px;
     &.small {
       input {
         width: calc(90% - 70px);
+      }
+    }
+  }
+  &__result {
+    padding: 20px;
+  }
+}
+
+.playlist-edit-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .edit__image {
+    aspect-ratio: 1/1;
+    width: 40%;
+    height: 40%;
+    position: relative;
+    flex: 0 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    input {
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    label {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+      z-index: 1;
+      background: var(--background-color-secondary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      span {
+        display: block;
+      }
+      svg {
+        width: 40px;
+        height: 40px;
+      }
+    }
+    &:hover label {
+      opacity: 1;
+    }
+  }
+  .edit__detail {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0 20px;
+    label {
+      font-weight: 600;
+      padding: 2px 0;
+    }
+    .edit__detail--title {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      input {
+        width: 100%;
+        height: 50px;
+        background: var(--background-glass-color-primary);
+        color: var(--text-primary-color);
+        outline: none;
+        border: none;
+        padding: 0 10px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+      }
+    }
+    .edit__detail--description {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      textarea {
+        width: 100%;
+        height: 100px;
+        background: var(--background-glass-color-primary);
+        color: var(--text-primary-color);
+        outline: none;
+        border: none;
+        padding: 10px;
+        font-size: 1rem;
+        font-weight: 400;
+        resize: none;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
       }
     }
   }

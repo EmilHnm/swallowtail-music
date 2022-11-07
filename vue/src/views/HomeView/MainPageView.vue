@@ -1,11 +1,13 @@
 <template>
   <div class="wrapper">
     <div class="news" ref="news">
-      <div class="latest-songs" v-if="latestSongs">
+      <div class="latest-songs">
         <h2>Latest Songs Update</h2>
+        <BaseCircleLoad v-if="isLatestSongLoading" />
         <div
           class="latest-song__container"
           :class="{ min: min, medium: medium }"
+          v-else
         >
           <base-list-item v-for="(song, index) in latestSongs" :key="index">
             <div class="latest-song__song">
@@ -41,37 +43,42 @@
           </base-list-item>
         </div>
       </div>
-      <div class="latest-album" v-if="latestAlbums.length > 0">
+      <div class="latest-album">
         <h2>Latest Album Update</h2>
-        <BaseHorizontalScroll>
+        <BaseCircleLoad v-if="isLatestAlbumLoading" />
+        <BaseHorizontalScroll v-else>
           <BaseCardAlbum
             v-for="album in latestAlbums"
             :key="album.album_id"
             :title="album.name"
             :uploader="album.user_name"
             :id="album.album_id"
-            :img="album.image_path"
+            :img="`${environment.album_cover}/${album.image_path}`"
+            :type="'album'"
             :songCount="album.songCount"
         /></BaseHorizontalScroll>
       </div>
     </div>
     <div class="top">
-      <div class="top__album" v-if="topAlbums.length > 0">
+      <div class="top__album">
         <h2>Top Album All Time</h2>
-        <BaseHorizontalScroll>
+        <BaseCircleLoad v-if="isTopAlbumLoading" />
+        <BaseHorizontalScroll v-else>
           <BaseCardAlbum
             v-for="album in topAlbums"
             :key="album.album_id"
             :title="album.name"
             :uploader="album.user_name"
             :id="album.album_id"
-            :img="album.image_path"
-            :listens="album.totalListen"
+            :img="`${environment.album_cover}/${album.image_path}`"
+            :type="'album'"
+            :listens="+album.totalListen"
           />
         </BaseHorizontalScroll>
       </div>
-      <div class="top__artist" v-if="topArtist.length > 0">
+      <div class="top__artist">
         <h2>Top Artist All Time</h2>
+        <BaseCircleLoad v-if="isTopArtistLoading" />
         <BaseHorizontalScroll>
           <BaseCardArtist
             v-for="artist in topArtist"
@@ -82,63 +89,28 @@
       </div>
     </div>
     <div class="favorite">
-      <div class="favorite__playlist">
+      <div class="favorite__playlist" v-if="userPlaylist.length > 0">
         <h2>Your Favorite List</h2>
         <div
           class="favorite__playlist--container"
           :class="{ min: min, medium: medium }"
         >
-          <base-list-item>
+          <base-list-item
+            v-for="playlist in userPlaylist"
+            :key="playlist.playlist_id"
+          >
             <div class="favorite__playlist__item">
-              <div class="favorite__playlist__item--title">Future Parade</div>
-              <div class="favorite__playlist__item--songCount">116 songs</div>
-              <div class="favorite__playlist__item--play">
-                <IconPlay />
+              <div
+                class="favorite__playlist__item--title"
+                @click="redirectToPlaylist(playlist.playlist_id)"
+              >
+                {{ playlist.title }}
               </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="favorite__playlist__item">
-              <div class="favorite__playlist__item--title">Future Parade</div>
-              <div class="favorite__playlist__item--songCount">116 songs</div>
-              <div class="favorite__playlist__item--play">
-                <IconPlay />
+              <div class="favorite__playlist__item--songCount">
+                {{ playlist.songCount }} songs
               </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="favorite__playlist__item">
-              <div class="favorite__playlist__item--title">Future Parade</div>
-              <div class="favorite__playlist__item--songCount">116 songs</div>
               <div class="favorite__playlist__item--play">
-                <IconPlay />
-              </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="favorite__playlist__item">
-              <div class="favorite__playlist__item--title">Future Parade</div>
-              <div class="favorite__playlist__item--songCount">116 songs</div>
-              <div class="favorite__playlist__item--play">
-                <IconPlay />
-              </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="favorite__playlist__item">
-              <div class="favorite__playlist__item--title">Future Parade</div>
-              <div class="favorite__playlist__item--songCount">116 songs</div>
-              <div class="favorite__playlist__item--play">
-                <IconPlay />
-              </div>
-            </div>
-          </base-list-item>
-          <base-list-item>
-            <div class="favorite__playlist__item">
-              <div class="favorite__playlist__item--title">Future Parade</div>
-              <div class="favorite__playlist__item--songCount">116 songs</div>
-              <div class="favorite__playlist__item--play">
-                <IconPlay />
+                <IconPlay @click="playPlaylist(playlist.playlist_id)" />
               </div>
             </div>
           </base-list-item>
@@ -154,8 +126,11 @@ import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
 import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
 import { mapActions, mapGetters } from "vuex";
+import { environment } from "@/environment/environment";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
+import type { playlist } from "@/model/playlistModel";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
 type songData = {
   [song_id: string]: {
@@ -177,17 +152,30 @@ type TopAlbum = album & {
   totalListen: number;
 };
 
+type playlistData = playlist & {
+  songCount: number;
+};
+
 export default defineComponent({
   components: {
     IconPlay,
     BaseHorizontalScroll,
     BaseCardArtist,
     BaseCardAlbum,
+    BaseCircleLoad,
   },
+  inject: {
+    userPlaylist: {
+      from: "userPlaylist",
+      default: [] as playlistData[],
+    },
+  },
+  emits: ["playPlaylist"],
   data() {
     return {
       news: 0,
       observer: null as ResizeObserver | null,
+      environment: environment,
       min: false,
       medium: false,
       testArr: [1, 2, 3, 4, 5, 6, 7, 8],
@@ -195,12 +183,23 @@ export default defineComponent({
       latestAlbums: [] as LatestAlbum[],
       topAlbums: [] as TopAlbum[],
       topArtist: [] as artist[],
+      //loading
+      isLatestSongLoading: true,
+      isLatestAlbumLoading: true,
+      isTopAlbumLoading: true,
+      isTopArtistLoading: true,
     };
   },
   methods: {
     ...mapActions("song", ["getLatestSong"]),
     ...mapActions("artist", ["getTopArtists"]),
     ...mapActions("album", ["getLatestAlbums", "getTopAlbums"]),
+    redirectToPlaylist(id: string) {
+      this.$router.push({ name: "playlistViewPage", params: { id: id } });
+    },
+    playPlaylist(id: string) {
+      this.$emit("playPlaylist", id);
+    },
   },
   computed: {
     ...mapGetters({ token: "auth/userToken" }),
@@ -214,21 +213,25 @@ export default defineComponent({
           r[a.song_id].push(a);
           return r;
         }, Object.create(null));
+        this.isLatestSongLoading = false;
       });
     this.getLatestAlbums(this.token)
       .then((res) => res.json())
       .then((res) => {
         this.latestAlbums = [...res.albums];
+        this.isLatestAlbumLoading = false;
       });
     this.getTopAlbums(this.token)
       .then((res) => res.json())
       .then((res) => {
         this.topAlbums = [...res.albums];
+        this.isTopAlbumLoading = false;
       });
     this.getTopArtists(this.token)
       .then((res) => res.json())
       .then((res) => {
         this.topArtist = [...res.artists];
+        this.isTopArtistLoading = false;
       });
   },
   mounted() {
@@ -265,6 +268,7 @@ export default defineComponent({
   height: 100%;
   overflow: auto;
   overflow-x: hidden;
+  padding-bottom: 40px;
   h2 {
     font-size: 1.5rem;
     font-weight: 600;
@@ -416,6 +420,7 @@ export default defineComponent({
       position: relative;
       width: 100%;
       &--title {
+        cursor: pointer;
         font-size: 1.2rem;
         font-weight: 600;
         text-overflow: ellipsis;
@@ -438,6 +443,7 @@ export default defineComponent({
         color: var(--text-subdued);
         opacity: 0;
         transition: 0.3s;
+        cursor: pointer;
         & svg {
           width: 100%;
           height: 100%;

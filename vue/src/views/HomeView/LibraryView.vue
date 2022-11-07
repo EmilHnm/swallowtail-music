@@ -1,22 +1,30 @@
 <template>
   <div class="container">
-    <!-- TODO: move redirect to BaseCardAlbum -->
     <BaseCardAlbum
-      v-for="item in playlist"
-      :key="item.playlist_id"
-      :id="item.playlist_id"
-      :title="item.title"
-      :uploader="'Emil'"
-      :songCount="6"
+      v-for="playlist in userPlaylist"
+      :key="playlist.playlist_id"
+      :title="playlist.title"
+      :id="playlist.playlist_id"
+      :img="
+        playlist.image_path
+          ? `${environment.playlist_cover}/${playlist.image_path}`
+          : `${environment.default}/no_image.jpg`
+      "
       :type="'playlist'"
-      @redirect="redirect"
+      :songCount="playlist.songCount"
     />
   </div>
 </template>
 <script lang="ts">
+import type { playlist } from "@/model/playlistModel";
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
+import { environment } from "@/environment/environment";
+
+type playlistData = playlist & {
+  songCount: number;
+};
 
 export default defineComponent({
   components: { BaseCardAlbum },
@@ -25,10 +33,16 @@ export default defineComponent({
       playlist: "playlist/getPlaylist",
     }),
   },
-  methods: {
-    redirect({ id, type }: { id: string; type: string }) {
-      this.$router.push({ name: "playlistViewPage", params: { id: id } });
+  inject: {
+    userPlaylist: {
+      from: "userPlaylist",
+      default: [] as playlistData[],
     },
+  },
+  data() {
+    return {
+      environment: environment,
+    };
   },
 });
 </script>

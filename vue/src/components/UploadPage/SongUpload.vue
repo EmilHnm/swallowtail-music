@@ -42,12 +42,14 @@
         <span>Artist List </span>
         <BaseTag
           v-for="(artist, index) in artistArray"
-          @click="functionModule.removeItemFormArr(index, artistArray)"
+          :key="artist.artist_id"
+          @click="_function.removeItemFormArr(index, artistArray)"
           >{{ artist.name }}</BaseTag
         >
         <BaseTag
           v-for="(artist, index) in newArtistArray"
-          @click="functionModule.removeItemFormArr(index, newArtistArray)"
+          :key="artist"
+          @click="_function.removeItemFormArr(index, newArtistArray)"
           >{{ artist }}</BaseTag
         >
       </div>
@@ -67,7 +69,7 @@
       >
         <div
           class="artistSearch--item"
-          v-for="artist in functionModule.checkIncludeString(
+          v-for="artist in _function.checkIncludeString(
             artistName,
             templateArtistArray,
             artistArray
@@ -84,12 +86,14 @@
         <span>Genre List</span>
         <BaseTag
           v-for="(genre, index) in genreArray"
-          @click="functionModule.removeItemFormArr(index, genreArray)"
+          :key="genre.genre_id"
+          @click="_function.removeItemFormArr(index, genreArray)"
           >{{ genre.name }}</BaseTag
         >
         <BaseTag
           v-for="(genre, index) in newGenreArray"
-          @click="functionModule.removeItemFormArr(index, newGenreArray)"
+          :key="genre"
+          @click="_function.removeItemFormArr(index, newGenreArray)"
           >{{ genre }}</BaseTag
         >
       </div>
@@ -109,7 +113,7 @@
       >
         <div
           class="genreSearch--item"
-          v-for="genre in functionModule.checkIncludeString(
+          v-for="genre in _function.checkIncludeString(
             genreName,
             templateGenreArray,
             genreArray
@@ -151,7 +155,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
-import { functionModule } from "../../store/module/functionModule";
+import { _function } from "../../mixins
 import type { genre } from "@/model/genreModel";
 import type { artist } from "@/model/artistModel";
 import BaseInput from "../UI/BaseInput.vue";
@@ -159,7 +163,6 @@ import BaseRadio from "../UI/BaseRadio.vue";
 import BaseButton from "../UI/BaseButton.vue";
 import BaseTag from "../UI/BaseTag.vue";
 import BaseDialog from "../UI/BaseDialog.vue";
-import Loading from "vue-loading-overlay";
 export default defineComponent({
   data() {
     return {
@@ -174,7 +177,7 @@ export default defineComponent({
       newGenreArray: [] as string[],
       artistName: "",
       genreName: "",
-      songFile: null as FileList | null,
+      songFile: null as File | null,
       dialogWaring: {
         title: "Warning",
         mode: "warning",
@@ -182,16 +185,18 @@ export default defineComponent({
         show: false,
       },
       isLoading: true,
-      functionModule: functionModule,
+      _function: _function,
     };
   },
   methods: {
-    ...mapActions("song", ["getGenreList", "getArtistList", "uploadSong"]),
+    ...mapActions("song", ["getGenreList", "uploadSong"]),
+    ...mapActions("artist", ["getArtistList"]),
     previewFile(event: Event) {
-      this.songFile = (<HTMLInputElement>event.target).files[0];
+      let target = event.target as HTMLInputElement;
+      if (target) if (target.files) this.songFile = target.files[0];
     },
     pushItemtoArray(item: genre | artist, array: genre[] | artist[]): void {
-      functionModule.pushItemtoArray(item, array);
+      _function.pushItemtoArray(item, array);
       this.artistName = "";
       this.genreName = "";
     },
@@ -200,7 +205,7 @@ export default defineComponent({
       array: string[],
       tempArr: genre[] | artist[]
     ): void {
-      functionModule.pushItemNotIncludedtoNewArray(item, array, tempArr);
+      _function.pushItemNotIncludedtoNewArray(item, array, tempArr);
       this.artistName = "";
       this.genreName = "";
     },
@@ -213,7 +218,7 @@ export default defineComponent({
         this.dialogWaring.show = true;
         return;
       }
-      if (functionModule.validateSongFileType(this.songFile) === false) {
+      if (_function.validateSongFileType(this.songFile) === false) {
         this.dialogWaring.content = "Please upload a valid song file";
         this.dialogWaring.show = true;
         return;
@@ -289,7 +294,6 @@ export default defineComponent({
     BaseButton,
     BaseTag,
     BaseDialog,
-    Loading,
   },
   computed: {
     ...mapGetters({

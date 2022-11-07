@@ -19,8 +19,17 @@ class ArtistController extends Controller
 
     public function show($id)
     {
-        $artist = Artist::where('artist_id', $id)->first();
-        return response()->json($artist, Response::HTTP_OK);
+        $artist = DB::table('artists')
+            ->leftJoin('song_artists', 'artists.artist_id', '=', 'song_artists.artist_id')
+            ->leftJoin('songs', 'song_artists.song_id', '=', 'songs.song_id')
+            ->select('artists.*', DB::raw('sum(songs.listens) as total_listens'), DB::raw('count(distinct songs.album_id) as total_album'))
+            ->where('artists.artist_id', $id)
+            ->groupBy('artists.artist_id')
+            ->first();
+        return response()->json([
+            'status' => 'success',
+            'artist' => $artist
+        ], Response::HTTP_OK);
     }
 
     public function getTop()
@@ -34,6 +43,75 @@ class ArtistController extends Controller
         return response()->json([
             'status' => 'success',
             'artists' => $artist
+        ]);
+    }
+
+    public function getBySongByArtistId($id)
+    {
+        $artist = DB::table('artists')
+            ->join('song_artists', 'artists.artist_id', '=', 'song_artists.artist_id')
+            ->join('songs', 'song_artists.song_id', '=', 'songs.song_id')
+            ->select('artists.*')
+            ->where('songs.song_id', $id)
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'artists' => $artist
+        ]);
+    }
+
+    public function getTopSongByArtistId($id)
+    {
+        $songs = DB::table('songs')
+            ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
+            ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
+            ->join('albums', 'songs.album_id', '=', 'albums.album_id')
+            ->select(
+                'songs.song_id',
+                'songs.title',
+                'songs.song_id',
+                'songs.duration',
+                'songs.listens',
+                "artists.artist_id",
+                "artists.name as artist_name",
+                "albums.name as album_name",
+                "albums.album_id as album_id",
+                "albums.image_path as image_path",
+            )
+            ->join(
+                DB::raw('(select `song_artists`.`song_id`
+                        from song_artists
+                        inner join songs on songs.song_id = song_artists.song_id
+                        where artist_id = ?
+                        group by `songs`.`song_id`
+                        order by songs.listens desc
+                        limit 10
+                        ) as song_temp'),
+                function ($join) {
+                    $join->on('song_temp.song_id', '=', 'songs.song_id');
+                }
+            )
+            ->setBindings([$id])
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'songs' => $songs
+        ]);
+    }
+
+    public function getAlbumByArtistId($id)
+    {
+        $albums = DB::table('songs')
+            ->join('albums', 'songs.album_id', '=', 'albums.album_id')
+            ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
+            ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
+            ->groupBy('albums.album_id')
+            ->select('albums.*', DB::raw('count(albums.album_id) as song_count'))
+            ->where('artists.artist_id', $id)
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'albums' => $albums
         ]);
     }
 }

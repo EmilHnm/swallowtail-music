@@ -28,7 +28,7 @@ class AlbumController extends Controller
         if ($request->file('albumImage')) {
             $imageFile = $request->file('albumImage');
             $fileName = $album_id . '.' . $imageFile->getClientOriginalExtension();
-            @unlink(public_path('storage/upload/album_cover') . $fileName);
+            @unlink(public_path('storage/upload/album_cover') . "/" . $fileName);
             $imageFile->move(public_path('storage/upload/album_cover'), $fileName);
             $album->image_path = $fileName;
         }
@@ -61,7 +61,7 @@ class AlbumController extends Controller
                         ->export()
                         ->addFilter(["-strict", "-2", "-acodec", "vorbis", '-b:a', '320k'])
                         ->save($song->song_id . '.ogg');
-                    @unlink(public_path('storage/upload/song_src/') . $filename);
+                    @unlink(public_path('storage/upload/song_src/') . "/" . $filename);
                     $duration = FFMpeg::fromDisk('final_audio')
                         ->open($song->song_id . '.ogg')
                         ->getDurationInSeconds();
@@ -107,10 +107,27 @@ class AlbumController extends Controller
 
     public function getAlbumSongs($id)
     {
-        $songs = Song::where('album_id', $id)->get();
+        $songList = DB::table('songs')
+            ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
+            ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
+            ->join('albums', 'songs.album_id', '=', 'albums.album_id')
+            ->select(
+                'songs.song_id',
+                'songs.title',
+                'songs.song_id',
+                'songs.duration',
+                'songs.listens',
+                "artists.artist_id",
+                "artists.name as artist_name",
+                "albums.name as album_name",
+                "albums.album_id as album_id",
+                "albums.image_path as image_path",
+            )
+            ->where('songs.album_id', $id)
+            ->get();
         return response()->json([
             'status' => 'success',
-            'songs' => $songs,
+            'songs' => $songList,
         ]);
     }
 
@@ -174,7 +191,7 @@ class AlbumController extends Controller
         if ($request->file('image')) {
             $imageFile = $request->file('image');
             $fileName = $album->album_id . '.' . $imageFile->getClientOriginalExtension();
-            @unlink(public_path('storage/upload/album_cover') . $album->image_path);
+            @unlink(public_path('storage/upload/album_cover') . "/" . $album->image_path);
             $imageFile->move(public_path('storage/upload/album_cover'), $fileName);
             $album->image_path = $fileName;
         }
@@ -203,7 +220,7 @@ class AlbumController extends Controller
                 'message' => 'You are not allowed to delete this album!'
             ]);
         }
-        @unlink(public_path('storage/upload/album_cover/') . $album->album_id);
+        @unlink(public_path('storage/upload/album_cover/') . "/" . $album->album_id);
         $song = Song::where('album_id', $album->album_id)->get();
         foreach ($song as $s) {
             $s->album_id = null;

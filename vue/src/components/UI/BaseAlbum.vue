@@ -1,15 +1,49 @@
 <template>
+  <teleport to="body">
+    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseDialog>
+    <BaseDialog
+      :open="isPlaylistOpening"
+      :title="'Select Playlist'"
+      :mode="'announcement'"
+      @close="isPlaylistOpening = false"
+    >
+      <template #default>
+        <BaseListItem
+          v-for="playlist in userPlaylist"
+          :key="playlist.playlist_id"
+          @click="onAddAlbumToPlaylist(playlist.playlist_id)"
+          >{{ playlist.title }}</BaseListItem
+        >
+      </template>
+      <template #action><div></div></template
+    ></BaseDialog>
+    <BaseDialog
+      :open="dialogWaring.show"
+      :title="dialogWaring.title"
+      :mode="dialogWaring.mode"
+      @close="closeDialog"
+    >
+      <template #default>
+        <p>{{ dialogWaring.content }}</p>
+      </template>
+    </BaseDialog>
+  </teleport>
   <div class="album-container">
     <div class="album__details">
       <div class="album__details--cover">
-        <img src="../../assets/music/cover.jpg" />
+        <img :src="`${environment.album_cover}/${data.image_path}`" />
       </div>
       <div class="album__details--prof">
         <div class="album__details--prof--title">
-          <h3>Future Parade</h3>
+          <h3>{{ data.name }}</h3>
         </div>
         <div class="album__details--prof--sub">
-          <span> 2022 - 4 Songs</span>
+          <span> {{ data.release_year }} - {{ data.song_count }} Songs</span>
         </div>
         <div class="album__details--prof--menu">
           <div class="album__details--prof--menu--play"><IconPlay /></div>
@@ -29,7 +63,9 @@
               <div class="playlist-menu" v-if="isMenuOpen">
                 <BaseListItem>Add to Queue</BaseListItem>
                 <BaseListItem>Add to Library</BaseListItem>
-                <BaseListItem>Add to Playlist</BaseListItem>
+                <BaseListItem @click="isPlaylistOpening = true"
+                  >Add to Playlist</BaseListItem
+                >
                 <BaseListItem>Report</BaseListItem>
               </div>
             </transition>
@@ -38,15 +74,15 @@
       </div>
     </div>
     <div class="album__songs">
-      <BaseSongItem
-        v-for="item in testArr"
-        :key="item"
-        :title="'Future Parade'"
-        :artist="'虹ヶ咲学園スクールアイドル同好会'"
-        :album="'Future Parade'"
-        :duration="'4:36'"
-        :hears="1000000"
-      />
+      <BaseCircleLoad v-if="isSongsLoading" />
+      <div v-else>
+        <BaseSongItem
+          v-for="song in songs"
+          :data="song"
+          :key="song[0].song_id"
+          :control="true"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -54,22 +90,117 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import IconHeartFilled from "../icons/IconHeartFilled.vue";
-import BaseListItem from "./BaseListItem.vue";
 import IconHorizontalThreeDot from "../icons/IconHorizontalThreeDot.vue";
 import BaseSongItem from "./BaseSongItem.vue";
 import IconPlay from "../icons/IconPlay.vue";
+import type { album } from "@/model/albumModel";
+import { environment } from "@/environment/environment";
+import { mapActions, mapGetters } from "vuex";
+import BaseDialog from "./BaseDialog.vue";
+import BaseLineLoad from "./BaseLineLoad.vue";
+import BaseCircleLoad from "./BaseCircleLoad.vue";
+import BaseListItem from "./BaseListItem.vue";
+
+type albumData = album & {
+  song_count: number;
+};
+
+type songPlaylist = {
+  [song_id: string]: {
+    song_id: string;
+    title: string;
+    artist_name: string;
+    artist_id: string;
+    added_date?: string;
+    album_name: string;
+    album_id: string;
+    image_path: string;
+    duration: number;
+    listens?: number;
+  }[];
+};
 
 export default defineComponent({
+  props: {
+    data: {
+      type: Object as () => albumData,
+      required: true,
+    },
+  },
+  inject: ["userPlaylist"],
   data() {
     return {
+      environment: environment,
       isMenuOpen: false,
-      testArr: [1, 2, 3, 4],
+      songs: {} as songPlaylist,
+      isPlaylistOpening: false,
+      isLoading: false,
+      isSongsLoading: true,
+      dialogWaring: {
+        title: "Warning",
+        mode: "warning",
+        content: "Please fill in all the fields",
+        show: false,
+      },
     };
   },
   methods: {
+    ...mapActions("album", ["getAlbumSongs"]),
+    ...mapActions("playlist", ["addAlbumToPlaylist"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
     },
+    closeDialog() {
+      this.dialogWaring.show = false;
+    },
+    onAddAlbumToPlaylist(id: string) {
+      this.isLoading = true;
+      this.isPlaylistOpening = false;
+      this.addAlbumToPlaylist({
+        token: this.token,
+        album_id: this.data.album_id,
+        playlist_id: id,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success") {
+            this.dialogWaring.title = "Success";
+            this.dialogWaring.content = res.message;
+            this.dialogWaring.mode = "announcement";
+            this.dialogWaring.show = true;
+          } else {
+            this.dialogWaring.title = "Error";
+            this.dialogWaring.content = res.message;
+            this.dialogWaring.mode = "warning";
+            this.dialogWaring.show = true;
+          }
+        });
+    },
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
+  },
+  created() {
+    this.getAlbumSongs({
+      userToken: this.token,
+      album_id: this.data.album_id,
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        if (res.status === "success") {
+          this.songs = res.songs.reduce((r: any, a: any) => {
+            r[a.song_id] = r[a.song_id] || [];
+            r[a.song_id].push(a);
+            return r;
+          }, Object.create(null));
+          this.isSongsLoading = false;
+        }
+      });
   },
   components: {
     IconHeartFilled,
@@ -77,6 +208,9 @@ export default defineComponent({
     IconHorizontalThreeDot,
     BaseSongItem,
     IconPlay,
+    BaseDialog,
+    BaseLineLoad,
+    BaseCircleLoad,
   },
 });
 </script>
@@ -85,6 +219,8 @@ export default defineComponent({
 .album-container {
   width: 90%;
   margin: 20px auto;
+  box-shadow: 0 2px 10px var(--background-glass-color-primary);
+  padding-bottom: 20px;
   & .album__details {
     display: flex;
     height: 150px;
@@ -112,7 +248,7 @@ export default defineComponent({
         user-select: none;
         flex: 0 0 auto;
         & h3 {
-          font-size: 2.5rem;
+          font-size: 2rem;
           font-weight: 700;
           margin: 2px;
           width: 80%;
@@ -135,7 +271,7 @@ export default defineComponent({
           background-color: var(--color-primary);
           display: flex;
           align-items: center;
-          padding: 3px;
+          padding: 4px;
           cursor: pointer;
           transition: transform 0.2s ease-in-out;
           & svg {

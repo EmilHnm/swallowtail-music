@@ -31,6 +31,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('artist')->group(function () {
         Route::get('/', [ArtistController::class, 'getAll']);
         Route::get('/top', [ArtistController::class, 'getTop']);
+        Route::get('/album/{id}', [ArtistController::class, 'getAlbumByArtistId']);
+        Route::get('/song/{id}', [ArtistController::class, 'getSongByArtistId']);
+        Route::get('/song/top/{id}', [ArtistController::class, 'getTopSongByArtistId']);
         Route::get('/{id}', [ArtistController::class, 'show']);
     });
 
@@ -42,39 +45,52 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('song')->group(function () {
         Route::post('/upload', [SongController::class, 'uploadSong']);
         Route::get('/latest', [SongController::class, 'latestSong']);
-        Route::post('/update', [SongController::class, 'updateSong']);
-        Route::get('/uploaded', [SongController::class, 'uploadedSong']);
         Route::get('/{id}', [SongController::class, 'getSongInfo']);
         Route::delete('/{id}/delete', [SongController::class, 'deleteSong']);
     });
 
     Route::prefix('album')->group(function () {
         Route::post('/upload', [AlbumController::class, 'uploadAlbum']);
-        Route::get('/uploaded', [AlbumController::class, 'getUploadedAlbum']);
-        Route::post('/update', [AlbumController::class, 'updateAlbum']);
         Route::get('/latest', [AlbumController::class, 'getLatestAlbum']);
         Route::get('/top', [AlbumController::class, 'getTopAlbum']);
-        Route::get('/addable', [AlbumController::class, 'getSongNotInAlbum']);
-        Route::post('/song-remove', [AlbumController::class, 'removeAlbumSong']);
-        Route::post('/song-add', [AlbumController::class, 'addAlbumSong']);
         Route::get('/{id}', [AlbumController::class, 'getAlbumInfo']);
         Route::get('/{id}/song', [AlbumController::class, 'getAlbumSongs']);
-        Route::delete('/{id}/delete', [AlbumController::class, 'deleteAlbum']);
     });
 
     Route::prefix('playlist')->group(function () {
         Route::post('/create', [PlaylistController::class, 'createPlaylist']);
         Route::get('/all', [PlaylistController::class, 'authPlaylist']);
         Route::get('/collection', [PlaylistController::class, 'authLikedList']);
+        Route::post('/set-type', [PlaylistController::class, 'settypePlaylist']);
+        Route::post('/song-add', [PlaylistController::class, 'addSongToPlaylist']);
+        Route::post('/album-add', [PlaylistController::class, 'addAlbumToPlaylist']);
+        Route::post('/update', [PlaylistController::class, 'updatePlaylist']);
+        Route::post('/add-to-playlist', [PlaylistController::class, 'addToPlaylist']);
         Route::get('/{id}', [PlaylistController::class, 'getPlaylist']);
         Route::get('/{id}/song', [PlaylistController::class, 'getPlaylistSong']);
-        Route::delete('/{id}/delete', [PlaylistController::class, 'deletePlaylistSong']);
+        Route::get('/{id}/addable', [PlaylistController::class, 'getAddableListSong']);
+        Route::delete('/{id}/delete', [PlaylistController::class, 'deletePlaylist']);
     });
 
     Route::prefix('account')->group(function () {
         Route::post('/update', [AccountController::class, 'updateAccount']);
         Route::post('/profile-image', [AccountController::class, 'updateProfilePicture']);
         Route::post('/password', [AccountController::class, 'updatePassword']);
+        //Album control
+        Route::prefix('album')->group(function () {
+            Route::get('/uploaded', [AlbumController::class, 'getUploadedAlbum']);
+            Route::post('/update', [AlbumController::class, 'updateAlbum']);
+            Route::get('/addable', [AlbumController::class, 'getSongNotInAlbum']);
+            Route::post('/song-remove', [AlbumController::class, 'removeAlbumSong']);
+            Route::post('/song-add', [AlbumController::class, 'addAlbumSong']);
+            Route::delete('/{id}/delete', [AlbumController::class, 'deleteAlbum']);
+        });
+        //Song control
+        Route::prefix('song')->group(function () {
+            Route::post('/update', [SongController::class, 'updateSong']);
+            Route::get('/uploaded', [SongController::class, 'uploadedSong']);
+            Route::delete('/{id}/delete', [SongController::class, 'deleteSong']);
+        });
     });
 });
 Route::prefix('auth')->group(function () {

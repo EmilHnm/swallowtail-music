@@ -32,13 +32,13 @@
         <div class="tagList">
           <BaseTag
             v-for="(artist, index) in artistArray"
-            @click="functionModule.removeItemFormArr(index, artistArray)"
+            @click="_function.removeItemFormArr(index, artistArray)"
             :key="artist.artist_id"
             >{{ artist.name }}</BaseTag
           >
           <BaseTag
             v-for="(artist, index) in newArtistArray"
-            @click="functionModule.removeItemFormArr(index, newArtistArray)"
+            @click="_function.removeItemFormArr(index, newArtistArray)"
             :key="index"
             >{{ artist }}</BaseTag
           >
@@ -55,7 +55,7 @@
         <div class="form__row--searchBox" v-if="artistName">
           <div
             class="form__row--searchBox--item"
-            v-for="artist in functionModule.checkIncludeString(
+            v-for="artist in _function.checkIncludeString(
               artistName,
               templateArtistArray,
               artistArray
@@ -72,12 +72,12 @@
           <BaseTag
             v-for="(genre, index) in genreArray"
             :key="genre.genre_id"
-            @click="functionModule.removeItemFormArr(index, genreArray)"
+            @click="_function.removeItemFormArr(index, genreArray)"
             >{{ genre.name }}</BaseTag
           >
           <BaseTag
             v-for="(genre, index) in newGenreArray"
-            @click="functionModule.removeItemFormArr(index, newGenreArray)"
+            @click="_function.removeItemFormArr(index, newGenreArray)"
             :key="genre"
             >{{ genre }}</BaseTag
           >
@@ -94,7 +94,7 @@
         <div class="form__row--searchBox" v-if="genreName">
           <div
             class="form__row--searchBox--item"
-            v-for="genre in functionModule.checkIncludeString(
+            v-for="genre in _function.checkIncludeString(
               genreName,
               templateGenreArray,
               genreArray
@@ -136,7 +136,7 @@
 import type { artist } from "@/model/artistModel";
 import type { genre } from "@/model/genreModel";
 import type { LocationQueryValue } from "vue-router";
-import { functionModule } from "@/store/module/functionModule";
+import { _function } from "@/mixins
 import { mapActions, mapGetters } from "vuex";
 import BaseRadio from "@/components/UI/BaseRadio.vue";
 import BaseTag from "@/components/UI/BaseTag.vue";
@@ -145,7 +145,7 @@ import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 export default {
   data() {
     return {
-      functionModule: functionModule,
+      _function: _function,
       song_id: null as LocationQueryValue | LocationQueryValue[],
       templateArtistArray: [] as artist[],
       templateGenreArray: [] as genre[],
@@ -167,14 +167,10 @@ export default {
     };
   },
   methods: {
-    ...mapActions("song", [
-      "getSong",
-      "getGenreList",
-      "getArtistList",
-      "updateSong",
-    ]),
+    ...mapActions("song", ["getSong", "getGenreList", "updateSong"]),
+    ...mapActions("artist", ["getArtistList"]),
     pushItemtoArray(item: genre | artist, array: genre[] | artist[]): void {
-      functionModule.pushItemtoArray(item, array);
+      _function.pushItemtoArray(item, array);
       this.artistName = "";
       this.genreName = "";
     },
@@ -183,7 +179,7 @@ export default {
       array: string[],
       tempArr: genre[] | artist[]
     ): void {
-      functionModule.pushItemNotIncludedtoNewArray(item, array, tempArr);
+      _function.pushItemNotIncludedtoNewArray(item, array, tempArr);
       this.artistName = "";
       this.genreName = "";
     },

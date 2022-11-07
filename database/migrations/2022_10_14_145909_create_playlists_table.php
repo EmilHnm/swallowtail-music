@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string("playlist_id")->nullable()->unique();
             $table->string("user_id")->nullable();
             $table->string("title")->nullable();
+            $table->string("image_path")->nullable();
             $table->string("description")->nullable();
             $table->string("type")->nullable();
             $table->timestamps();
