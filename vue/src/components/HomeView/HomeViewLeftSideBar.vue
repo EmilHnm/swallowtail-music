@@ -72,6 +72,12 @@ type playlistData = playlist & {
   songCount: number;
 };
 
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    userPlaylist: playlistData[];
+  }
+}
+
 export default defineComponent({
   components: {
     IconHome,

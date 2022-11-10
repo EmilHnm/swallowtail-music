@@ -33,7 +33,9 @@
   </div>
   <div class="control">
     <div class="control__left">
-      <div class="control__left--play"><IconPlay /></div>
+      <div class="control__left--play">
+        <IconPlay @click="playArtistSong" />
+      </div>
       <div class="control__left--menu">
         <IconHorizontalThreeDot @click="toggleMenu" />
         <teleport to="body">
@@ -53,7 +55,11 @@
     </div>
   </div>
   <div class="artist-details">
-    <RouterView />
+    <RouterView
+      @playAlbum="playAlbum"
+      @addAlbumToQueue="addAlbumToQueue"
+      @playSongInAlbum="playSongInAlbum"
+    />
   </div>
 </template>
 
@@ -74,9 +80,15 @@ type artistData = artist & {
 };
 
 export default defineComponent({
-  setup() {
-    return {};
-  },
+  emits: [
+    "updatePlaylist",
+    "deletePlaylist",
+    "playPlaylist",
+    "playAlbum",
+    "addAlbumToQueue",
+    "playSongInAlbum",
+    "playArtistSong",
+  ],
   data() {
     return {
       environment: environment,
@@ -94,27 +106,46 @@ export default defineComponent({
     toggleTopSong() {
       this.isSongListOpen = !this.isSongListOpen;
     },
+    playAlbum(id: string) {
+      this.$emit("playAlbum", id);
+    },
+    addAlbumToQueue(id: string) {
+      this.$emit("addAlbumToQueue", id);
+    },
+    playSongInAlbum(id: string) {
+      this.$emit("playSongInAlbum", id);
+    },
+    playArtistSong() {
+      this.$emit("playArtistSong", this.artist.artist_id);
+    },
   },
   computed: {
     ...mapGetters({
       token: "auth/userToken",
     }),
   },
-  created() {
-    this.getArtist({
-      token: this.token,
-      artist_id: this.$route.params.id,
-    })
-      .then((res: any) => {
-        return res.json();
-      })
-      .then((res) => {
-        this.isLoading = false;
-        if (res.status === "success") {
-          this.artist = res.artist;
-        }
-      });
+  watch: {
+    "$route.params.id": {
+      immediate: true,
+      deep: true,
+      handler() {
+        this.getArtist({
+          token: this.token,
+          artist_id: this.$route.params.id,
+        })
+          .then((res: any) => {
+            return res.json();
+          })
+          .then((res) => {
+            this.isLoading = false;
+            if (res.status === "success") {
+              this.artist = res.artist;
+            }
+          });
+      },
+    },
   },
+
   components: {
     BaseListItem,
     IconHorizontalThreeDot,

@@ -1,14 +1,15 @@
 <?php
 
-use App\Http\Controllers\AccountController;
-use App\Http\Controllers\AlbumController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SongController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PlaylistController;
-use App\Http\Controllers\SongController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('artist')->group(function () {
         Route::get('/', [ArtistController::class, 'getAll']);
         Route::get('/top', [ArtistController::class, 'getTop']);
+        Route::get('/search', [ArtistController::class, 'searchArtist']);
         Route::get('/album/{id}', [ArtistController::class, 'getAlbumByArtistId']);
         Route::get('/song/{id}', [ArtistController::class, 'getSongByArtistId']);
         Route::get('/song/top/{id}', [ArtistController::class, 'getTopSongByArtistId']);
@@ -45,12 +47,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('song')->group(function () {
         Route::post('/upload', [SongController::class, 'uploadSong']);
         Route::get('/latest', [SongController::class, 'latestSong']);
+        Route::get('/search', [SongController::class, 'searchSong']);
         Route::get('/{id}', [SongController::class, 'getSongInfo']);
+        Route::post('/{id}/like', [SongController::class, 'likeSong']);
+        Route::get('/{id}/liked', [SongController::class, 'likedSong']);
         Route::delete('/{id}/delete', [SongController::class, 'deleteSong']);
     });
 
     Route::prefix('album')->group(function () {
         Route::post('/upload', [AlbumController::class, 'uploadAlbum']);
+        Route::get('/search', [AlbumController::class, 'searchAlbum']);
         Route::get('/latest', [AlbumController::class, 'getLatestAlbum']);
         Route::get('/top', [AlbumController::class, 'getTopAlbum']);
         Route::get('/{id}', [AlbumController::class, 'getAlbumInfo']);
@@ -70,6 +76,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}/song', [PlaylistController::class, 'getPlaylistSong']);
         Route::get('/{id}/addable', [PlaylistController::class, 'getAddableListSong']);
         Route::delete('/{id}/delete', [PlaylistController::class, 'deletePlaylist']);
+    });
+
+    Route::prefix('user')->group(function () {
+        Route::get('/search', [UserController::class, 'searchUser']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::get('/{id}/top-artists', [UserController::class, 'getUserTopArtist']);
+        Route::get('/{id}/public-playlist', [UserController::class, 'getPublicPlaylist']);
+        Route::get('/{id}/top-tracks', [UserController::class, 'getTopTracks']);
     });
 
     Route::prefix('account')->group(function () {

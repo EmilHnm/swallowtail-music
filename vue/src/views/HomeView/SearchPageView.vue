@@ -1,6 +1,6 @@
 <template>
   <div class="search-form">
-    <form @submit.prevent="onSubmit">
+    <div>
       <BaseInput
         :id="'search'"
         :label="'Search'"
@@ -9,41 +9,67 @@
         v-model="searchText"
       />
       <BaseButton :type="'submit'">Search</BaseButton>
-    </form>
+    </div>
   </div>
   <div class="search-result">
     <div class="search-result__tag" ref="container" @wheel="searchFilterScroll">
       <div class="search-result__tag--all">
-        <BaseButton @click="changeComponent('AllSearchPage')">All</BaseButton>
+        <BaseButton @click="changeComponent('AllSearchPage')">
+          <BaseDotLoading v-if="isSearching" />
+          <span v-else>All</span>
+        </BaseButton>
       </div>
-      <div class="search-result__tag--song">
-        <BaseButton @click="changeComponent('SongSearchPage')">Song</BaseButton>
+      <div
+        class="search-result__tag--song"
+        v-if="Object.keys(songResult).length > 0"
+      >
+        <BaseButton @click="changeComponent('SongSearchPage')">
+          <BaseDotLoading v-if="searching.song" />
+          <span v-else>Song</span>
+        </BaseButton>
       </div>
-      <div class="search-result__tag--album">
-        <BaseButton @click="changeComponent('AlbumSearchPage')"
-          >Album</BaseButton
+      <div
+        class="search-result__tag--album"
+        v-if="albumResult.length > 0 || searching.album"
+      >
+        <BaseButton @click="changeComponent('AlbumSearchPage')">
+          <BaseDotLoading v-if="searching.album" />
+          <span v-else>Album</span>
+        </BaseButton>
+      </div>
+      <div
+        class="search-result__tag--artist"
+        v-if="artistResult.length > 0 || searching.artist"
+      >
+        <BaseButton @click="changeComponent('ArtistSearchPage')">
+          <BaseDotLoading v-if="searching.artist" />
+          <span v-else>Artist</span></BaseButton
         >
       </div>
-      <div class="search-result__tag--artist">
-        <BaseButton @click="changeComponent('ArtistSearchPage')"
-          >Artist</BaseButton
-        >
-      </div>
-      <div class="search-result__tag--user">
-        <BaseButton @click="changeComponent('UserSearchPage')">User</BaseButton>
+      <div
+        class="search-result__tag--user"
+        v-if="userResult.length > 0 || searching.user"
+      >
+        <BaseButton @click="changeComponent('UserSearchPage')">
+          <BaseDotLoading v-if="searching.user" />
+          <span v-else>User</span>
+        </BaseButton>
       </div>
     </div>
-    <keep-alive v-if="testArr.length !== 0">
+    <keep-alive v-if="hasResult">
       <component
         :is="selectedSearchFilter"
         @changeSearchPage="changeComponent"
       ></component>
     </keep-alive>
+    <div v-else>
+      <h3>No result</h3>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
 import BaseInput from "../../components/UI/BaseInput.vue";
 import BaseButton from "../../components/UI/BaseButton.vue";
 import AllSearchPage from "../../components/SearchPage/AllSearchPage.vue";
@@ -51,20 +77,53 @@ import ArtistSearchPage from "../../components/SearchPage/ArtistSearchPage.vue";
 import AlbumSearchPage from "../../components/SearchPage/AlbumSearchPage.vue";
 import UserSearchPage from "../../components/SearchPage/UserSearchPage.vue";
 import SongSearchPage from "../../components/SearchPage/SongSearchPage.vue";
+import { mapActions, mapGetters } from "vuex";
+import type { album } from "@/model/albumModel";
+import type { artist } from "@/model/artistModel";
+import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
+
+type songListData = {
+  [song_id: string]: {
+    song_id: string;
+    title: string;
+    artist_name: string;
+    artist_id: string;
+    added_date?: string;
+    album_name: string;
+    album_id: string;
+    image_path: string;
+    duration: number;
+    listens?: number;
+  }[];
+};
+
+type albumData = album & { song_count: number };
+
 export default defineComponent({
-  setup() {},
   data() {
     return {
-      testArr: [1, 2, 3, 4],
-      container: null,
+      songResult: {} as songListData,
+      albumResult: [] as albumData[],
+      artistResult: [] as artist[],
+      userResult: [],
+      container: null as HTMLElement | null,
       selectedSearchFilter: "AllSearchPage",
       pos: { top: 0, left: 0, x: 0, y: 0 },
       searchText: "",
+      searching: {
+        song: false,
+        album: false,
+        artist: false,
+        user: false,
+      },
     };
   },
   provide() {
     return {
-      testArr: this.testArr,
+      songResult: computed(() => this.songResult),
+      albumResult: computed(() => this.albumResult),
+      artistResult: computed(() => this.artistResult),
+      userResult: computed(() => this.userResult),
     };
   },
   components: {
@@ -75,49 +134,155 @@ export default defineComponent({
     AlbumSearchPage,
     UserSearchPage,
     SongSearchPage,
+    BaseDotLoading,
   },
   methods: {
-    onSubmit() {
-      console.log("searchText", this.searchText);
-    },
+    ...mapActions("song", ["searchSong"]),
+    ...mapActions("album", ["searchAlbums"]),
+    ...mapActions("artist", ["searchArtist"]),
+    ...mapActions("user", ["searchUser"]),
     changeComponent(componentName: string) {
+      if (this.isSearching) return;
       this.selectedSearchFilter = componentName;
     },
     searchFilterScroll(e: WheelEvent) {
       e.preventDefault();
-      if (e.deltaY > 0) {
-        this.container.scrollLeft += 10;
-      } else {
-        this.container.scrollLeft -= 10;
-      }
+      if (this.container)
+        if (e.deltaY > 0) {
+          this.container.scrollLeft += 10;
+        } else {
+          this.container.scrollLeft -= 10;
+        }
     },
     mouseDown(e: MouseEvent) {
-      this.container.style.cursor = "grabbing";
-      this.container.style.userSelect = "none";
-      this.container.addEventListener("mousemove", this.mouseMove);
-      this.pos = {
-        left: this.container.offsetLeft,
-        top: this.container.offsetTop,
-        x: e.clientX,
-        y: e.clientY,
-      };
+      if (this.container) {
+        this.container.style.cursor = "grabbing";
+        this.container.style.userSelect = "none";
+        this.container.addEventListener("mousemove", this.mouseMove);
+        this.pos = {
+          left: this.container.offsetLeft,
+          top: this.container.offsetTop,
+          x: e.clientX,
+          y: e.clientY,
+        };
+      }
     },
     mouseUp() {
-      this.container.style.cursor = "grab";
-      this.container.style.removeProperty("user-select");
-      this.container.removeEventListener("mousemove", this.mouseMove);
+      if (this.container) {
+        this.container.style.cursor = "grab";
+        this.container.style.removeProperty("user-select");
+        this.container.removeEventListener("mousemove", this.mouseMove);
+      }
     },
     mouseMove(e: MouseEvent) {
       // How far the mouse has been moved
       const dx = e.clientX - this.pos.x;
       const dy = e.clientY - this.pos.y;
       // Scroll the element
-      this.container.scrollTop = this.pos.top - dy;
-      this.container.scrollLeft = this.pos.left - dx;
+      if (this.container) {
+        this.container.scrollTop = this.pos.top - dy;
+        this.container.scrollLeft = this.pos.left - dx;
+      }
+    },
+    onSearchSong(query: string) {
+      this.searching.song = true;
+      this.searchSong({
+        token: this.token,
+        query: query,
+      })
+        .then((res: any) => res.json())
+        .then((res) => {
+          this.searching.song = false;
+          if (res.status === "success") {
+            this.songResult = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+          }
+        });
+    },
+    onSearchAlbums(query: string) {
+      this.searching.album = true;
+      this.searchAlbums({
+        token: this.token,
+        query: query,
+      })
+        .then((res: any) => res.json())
+        .then((res) => {
+          this.searching.album = false;
+          if (res.status === "success") {
+            this.albumResult = res.albums;
+          }
+        });
+    },
+    onSearchArtist(query: string) {
+      this.searching.artist = true;
+      this.searchArtist({
+        token: this.token,
+        query: query,
+      })
+        .then((res: any) => res.json())
+        .then((res) => {
+          this.searching.artist = false;
+          if (res.status === "success") {
+            this.artistResult = res.artists;
+          }
+        });
+    },
+    onSearchUser(query: string) {
+      this.searching.user = true;
+      this.searchUser({
+        token: this.token,
+        query: query,
+      })
+        .then((res: any) => res.json())
+        .then((res) => {
+          this.searching.user = false;
+          if (res.status === "success") {
+            this.userResult = res.users;
+          }
+        });
+    },
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
+    hasResult() {
+      return (
+        Object.keys(this.songResult).length > 0 ||
+        this.albumResult.length > 0 ||
+        this.artistResult.length > 0 ||
+        this.userResult.length > 0
+      );
+    },
+    isSearching() {
+      return (
+        this.searching.song ||
+        this.searching.album ||
+        this.searching.artist ||
+        this.searching.user
+      );
+    },
+  },
+  watch: {
+    searchText() {
+      if (this.searchText !== "") {
+        this.onSearchSong(this.searchText);
+        this.onSearchAlbums(this.searchText);
+        this.onSearchArtist(this.searchText);
+        this.onSearchUser(this.searchText);
+      } else {
+        this.songResult = {};
+        this.albumResult = [];
+        this.artistResult = [];
+        this.userResult = [];
+      }
     },
   },
   mounted() {
-    this.container = this.$refs.container;
+    this.container = this.$refs.container as HTMLElement;
   },
 });
 </script>

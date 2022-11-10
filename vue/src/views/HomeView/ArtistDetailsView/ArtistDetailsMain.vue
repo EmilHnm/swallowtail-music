@@ -3,11 +3,12 @@
     <div class="popular">
       <h2>Popular</h2>
       <div class="songs" v-if="Object.keys(songs).length > 0">
-        <BaseSongItem
-          v-for="index in isSongListOpen ? 10 : 5"
-          :data="Object.values(songs)[index]"
-          :key="index"
-        />
+        <div v-for="index in isSongListOpen ? 10 : 5" :key="index">
+          <BaseSongItem
+            v-if="index <= Object.keys(songs).length"
+            :data="Object.values(songs)[index - 1]"
+          />
+        </div>
         <span @click="toggleTopSong">{{
           isSongListOpen ? "Show Less" : "Show More"
         }}</span>
@@ -86,38 +87,51 @@ export default defineComponent({
     BaseSongItem,
     BaseCircleLoadVue,
   },
+  watch: {
+    "$route.params.id": {
+      immediate: true,
+      deep: true,
+      handler() {
+        if (this.$route.name === "artistOverviewPage") {
+          this.getArtistTopSongById({
+            token: this.token,
+            artist_id: this.$route.params.id,
+          })
+            .then((res: any) => {
+              return res.json();
+            })
+            .then((res) => {
+              if (res.status === "success")
+                this.songs = res.songs.reduce((r: any, a: any) => {
+                  r[a.song_id] = r[a.song_id] || [];
+                  r[a.song_id].push(a);
+                  return r;
+                }, Object.create(null));
+            });
+          this.getArtistAlbumById({
+            token: this.token,
+            artist_id: this.$route.params.id,
+          })
+            .then((res) => {
+              return res.json();
+            })
+            .then((res) => {
+              if (res.status === "success") {
+                this.albums = res.albums;
+              }
+            });
+        }
+      },
+    },
+  },
+  beforeRouteLeave(to, from, next) {
+    console.log("leave", this.$route.params.id);
+    next();
+  },
   computed: {
     ...mapGetters({
       token: "auth/userToken",
     }),
-  },
-  created() {
-    this.getArtistTopSongById({
-      token: this.token,
-      artist_id: this.$route.params.id,
-    })
-      .then((res: any) => {
-        return res.json();
-      })
-      .then((res) => {
-        this.songs = res.songs.reduce((r: any, a: any) => {
-          r[a.song_id] = r[a.song_id] || [];
-          r[a.song_id].push(a);
-          return r;
-        }, Object.create(null));
-      });
-    this.getArtistAlbumById({
-      token: this.token,
-      artist_id: this.$route.params.id,
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((res) => {
-        if (res.status === "success") {
-          this.albums = res.albums;
-        }
-      });
   },
 });
 </script>

@@ -115,6 +115,7 @@ class PlaylistController extends Controller
             )
             ->where('playlist_songs.playlist_id', $id)
             ->orderBy('playlist_songs.created_at', 'desc')
+            ->where('songs.display', '=', 'public')
             ->get();
         $songCount = $songList->count();
         return response()->json([
@@ -136,15 +137,29 @@ class PlaylistController extends Controller
     }
     public function authLikedList()
     {
-        $likedList = LikedSong::select('song_id', 'created_at')
-            ->with('song')
-            ->where('user_id', Auth::user()->user_id)
+        $likedList = DB::table('liked_songs')
+            ->join('songs', 'liked_songs.song_id', '=', 'songs.song_id')
+            ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
+            ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
+            ->join('albums', 'songs.album_id', '=', 'albums.album_id')
+            ->select(
+                'songs.song_id',
+                'songs.title',
+                'songs.song_id',
+                'songs.duration',
+                'songs.listens',
+                "artists.artist_id",
+                "artists.name as artist_name",
+                "albums.name as album_name",
+                "albums.album_id as album_id",
+                "albums.image_path as image_path",
+            )
+            ->where('liked_songs.user_id', Auth::user()->user_id)
+            ->where('songs.display', '=', 'public')
             ->get();
-        $totalDuration = array_sum(array_column($likedList->toArray(), 'duration'));
         return response()->json([
-            'likedList' => $likedList,
-            'songCount' => $likedList->count(),
-            'totalDuration' => $totalDuration
+            'status' => 'success',
+            'likedList' => $likedList
         ]);
     }
     public function addSongToPlaylist(Request $request)
@@ -251,6 +266,7 @@ class PlaylistController extends Controller
                 "albums.image_path as image_path",
             )
             ->where('songs.title', 'like',  $query)
+            ->where('songs.display', '=', 'public')
             ->limit(5)
             ->get();
         return response()->json([

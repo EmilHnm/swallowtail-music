@@ -38,12 +38,16 @@
       </div>
       <div class="song-item__right">
         <div class="song-item__right--album" :class="{ small: small }">
-          <span v-if="data[0].album_id">{{ data[0].album_name }}</span>
+          <span
+            v-if="data[0].album_id"
+            @click="redirectToAlbum(data[0].album_id)"
+            >{{ data[0].album_name }}</span
+          >
           <span v-else><BaseLineLoad /></span>
         </div>
         <div
           class="song-item__right--hears"
-          v-if="data[0].listens"
+          v-if="data[0].listens !== undefined"
           :class="{ medium: medium }"
         >
           <span>{{ data[0].listens }}</span>
@@ -107,7 +111,14 @@
       </div>
       <div class="menu__btn">
         <div class="" v-if="menuMode === 'default'">
-          <BaseListItem>Like</BaseListItem>
+          <BaseListItem @click="onLikeSong">
+            <span v-if="liked !== null">
+              {{ liked ? "Unlike" : "Like" }}
+            </span>
+            <span v-else>
+              <BaseLineLoad />
+            </span>
+          </BaseListItem>
           <BaseListItem @click="changeMenuMode('playlist')"
             >Add to Playlist</BaseListItem
           >
@@ -152,6 +163,7 @@ import IconThreeDots from "../icons/IconThreeDots.vue";
 import BaseLineLoad from "./BaseLineLoad.vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseDialog from "./BaseDialog.vue";
+import type { playlist } from "@/model/playlistModel";
 
 type songData = {
   song_id: string;
@@ -166,8 +178,18 @@ type songData = {
   listens?: number;
 }[];
 
+type playlistData = playlist & {
+  songCount: number;
+};
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    userPlaylist: playlistData[];
+  }
+}
+
 export default defineComponent({
-  emits: ["deleteFromQueue", "deleteFromPlaylist", "selectSong"],
+  emits: ["deleteFromQueue", "deleteFromPlaylist", "selectSong", "likeSong"],
   inject: ["userPlaylist"],
   data() {
     return {
@@ -179,6 +201,7 @@ export default defineComponent({
       isMenuOpen: false,
       menuMode: "default",
       isLoading: false,
+      liked: null,
     };
   },
   props: {
@@ -205,6 +228,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("playlist", ["addSongToPlaylist"]),
+    ...mapActions("song", ["likeSong", "likedSong"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
       this.changeMenuMode("default");
@@ -234,6 +258,35 @@ export default defineComponent({
         this.toggleMenu();
       });
     },
+    redirectToAlbum(id: string) {
+      this.$router.push({ name: "albumViewPage", params: { id: id } });
+    },
+    loadLiked() {
+      this.likedSong({
+        userToken: this.token,
+        songId: this.data[0].song_id,
+      })
+        .then((res: any) => {
+          return res.json();
+        })
+        .then((res: any) => {
+          this.liked = res.liked;
+          this.isLoading = false;
+        });
+    },
+    onLikeSong() {
+      if (this.liked !== null) {
+        this.isLoading = true;
+        this.isMenuOpen = false;
+        this.likeSong({
+          userToken: this.token,
+          songId: this.data[0].song_id,
+        }).then(() => {
+          this.$emit("likeSong", this.data[0].song_id);
+          this.loadLiked();
+        });
+      }
+    },
   },
   mounted() {
     const songItem = this.$refs.songItem as HTMLElement;
@@ -244,7 +297,9 @@ export default defineComponent({
     });
     if (this.observer && songItem) this.observer.observe(songItem);
   },
-  created() {},
+  created() {
+    this.loadLiked();
+  },
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();
   },

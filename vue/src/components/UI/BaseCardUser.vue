@@ -2,23 +2,31 @@
   <BaseCard>
     <div class="user">
       <div class="user__image">
-        <img class="img" src="../../assets/default-avatar.png" />
+        <img
+          class="img"
+          :src="
+            imageSrc
+              ? `${environment.profile_image}/${imageSrc}`
+              : `${environment.default}/default-avatar.jpg`
+          "
+        />
       </div>
-      <div class="user__name">{{ userName }}</div>
-      <div class="user__songCount">{{ songCount }}</div>
+      <div class="user__name" @click="redirectToUserProfile">
+        {{ userName }}
+      </div>
+      <div class="user__songCount">{{ songCount }} song(s) uploaded</div>
     </div></BaseCard
   >
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
 import BaseCard from "./BaseCard.vue";
-
+import { environment } from "@/environment/environment";
 export default defineComponent({
   props: {
-    // imageSrc: {
-    //   type: String,
-    //   required: true,
-    // },
+    imageSrc: {
+      type: String,
+    },
     userName: {
       type: String,
       required: true,
@@ -27,8 +35,21 @@ export default defineComponent({
       type: Number,
       required: true,
     },
+    id: {
+      type: String,
+      required: true,
+    },
   },
-  setup() {},
+  data() {
+    return {
+      environment: environment,
+    };
+  },
+  methods: {
+    redirectToUserProfile() {
+      this.$router.push({ name: "profilePage", params: { id: this.id } });
+    },
+  },
   components: { BaseCard },
 });
 </script>

@@ -98,7 +98,8 @@ class AlbumController extends Controller
     public function getAlbumInfo($id)
     {
         $album = Album::where('album_id', $id)->first();
-        $songs = Song::where('album_id', $id)->get();
+        $songs = Song::where('album_id', $id)->count();
+        $album->song_count = $songs;
         return response()->json([
             'status' => 'success',
             'album' => $album,
@@ -124,6 +125,7 @@ class AlbumController extends Controller
                 "albums.image_path as image_path",
             )
             ->where('songs.album_id', $id)
+            ->where('songs.display', '=', 'public')
             ->get();
         return response()->json([
             'status' => 'success',
@@ -253,6 +255,26 @@ class AlbumController extends Controller
             'albums' => $album
         ]);
     }
+
+    public function searchAlbum(Request $request)
+    {
+        if ($request->query->has('query')) {
+            $query = $request->query->get('query');
+            $albums = Album::where('name', 'like',  '%' . $query . '%')->get();
+            $songs = Song::where('album_id', $albums[0]->album_id)->count();
+            $albums->song_count = $songs;
+            return response()->json([
+                'status' => 'success',
+                'albums' => $albums
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Query not found'
+            ]);
+        }
+    }
+
 
     public function getTopAlbum()
     {

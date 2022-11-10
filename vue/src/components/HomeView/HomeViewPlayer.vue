@@ -2,14 +2,19 @@
   <footer class="now_playing">
     <div class="now_playing__info">
       <div class="now_playing__info--cover" @click="navigateToPlaying">
-        <img src="../../assets/music/cover.jpg" alt="cover" />
+        <img
+          :src="`${environment.album_cover}/${playingAudio[0].image_path}`"
+          alt="cover"
+        />
       </div>
       <div class="now_playing__info--title">
         <div class="now_playing__info--title--name" @click="navigateToPlaying">
-          {{ playingAudio.title }}
+          {{ playingAudio[0].title }}
         </div>
         <div class="now_playing__info--title--artist">
-          {{ playingAudio.artist }}
+          <span v-for="item in playingAudio" :key="item.artist_id">{{
+            item.artist_name
+          }}</span>
         </div>
       </div>
       <div class="now_playing__info--heart">
@@ -57,20 +62,22 @@
         <div class="now_playing__controls--progress--bar">
           <div
             class="now_playing__controls--progress--bar--progress"
-            :style="{ width: (progress / playingAudio.duration) * 100 + '%' }"
+            :style="{
+              width: (progress / playingAudio[0].duration) * 100 + '%',
+            }"
           ></div>
           <input
             type="range"
             class="now_playing__controls--progress--bar--range"
-            :value="(progress / playingAudio.duration) * 100"
+            :value="(progress / playingAudio[0].duration) * 100"
             @input="setProgress"
           />
         </div>
         <div class="now_playing__controls--progress--time--duration">
           {{
-            Math.floor(playingAudio.duration / 60) +
-            ":" +
-            Math.floor(playingAudio.duration % 60)
+            new Date(playingAudio[0].duration * 1000)
+              .toISOString()
+              .substring(14, 19)
           }}
         </div>
       </div>
@@ -108,6 +115,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { environment } from "@/environment/environment";
 import IconHeartFilled from "../icons/IconHeartFilled.vue";
 import IconPrevious from "../icons/IconPrevious.vue";
 import Iconshuffle from "../icons/IconShuffle.vue";
@@ -120,12 +128,25 @@ import IconPause from "../icons/IconPause.vue";
 import IconRepeatOne from "../icons/IconRepeatOne.vue";
 import IconMuted from "../icons/IconMuted.vue";
 
+type songData = {
+  song_id: string;
+  title: string;
+  artist_name: string;
+  artist_id: string;
+  added_date?: string;
+  album_name: string;
+  album_id: string;
+  image_path: string;
+  duration: number;
+  listens?: number;
+}[];
+
 export default defineComponent({
   name: "HomeViewPlayer",
   props: {
     playingAudio: {
       required: true,
-      type: Object,
+      type: Object as () => songData,
     },
     isPlaying: {
       required: true,
@@ -163,6 +184,7 @@ export default defineComponent({
   },
   data() {
     return {
+      environment: environment,
       isRightSideBarActive: false,
       currentTime: "0:00",
       durationTime: "",

@@ -32,12 +32,30 @@ class ArtistController extends Controller
         ], Response::HTTP_OK);
     }
 
+    public function searchArtist(Request $request)
+    {
+        if ($request->query->has('query')) {
+            $query = $request->query->get('query');
+            $artists = Artist::where('name', 'like', '%' . $query . '%')->get();
+            return response()->json([
+                'status' => 'success',
+                'artists' => $artists
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Query not found'
+            ]);
+        }
+    }
+
     public function getTop()
     {
-        $artist =  DB::table('artists')
+        $artist = DB::table('artists')
             ->leftJoin('song_artists', 'artists.artist_id', '=', 'song_artists.artist_id')
             ->leftJoin('songs', 'song_artists.song_id', '=', 'songs.song_id')
-            ->select('artists.*', DB::raw('count(songs.song_id) as total'))
+            ->select('artists.*', DB::raw('sum(songs.listens) as total'))
+            ->groupBy('artists.artist_id')
             ->limit(8)
             ->get();
         return response()->json([
@@ -91,6 +109,7 @@ class ArtistController extends Controller
                     $join->on('song_temp.song_id', '=', 'songs.song_id');
                 }
             )
+            ->orderBy('songs.listens', 'desc')
             ->setBindings([$id])
             ->get();
         return response()->json([

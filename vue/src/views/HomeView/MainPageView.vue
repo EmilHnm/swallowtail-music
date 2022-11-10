@@ -18,7 +18,7 @@
                     v-for="(artist, i) in song"
                     :key="artist.artist_id"
                     :to="{
-                      name: 'artistOverviewPage',
+                      name: 'artistPage',
                       params: { id: artist.artist_id },
                     }"
                   >
@@ -83,7 +83,7 @@
           <BaseCardArtist
             v-for="artist in topArtist"
             :key="artist.artist_id"
-            :title="artist.name"
+            :data="artist"
           />
         </BaseHorizontalScroll>
       </div>

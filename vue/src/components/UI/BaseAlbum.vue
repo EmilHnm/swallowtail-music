@@ -46,7 +46,9 @@
           <span> {{ data.release_year }} - {{ data.song_count }} Songs</span>
         </div>
         <div class="album__details--prof--menu">
-          <div class="album__details--prof--menu--play"><IconPlay /></div>
+          <div class="album__details--prof--menu--play">
+            <IconPlay @click="playAlbum" />
+          </div>
           <div class="album__details--prof--menu--heart">
             <IconHeartFilled />
           </div>
@@ -61,7 +63,9 @@
             </teleport>
             <transition name="playlist-menu">
               <div class="playlist-menu" v-if="isMenuOpen">
-                <BaseListItem>Add to Queue</BaseListItem>
+                <BaseListItem @click="addAlbumToQueue"
+                  >Add to Queue</BaseListItem
+                >
                 <BaseListItem>Add to Library</BaseListItem>
                 <BaseListItem @click="isPlaylistOpening = true"
                   >Add to Playlist</BaseListItem
@@ -81,6 +85,7 @@
           :data="song"
           :key="song[0].song_id"
           :control="true"
+          @select-song="playSongInAlbum(song[0].song_id)"
         />
       </div>
     </div>
@@ -89,17 +94,18 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import type { album } from "@/model/albumModel";
+import { environment } from "@/environment/environment";
+import { mapActions, mapGetters } from "vuex";
 import IconHeartFilled from "../icons/IconHeartFilled.vue";
 import IconHorizontalThreeDot from "../icons/IconHorizontalThreeDot.vue";
 import BaseSongItem from "./BaseSongItem.vue";
 import IconPlay from "../icons/IconPlay.vue";
-import type { album } from "@/model/albumModel";
-import { environment } from "@/environment/environment";
-import { mapActions, mapGetters } from "vuex";
 import BaseDialog from "./BaseDialog.vue";
 import BaseLineLoad from "./BaseLineLoad.vue";
 import BaseCircleLoad from "./BaseCircleLoad.vue";
 import BaseListItem from "./BaseListItem.vue";
+import type { playlist } from "@/model/playlistModel";
 
 type albumData = album & {
   song_count: number;
@@ -120,6 +126,16 @@ type songPlaylist = {
   }[];
 };
 
+type playlistData = playlist & {
+  songCount: number;
+};
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    userPlaylist: playlistData[];
+  }
+}
+
 export default defineComponent({
   props: {
     data: {
@@ -128,6 +144,7 @@ export default defineComponent({
     },
   },
   inject: ["userPlaylist"],
+  emits: ["playAlbum", "addAlbumToQueue", "playSongInAlbum"],
   data() {
     return {
       environment: environment,
@@ -176,6 +193,15 @@ export default defineComponent({
             this.dialogWaring.show = true;
           }
         });
+    },
+    playAlbum() {
+      this.$emit("playAlbum", this.data.album_id);
+    },
+    addAlbumToQueue() {
+      this.$emit("addAlbumToQueue", this.data.album_id);
+    },
+    playSongInAlbum(id: string) {
+      this.$emit("playSongInAlbum", id);
     },
   },
   computed: {

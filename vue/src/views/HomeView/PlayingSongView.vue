@@ -1,9 +1,9 @@
 <template>
   <div class="playingSong-container" ref="container">
-    <div class="information" :class="{ mobile: mobile }">
+    <div class="information" :class="{ mobile: mobile }" v-if="playingAudio">
       <BaseCircleProgress
         :completed-steps="progress"
-        :total-steps="playingAudio.duration"
+        :total-steps="playingAudio[0].duration"
         :animation-duration="500"
         :diameter="300"
       >
@@ -11,16 +11,21 @@
           class="album-image rotate"
           :class="{ 'animation-pause': !isPlaying }"
         >
-          <img src="../../assets/music/cover.jpg" alt="" />
+          <img
+            :src="`${environment.album_cover}/${playingAudio[0].image_path}`"
+            alt=""
+          />
         </div>
       </BaseCircleProgress>
       <div class="information__detail">
         <div class="information__detail--sub">Now Playing</div>
         <div class="information__detail--title">
-          {{ playingAudio.title }}
+          {{ playingAudio[0].title }}
         </div>
         <div class="information__detail--artist">
-          {{ playingAudio.artist }}
+          <span v-for="item in playingAudio" :key="item.artist_id">{{
+            item.artist_name
+          }}</span>
         </div>
         <div class="information__detail--uploader">Emil</div>
         <div class="information__detail--duration">
@@ -33,13 +38,14 @@
           }}
           -
           {{
-            Math.floor(playingAudio.duration / 60) +
-            ":" +
-            Math.floor(playingAudio.duration % 60)
+            new Date(playingAudio[0].duration * 1000)
+              .toISOString()
+              .substring(14, 19)
           }}
         </div>
       </div>
     </div>
+    <h3 v-else>No Audio Playing</h3>
     <div class="visualizer" :class="{ mobile: mobile }">
       <div
         v-for="index in 100"
@@ -52,11 +58,26 @@
 </template>
 
 <script lang="ts">
+import { environment } from "@/environment/environment";
 import { defineComponent } from "vue";
 import BaseCircleProgress from "../../components/UI/BaseCircleProgress.vue";
+
+type songData = {
+  song_id: string;
+  title: string;
+  artist_name: string;
+  artist_id: string;
+  added_date?: string;
+  album_name: string;
+  album_id: string;
+  image_path: string;
+  duration: number;
+  listens?: number;
+}[];
+
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
-    playingAudio: Object;
+    playingAudio: songData;
     progress: number;
     isPlaying: boolean;
     frequencyData: Array<number>;
@@ -66,6 +87,7 @@ declare module "@vue/runtime-core" {
 export default defineComponent({
   data() {
     return {
+      environment: environment,
       observer: null as ResizeObserver | null,
       mobile: true,
     };

@@ -179,7 +179,58 @@ class SongController extends Controller
         ]);
     }
 
+    public function likeSong($id)
+    {
+        $song = Song::where('song_id', $id)->first();
+        if (!$song->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Song not found'
+            ]);
+        }
 
+        $liked = LikedSong::where('song_id', $id)->where('user_id', Auth::user()->user_id)->first();
+        if ($liked) {
+            $liked->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Song unliked successfully'
+            ]);
+        } else {
+            $liked = new LikedSong();
+            $liked->song_id = $id;
+            $liked->user_id = Auth::user()->user_id;
+            $liked->save();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Song liked successfully'
+            ]);
+        }
+    }
+
+    public function likedSong($id)
+    {
+        $song = Song::where('song_id', $id)->first();
+        if (!$song->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Song not found'
+            ]);
+        }
+
+        $liked = LikedSong::where('song_id', $id)->where('user_id', Auth::user()->user_id)->first();
+        if ($liked) {
+            return response()->json([
+                'status' => 'success',
+                'liked' => true
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'success',
+                'liked' => false
+            ]);
+        }
+    }
 
     public function deleteSong($id)
     {
@@ -221,5 +272,40 @@ class SongController extends Controller
             'status' => 'success',
             'songs' => $songs
         ]);
+    }
+
+    public function searchSong(Request $request)
+    {
+        if ($request->query->has('query')) {
+            $query = $request->query->get('query');
+            $songs = DB::table('songs')
+                ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
+                ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
+                ->join('albums', 'songs.album_id', '=', 'albums.album_id')
+                ->select(
+                    'songs.song_id',
+                    'songs.title',
+                    'songs.song_id',
+                    'songs.duration',
+                    'songs.listens',
+                    "artists.artist_id",
+                    "artists.name as artist_name",
+                    "albums.name as album_name",
+                    "albums.album_id as album_id",
+                    "albums.image_path as image_path",
+                )
+                ->where('songs.title', 'like',  '%' . $query . '%')
+                ->where('songs.display', '=', 'public')
+                ->get();
+            return response()->json([
+                'status' => 'success',
+                'songs' => $songs
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Query not found'
+            ]);
+        }
     }
 }

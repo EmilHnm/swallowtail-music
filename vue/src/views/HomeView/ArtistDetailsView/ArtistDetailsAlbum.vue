@@ -6,7 +6,12 @@
     <template #action><div></div></template>
   </BaseDialog>
   <div v-for="album in albums" :key="album.album_id" :id="album.album_id">
-    <BaseAlbum :data="album" />
+    <BaseAlbum
+      :data="album"
+      @playAlbum="playAlbum"
+      @addAlbumToQueue="addAlbumToQueue"
+      @playSongInAlbum="playSongInAlbum"
+    />
   </div>
 </template>
 
@@ -23,6 +28,7 @@ type albumData = album & {
 };
 
 export default defineComponent({
+  emits: ["playAlbum", "addAlbumToQueue", "playSongInAlbum"],
   data() {
     return {
       isMenuOpen: false,
@@ -32,6 +38,15 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("artist", ["getArtistAlbumById"]),
+    playAlbum(id: string) {
+      this.$emit("playAlbum", id);
+    },
+    addAlbumToQueue(id: string) {
+      this.$emit("addAlbumToQueue", id);
+    },
+    playSongInAlbum(id: string) {
+      this.$emit("playSongInAlbum", id);
+    },
   },
   computed: {
     ...mapGetters({

@@ -30,7 +30,7 @@
     </div>
     <div class="header__center">
       <div class="header__center--logo">
-        <router-link class="header__center--logo" :to="{ name: 'home' }">
+        <router-link class="header__center--logo" :to="{ name: 'mainPage' }">
           <icon-logo></icon-logo>
         </router-link>
         <span class="header__center--logo-text">Swallowtail Music</span>

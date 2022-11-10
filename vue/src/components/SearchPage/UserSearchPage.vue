@@ -2,21 +2,32 @@
   <div class="search-result__container">
     <div class="search-result__container--user">
       <BaseCardUser
-        v-for="item in testArr"
-        :key="item"
-        :userName="'Emil'"
-        :songCount="6"
+        v-for="user in userResult"
+        :key="user.user_id"
+        :id="user.user_id"
+        :userName="user.name"
+        :imageSrc="user.profile_photo_url"
+        :songCount="user.song_count"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import type { user } from "@/model/userModel";
 import { defineComponent } from "vue";
 import BaseCardUser from "../UI/BaseCardUser.vue";
 
+type userData = user & { song_count: number };
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    userResult: userData[];
+  }
+}
+
 export default defineComponent({
-  inject: ["testArr"],
+  inject: ["userResult"],
   components: { BaseCardUser },
 });
 </script>

@@ -2,12 +2,19 @@
   <BaseCard>
     <div class="artist">
       <div class="artist__image">
-        <img class="img" src="../../assets/music/cover.jpg" />
+        <img
+          class="img"
+          :src="
+            data.image_path
+              ? `${environment.artist_image}/${data.image_path}`
+              : `${environment.default}/no_image.jpg`
+          "
+        />
         <div class="artist__image--play">
           <IconPlay />
         </div>
       </div>
-      <div class="artist__name">{{ title }}</div>
+      <div class="artist__name" @click="redirectToArtist">{{ data.name }}</div>
       <div class="artist__sub">Artist</div>
     </div></BaseCard
   >
@@ -16,19 +23,29 @@
 import { defineComponent } from "vue";
 import BaseCard from "./BaseCard.vue";
 import IconPlay from "../icons/IconPlay.vue";
+import type { artist } from "@/model/artistModel";
+import { environment } from "@/environment/environment";
 
 export default defineComponent({
   props: {
-    // imageSrc: {
-    //   type: String,
-    //   required: true,
-    // },
-    title: {
-      type: String,
+    data: {
+      type: Object as () => artist,
       required: true,
     },
   },
-  setup() {},
+  data() {
+    return {
+      environment: environment,
+    };
+  },
+  methods: {
+    redirectToArtist() {
+      this.$router.push({
+        name: "artistPage",
+        params: { id: this.data.artist_id },
+      });
+    },
+  },
   components: { BaseCard, IconPlay },
 });
 </script>

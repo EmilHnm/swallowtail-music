@@ -9,10 +9,12 @@
       </div>
       <div class="album__title" @click="redirect">{{ title }}</div>
       <div class="album__uploader" v-if="uploader">{{ uploader }}</div>
-      <div class="album__songCount" v-if="songCount !== null">
+      <div class="album__songCount" v-if="songCount !== undefined">
         {{ songCount }} songs
       </div>
-      <div class="album__songCount" v-if="listens">{{ listens }} listens</div>
+      <div class="album__songCount" v-if="listens !== undefined">
+        {{ listens }} listens
+      </div>
     </div>
   </BaseCard>
 </template>
@@ -60,7 +62,13 @@ export default {
             id: this.id,
           },
         });
-      //if (this.type === "album")
+      if (this.type === "album")
+        this.$router.push({
+          name: "albumViewPage",
+          params: {
+            id: this.id,
+          },
+        });
     },
   },
 };

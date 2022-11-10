@@ -121,7 +121,9 @@
             {{ playlistOwner.name }}
           </div></router-link
         >
-        <div class="info__other--songCount">- {{ songCount }} Songs -</div>
+        <div class="info__other--songCount">
+          - {{ Object.keys(songList).length }} Songs -
+        </div>
         <div class="info__other--totalDuration">
           {{ totalDuration }}
         </div>
@@ -279,11 +281,11 @@ import { _function } from "@/mixins";
 import IconPlay from "../../components/icons/IconPlay.vue";
 import IconSearch from "../../components/icons/IconSearch.vue";
 import IconHorizontalThreeDot from "../../components/icons/IconHorizontalThreeDot.vue";
-import BaseListItem from "../../components/UI/BaseListItem.vue";
-import BaseLineLoad from "../../components/UI/BaseLineLoad.vue";
-import BaseCircleLoad from "../../components/UI/BaseCircleLoad.vue";
-import BaseSongItem from "../../components/UI/BaseSongItem.vue";
-import BaseDialog from "../../components/UI/BaseDialog.vue";
+import BaseListItem from "@/components/UI/BaseListItem.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import BaseSongItem from "@/components/UI/BaseSongItem.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 import IconBallPen from "@/components/icons/IconBallPen.vue";
 
@@ -386,7 +388,7 @@ export default defineComponent({
         .then((res) => {
           this.isLoading = false;
           if (res.status === "error") {
-            this.$router.push({ name: "mainPage", replace: true });
+            this.$router.push({ name: "mainPage" });
           } else {
             this.playlistDetail = res.playlistDetail;
             this.playlistOwner = res.owner;
@@ -655,8 +657,10 @@ export default defineComponent({
     },
     "$route.params.id": {
       handler() {
-        this.loadPlaylist();
-        this.loadPlaylistSong();
+        if (this.$route.name === "playlistViewPage") {
+          this.loadPlaylist();
+          this.loadPlaylistSong();
+        }
       },
       deep: true,
       immediate: true,

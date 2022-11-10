@@ -1,3 +1,4 @@
+import { userModule } from "./module/userModule";
 import { createStore } from "vuex";
 import { accountModule } from "./module/accountModule";
 import { albumModule } from "./module/albumModule";
@@ -14,6 +15,7 @@ export default createStore({
     playlist: playlistModule,
     account: accountModule,
     artist: artistModule,
+    user: userModule,
     test: testModule,
   },
 });

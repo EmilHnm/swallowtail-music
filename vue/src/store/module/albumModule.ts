@@ -1,4 +1,3 @@
-import type { album } from "./../../model/albumModel";
 import { environment } from "@/environment/environment";
 
 export const albumModule = {
@@ -7,12 +6,12 @@ export const albumModule = {
   getters: {},
   mutations: {},
   actions: {
-    getAlbum(context: any, payload: { userToken: string; albumId: string }) {
-      return fetch(`${environment.api}/album/${payload.albumId}`, {
+    getAlbum(context: any, payload: { token: string; album_id: string }) {
+      return fetch(`${environment.api}/album/${payload.album_id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${payload.userToken}`,
+          Authorization: `Bearer ${payload.token}`,
           Accept: "application/json",
         },
       });
@@ -24,6 +23,15 @@ export const albumModule = {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
+        },
+      });
+    },
+    searchAlbums(context: any, data: { token: string; query: string }) {
+      return fetch(`${environment.api}/album/search?query=${data.query}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${data.token}`,
         },
       });
     },

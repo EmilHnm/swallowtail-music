@@ -5,12 +5,14 @@
       <base-list-item :selected="true">
         <div class="playing-list__song">
           <IconPlay />
-          <div class="playing-list__song--title">{{ playingAudio.title }}</div>
+          <div class="playing-list__song--title">
+            {{ playingAudio[0].title }}
+          </div>
           <div class="playing-list__song--duration">
             {{
-              Math.floor(playingAudio.duration / 60) +
+              Math.floor(playingAudio[0].duration / 60) +
               ":" +
-              Math.floor(playingAudio.duration % 60)
+              Math.floor(playingAudio[0].duration % 60)
             }}
           </div>
         </div>
@@ -22,23 +24,20 @@
       <transition-group tag="ul" name="queue-list">
         <li
           class="playing-list__queue--item"
-          v-for="(item, index) in playlist"
-          :key="index"
+          v-for="(item, key, i) in playlist"
+          :key="key"
           draggable="true"
           @dragstart="dragStart($event, item)"
           @dragend="onDrop($event)"
           @dragenter="dragEnter($event, item)"
         >
-          <!-- <BaseSongItem
-            :selected="index === audioIndex ? true : false"
-            :title="item.title"
-            :artist="item.artist"
-            :album="'Future Paradise'"
-            :duration="500"
+          <BaseSongItem
+            :selected="i === audioIndex ? true : false"
+            :data="item"
             :inQueue="true"
-            @deleteFromQueue="deleteFromQueue(index)"
-            @selectSong="setPlaySong(index)"
-          /> -->
+            @deleteFromQueue="deleteFromQueue(i)"
+            @selectSong="setPlaySong(i)"
+          />
         </li>
       </transition-group>
     </div>
@@ -47,23 +46,20 @@
       <transition-group tag="ul" name="queue-list" mode="out-in">
         <li
           class="playing-list__queue--item"
-          v-for="(item, index) in shuffledPlaylist"
-          :key="index"
+          v-for="(item, key, i) in shuffledPlaylist"
+          :key="key"
           draggable="true"
           @dragstart="dragStart($event, item)"
           @dragend="onDrop($event)"
           @dragenter="dragEnter($event, item)"
         >
-          <!-- <BaseSongItem
-            :selected="index === audioIndex ? true : false"
-            :title="item.title"
-            :artist="item.artist"
-            :album="'Future Paradise'"
-            :duration="'3:30'"
+          <BaseSongItem
+            :selected="i === audioIndex ? true : false"
+            :data="item"
             :inQueue="true"
-            @deleteFromQueue="deleteFromQueue(index)"
-            @selectSong="setPlaySong(index)"
-          /> -->
+            @deleteFromQueue="deleteFromQueue(i)"
+            @selectSong="setPlaySong(i)"
+          />
         </li>
       </transition-group>
     </div>
@@ -74,6 +70,23 @@ import { defineComponent } from "vue";
 import IconPlay from "../icons/IconPlay.vue";
 import BaseSongItem from "../UI/BaseSongItem.vue";
 
+type songData = {
+  song_id: string;
+  title: string;
+  artist_name: string;
+  artist_id: string;
+  added_date?: string;
+  album_name: string;
+  album_id: string;
+  image_path: string;
+  duration: number;
+  listens?: number;
+}[];
+
+type songList = {
+  [song_id: string]: songData;
+};
+
 export default defineComponent({
   emits: ["onDrop", "setPlaySong", "deleteFromQueue"],
   props: {
@@ -82,15 +95,15 @@ export default defineComponent({
       default: false,
     },
     playlist: {
-      type: Array as () => Array<Object>,
+      type: Object as () => songList,
       required: true,
     },
     shuffledPlaylist: {
-      type: Array as () => Array<Object>,
+      type: Object as () => songList,
       required: true,
     },
     playingAudio: {
-      type: Object,
+      type: Array as () => songData,
       required: true,
     },
     audioIndex: {
@@ -109,25 +122,31 @@ export default defineComponent({
     };
   },
   methods: {
-    dragStart(e: DragEvent, item: Object) {
+    dragStart(e: DragEvent, item: songData) {
       if (e.target) (e.target as HTMLLIElement).classList.add("dragging");
       if (this.shuffle) {
-        this.movingIndex = this.shuffledPlaylist.findIndex((i) => i === item);
+        this.movingIndex = Object.keys(this.shuffledPlaylist).findIndex(
+          (i) => i === item[0].song_id
+        );
       } else {
-        this.movingIndex = this.playlist.findIndex((i) => i === item);
+        this.movingIndex = Object.keys(this.playlist).findIndex(
+          (i) => i === item[0].song_id
+        );
       }
     },
     onDrop(e: DragEvent) {
       if (e.target) (e.target as HTMLLIElement).classList.remove("dragging");
       this.$emit("onDrop", this.movingIndex, this.movingOverIndex);
     },
-    dragEnter(e: DragEvent, item: Object) {
+    dragEnter(e: DragEvent, item: songData) {
       if (this.shuffle) {
-        this.movingOverIndex = this.shuffledPlaylist.findIndex(
-          (i) => i === item
+        this.movingOverIndex = Object.keys(this.shuffledPlaylist).findIndex(
+          (i) => i === item[0].song_id
         );
       } else {
-        this.movingOverIndex = this.playlist.findIndex((i) => i === item);
+        this.movingOverIndex = Object.keys(this.playlist).findIndex(
+          (i) => i === item[0].song_id
+        );
       }
     },
     setPlaySong(index: number) {

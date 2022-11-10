@@ -34,6 +34,15 @@ export const artistModule = {
         },
       });
     },
+    searchArtist(context: any, payload: { token: string; query: string }) {
+      return fetch(`${environment.api}/artist/search?query=${payload.query}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${payload.token}`,
+          Accept: "application/json",
+        },
+      });
+    },
     getArtistBySongId(
       context: any,
       payload: { userToken: string; song_id: string }

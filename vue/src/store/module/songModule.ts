@@ -43,6 +43,15 @@ export const songModule = {
         body: data.songForm,
       });
     },
+    searchSong(context: any, data: { token: string; query: string }) {
+      return fetch(`${environment.api}/song/search?query=${data.query}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
+    },
     getGenreList(context: any, userToken: string): Promise<Response> {
       return fetch(`${environment.api}/genre`, {
         method: "GET",
@@ -67,6 +76,25 @@ export const songModule = {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${payload.userToken}`,
+        },
+      });
+    },
+    likeSong(context: any, payload: { userToken: string; songId: string }) {
+      return fetch(`${environment.api}/song/${payload.songId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+        },
+      });
+    },
+    likedSong(context: any, payload: { userToken: string; songId: string }) {
+      return fetch(`${environment.api}/song/${payload.songId}/liked`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
         },
       });
     },

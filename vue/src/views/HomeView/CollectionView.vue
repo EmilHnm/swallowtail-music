@@ -1,4 +1,12 @@
 <template>
+  <teleport to="body">
+    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseDialog>
+  </teleport>
   <div class="collection-header">
     <div class="header__background"></div>
     <div class="header__icon">
@@ -16,7 +24,7 @@
   </div>
   <div class="control">
     <div class="control__left">
-      <div class="control__left--play" v-if="likedList.length > 0">
+      <div class="control__left--play" v-if="Object.keys(likedList).length > 0">
         <IconPlay />
       </div>
       <div class="control__left--menu">
@@ -35,7 +43,7 @@
     </div>
   </div>
   <div class="songList" ref="songList">
-    <div class="songList__header" v-if="likedList.length > 0">
+    <div class="songList__header" v-if="Object.keys(likedList).length > 0">
       <div class="songList__header--left">
         <div class="songList__header--left--img"></div>
         <div class="songList__header--left--title">Title</div>
@@ -64,13 +72,10 @@
     </div>
     <div class="songList__content">
       <BaseSongItem
-        v-for="item in likedList"
-        :key="item.song_id"
-        :title="'Future Parade'"
-        :artist="'虹ヶ咲学園スクールアイドル同好会'"
-        :album="'Future Parade'"
-        :duration="'4:36'"
-        :hears="1000000"
+        v-for="song in likedList"
+        :key="song[0].song_id"
+        :data="song"
+        @likeSong="likeSong"
       />
     </div>
   </div>
@@ -82,8 +87,22 @@ import IconHorizontalThreeDot from "../../components/icons/IconHorizontalThreeDo
 import BaseListItem from "../../components/UI/BaseListItem.vue";
 import BaseSongItem from "../../components/UI/BaseSongItem.vue";
 import IconHeartFilled from "../../components/icons/IconHeartFilled.vue";
-import type { song } from "@/model/songModel";
 import { mapActions, mapGetters } from "vuex";
+
+type songDataList = {
+  [song_id: string]: {
+    song_id: string;
+    title: string;
+    artist_name: string;
+    artist_id: string;
+    added_date?: string;
+    album_name: string;
+    album_id: string;
+    image_path: string;
+    duration: number;
+    listens?: number;
+  }[];
+};
 
 export default defineComponent({
   setup() {},
@@ -103,9 +122,10 @@ export default defineComponent({
       observer: null as ResizeObserver | null,
       small: false,
       medium: false,
-      likedList: [] as song[],
+      likedList: {} as songDataList,
       songCount: 0,
       totalDuration: "",
+      isLoading: false,
     };
   },
   methods: {
@@ -115,6 +135,34 @@ export default defineComponent({
     },
     toggleSearchBar() {
       this.isSearchBarOpen = !this.isSearchBarOpen;
+    },
+    loadLikedList() {
+      this.isLoading = true;
+      this.getLikedSongList(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.likedList = res.likedList.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.songCount = res.songCount;
+            let duration = Object.keys(this.likedList).reduce(
+              (a: number, key: any) => {
+                return a + this.likedList[key][0].duration;
+              },
+              0
+            );
+            this.totalDuration = new Date(duration * 1000)
+              .toISOString()
+              .substring(11, 19);
+            this.isLoading = false;
+          }
+        });
+    },
+    likeSong() {
+      this.loadLikedList();
     },
   },
   mounted() {
@@ -127,15 +175,7 @@ export default defineComponent({
     if (this.observer && songList) this.observer.observe(songList);
   },
   created() {
-    this.getLikedSongList(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        this.likedList = res.likedList;
-        this.songCount = res.songCount;
-        this.totalDuration = new Date(res.totalDuration * 1000)
-          .toISOString()
-          .substr(11, 8);
-      });
+    this.loadLikedList();
   },
   computed: {
     ...mapGetters({

@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { _function } from "@/mixins";
 import { mapActions, mapGetters } from "vuex";
 import type { playlist } from "@/model/playlistModel";
+import { environment } from "@/environment/environment";
 import HomeViewLeftSideBar from "../../components/HomeView/HomeViewLeftSideBar.vue";
 import HomeViewRightSideBar from "../../components/HomeView/HomeViewRightSideBar.vue";
 import HomeViewPlayer from "../../components/HomeView/HomeViewPlayer.vue";
@@ -11,6 +12,23 @@ import BaseDialog from "../../components/UI/BaseDialog.vue";
 
 type playlistData = playlist & {
   songCount: number;
+};
+
+type songData = {
+  song_id: string;
+  title: string;
+  artist_name: string;
+  artist_id: string;
+  added_date?: string;
+  album_name: string;
+  album_id: string;
+  image_path: string;
+  duration: number;
+  listens?: number;
+}[];
+
+type songList = {
+  [song_id: string]: songData;
 };
 
 export default {
@@ -27,36 +45,7 @@ export default {
       isLeftSideBarActive: false,
       isRightSideBarActive: false,
       audio: null as HTMLAudioElement | null,
-      audioList: [
-        {
-          title: "Future Parade",
-          artist: " 虹ヶ咲学園スクールアイドル同好会 ",
-          src: "somestring.mp3",
-        },
-        {
-          title: "Level Oops! Adventures",
-          artist: " 虹ヶ咲学園スクールアイドル同好会 ",
-          src: "02. Level Oops! Adventures.mp3",
-        },
-        {
-          title: "Future Parade (Off Vocal)",
-          artist: " 虹ヶ咲学園スクールアイドル同好会 ",
-          src: "03. Future Parade (Off Vocal).mp3",
-        },
-        {
-          title: "Level Oops! Adventures (Off Vocal)",
-          artist: " 虹ヶ咲学園スクールアイドル同好会 ",
-          src: "04. Level Oops! Adventures (Off Vocal).mp3",
-        },
-      ],
-      playingAudio: {
-        title: "",
-        artist: "",
-        album: "",
-        duration: 0,
-        hears: 0,
-        src: "",
-      },
+      audioList: {} as songList,
       //play song property
       isPlaying: false,
       progress: 0,
@@ -64,7 +53,8 @@ export default {
       volume: 100,
       repeat: "off",
       isOnShuffle: false,
-      shuffledList: [] as Array<any>,
+      shuffledList: {} as songList,
+      isAudioWaitting: false,
       // visualizer
       ctx: null as AudioContext | null,
       audioSource: null as MediaElementAudioSourceNode | null,
@@ -92,7 +82,11 @@ export default {
     };
   },
   methods: {
-    ...mapActions("playlist", ["getAccountPlaylist", "deletePlaylist"]),
+    ...mapActions("playlist", [
+      "getAccountPlaylist",
+      "deletePlaylist",
+      "getPlaylistSongs",
+    ]),
     // NOTE: Sidebar control
     toggleLeftSideBar() {
       this.isLeftSideBarActive = !this.isLeftSideBarActive;
@@ -110,18 +104,17 @@ export default {
       this.isPlaying = false;
     },
     nextSong() {
-      if (this.audioIndex === this.audioList.length - 1) {
+      if (this.audioIndex === Object.keys(this.audioList).length - 1) {
         if (this.repeat === "off") return;
         this.audioIndex = 0;
       } else {
         this.audioIndex++;
       }
     },
-    loadSong() {},
     prevSong() {
       if (this.audioIndex === 0) {
         if (this.repeat === "off") return;
-        this.audioIndex = this.audioList.length - 1;
+        this.audioIndex = Object.keys(this.audioList).length - 1;
       } else {
         this.audioIndex--;
       }
@@ -142,10 +135,10 @@ export default {
       this.progress = this.audio.currentTime;
     },
     getDuration() {
-      this.playingAudio.duration = this.audio.duration;
+      this.playingAudio[0].duration = this.audio.duration;
     },
     setProgress(progress: number) {
-      this.audio.currentTime = (progress * this.playingAudio.duration) / 100;
+      this.audio.currentTime = (progress * this.playingAudio[0].duration) / 100;
     },
     setVolume(value: string) {
       this.volume = +value;
@@ -160,6 +153,14 @@ export default {
     canplay() {
       if (this.isPlaying) this.playSong();
     },
+    waiting() {
+      this.isAudioWaitting = true;
+      this.audio.pause();
+    },
+    loadeddata() {
+      this.isAudioWaitting = false;
+      if (this.isPlaying) this.playSong();
+    },
     setPlaySong(index: number) {
       if (this.audioIndex === index) return;
       this.audioIndex = index;
@@ -167,13 +168,21 @@ export default {
     // NOTE:playinglist
     onDrop(start: number, end: number) {
       if (this.isOnShuffle) {
-        const temp = this.shuffledList[start];
-        this.shuffledList.splice(start, 1);
-        this.shuffledList.splice(end, 0, temp);
+        const tempValue = Object.values(this.shuffledList)[start];
+        const tempKey = Object.keys(this.shuffledList)[start];
+        this.shuffledList = _function.spliceObject(this.shuffledList, start, 1);
+        this.shuffledList = _function.spliceObject(this.shuffledList, end, 0, {
+          [tempKey]: tempValue,
+        });
       } else {
-        const temp = this.audioList[start];
-        this.audioList.splice(start, 1);
-        this.audioList.splice(end, 0, temp);
+        const tempValue = Object.values(this.audioList)[start];
+        const tempKey = Object.keys(this.audioList)[start];
+        console.log(this.audioList);
+        this.audioList = _function.spliceObject(this.audioList, start, 1);
+        console.log("update");
+        this.audioList = _function.spliceObject(this.audioList, end, 0, {
+          [tempKey]: tempValue,
+        });
       }
       if (start === this.audioIndex) {
         this.audioIndex = end;
@@ -188,13 +197,12 @@ export default {
         return;
       }
       if (this.isOnShuffle) {
-        this.shuffledList.splice(index, 1);
+        this.shuffledList = _function.spliceObject(this.shuffledList, index, 1);
       } else {
-        this.audioList.splice(index, 1);
+        this.audioList = _function.spliceObject(this.audioList, index, 1);
       }
       if (index < this.audioIndex) {
         this.audioIndex++;
-        console.log(true);
       }
     },
     // NOTE:visualizer
@@ -235,6 +243,37 @@ export default {
         });
     },
     playPlaylist(id: string) {
+      this.getPlaylistSongs({ playlist_id: id, token: this.token })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.songList) {
+            this.audioList = res.songList.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
+    },
+    // NOTE: Album
+    playAlbum(id: string) {
+      console.log(id);
+    },
+    addAlbumToQueue(id: string) {
+      console.log(id);
+    },
+    playSongInAlbum(id: string) {
+      console.log(id);
+    },
+    //NOTE : Artist
+    playArtistSong(id: string) {
       console.log(id);
     },
     // NOTE: dialog
@@ -252,34 +291,25 @@ export default {
     },
     isOnShuffle(n) {
       if (n) {
-        let playing = this.audioList[this.audioIndex];
-        let listNotContainPlaying = this.audioList.filter(
-          (item) => item.title !== playing.title
+        let playingData = Object.values(this.audioList)[this.audioIndex];
+        let playingKey = Object.keys(this.audioList)[this.audioIndex];
+        let listNotContainPlaying = _function.filterObject(
+          this.audioList,
+          playingKey
         );
-        this.shuffledList = [
-          playing,
-          ..._function.shuffleArr(listNotContainPlaying),
-        ];
+        this.shuffledList = {
+          [playingKey]: playingData,
+          ..._function.shuffleObject(listNotContainPlaying),
+        };
         this.audioIndex = 0;
-        console.log("shuffle", this.audioIndex);
+        console.log(this.shuffledList, this.audioIndex);
       } else {
-        let playing = this.shuffledList[this.audioIndex];
-        let audioIndex = this.audioList.findIndex(
-          (item) => item.title === playing.title
+        let playingKey = Object.keys(this.shuffledList)[this.audioIndex];
+        let audioIndex = Object.keys(this.audioList).findIndex(
+          (key) => key === playingKey
         );
         this.audioIndex = audioIndex;
       }
-    },
-    audioIndex(n) {
-      if (this.isOnShuffle) {
-        this.playingAudio = this.shuffledList[n];
-      } else {
-        this.playingAudio = this.audioList[n];
-      }
-    },
-    playingAudio() {
-      this.audio.src =
-        "http://127.0.0.1:5173/src/assets/music/" + this.playingAudio.src;
     },
     volume() {
       this.audio.volume = this.volume / 100;
@@ -308,19 +338,33 @@ export default {
         this.renderFrame();
       }
     },
+    playingAudio() {
+      if (this.playingAudio) {
+        this.audio.src = this.playingAudioSrc;
+        this.playSong();
+      }
+    },
   },
   computed: {
     ...mapGetters({
       token: "auth/userToken",
     }),
+    playingAudio() {
+      return Object.values(this.audioList)[this.audioIndex];
+    },
+    playingAudioSrc() {
+      return this.playingAudio
+        ? `${environment.song_src}/${this.playingAudio[0].song_id}.ogg`
+        : "";
+    },
   },
   created() {
     this.loadPlaylist();
   },
   mounted() {
-    this.audio = this.$refs["audio"];
+    this.audio = this.$refs["audio"] as HTMLAudioElement;
+    this.audio.crossOrigin = "anonymous";
     this.audio.volume = this.volume / 100;
-    this.playingAudio = this.audioList[this.audioIndex];
   },
 };
 </script>
@@ -339,16 +383,21 @@ export default {
     </BaseDialog>
   </teleport>
   <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
-  <div class="main-body">
+  <div class="main-body" :class="{ full: Object.keys(audioList).length <= 0 }">
     <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
     <main>
       <RouterView
         @updatePlaylist="loadPlaylist"
         @deletePlaylist="removePlaylist"
         @playPlaylist="playPlaylist"
+        @playAlbum="playAlbum"
+        @addAlbumToQueue="addAlbumToQueue"
+        @playSongInAlbum="playSongInAlbum"
+        @playArtistSong="playArtistSong"
       />
     </main>
     <HomeViewRightSideBar
+      v-if="Object.keys(audioList).length > 0"
       :isActive="isRightSideBarActive"
       :playlist="audioList"
       :playingAudio="playingAudio"
@@ -361,6 +410,7 @@ export default {
     />
   </div>
   <HomeViewPlayer
+    v-if="Object.keys(audioList).length > 0"
     :playingAudio="playingAudio"
     :progress="progress"
     :volume="volume"
@@ -385,13 +435,18 @@ export default {
     @durationchange="getDuration"
     @ended="nextSong"
     @canplay="canplay"
+    @waiting="waiting"
+    @loadeddata="loadeddata"
   ></audio>
 </template>
 <style lang="scss" scoped>
 .main-body {
   display: flex;
   position: relative;
-  height: calc(100vh - 60px - 80px);
+  height: calc(100vh - 60px - 81px);
+  &.full {
+    height: calc(100vh - 81px);
+  }
   main {
     flex: 1;
     overflow-y: auto;

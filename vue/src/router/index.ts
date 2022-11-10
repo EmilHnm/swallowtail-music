@@ -10,12 +10,6 @@ import NotFoundView from "../views/NotFoundView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  scrollBehavior(to: number, from: number, savedPosittion) {
-    if (savedPosittion) {
-      return savedPosittion;
-    }
-    return { left: 0, top: 0 };
-  },
   routes: [
     {
       path: "/",
@@ -24,9 +18,6 @@ const router = createRouter({
       redirect: "home",
       meta: {
         requiresAuth: true,
-        goToIndexIf: () => {
-          return store.getters["auth/userData"].user_id;
-        },
       },
       children: [
         {
@@ -43,6 +34,11 @@ const router = createRouter({
           path: "/library",
           name: "libraryPage",
           component: () => import("../views/HomeView/LibraryView.vue"),
+        },
+        {
+          path: "/album/:id",
+          name: "albumViewPage",
+          component: () => import("../views/HomeView/AlbumView.vue"),
         },
         {
           path: "/playlist/:id",
@@ -77,7 +73,10 @@ const router = createRouter({
         {
           path: "artist/:id",
           name: "artistPage",
-          redirect: "overview",
+          redirect: (to) => ({
+            name: "artistOverviewPage",
+            params: { id: to.params.id },
+          }),
           component: () =>
             import("../views/HomeView/ArtistDetailsView/ArtistDetailsView.vue"),
           children: [
@@ -239,7 +238,6 @@ router.beforeEach((to, from, next) => {
                 profile_photo_url: res.profile_photo_url,
               },
             };
-
             store.commit("auth/setUser", data);
             if (to.meta.requiresAuth) {
               next();

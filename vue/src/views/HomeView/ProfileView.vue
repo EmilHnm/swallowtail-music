@@ -1,55 +1,83 @@
 <template>
+  <teleport to="body"
+    ><BaseDialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseDialog>
+  </teleport>
   <div class="user-header">
     <div class="header__background"></div>
     <div class="header__image">
-      <img src="../../assets/music/cover.jpg" alt="" srcset="" />
+      <img
+        :src="
+          user.profile_photo_url
+            ? `${environment.profile_image}/${user.profile_photo_url}`
+            : `${environment.default}/default-avatar.jpg`
+        "
+        alt=""
+        srcset=""
+      />
     </div>
     <div class="info">
       <div class="info__type">Profile</div>
-      <div class="info__title">Hoa Ngominh</div>
+      <div class="info__title">{{ user.name }}</div>
       <div class="info__other">
-        <div class="info__other--playlistCount">4 public playlists</div>
-        <div class="info__other--songUploaded">- 4 Songs -</div>
-        <div class="info__other--albumUploaded">1 Album</div>
+        <div class="info__other--playlistCount">
+          {{ user.publicPlaylist_count }} public playlists
+        </div>
+        <div class="info__other--songUploaded">
+          - {{ user.songUploaded_count }} Songs -
+        </div>
+        <div class="info__other--albumUploaded">
+          {{ user.albumUploaded_count }} Album
+        </div>
       </div>
     </div>
   </div>
-  <div class="control">
+  <div class="control" v-if="userData.user_id == user.user_id">
     <BaseButton>Edit Profile</BaseButton>
   </div>
   <div class="detail" ref="detail">
     <div class="topArtist">
-      <h2>Top artist this month</h2>
-      <span>This only visible to you</span>
+      <h2>Top artists</h2>
       <BaseHorizontalScroll>
         <BaseCardArtist
-          v-for="album in albums"
-          :key="album"
-          :title="' 虹ヶ咲学園スクールアイドル同好会 '"
+          v-for="artist in topArtist"
+          :key="artist.artist_id"
+          :data="artist"
         />
       </BaseHorizontalScroll>
     </div>
     <div class="topTracks">
-      <h2>Top artist this month</h2>
+      <h2>Top tracks</h2>
       <span>This only visible to you</span>
       <BaseSongItem
-        v-for="song in songs"
-        :key="song"
-        :title="' Future Parade '"
-        :artist="' 虹ヶ咲学園スクールアイドル同好会 '"
-        :album="' Future Parade '"
-        :duration="' 3:21 '"
-        :hears="1000"
+        v-for="song in topTracks"
+        :key="song[0].song_id"
+        :data="song"
       />
     </div>
     <div class="publicPlaylist">
       <h2>Public Playlist</h2>
       <BaseHorizontalScroll>
         <BaseCardAlbum
-          v-for="playlist in playlists"
-          :key="playlist"
-          :songCount="4"
-          :title="' 虹ヶ咲学園スクールアイドル同好会 '"
+          v-for="playlist in userPlaylist"
+          :key="playlist.playlist_id"
+          :title="playlist.title"
+          :id="playlist.playlist_id"
+          :img="
+            playlist.image_path
+              ? `${environment.playlist_cover}/${playlist.image_path}`
+              : `${environment.default}/no_image.jpg`
+          "
+          :type="'playlist'"
+          :songCount="playlist.songCount"
         />
       </BaseHorizontalScroll>
     </div>
@@ -62,6 +90,38 @@ import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
 import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
 import BaseSongItem from "../../components/UI/BaseSongItem.vue";
 import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
+import { mapActions, mapGetters } from "vuex";
+import type { user } from "@/model/userModel";
+import type { artist } from "@/model/artistModel";
+import { environment } from "@/environment/environment";
+import type { playlist } from "@/model/playlistModel";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+
+type userProfileData = user & {
+  publicPlaylist_count: number;
+  songUploaded_count: number;
+  albumUploaded_count: number;
+};
+
+type playlistData = playlist & {
+  songCount: number;
+};
+
+type songData = {
+  [song_id: string]: {
+    song_id: string;
+    title: string;
+    artist_name: string;
+    artist_id: string;
+    added_date?: string;
+    album_name: string;
+    album_id: string;
+    image_path: string;
+    duration: number;
+    listens?: number;
+  }[];
+};
 
 export default defineComponent({
   setup() {},
@@ -71,27 +131,95 @@ export default defineComponent({
     BaseCardArtist,
     BaseSongItem,
     BaseCardAlbum,
+    BaseDialog,
+    BaseLineLoad,
   },
   data() {
     return {
+      environment: environment,
       isMenuOpen: false,
-      isSearchBarOpen: false,
+      isLoading: true,
       filterText: "",
       detailWidth: 0,
       observer: null as ResizeObserver | null,
       small: false,
       medium: false,
-      albums: [1, 2, 3, 4, 5],
-      songs: [1, 2, 3, 4, 5],
-      playlists: [1, 2, 3, 4],
+      user: {} as userProfileData,
+      topArtist: [] as artist[],
+      topTracks: {} as songData,
+      playlists: [] as playlistData[],
     };
   },
   methods: {
+    ...mapActions("user", ["getUser"]),
+    ...mapActions("user", [
+      "getTopArtists",
+      "getPublicPlaylist",
+      "getTopTracks",
+    ]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
     },
-    toggleSearchBar() {
-      this.isSearchBarOpen = !this.isSearchBarOpen;
+    onLoadUser(user_id: string) {
+      this.getUser({
+        token: this.token,
+        user_id: user_id,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success") {
+            this.user = res.user;
+          } else {
+            this.$router.push({ name: "mainPage" });
+          }
+        });
+    },
+    onLoadTopArtist(user_id: string) {
+      this.getTopArtists({
+        token: this.token,
+        user_id: user_id,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.topArtist = res.artists;
+          } else {
+            this.$router.push({ name: "mainPage" });
+          }
+        });
+    },
+    onGetPublicPlaylist(user_id: string) {
+      this.getPublicPlaylist({
+        token: this.token,
+        user_id: user_id,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.playlists = res.playlists;
+          } else {
+            this.$router.push({ name: "mainPage" });
+          }
+        });
+    },
+    onGetTopTracks(user_id: string) {
+      this.getTopTracks({
+        token: this.token,
+        user_id: user_id,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.topTracks = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+          } else {
+            this.$router.push({ name: "mainPage" });
+          }
+        });
     },
   },
   mounted() {
@@ -116,6 +244,23 @@ export default defineComponent({
         this.medium = false;
       }
     },
+    "$route.params.id": {
+      immediate: true,
+      deep: true,
+      handler() {
+        if (this.$route.name === "profilePage") {
+          this.onLoadUser(this.$route.params.id as string);
+          this.onLoadTopArtist(this.$route.params.id as string);
+          this.onGetTopTracks(this.$route.params.id as string);
+        }
+      },
+    },
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+      userData: "auth/userData",
+    }),
   },
 });
 </script>
@@ -194,6 +339,7 @@ $tablet-width: 768px;
 }
 .detail {
   width: 100%;
+  padding: 20px;
 }
 
 @media (max-width: $mobile-width) {

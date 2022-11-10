@@ -83,4 +83,86 @@ export const _function = {
     }
     return array;
   },
+  // Splice Object
+  // IDEA
+  // spliceObject(object: any, index: number, count: number, item: any) {
+  //   const newObj: any = {};
+  //   if (index > Object.keys(object).length || index < 0)
+  //     index = Object.keys(object).length;
+  //   if (count < 0) count = 0;
+  //   if (count > Object.keys(object).length - index) count = 0;
+  //   if (item)
+  //     for (let i = 0; i <= Object.keys(object).length; i++) {
+  //       if (i < index) {
+  //         newObj[Object.keys(object)[i]] = Object.values(object)[i];
+  //       }
+  //       if (i === index) {
+  //         for (let i = 0; i < Object.keys(item).length; i++) {
+  //           newObj[Object.keys(item)[i]] = Object.values(item)[i];
+  //         }
+  //       }
+  //       if (i > index + count) {
+  //         newObj[Object.keys(object)[i - 1]] = Object.values(object)[i - 1];
+  //       }
+  //     }
+  //   else {
+  //     for (let i = 0; i <= Object.keys(object).length; i++) {
+  //       if (i < index && i >= index + count) {
+  //         newObj[Object.keys(object)[i]] = Object.values(object)[i];
+  //       }
+  //     }
+  //   }
+  //   return newObj;
+  // },
+  // OPTIMIZE
+  spliceObject(object: any, index: number, count: number, item: any = {}) {
+    //get object lenght
+    const totalProps = Object.keys(object).length;
+    if (index >= totalProps || index < 0)
+      //if index is out of range,
+      return item ? { ...object, ...item } : { ...object }; //return object with new item
+    if (!count || count < 0) count = 0; // set count to 0 to prevent error
+    if (count > totalProps - index) count = totalProps - index; // set count to max value if count is out of range
+    const newObj = Object.keys(object).reduce((acc, key, i) => {
+      if (count !== 0)
+        if (i < index || i >= index + count) {
+          //load all props before index and after index + count
+          return { ...acc, [key]: object[key] };
+        } else if (item) {
+          //load new item
+          return { ...acc, ...item };
+        } else {
+          return { ...acc };
+        }
+      else if (i < index || i > index + count) {
+        //load all props before index and after index + count
+        return { ...acc, [key]: object[key] };
+      } else if (item) {
+        //load new item
+        return { ...acc, ...item, [key]: object[key] };
+      } else {
+        return { ...acc };
+      }
+    }, {});
+    return newObj;
+  },
+  //suffle props in object
+  shuffleObject(object: any) {
+    const keys = Object.keys(object);
+    const newKeys = this.shuffleArr(keys);
+    const newObj = newKeys.reduce((acc, key) => {
+      return { ...acc, [key]: object[key] };
+    }, {});
+    return newObj;
+  },
+  //filter Object
+  filterObject(object: any, filter: string) {
+    const newObj = Object.keys(object)
+      .filter((key) => !filter.includes(key))
+      .reduce((obj: any, key: string) => {
+        obj[key] = object[key];
+        return obj;
+      }, {});
+    return newObj;
+  },
 };
