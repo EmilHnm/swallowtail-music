@@ -89,6 +89,7 @@ export default {
       "getAccountPlaylist",
       "deletePlaylist",
       "getPlaylistSongs",
+      "getLikedSongList",
     ]),
     ...mapActions("album", ["getAlbumSongs"]),
     // NOTE: Sidebar control
@@ -254,6 +255,8 @@ export default {
         .then((res) => res.json())
         .then((res) => {
           this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
           if (res.songList) {
             this.audioList = res.songList.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -261,6 +264,7 @@ export default {
               return r;
             }, Object.create(null));
             this.audioIndex = 0;
+            console.log(this.audioIndex, this.isLoading);
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -277,6 +281,8 @@ export default {
         .then((res) => res.json())
         .then((res) => {
           this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
           if (res.songList) {
             const newSongList = res.songList.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -302,6 +308,8 @@ export default {
         .then((res) => res.json())
         .then((res) => {
           this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
           if (res.status === "success") {
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -332,7 +340,8 @@ export default {
               return r;
             }, Object.create(null));
             this.audioList = { ...this.audioList, ...newSongList };
-            this.audioIndex = 0;
+            if (this.isOnShuffle)
+              this.shuffledList = { ...this.shuffledList, ...newSongList };
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -345,11 +354,12 @@ export default {
     },
     playSongInAlbum(array: string[]) {
       this.isLoading = true;
-      console.log(array);
       this.getAlbumSongs({ album_id: array[0], userToken: this.token })
         .then((res) => res.json())
         .then((res) => {
           this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
           if (res.status === "success") {
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -384,6 +394,8 @@ export default {
         })
         .then((res) => {
           this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
           if (res.status === "success")
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -404,6 +416,8 @@ export default {
         })
         .then((res) => {
           this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
           if (res.status === "success")
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -415,6 +429,32 @@ export default {
               this.audioIndex = index;
             }
           });
+        });
+    },
+    //NOTE: Liked Song
+    playLikedSong() {
+      this.isLoading = true;
+      this.getLikedSongList(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
+          if (res.status === "success") {
+            this.audioList = res.likedList.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.audioIndex = 0;
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
         });
     },
     // NOTE: dialog
@@ -547,6 +587,7 @@ export default {
         @playSongInAlbum="playSongInAlbum"
         @playArtistSong="playArtistSong"
         @playSongOfArtist="playSongOfArtist"
+        @playLikedSong="playLikedSong"
       />
     </main>
     <HomeViewRightSideBar

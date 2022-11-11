@@ -190,7 +190,7 @@ export default defineComponent({
         }
         let reader = new FileReader();
         reader.readAsDataURL(e.target.files[0]);
-        reader.onload = (e) => {
+        reader.onload = () => {
           this.albumImageTempPath = reader.result as string;
         };
         this.albumImage = e.target.files[0];
@@ -329,11 +329,6 @@ export default defineComponent({
     ...mapGetters({
       userToken: "auth/userToken",
     }),
-  },
-  watch: {
-    data() {
-      console.log(this.data);
-    },
   },
   components: { BaseInput, BaseButton, BaseDialog },
 });

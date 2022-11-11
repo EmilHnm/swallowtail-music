@@ -125,10 +125,10 @@
           <BaseListItem v-if="inQueue" @click="deleteFromQueue"
             >Delete from Queue</BaseListItem
           >
-          <BaseListItem v-if="inPlaylist" @click="deleteFromPlaylist"
-            >Delete from Queue</BaseListItem
-          >
           <BaseListItem v-else>Add to Queue</BaseListItem>
+          <BaseListItem v-if="inPlaylist" @click="deleteFromPlaylist"
+            >Delete from Playlist</BaseListItem
+          >
           <BaseListItem @click="changeMenuMode('artist')"
             >View Artist</BaseListItem
           >

@@ -25,7 +25,7 @@
   <div class="control">
     <div class="control__left">
       <div class="control__left--play" v-if="Object.keys(likedList).length > 0">
-        <IconPlay />
+        <IconPlay @click="playLikedSong" />
       </div>
       <div class="control__left--menu">
         <IconHorizontalThreeDot @click="toggleMenu" />
@@ -105,7 +105,7 @@ type songDataList = {
 };
 
 export default defineComponent({
-  setup() {},
+  emits: ["playLikedSong"],
   components: {
     IconPlay,
     IconHorizontalThreeDot,
@@ -163,6 +163,9 @@ export default defineComponent({
     },
     likeSong() {
       this.loadLikedList();
+    },
+    playLikedSong() {
+      this.$emit("playLikedSong");
     },
   },
   mounted() {

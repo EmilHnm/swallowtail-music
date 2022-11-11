@@ -43,13 +43,13 @@
         <BaseTag
           v-for="(artist, index) in artistArray"
           :key="artist.artist_id"
-          @click="_function.removeItemFormArr(index, artistArray)"
+          @click="func.removeItemFormArr(index, artistArray)"
           >{{ artist.name }}</BaseTag
         >
         <BaseTag
           v-for="(artist, index) in newArtistArray"
           :key="artist"
-          @click="_function.removeItemFormArr(index, newArtistArray)"
+          @click="func.removeItemFormArr(index, newArtistArray)"
           >{{ artist }}</BaseTag
         >
       </div>
@@ -69,7 +69,7 @@
       >
         <div
           class="artistSearch--item"
-          v-for="artist in _function.checkIncludeString(
+          v-for="artist in func.checkIncludeString(
             artistName,
             templateArtistArray,
             artistArray
@@ -87,13 +87,13 @@
         <BaseTag
           v-for="(genre, index) in genreArray"
           :key="genre.genre_id"
-          @click="_function.removeItemFormArr(index, genreArray)"
+          @click="func.removeItemFormArr(index, genreArray)"
           >{{ genre.name }}</BaseTag
         >
         <BaseTag
           v-for="(genre, index) in newGenreArray"
           :key="genre"
-          @click="_function.removeItemFormArr(index, newGenreArray)"
+          @click="func.removeItemFormArr(index, newGenreArray)"
           >{{ genre }}</BaseTag
         >
       </div>
@@ -113,7 +113,7 @@
       >
         <div
           class="genreSearch--item"
-          v-for="genre in _function.checkIncludeString(
+          v-for="genre in func.checkIncludeString(
             genreName,
             templateGenreArray,
             genreArray
@@ -155,7 +155,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
-import { _function } from "../../mixins
+import { _function } from "../../mixins";
 import type { genre } from "@/model/genreModel";
 import type { artist } from "@/model/artistModel";
 import BaseInput from "../UI/BaseInput.vue";
@@ -185,7 +185,7 @@ export default defineComponent({
         show: false,
       },
       isLoading: true,
-      _function: _function,
+      func: _function,
     };
   },
   methods: {

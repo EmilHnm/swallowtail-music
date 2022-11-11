@@ -56,6 +56,7 @@
             :img="`${environment.album_cover}/${album.image_path}`"
             :type="'album'"
             :songCount="album.songCount"
+            @playAlbum="playAlbum"
         /></BaseHorizontalScroll>
       </div>
     </div>
@@ -73,6 +74,7 @@
             :img="`${environment.album_cover}/${album.image_path}`"
             :type="'album'"
             :listens="+album.totalListen"
+            @playAlbum="playAlbum"
           />
         </BaseHorizontalScroll>
       </div>
@@ -84,6 +86,7 @@
             v-for="artist in topArtist"
             :key="artist.artist_id"
             :data="artist"
+            @playArtistSong="playArtistSong"
           />
         </BaseHorizontalScroll>
       </div>
@@ -170,7 +173,7 @@ export default defineComponent({
       default: [] as playlistData[],
     },
   },
-  emits: ["playPlaylist"],
+  emits: ["playPlaylist", "playArtistSong", "playAlbum"],
   data() {
     return {
       news: 0,
@@ -199,6 +202,12 @@ export default defineComponent({
     },
     playPlaylist(id: string) {
       this.$emit("playPlaylist", id);
+    },
+    playArtistSong(artist_id: string) {
+      this.$emit("playArtistSong", artist_id);
+    },
+    playAlbum(album_id: string) {
+      this.$emit("playAlbum", album_id);
     },
   },
   computed: {

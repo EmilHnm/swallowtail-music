@@ -11,7 +11,7 @@
           "
         />
         <div class="artist__image--play">
-          <IconPlay />
+          <IconPlay @click="playArtistSong" />
         </div>
       </div>
       <div class="artist__name" @click="redirectToArtist">{{ data.name }}</div>
@@ -27,6 +27,7 @@ import type { artist } from "@/model/artistModel";
 import { environment } from "@/environment/environment";
 
 export default defineComponent({
+  emits: ["playArtistSong"],
   props: {
     data: {
       type: Object as () => artist,
@@ -44,6 +45,9 @@ export default defineComponent({
         name: "artistPage",
         params: { id: this.data.artist_id },
       });
+    },
+    playArtistSong() {
+      this.$emit("playArtistSong", this.data.artist_id);
     },
   },
   components: { BaseCard, IconPlay },

@@ -99,6 +99,7 @@ export default defineComponent({
       })
         .then((res) => res.json())
         .then((data) => {
+          this.isLoading = false;
           if (data.status === "success") {
             this.current_password = "";
             this.password = "";
