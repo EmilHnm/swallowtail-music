@@ -27,7 +27,6 @@
             item.artist_name
           }}</span>
         </div>
-        <div class="information__detail--uploader">Emil</div>
         <div class="information__detail--duration">
           {{
             Math.floor(progress / 60) +

@@ -146,8 +146,10 @@
         </teleport>
         <transition name="playlist-menu">
           <div class="playlist-menu" v-if="isMenuOpen">
-            <BaseListItem>Add Song</BaseListItem>
-            <BaseListItem>Add to Queue</BaseListItem>
+            <BaseListItem @click="scrollToSearch">Add Song</BaseListItem>
+            <BaseListItem @click="addPlaylistToQueue"
+              >Add to Queue</BaseListItem
+            >
             <BaseListItem @click="openAddToPlaylist"
               >Add to Other Playlist</BaseListItem
             >
@@ -237,7 +239,7 @@
       />
     </div>
   </div>
-  <div class="searchMore">
+  <div class="searchMore" ref="searchMore">
     <h3>Let find more song for your playlist</h3>
     <div class="searchMore__form" :class="{ medium: medium, small: small }">
       <button>
@@ -305,7 +307,12 @@ type songPlaylist = {
 };
 
 export default defineComponent({
-  emits: ["updatePlaylist", "deletePlaylist", "playPlaylist"],
+  emits: [
+    "updatePlaylist",
+    "deletePlaylist",
+    "playPlaylist",
+    "addPlaylistToQueue",
+  ],
   components: {
     IconPlay,
     IconSearch,
@@ -377,6 +384,14 @@ export default defineComponent({
     },
     toggleSearchBar() {
       this.isSearchBarOpen = !this.isSearchBarOpen;
+    },
+    scrollToSearch() {
+      (<HTMLDivElement>this.$refs.searchMore).scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+        inline: "nearest",
+      });
+      return;
     },
     loadPlaylist() {
       this.isLoading = true;
@@ -594,6 +609,10 @@ export default defineComponent({
     },
     playPlaylist() {
       this.$emit("playPlaylist", this.playlistDetail.playlist_id);
+    },
+    addPlaylistToQueue() {
+      console.log("addPlaylistToQueue");
+      this.$emit("addPlaylistToQueue", this.playlistDetail.playlist_id);
     },
     ...mapActions("playlist", [
       "getPlaylist",

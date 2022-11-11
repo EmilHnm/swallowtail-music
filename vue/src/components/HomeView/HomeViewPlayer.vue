@@ -12,13 +12,17 @@
           {{ playingAudio[0].title }}
         </div>
         <div class="now_playing__info--title--artist">
-          <span v-for="item in playingAudio" :key="item.artist_id">{{
-            item.artist_name
-          }}</span>
+          <span
+            v-for="item in playingAudio"
+            :key="item.artist_id"
+            @click="redirectToArtist(item.artist_id)"
+            >{{ item.artist_name }}</span
+          >
         </div>
       </div>
-      <div class="now_playing__info--heart">
-        <IconHeartFilled />
+      <div class="now_playing__info--heart" @click="onLikeSong">
+        <IconHeartFilled v-if="isLike" />
+        <IconHeart v-else />
       </div>
     </div>
     <div class="now_playing__controls">
@@ -117,6 +121,7 @@
 import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
 import IconHeartFilled from "../icons/IconHeartFilled.vue";
+import IconHeart from "../icons/IconHeart.vue";
 import IconPrevious from "../icons/IconPrevious.vue";
 import Iconshuffle from "../icons/IconShuffle.vue";
 import IconPlay from "../icons/IconPlay.vue";
@@ -127,6 +132,7 @@ import IconVolume from "../icons/IconVolume.vue";
 import IconPause from "../icons/IconPause.vue";
 import IconRepeatOne from "../icons/IconRepeatOne.vue";
 import IconMuted from "../icons/IconMuted.vue";
+import { mapActions, mapGetters } from "vuex";
 
 type songData = {
   song_id: string;
@@ -181,6 +187,7 @@ export default defineComponent({
     IconPause,
     IconRepeatOne,
     IconMuted,
+    IconHeart,
   },
   data() {
     return {
@@ -188,9 +195,12 @@ export default defineComponent({
       isRightSideBarActive: false,
       currentTime: "0:00",
       durationTime: "",
+      isLike: null as boolean | null,
+      isLikeLoading: false,
     };
   },
   methods: {
+    ...mapActions("song", ["likeSong", "likedSong"]),
     toggleRightSideBar() {
       this.isRightSideBarActive = !this.isRightSideBarActive;
       this.$emit("toggleRightSideBar", this.isRightSideBarActive);
@@ -227,6 +237,53 @@ export default defineComponent({
       this.$router.push({
         name: "playingPage",
       });
+    },
+    redirectToArtist(id: string) {
+      this.$router.push({
+        name: "artistPage",
+        params: {
+          id: id,
+        },
+      });
+    },
+    onLoadLikeSong() {
+      this.isLikeLoading = true;
+      this.isLike = null;
+      this.likedSong({
+        songId: this.playingAudio[0].song_id,
+        userToken: this.token,
+      })
+        .then((res: any) => {
+          return res.json();
+        })
+        .then((res: any) => {
+          this.isLike = res.liked;
+        });
+    },
+    onLikeSong() {
+      if (this.isLike !== null) {
+        this.isLike = null;
+        this.likeSong({
+          userToken: this.token,
+          songId: this.playingAudio[0].song_id,
+        }).then(() => {
+          this.onLoadLikeSong();
+        });
+      }
+    },
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
+  },
+  watch: {
+    playingAudio: {
+      handler() {
+        this.onLoadLikeSong();
+      },
+      immediate: true,
+      deep: true,
     },
   },
 });
@@ -477,7 +534,7 @@ $tablet-width: 768px;
 @media (max-width: $tablet-width) {
   .now_playing {
     .now_playing__info {
-      margin-left: 0px;
+      margin-left: 10px;
       width: 20%;
       &--title {
         display: none;

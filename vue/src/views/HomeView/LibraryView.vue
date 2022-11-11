@@ -12,6 +12,7 @@
       "
       :type="'playlist'"
       :songCount="playlist.songCount"
+      @playPlaylist="playPlaylist"
     />
   </div>
 </template>
@@ -39,6 +40,12 @@ export default defineComponent({
       default: [] as playlistData[],
     },
   },
+  methods: {
+    playPlaylist(id: string) {
+      this.$emit("playPlaylist", id);
+    },
+  },
+  emits: ["playPlaylist"],
   data() {
     return {
       environment: environment,

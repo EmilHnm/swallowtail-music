@@ -201,7 +201,7 @@ export default defineComponent({
       this.$emit("addAlbumToQueue", this.data.album_id);
     },
     playSongInAlbum(id: string) {
-      this.$emit("playSongInAlbum", id);
+      this.$emit("playSongInAlbum", this.data.album_id, id);
     },
   },
   computed: {

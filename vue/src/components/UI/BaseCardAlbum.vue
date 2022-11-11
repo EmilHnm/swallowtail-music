@@ -4,7 +4,7 @@
       <div class="album__image">
         <img class="img" :src="img" />
         <div class="album__image--play">
-          <IconPlay />
+          <IconPlay @click="play" />
         </div>
       </div>
       <div class="album__title" @click="redirect">{{ title }}</div>
@@ -70,7 +70,16 @@ export default {
           },
         });
     },
+    play() {
+      if (this.type === "playlist") {
+        this.$emit("playPlaylist", this.id);
+      }
+      if (this.type === "album") {
+        this.$emit("playAlbum", this.id);
+      }
+    },
   },
+  emits: ["playPlaylist", "playAlbum"],
 };
 </script>
 

@@ -59,6 +59,7 @@
       @playAlbum="playAlbum"
       @addAlbumToQueue="addAlbumToQueue"
       @playSongInAlbum="playSongInAlbum"
+      @playSongOfArtist="playSongOfArtist"
     />
   </div>
 </template>
@@ -88,6 +89,7 @@ export default defineComponent({
     "addAlbumToQueue",
     "playSongInAlbum",
     "playArtistSong",
+    "playSongOfArtist",
   ],
   data() {
     return {
@@ -117,6 +119,10 @@ export default defineComponent({
     },
     playArtistSong() {
       this.$emit("playArtistSong", this.artist.artist_id);
+    },
+    playSongOfArtist(song_id: string) {
+      console.log(song_id);
+      this.$emit("playSongOfArtist", [this.artist.artist_id, song_id]);
     },
   },
   computed: {

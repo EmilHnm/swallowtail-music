@@ -9,7 +9,7 @@
   </teleport>
   <div class="song-item" ref="songItem">
     <BaseListItem :selected="selected">
-      <div class="song-item__left">
+      <div class="song-item__left" :class="{ small: small }">
         <div class="song-item__left--image" @click="selectSong">
           <img
             :src="`${environment.album_cover}/${data[0].image_path}`"
@@ -36,7 +36,7 @@
           <span v-else><BaseLineLoad /></span>
         </div>
       </div>
-      <div class="song-item__right">
+      <div class="song-item__right" :class="{ small: small }">
         <div class="song-item__right--album" :class="{ small: small }">
           <span
             v-if="data[0].album_id"
@@ -462,9 +462,13 @@ $tablet-width: 768px;
   margin: 10px auto;
   cursor: pointer;
   &__left {
-    width: 70%;
+    width: 40%;
     display: flex;
     overflow: hidden;
+    flex: 0 0 auto;
+    &.small {
+      width: 70%;
+    }
     &--image {
       width: 50px;
       height: 50px;
@@ -508,15 +512,19 @@ $tablet-width: 768px;
     }
   }
   &__right {
-    width: 100%;
+    width: 60%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     user-select: none;
+    &.small {
+      width: auto;
+    }
     &--album {
-      width: 60%;
+      width: 50%;
       overflow: hidden;
       text-align: center;
+      text-overflow: ellipsis;
       &:hover {
         text-decoration: underline;
       }
@@ -533,6 +541,7 @@ $tablet-width: 768px;
     &--hears {
       width: 20%;
       overflow: hidden;
+      text-overflow: ellipsis;
       text-align: center;
       &.medium {
         display: none;
@@ -547,6 +556,7 @@ $tablet-width: 768px;
     &--addDate {
       width: 20%;
       overflow: hidden;
+      text-overflow: ellipsis;
       text-align: center;
       &.medium {
         display: none;
@@ -580,7 +590,7 @@ $tablet-width: 768px;
       width: 30px;
       border-radius: 20%;
       position: relative;
-
+      flex: 0 0 auto;
       &:hover {
         background: var(--background-glass-color-primary);
         box-shadow: 0 0px 15px rgb(0 0 0 / 50%);

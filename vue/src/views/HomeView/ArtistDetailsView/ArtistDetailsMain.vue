@@ -7,6 +7,11 @@
           <BaseSongItem
             v-if="index <= Object.keys(songs).length"
             :data="Object.values(songs)[index - 1]"
+            @select-song="
+              playSongOfArtist(
+                Object.values(songs)[index - 1][0].song_id as string
+              )
+            "
           />
         </div>
         <span @click="toggleTopSong">{{
@@ -79,6 +84,9 @@ export default defineComponent({
     },
     redirectToAlbum() {
       this.$router.push({ name: "artistAlbumsPage" });
+    },
+    playSongOfArtist(song_id: string) {
+      this.$emit("playSongOfArtist", song_id);
     },
   },
   components: {

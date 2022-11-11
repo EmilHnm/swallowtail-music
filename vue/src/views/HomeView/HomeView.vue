@@ -9,6 +9,7 @@ import HomeViewRightSideBar from "../../components/HomeView/HomeViewRightSideBar
 import HomeViewPlayer from "../../components/HomeView/HomeViewPlayer.vue";
 import HomeViewHeader from "../../components/HomeView/HomeViewHeader.vue";
 import BaseDialog from "../../components/UI/BaseDialog.vue";
+import BaseLineLoad from "../../components/UI/BaseLineLoad.vue";
 
 type playlistData = playlist & {
   songCount: number;
@@ -39,6 +40,7 @@ export default {
     HomeViewPlayer,
     HomeViewHeader,
     BaseDialog,
+    BaseLineLoad,
   },
   data() {
     return {
@@ -69,6 +71,7 @@ export default {
         content: "Please fill in all the fields",
         show: false,
       },
+      isLoading: false,
     };
   },
   provide() {
@@ -87,6 +90,7 @@ export default {
       "deletePlaylist",
       "getPlaylistSongs",
     ]),
+    ...mapActions("album", ["getAlbumSongs"]),
     // NOTE: Sidebar control
     toggleLeftSideBar() {
       this.isLeftSideBarActive = !this.isLeftSideBarActive;
@@ -221,9 +225,11 @@ export default {
         });
     },
     removePlaylist(id: string) {
+      this.isLoading = true;
       this.deletePlaylist({ playlist_id: id, token: this.token })
         .then((res) => res.json())
         .then((res) => {
+          this.isLoading = false;
           if (res.status === "success") {
             this.loadPlaylist();
             this.dialogWaring = {
@@ -243,15 +249,42 @@ export default {
         });
     },
     playPlaylist(id: string) {
+      this.isLoading = true;
       this.getPlaylistSongs({ playlist_id: id, token: this.token })
         .then((res) => res.json())
         .then((res) => {
+          this.isLoading = false;
           if (res.songList) {
             this.audioList = res.songList.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
               r[a.song_id].push(a);
               return r;
             }, Object.create(null));
+            this.audioIndex = 0;
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
+    },
+    addPlaylistToQueue(id: string) {
+      this.isLoading = true;
+      this.getPlaylistSongs({ playlist_id: id, token: this.token })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.songList) {
+            const newSongList = res.songList.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.audioList = { ...this.audioList, ...newSongList };
+            this.audioIndex = 0;
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -264,17 +297,125 @@ export default {
     },
     // NOTE: Album
     playAlbum(id: string) {
-      console.log(id);
+      this.isLoading = true;
+      this.getAlbumSongs({ album_id: id, userToken: this.token })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success") {
+            this.audioList = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.audioIndex = 0;
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
     },
     addAlbumToQueue(id: string) {
-      console.log(id);
+      this.isLoading = true;
+      this.getAlbumSongs({ album_id: id, userToken: this.token })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success") {
+            const newSongList = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.audioList = { ...this.audioList, ...newSongList };
+            this.audioIndex = 0;
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
     },
-    playSongInAlbum(id: string) {
-      console.log(id);
+    playSongInAlbum(array: string[]) {
+      this.isLoading = true;
+      console.log(array);
+      this.getAlbumSongs({ album_id: array[0], userToken: this.token })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success") {
+            this.audioList = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            Object.keys(this.audioList).forEach((key, index) => {
+              if (key === array[1]) {
+                this.audioIndex = index;
+              }
+            });
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
     },
     //NOTE : Artist
+    ...mapActions("artist", ["getArtistTopSongById"]),
     playArtistSong(id: string) {
-      console.log(id);
+      this.isLoading = true;
+      this.getArtistTopSongById({
+        token: this.token,
+        artist_id: id,
+      })
+        .then((res: any) => {
+          return res.json();
+        })
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success")
+            this.audioList = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+          this.audioIndex = 0;
+        });
+    },
+    playSongOfArtist(array: string[]) {
+      this.isLoading = true;
+      this.getArtistTopSongById({
+        token: this.token,
+        artist_id: array[0],
+      })
+        .then((res: any) => {
+          return res.json();
+        })
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success")
+            this.audioList = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+          Object.keys(this.audioList).forEach((key, index) => {
+            if (key === array[1]) {
+              this.audioIndex = index;
+            }
+          });
+        });
     },
     // NOTE: dialog
     closeDialog() {
@@ -308,6 +449,7 @@ export default {
         let audioIndex = Object.keys(this.audioList).findIndex(
           (key) => key === playingKey
         );
+        console.log(audioIndex);
         this.audioIndex = audioIndex;
       }
     },
@@ -350,6 +492,9 @@ export default {
       token: "auth/userToken",
     }),
     playingAudio() {
+      if (this.isOnShuffle) {
+        return Object.values(this.shuffledList)[this.audioIndex];
+      }
       return Object.values(this.audioList)[this.audioIndex];
     },
     playingAudioSrc() {
@@ -381,6 +526,12 @@ export default {
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseDialog>
+    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseDialog>
   </teleport>
   <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
   <div class="main-body" :class="{ full: Object.keys(audioList).length <= 0 }">
@@ -390,10 +541,12 @@ export default {
         @updatePlaylist="loadPlaylist"
         @deletePlaylist="removePlaylist"
         @playPlaylist="playPlaylist"
+        @addPlaylistToQueue="addPlaylistToQueue"
         @playAlbum="playAlbum"
         @addAlbumToQueue="addAlbumToQueue"
         @playSongInAlbum="playSongInAlbum"
         @playArtistSong="playArtistSong"
+        @playSongOfArtist="playSongOfArtist"
       />
     </main>
     <HomeViewRightSideBar
