@@ -4,6 +4,7 @@
     "compilerOptions": {
         "baseUrl": ".",
         "strict": true,
+        "lib": ["ESNext", "DOM"],
         "noImplicitThis": true,
         "paths": {
             "@/*": ["./src/*"]

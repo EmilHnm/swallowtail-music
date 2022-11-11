@@ -32,6 +32,14 @@ type songList = {
   [song_id: string]: songData;
 };
 
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    playingAudioSrc: string;
+    playingAudio: songData;
+    token: string;
+  }
+}
+
 export default {
   name: "HomeView",
   components: {
@@ -182,9 +190,7 @@ export default {
       } else {
         const tempValue = Object.values(this.audioList)[start];
         const tempKey = Object.keys(this.audioList)[start];
-        console.log(this.audioList);
         this.audioList = _function.spliceObject(this.audioList, start, 1);
-        console.log("update");
         this.audioList = _function.spliceObject(this.audioList, end, 0, {
           [tempKey]: tempValue,
         });
@@ -264,7 +270,6 @@ export default {
               return r;
             }, Object.create(null));
             this.audioIndex = 0;
-            console.log(this.audioIndex, this.isLoading);
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -457,6 +462,12 @@ export default {
           }
         });
     },
+    // NOTE: Song
+    addToQueue(song: any) {
+      this.audioList = { ...this.audioList, ...song };
+      if (this.isOnShuffle)
+        this.shuffledList = { ...this.shuffledList, ...song };
+    },
     // NOTE: dialog
     closeDialog() {
       this.dialogWaring.show = false;
@@ -483,13 +494,11 @@ export default {
           ..._function.shuffleObject(listNotContainPlaying),
         };
         this.audioIndex = 0;
-        console.log(this.shuffledList, this.audioIndex);
       } else {
         let playingKey = Object.keys(this.shuffledList)[this.audioIndex];
         let audioIndex = Object.keys(this.audioList).findIndex(
           (key) => key === playingKey
         );
-        console.log(audioIndex);
         this.audioIndex = audioIndex;
       }
     },
@@ -508,9 +517,11 @@ export default {
             this.audioSource.connect(this.ctx.destination);
             this.frequencyData = new Uint8Array(
               this.analayzer.frequencyBinCount
-            );
+            ) as Uint8Array;
             if (this.frequencyData)
-              this.analayzer.getByteFrequencyData(this.frequencyData);
+              this.analayzer.getByteFrequencyData(
+                this.frequencyData as Uint8Array
+              );
           }
         }
       }
@@ -523,7 +534,7 @@ export default {
     playingAudio() {
       if (this.playingAudio) {
         this.audio.src = this.playingAudioSrc;
-        this.playSong();
+        if (this.isPlaying) this.playSong();
       }
     },
   },
@@ -588,6 +599,7 @@ export default {
         @playArtistSong="playArtistSong"
         @playSongOfArtist="playSongOfArtist"
         @playLikedSong="playLikedSong"
+        @addToQueue="addToQueue"
       />
     </main>
     <HomeViewRightSideBar

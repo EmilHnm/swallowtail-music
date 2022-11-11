@@ -125,7 +125,7 @@
           <BaseListItem v-if="inQueue" @click="deleteFromQueue"
             >Delete from Queue</BaseListItem
           >
-          <BaseListItem v-else>Add to Queue</BaseListItem>
+          <BaseListItem v-else @click="addToQueue">Add to Queue</BaseListItem>
           <BaseListItem v-if="inPlaylist" @click="deleteFromPlaylist"
             >Delete from Playlist</BaseListItem
           >
@@ -189,7 +189,13 @@ declare module "@vue/runtime-core" {
 }
 
 export default defineComponent({
-  emits: ["deleteFromQueue", "deleteFromPlaylist", "selectSong", "likeSong"],
+  emits: [
+    "deleteFromQueue",
+    "deleteFromPlaylist",
+    "selectSong",
+    "likeSong",
+    "addToQueue",
+  ],
   inject: ["userPlaylist"],
   data() {
     return {
@@ -243,6 +249,10 @@ export default defineComponent({
     deleteFromPlaylist() {
       this.isMenuOpen = false;
       this.$emit("deleteFromPlaylist");
+    },
+    addToQueue() {
+      this.isMenuOpen = false;
+      this.$emit("addToQueue", { [this.data[0].song_id]: this.data });
     },
     selectSong() {
       this.$emit("selectSong", this.data[0].song_id);
