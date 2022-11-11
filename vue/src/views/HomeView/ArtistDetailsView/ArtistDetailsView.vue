@@ -121,7 +121,6 @@ export default defineComponent({
       this.$emit("playArtistSong", this.artist.artist_id);
     },
     playSongOfArtist(song_id: string) {
-      console.log(song_id);
       this.$emit("playSongOfArtist", [this.artist.artist_id, song_id]);
     },
   },

@@ -108,11 +108,11 @@ export default {
       this.isRightSideBarActive = value;
     },
     // NOTE: Song event control
-    playSong() {
+    playAudio() {
       this.audio.play();
       this.isPlaying = true;
     },
-    pauseSong() {
+    pauseAudio() {
       this.audio.pause();
       this.isPlaying = false;
     },
@@ -164,7 +164,7 @@ export default {
       }
     },
     canplay() {
-      if (this.isPlaying) this.playSong();
+      if (this.isPlaying) this.playAudio();
     },
     waiting() {
       this.isAudioWaitting = true;
@@ -172,7 +172,7 @@ export default {
     },
     loadeddata() {
       this.isAudioWaitting = false;
-      if (this.isPlaying) this.playSong();
+      if (this.isPlaying) this.playAudio();
     },
     setPlaySong(index: number) {
       if (this.audioIndex === index) return;
@@ -270,6 +270,7 @@ export default {
               return r;
             }, Object.create(null));
             this.audioIndex = 0;
+            this.playAudio();
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -295,7 +296,36 @@ export default {
               return r;
             }, Object.create(null));
             this.audioList = { ...this.audioList, ...newSongList };
-            this.audioIndex = 0;
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
+    },
+    playSongInPlaylist(array: string[]) {
+      this.isLoading = true;
+      this.getPlaylistSongs({ playlist_id: array[0], token: this.token })
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
+          if (res.songList) {
+            this.audioList = res.songList.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            Object.keys(this.audioList).forEach((key, index) => {
+              if (key === array[1]) {
+                this.audioIndex = index;
+              }
+            });
+            this.playAudio();
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -322,6 +352,7 @@ export default {
               return r;
             }, Object.create(null));
             this.audioIndex = 0;
+            this.playAudio();
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -376,6 +407,7 @@ export default {
                 this.audioIndex = index;
               }
             });
+            this.playAudio();
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -401,13 +433,22 @@ export default {
           this.isLoading = false;
           this.isOnShuffle = false;
           this.shuffledList = {};
-          if (res.status === "success")
+          if (res.status === "success") {
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
               r[a.song_id].push(a);
               return r;
             }, Object.create(null));
-          this.audioIndex = 0;
+            this.audioIndex = 0;
+            this.playAudio();
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
         });
     },
     playSongOfArtist(array: string[]) {
@@ -423,20 +464,30 @@ export default {
           this.isLoading = false;
           this.isOnShuffle = false;
           this.shuffledList = {};
-          if (res.status === "success")
+          if (res.status === "success") {
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
               r[a.song_id].push(a);
               return r;
             }, Object.create(null));
-          Object.keys(this.audioList).forEach((key, index) => {
-            if (key === array[1]) {
-              this.audioIndex = index;
-            }
-          });
+            Object.keys(this.audioList).forEach((key, index) => {
+              if (key === array[1]) {
+                this.audioIndex = index;
+              }
+            });
+            this.playAudio();
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
         });
     },
     //NOTE: Liked Song
+    ...mapActions("song", ["getSongForPlay"]),
     playLikedSong() {
       this.isLoading = true;
       this.getLikedSongList(this.token)
@@ -452,6 +503,7 @@ export default {
               return r;
             }, Object.create(null));
             this.audioIndex = 0;
+            this.playAudio();
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -467,6 +519,33 @@ export default {
       this.audioList = { ...this.audioList, ...song };
       if (this.isOnShuffle)
         this.shuffledList = { ...this.shuffledList, ...song };
+    },
+    playSong(song_id: string) {
+      this.getSongForPlay({
+        token: this.token,
+        song_id: song_id,
+      })
+        .then((res: any) => {
+          return res.json();
+        })
+        .then((res) => {
+          if (res.status === "success") {
+            this.audioList = res.song.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.audioIndex = 0;
+            this.playAudio();
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
     },
     // NOTE: dialog
     closeDialog() {
@@ -534,7 +613,7 @@ export default {
     playingAudio() {
       if (this.playingAudio) {
         this.audio.src = this.playingAudioSrc;
-        if (this.isPlaying) this.playSong();
+        if (this.isPlaying) this.playAudio();
       }
     },
   },
@@ -592,6 +671,7 @@ export default {
         @updatePlaylist="loadPlaylist"
         @deletePlaylist="removePlaylist"
         @playPlaylist="playPlaylist"
+        @playSongInPlaylist="playSongInPlaylist"
         @addPlaylistToQueue="addPlaylistToQueue"
         @playAlbum="playAlbum"
         @addAlbumToQueue="addAlbumToQueue"
@@ -600,6 +680,7 @@ export default {
         @playSongOfArtist="playSongOfArtist"
         @playLikedSong="playLikedSong"
         @addToQueue="addToQueue"
+        @playSong="playSong"
       />
     </main>
     <HomeViewRightSideBar
@@ -626,8 +707,8 @@ export default {
     @toggleRightSideBar="toggleRightSideBar"
     @shuffleToggle="shuffleToggle"
     @repeatToggle="repeatToggle"
-    @playSong="playSong"
-    @pauseSong="pauseSong"
+    @playSong="playAudio"
+    @pauseSong="pauseAudio"
     @setProgress="setProgress"
     @prevSong="prevSong"
     @nextSong="nextSong"

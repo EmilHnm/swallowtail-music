@@ -150,7 +150,6 @@ export default defineComponent({
       }
     },
     setPlaySong(index: number) {
-      console.log("setPlaySong: " + index);
       this.$emit("setPlaySong", index);
     },
     deleteFromQueue(index: number) {

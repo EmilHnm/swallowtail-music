@@ -49,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/latest', [SongController::class, 'latestSong']);
         Route::get('/search', [SongController::class, 'searchSong']);
         Route::get('/{id}', [SongController::class, 'getSongInfo']);
+        Route::get('/{id}/play', [SongController::class, 'getSongForPlay']);
         Route::post('/{id}/like', [SongController::class, 'likeSong']);
         Route::get('/{id}/liked', [SongController::class, 'likedSong']);
         Route::delete('/{id}/delete', [SongController::class, 'deleteSong']);

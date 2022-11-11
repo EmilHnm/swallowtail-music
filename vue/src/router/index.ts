@@ -254,7 +254,6 @@ router.beforeEach((to, from, next) => {
       }
     }
   } else {
-    console.log("token not exists");
     if (to.meta.isGuest) next();
     else next({ name: "auth" });
   }

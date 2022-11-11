@@ -179,6 +179,33 @@ class SongController extends Controller
         ]);
     }
 
+    public function getSongForPlay($id)
+    {
+        $song =
+            DB::table('songs')
+            ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
+            ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
+            ->join('albums', 'songs.album_id', '=', 'albums.album_id')
+            ->select(
+                'songs.song_id',
+                'songs.title',
+                'songs.song_id',
+                'songs.duration',
+                'songs.listens',
+                "artists.artist_id",
+                "artists.name as artist_name",
+                "albums.name as album_name",
+                "albums.album_id as album_id",
+                "albums.image_path as image_path",
+            )
+            ->where('songs.song_id', $id)
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'song' => $song
+        ]);
+    }
+
     public function likeSong($id)
     {
         $song = Song::where('song_id', $id)->first();

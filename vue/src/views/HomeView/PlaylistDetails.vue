@@ -230,6 +230,7 @@
         :data="song"
         :key="song[0].song_id"
         @addToQueue="addToQueue"
+        @selectSong="playSongInPlaylist"
       />
     </div>
     <div class="songList__content" v-else>
@@ -238,6 +239,7 @@
         :data="song"
         :key="song[0].song_id"
         @addToQueue="addToQueue"
+        @selectSong="playSongInPlaylist"
       />
     </div>
   </div>
@@ -317,6 +319,7 @@ export default defineComponent({
     "playPlaylist",
     "addPlaylistToQueue",
     "addToQueue",
+    "playSongInPlaylist",
   ],
   components: {
     IconPlay,
@@ -622,8 +625,13 @@ export default defineComponent({
     playPlaylist() {
       this.$emit("playPlaylist", this.playlistDetail.playlist_id);
     },
+    playSongInPlaylist(song_id: string) {
+      this.$emit("playSongInPlaylist", [
+        this.playlistDetail.playlist_id,
+        song_id,
+      ]);
+    },
     addPlaylistToQueue() {
-      console.log("addPlaylistToQueue");
       this.$emit("addPlaylistToQueue", this.playlistDetail.playlist_id);
     },
     ...mapActions("playlist", [

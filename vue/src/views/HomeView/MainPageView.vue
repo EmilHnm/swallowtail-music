@@ -37,7 +37,7 @@
                 }}
               </div>
               <div class="latest-song__song--add-queue">
-                <IconPlay />
+                <IconPlay @click="playSong(song[0].song_id)" />
               </div>
             </div>
           </base-list-item>
@@ -173,7 +173,7 @@ export default defineComponent({
       default: [] as playlistData[],
     },
   },
-  emits: ["playPlaylist", "playArtistSong", "playAlbum"],
+  emits: ["playPlaylist", "playArtistSong", "playAlbum", "playSong"],
   data() {
     return {
       news: 0,
@@ -208,6 +208,9 @@ export default defineComponent({
     },
     playAlbum(album_id: string) {
       this.$emit("playAlbum", album_id);
+    },
+    playSong(song_id: string) {
+      this.$emit("playSong", song_id);
     },
   },
   computed: {
@@ -332,6 +335,7 @@ export default defineComponent({
         & > h3 {
           width: 100%;
           font-size: 1.2rem;
+          overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
           margin: 2px 0;

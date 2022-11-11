@@ -17,6 +17,15 @@ export const songModule = {
         },
       });
     },
+    getSongForPlay(context: any, payload: { token: string; song_id: string }) {
+      return fetch(`${environment.api}/song/${payload.song_id}/play`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${payload.token}`,
+        },
+      });
+    },
     uploadSong(
       context: any,
       data: { token: string; songForm: FormData }

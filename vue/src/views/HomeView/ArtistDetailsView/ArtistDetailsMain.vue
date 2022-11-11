@@ -132,10 +132,6 @@ export default defineComponent({
       },
     },
   },
-  beforeRouteLeave(to, from, next) {
-    console.log("leave", this.$route.params.id);
-    next();
-  },
   computed: {
     ...mapGetters({
       token: "auth/userToken",
