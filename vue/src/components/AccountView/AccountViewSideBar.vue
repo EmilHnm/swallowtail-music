@@ -39,6 +39,12 @@
           <span>Upload Management</span>
         </router-link>
       </li>
+      <li @click="closeSideBar">
+        <router-link :to="{ name: 'accountAdmin' }">
+          <IconMenuBlock />
+          <span>Admin Dashboard</span>
+        </router-link>
+      </li>
     </ul>
   </nav>
 </template>
@@ -52,6 +58,7 @@ import IconAvatarProfile from "../icons/IconAvatarProfile.vue";
 import IconSecurity from "../icons/IconSecurity.vue";
 import IconDisk from "../icons/IconDisk.vue";
 import { mapGetters } from "vuex";
+import IconMenuBlock from "../icons/IconMenuBlock.vue";
 export default {
   props: {
     isSideBarActive: Boolean,
@@ -77,6 +84,7 @@ export default {
     IconAvatarProfile,
     IconSecurity,
     IconDisk,
+    IconMenuBlock,
   },
 };
 </script>

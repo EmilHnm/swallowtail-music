@@ -9,6 +9,7 @@ export const authModule = {
           username: "",
           email: "",
           profile_photo_url: "",
+          role: "",
         },
         token: "",
       },

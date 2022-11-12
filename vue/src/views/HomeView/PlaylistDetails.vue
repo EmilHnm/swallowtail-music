@@ -295,7 +295,7 @@ import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 import IconBallPen from "@/components/icons/IconBallPen.vue";
 
-type SongData = {
+type songData = {
   song_id: string;
   title: string;
   artist_name: string;
@@ -306,10 +306,11 @@ type SongData = {
   image_path: string;
   duration: number;
   listens?: number;
+  liked: number;
 }[];
 
-type songPlaylist = {
-  [song_id: string]: SongData;
+type songList = {
+  [song_id: string]: songData;
 };
 
 export default defineComponent({
@@ -317,9 +318,18 @@ export default defineComponent({
     "updatePlaylist",
     "deletePlaylist",
     "playPlaylist",
-    "addPlaylistToQueue",
-    "addToQueue",
     "playSongInPlaylist",
+    "addPlaylistToQueue",
+    "playAlbum",
+    "addAlbumToQueue",
+    "playSongInAlbum",
+    "playArtistSong",
+    "playSongOfArtist",
+    "addArtistSongToQueue",
+    "playLikedSong",
+    "addLikedSongToQueue",
+    "addToQueue",
+    "playSong",
   ],
   components: {
     IconPlay,
@@ -345,7 +355,7 @@ export default defineComponent({
       totalDuration: "",
       //song list part
       playlistDetail: {} as playlist,
-      songList: {} as songPlaylist,
+      songList: {} as songList,
       playlistOwner: {
         user_id: "1",
       } as user,
@@ -353,10 +363,10 @@ export default defineComponent({
       //filter
       isSearchBarOpen: false,
       filterText: "",
-      filteredSongList: {} as songPlaylist,
+      filteredSongList: {} as songList,
       //search part
       searchText: "",
-      songSearchResuilt: {} as songPlaylist,
+      songSearchResuilt: {} as songList,
       //Edit part
       edit: {
         file: null as File | null,
@@ -573,21 +583,21 @@ export default defineComponent({
         if (target.value === "title") {
           this.songList = Object.fromEntries(
             Object.entries(this.songList).sort(
-              (a: [string, SongData], b: [string, SongData]) =>
+              (a: [string, songData], b: [string, songData]) =>
                 a[1][0].title.localeCompare(b[1][0].title)
             )
           );
         } else if (target.value === "artist") {
           this.songList = Object.fromEntries(
             Object.entries(this.songList).sort(
-              (a: [string, SongData], b: [string, SongData]) =>
+              (a: [string, songData], b: [string, songData]) =>
                 a[1][0].artist_name.localeCompare(b[1][0].artist_name)
             )
           );
         } else if (target.value === "album") {
           this.songList = Object.fromEntries(
             Object.entries(this.songList).sort(
-              (a: [string, SongData], b: [string, SongData]) => {
+              (a: [string, songData], b: [string, songData]) => {
                 return a[1][0].album_name.localeCompare(b[1][0].album_name);
               }
             )
@@ -595,7 +605,7 @@ export default defineComponent({
         } else if (target.value === "date") {
           this.songList = Object.fromEntries(
             Object.entries(this.songList).sort(
-              (a: [string, SongData], b: [string, SongData]): number => {
+              (a: [string, songData], b: [string, songData]): number => {
                 if (a[1][0].added_date && b[1][0].added_date)
                   return a[1][0].added_date.localeCompare(b[1][0].added_date);
                 return 0;

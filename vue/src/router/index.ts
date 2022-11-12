@@ -196,6 +196,23 @@ const router = createRouter({
             },
           ],
         },
+        {
+          path: "admin",
+          name: "accountAdmin",
+          redirect: "admin/dashboard",
+          component: () =>
+            import("../views/AccountView/AccountAdmin/AccountAdminView.vue"),
+          children: [
+            {
+              path: "dashboard",
+              name: "accountAdminDashboard",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountAdmin/AccountAdminDashboard.vue"
+                ),
+            },
+          ],
+        },
       ],
     },
 
@@ -236,6 +253,7 @@ router.beforeEach((to, from, next) => {
                 name: res.name,
                 email: res.email,
                 profile_photo_url: res.profile_photo_url,
+                role: res.role,
               },
             };
             store.commit("auth/setUser", data);

@@ -47,7 +47,9 @@
         </teleport>
         <transition name="playlist-menu">
           <div class="playlist-menu" v-if="isMenuOpen">
-            <BaseListItem>Add to Queue</BaseListItem>
+            <BaseListItem @click="addArtistSongToQueue"
+              >Add to Queue</BaseListItem
+            >
             <BaseListItem>Report</BaseListItem>
           </div>
         </transition>
@@ -85,11 +87,18 @@ export default defineComponent({
     "updatePlaylist",
     "deletePlaylist",
     "playPlaylist",
+    "playSongInPlaylist",
+    "addPlaylistToQueue",
     "playAlbum",
     "addAlbumToQueue",
     "playSongInAlbum",
     "playArtistSong",
     "playSongOfArtist",
+    "addArtistSongToQueue",
+    "playLikedSong",
+    "addLikedSongToQueue",
+    "addToQueue",
+    "playSong",
   ],
   data() {
     return {
@@ -122,6 +131,9 @@ export default defineComponent({
     },
     playSongOfArtist(song_id: string) {
       this.$emit("playSongOfArtist", [this.artist.artist_id, song_id]);
+    },
+    addArtistSongToQueue() {
+      this.$emit("addArtistSongToQueue", this.artist.artist_id);
     },
   },
   computed: {

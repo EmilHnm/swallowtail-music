@@ -37,7 +37,7 @@
           ></div>
         </teleport>
         <div class="collection-menu" :class="{ active: isMenuOpen }">
-          <BaseListItem>Add to Queue</BaseListItem>
+          <BaseListItem @click="addLikedSongToQueue">Add to Queue</BaseListItem>
         </div>
       </div>
     </div>
@@ -88,30 +88,53 @@ import BaseListItem from "../../components/UI/BaseListItem.vue";
 import BaseSongItem from "../../components/UI/BaseSongItem.vue";
 import IconHeartFilled from "../../components/icons/IconHeartFilled.vue";
 import { mapActions, mapGetters } from "vuex";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 
-type songDataList = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    added_date?: string;
-    album_name: string;
-    album_id: string;
-    image_path: string;
-    duration: number;
-    listens?: number;
-  }[];
+type songData = {
+  song_id: string;
+  title: string;
+  artist_name: string;
+  artist_id: string;
+  added_date?: string;
+  album_name: string;
+  album_id: string;
+  image_path: string;
+  duration: number;
+  listens?: number;
+  liked: number;
+}[];
+
+type songList = {
+  [song_id: string]: songData;
 };
 
 export default defineComponent({
-  emits: ["playLikedSong"],
+  emits: [
+    "updatePlaylist",
+    "deletePlaylist",
+    "playPlaylist",
+    "playSongInPlaylist",
+    "addPlaylistToQueue",
+    "playAlbum",
+    "addAlbumToQueue",
+    "playSongInAlbum",
+    "playArtistSong",
+    "playSongOfArtist",
+    "addArtistSongToQueue",
+    "playLikedSong",
+    "addLikedSongToQueue",
+    "addToQueue",
+    "playSong",
+  ],
   components: {
     IconPlay,
     IconHorizontalThreeDot,
     BaseListItem,
     BaseSongItem,
     IconHeartFilled,
+    BaseDialog,
+    BaseLineLoad,
   },
   data() {
     return {
@@ -122,7 +145,7 @@ export default defineComponent({
       observer: null as ResizeObserver | null,
       small: false,
       medium: false,
-      likedList: {} as songDataList,
+      likedList: {} as songList,
       songCount: 0,
       totalDuration: "",
       isLoading: false,
@@ -166,6 +189,10 @@ export default defineComponent({
     },
     playLikedSong() {
       this.$emit("playLikedSong");
+    },
+    addLikedSongToQueue() {
+      this.isMenuOpen = false;
+      this.$emit("addLikedSongToQueue");
     },
   },
   mounted() {

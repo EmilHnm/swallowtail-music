@@ -176,6 +176,7 @@ type songData = {
   duration: number;
   image_path: string;
   listens?: number;
+  liked: number;
 }[];
 
 type playlistData = playlist & {
@@ -207,7 +208,7 @@ export default defineComponent({
       isMenuOpen: false,
       menuMode: "default",
       isLoading: false,
-      liked: null,
+      liked: 0,
     };
   },
   props: {
@@ -308,7 +309,7 @@ export default defineComponent({
     if (this.observer && songItem) this.observer.observe(songItem);
   },
   created() {
-    this.loadLiked();
+    this.liked = this.data[0].liked;
   },
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();
@@ -528,7 +529,7 @@ $tablet-width: 768px;
     align-items: center;
     user-select: none;
     &.small {
-      width: auto;
+      width: 100%;
     }
     &--album {
       width: 50%;

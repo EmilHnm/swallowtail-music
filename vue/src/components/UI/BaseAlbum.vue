@@ -123,6 +123,7 @@ type songPlaylist = {
     image_path: string;
     duration: number;
     listens?: number;
+    liked: number;
   }[];
 };
 

@@ -45,7 +45,23 @@ export default defineComponent({
       this.$emit("playPlaylist", id);
     },
   },
-  emits: ["playPlaylist"],
+  emits: [
+    "updatePlaylist",
+    "deletePlaylist",
+    "playPlaylist",
+    "playSongInPlaylist",
+    "addPlaylistToQueue",
+    "playAlbum",
+    "addAlbumToQueue",
+    "playSongInAlbum",
+    "playArtistSong",
+    "playSongOfArtist",
+    "addArtistSongToQueue",
+    "playLikedSong",
+    "addLikedSongToQueue",
+    "addToQueue",
+    "playSong",
+  ],
   data() {
     return {
       environment: environment,

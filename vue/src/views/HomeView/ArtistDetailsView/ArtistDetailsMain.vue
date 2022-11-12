@@ -50,18 +50,21 @@ import BaseCircleLoadVue from "@/components/UI/BaseCircleLoad.vue";
 import type { album } from "@/model/albumModel";
 
 type songData = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    added_date?: string;
-    album_name: string;
-    album_id: string;
-    image_path: string;
-    duration: number;
-    listens?: number;
-  }[];
+  song_id: string;
+  title: string;
+  artist_name: string;
+  artist_id: string;
+  added_date?: string;
+  album_name: string;
+  album_id: string;
+  image_path: string;
+  duration: number;
+  listens?: number;
+  liked: number;
+}[];
+
+type songList = {
+  [song_id: string]: songData;
 };
 
 type albumData = album & {
@@ -73,7 +76,7 @@ export default defineComponent({
     return {
       environment: environment,
       isSongListOpen: false,
-      songs: {} as songData,
+      songs: {} as songList,
       albums: [] as albumData[],
     };
   },

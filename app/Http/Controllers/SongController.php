@@ -186,6 +186,7 @@ class SongController extends Controller
             ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
             ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
             ->join('albums', 'songs.album_id', '=', 'albums.album_id')
+            ->leftJoin('liked_songs', 'songs.song_id', '=', 'liked_songs.song_id')
             ->select(
                 'songs.song_id',
                 'songs.title',
@@ -197,12 +198,24 @@ class SongController extends Controller
                 "albums.name as album_name",
                 "albums.album_id as album_id",
                 "albums.image_path as image_path",
+                DB::raw('CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked')
             )
             ->where('songs.song_id', $id)
             ->get();
         return response()->json([
             'status' => 'success',
             'song' => $song
+        ]);
+    }
+
+    public function increaseSongListens($id)
+    {
+        $song = Song::find($id);
+        $song->listens = $song->listens + 1;
+        $song->save();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Song listens increased'
         ]);
     }
 
@@ -309,6 +322,7 @@ class SongController extends Controller
                 ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
                 ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
                 ->join('albums', 'songs.album_id', '=', 'albums.album_id')
+                ->leftJoin('liked_songs', 'songs.song_id', '=', 'liked_songs.song_id')
                 ->select(
                     'songs.song_id',
                     'songs.title',
@@ -320,6 +334,7 @@ class SongController extends Controller
                     "albums.name as album_name",
                     "albums.album_id as album_id",
                     "albums.image_path as image_path",
+                    DB::raw('CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked')
                 )
                 ->where('songs.title', 'like',  '%' . $query . '%')
                 ->where('songs.display', '=', 'public')

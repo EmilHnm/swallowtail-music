@@ -100,6 +100,23 @@ type songListData = {
 type albumData = album & { song_count: number };
 
 export default defineComponent({
+  emits: [
+    "updatePlaylist",
+    "deletePlaylist",
+    "playPlaylist",
+    "playSongInPlaylist",
+    "addPlaylistToQueue",
+    "playAlbum",
+    "addAlbumToQueue",
+    "playSongInAlbum",
+    "playArtistSong",
+    "playSongOfArtist",
+    "addArtistSongToQueue",
+    "playLikedSong",
+    "addLikedSongToQueue",
+    "addToQueue",
+    "playSong",
+  ],
   data() {
     return {
       songResult: {} as songListData,

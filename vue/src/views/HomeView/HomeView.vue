@@ -1,6 +1,7 @@
 <script lang="ts">
 import { computed } from "vue";
 import { _function } from "@/mixins";
+import { Timer } from "@/mixins/Timer";
 import { mapActions, mapGetters } from "vuex";
 import type { playlist } from "@/model/playlistModel";
 import { environment } from "@/environment/environment";
@@ -26,6 +27,7 @@ type songData = {
   image_path: string;
   duration: number;
   listens?: number;
+  liked: number;
 }[];
 
 type songList = {
@@ -56,6 +58,7 @@ export default {
       isRightSideBarActive: false,
       audio: null as HTMLAudioElement | null,
       audioList: {} as songList,
+      timeOut: null as null | Timer,
       //play song property
       isPlaying: false,
       progress: 0,
@@ -451,6 +454,36 @@ export default {
           }
         });
     },
+    addArtistSongToQueue(id: string) {
+      this.isLoading = true;
+      this.getArtistTopSongById({
+        token: this.token,
+        artist_id: id,
+      })
+        .then((res: any) => {
+          return res.json();
+        })
+        .then((res) => {
+          this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
+          if (res.status === "success") {
+            const newSongList: songList = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.audioList = { ...this.audioList, ...newSongList };
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
+    },
     playSongOfArtist(array: string[]) {
       this.isLoading = true;
       this.getArtistTopSongById({
@@ -487,7 +520,7 @@ export default {
         });
     },
     //NOTE: Liked Song
-    ...mapActions("song", ["getSongForPlay"]),
+    ...mapActions("song", ["getSongForPlay", "increaseSongListens"]),
     playLikedSong() {
       this.isLoading = true;
       this.getLikedSongList(this.token)
@@ -504,6 +537,31 @@ export default {
             }, Object.create(null));
             this.audioIndex = 0;
             this.playAudio();
+          } else {
+            this.dialogWaring = {
+              title: "Error",
+              mode: "warning",
+              content: res.message,
+              show: true,
+            };
+          }
+        });
+    },
+    addLikedSongToQueue() {
+      this.isLoading = true;
+      this.getLikedSongList(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          this.isOnShuffle = false;
+          this.shuffledList = {};
+          if (res.status === "success") {
+            const newSongList = res.likedList.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
+            this.audioList = { ...this.audioList, ...newSongList };
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -587,6 +645,7 @@ export default {
     // visualizer
     isPlaying() {
       if (this.isPlaying) {
+        if (this.timeOut) this.timeOut.resume();
         if (this.ctx === null) {
           this.ctx = new AudioContext();
           this.audioSource = this.ctx.createMediaElementSource(this.audio);
@@ -603,6 +662,8 @@ export default {
               );
           }
         }
+      } else {
+        if (this.timeOut) this.timeOut.pause();
       }
     },
     progress() {
@@ -612,6 +673,20 @@ export default {
     },
     playingAudio() {
       if (this.playingAudio) {
+        this.timeOut = null;
+        this.timeOut = new Timer(() => {
+          this.increaseSongListens({
+            token: this.token,
+            song_id: this.playingAudio[0].song_id,
+          })
+            .then((res) => res.json())
+            .then((res) => {
+              if (res.status === "success") {
+                this.timeOut = null;
+              }
+            });
+        }, 5000);
+        this.timeOut.resume();
         this.audio.src = this.playingAudioSrc;
         if (this.isPlaying) this.playAudio();
       }
@@ -678,7 +753,9 @@ export default {
         @playSongInAlbum="playSongInAlbum"
         @playArtistSong="playArtistSong"
         @playSongOfArtist="playSongOfArtist"
+        @addArtistSongToQueue="addArtistSongToQueue"
         @playLikedSong="playLikedSong"
+        @addLikedSongToQueue="addLikedSongToQueue"
         @addToQueue="addToQueue"
         @playSong="playSong"
       />
