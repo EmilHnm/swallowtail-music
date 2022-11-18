@@ -211,6 +211,22 @@ const router = createRouter({
                   "../views/AccountView/AccountAdmin/AccountAdminDashboard.vue"
                 ),
             },
+            {
+              path: "user",
+              name: "accountAdminUser",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountAdmin/AccountAdminUsers/AccountAdminUsers.vue"
+                ),
+            },
+            {
+              path: "user/:id",
+              name: "accountAdminUserEdit",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountAdmin/AccountAdminUsers/AccountAdminUserEdit.vue"
+                ),
+            },
           ],
         },
       ],

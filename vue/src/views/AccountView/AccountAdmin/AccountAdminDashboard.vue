@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <button>
+    <button @click="$router.push({ name: 'accountAdminUser' })">
       <div class="icon"><IconAvatarProfile /></div>
       <div class="title">Users</div>
     </button>

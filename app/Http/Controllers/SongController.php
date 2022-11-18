@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Song;
 use App\Models\Genre;
 use App\Models\Artist;
@@ -10,9 +11,11 @@ use App\Models\SongGenre;
 use App\Models\SongArtist;
 use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
 
@@ -208,10 +211,23 @@ class SongController extends Controller
         ]);
     }
 
-    public function increaseSongListens($id)
+    public function increaseSongListens($id, Request $request)
     {
+        // $reqTime = Redis::get($request->bearerToken());
+        // if ($reqTime) {
+        //     $timelast = date($reqTime);
+        //     $timenow = date(Carbon::now()->timestamp);
+        //     $diff = $timenow - $timelast;
+        //     if ($diff < 45) {
+        //         return response()->json([
+        //             'status' => 'error',
+        //             'message' => 'You are not allowed to increase listens'
+        //         ]);
+        //     }
+        // }
         $song = Song::find($id);
         $song->listens = $song->listens + 1;
+        // Redis::set($request->bearerToken(),  Carbon::now()->timestamp);
         $song->save();
         return response()->json([
             'status' => 'success',
@@ -291,6 +307,7 @@ class SongController extends Controller
         SongGenre::where('song_id', $id)->delete();
         PlaylistSong::where('song_id', $id)->delete();
         LikedSong::where('song_id', $id)->delete();
+        @unlink(public_path('storage/upload/song_src/') . $id . '.ogg');
         $song->delete();
         return response()->json([
             'status' => 'success',

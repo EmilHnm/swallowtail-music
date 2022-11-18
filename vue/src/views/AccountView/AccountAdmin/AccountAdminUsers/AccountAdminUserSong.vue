@@ -1,30 +1,10 @@
 <template>
-  <teleport to="body">
-    <BaseFlatDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseFlatDialog>
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseCircleLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
-  </teleport>
-  <div class="main" ref="main">
-    <h3>Song Uploaded Management</h3>
-    <div class="data" v-if="Object.keys(uploadedSongList).length">
-      <div class="filter">
+  <div class="user-song-container">
+    <div class="tool">
+      <div class="tool__songCount">
+        Uploaded Songs: {{ Object.keys(songList).length }}
+      </div>
+      <div class="tool__filter">
         <label for="filterText"><IconSearch /></label>
         <input
           type="text"
@@ -33,11 +13,15 @@
           v-model="filterText"
         />
       </div>
+    </div>
+    <BaseCircleLoad v-if="isLoading" />
+    <div class="data" ref="main" v-else>
       <table v-if="!filterText">
         <thead>
           <tr>
             <td class="index">#</td>
             <td class="title" @click="sortList('title')">Title</td>
+            <td class="album" @click="sortList('uploadDate')">Album</td>
             <td
               class="artist"
               @click="sortList('artist')"
@@ -50,9 +34,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(song, index, i) in uploadedSongList" :key="index">
+          <tr v-for="(song, index, i) in songList" :key="index">
             <td>{{ i + 1 }}</td>
             <td>{{ song[0].title }}</td>
+            <td>{{ song[0].album_name }}</td>
             <td v-if="song[0].artist_name && mainWidth > 600">
               <router-link
                 v-for="(artist, index) in song"
@@ -69,10 +54,7 @@
             <td v-if="!song[0].artist_name && mainWidth > 600">Unset</td>
             <td>{{ new Date(song[0].created_at).toLocaleDateString() }}</td>
             <td>
-              <button class="edit" @click="navigateToEdit(song[0].song_id)">
-                Edit
-              </button>
-              <button class="delete" @click="deleteItem(song[0].song_id)">
+              <button class="delete" @click="onDeleteSong(song[0].song_id)">
                 Delete
               </button>
             </td>
@@ -84,6 +66,7 @@
           <tr>
             <td class="index">#</td>
             <td class="title" @click="sortList('title')">Title</td>
+            <td class="album" @click="sortList('uploadDate')">Album</td>
             <td
               class="artist"
               @click="sortList('artist')"
@@ -96,9 +79,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(song, index, i) in filteredUploadedSongList" :key="index">
+          <tr v-for="(song, index, i) in filteredsongList" :key="index">
             <td>{{ i + 1 }}</td>
             <td>{{ song[0].title }}</td>
+            <td>{{ song[0].album_name }}</td>
             <td v-if="song[0].artist_name && mainWidth > 600">
               <router-link
                 v-for="artist in song"
@@ -114,10 +98,7 @@
             <td v-if="!song[0].artist_name && mainWidth > 600">Unset</td>
             <td>{{ new Date(song[0].created_at).toLocaleDateString() }}</td>
             <td>
-              <button class="edit" @click="navigateToEdit(song[0].song_id)">
-                Edit
-              </button>
-              <button class="delete" @click="deleteItem(song[0].song_id)">
+              <button class="delete" @click="onDeleteSong(song[0].song_id)">
                 Delete
               </button>
             </td>
@@ -125,18 +106,14 @@
         </tbody>
       </table>
     </div>
-    <div class="no-data" v-else>
-      <h3>No Song Uploaded</h3>
-    </div>
   </div>
 </template>
 
 <script lang="ts">
 import IconSearch from "@/components/icons/IconSearch.vue";
-import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
-import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
 type songListData = {
   [song_id: string]: songData;
@@ -147,47 +124,58 @@ type songData = {
   title: string;
   artist_name: string;
   artist_id: string;
+  album_id: string;
+  album_name: string;
   created_at: string;
 }[];
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    filteredsongList: songListData;
+  }
+}
 
 export default defineComponent({
   data() {
     return {
-      uploadedSongList: {} as songListData,
-      filteredUploadedSongList: {} as songListData,
+      filterText: "",
+      songList: {} as songListData,
       observer: null as ResizeObserver | null,
       mainWidth: 0,
-      filterText: "",
-      isLoading: false,
       sortMode: {
         title: "asc",
         artist: "asc",
         uploadDate: "asc",
       },
-      dialogWaring: {
-        title: "Warning",
-        mode: "warning",
-        content: "Please fill in all the fields",
-        show: false,
-      },
+      isLoading: false,
     };
   },
   methods: {
-    ...mapActions("song", ["getUploadedSongs", "deleteSong"]),
+    ...mapActions("admin", ["getUserUploadSong", "deleteSong"]),
+    onDeleteSong(id: string) {
+      this.isLoading = true;
+      this.deleteSong({ token: this.token, song_id: id })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.loadSong();
+          }
+        });
+    },
     sortList(colname: string) {
       if (colname === "title") {
         if (this.sortMode.title == "asc") {
           this.sortMode.title = "desc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
               (a: [string, songData], b: [string, songData]) =>
                 -a[1][0].title.localeCompare(b[1][0].title)
             )
           );
         } else {
           this.sortMode.title = "asc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
               (a: [string, songData], b: [string, songData]) =>
                 a[1][0].title.localeCompare(b[1][0].title)
             )
@@ -198,8 +186,8 @@ export default defineComponent({
       if (colname === "artist") {
         if (this.sortMode.artist === "asc") {
           this.sortMode.artist = "desc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
               (a: [string, songData], b: [string, songData]) => {
                 if (a[1][0].artist_name === null) {
                   return -1;
@@ -215,8 +203,8 @@ export default defineComponent({
           );
         } else {
           this.sortMode.artist = "asc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
               (a: [string, songData], b: [string, songData]) => {
                 if (a[1][0].artist_name === null) {
                   return 1;
@@ -236,16 +224,16 @@ export default defineComponent({
       if (colname === "uploadDate") {
         if (this.sortMode.uploadDate === "asc") {
           this.sortMode.uploadDate = "desc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
               (a: [string, songData], b: [string, songData]) =>
                 -a[1][0].created_at.localeCompare(b[1][0].created_at)
             )
           );
         } else {
           this.sortMode.uploadDate = "asc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
+          this.songList = Object.fromEntries(
+            Object.entries(this.songList).sort(
               (a: [string, songData], b: [string, songData]) =>
                 a[1][0].created_at.localeCompare(b[1][0].created_at)
             )
@@ -254,83 +242,48 @@ export default defineComponent({
         return;
       }
     },
-    navigateToEdit(id: string | number) {
-      this.$router.push({
-        name: "accountUploadSongEdit",
-        query: { id },
-      });
-    },
-    deleteItem(id: string) {
+    loadSong() {
       this.isLoading = true;
-      this.deleteSong({ userToken: this.token, songId: id })
+      this.getUserUploadSong({
+        token: this.token,
+        user_id: this.$route.params.id,
+      })
         .then((res) => res.json())
         .then((res) => {
-          if (res.status === "success") {
-            this.getUploadedSongs(this.token)
-              .then((res) => res.json())
-              .then((res) => {
-                this.uploadedSongList = res.songs.reduce((r: any, a: any) => {
-                  r[a.song_id] = r[a.song_id] || [];
-                  r[a.song_id].push(a);
-                  return r;
-                }, Object.create(null));
-              });
-            this.dialogWaring.mode = "announcement";
-            this.dialogWaring.content = res.message;
-            this.dialogWaring.title = "Success";
-            this.dialogWaring.show = true;
-          } else {
-            this.dialogWaring.mode = "warning";
-            this.dialogWaring.content = res.message;
-            this.dialogWaring.title = "Warning";
-            this.dialogWaring.show = true;
-          }
+          this.isLoading = false;
+          if (res.status === "success")
+            this.songList = res.songs.reduce((r: any, a: any) => {
+              r[a.song_id] = r[a.song_id] || [];
+              r[a.song_id].push(a);
+              return r;
+            }, Object.create(null));
           this.isLoading = false;
         });
-    },
-    closeDialog() {
-      this.dialogWaring.show = false;
     },
   },
   computed: {
     ...mapGetters({
       token: "auth/userToken",
     }),
-  },
-  watch: {
-    filterText() {
-      if (this.filterText === "") {
-        this.filteredUploadedSongList = {};
-        return;
-      }
-      this.filteredUploadedSongList = Object.fromEntries(
-        Object.entries(this.uploadedSongList).filter(
-          (song: [string, songData]) => {
-            return (
-              song[1][0].title
-                .toLowerCase()
-                .includes(this.filterText.toLowerCase()) ||
-              song[1][0].artist_name
-                ?.toLowerCase()
-                .includes(this.filterText.toLowerCase())
-            );
-          }
-        )
+    filteredsongList() {
+      return Object.fromEntries(
+        Object.entries(this.songList).filter((song: [string, songData]) => {
+          return (
+            song[1][0].title
+              .toLowerCase()
+              .includes(this.filterText.toLowerCase()) ||
+            song[1][0].artist_name
+              ?.toLowerCase()
+              .includes(this.filterText.toLowerCase())
+          );
+        })
       );
     },
   },
+  created() {
+    this.loadSong();
+  },
   mounted() {
-    this.isLoading = true;
-    this.getUploadedSongs(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        this.uploadedSongList = res.songs.reduce((r: any, a: any) => {
-          r[a.song_id] = r[a.song_id] || [];
-          r[a.song_id].push(a);
-          return r;
-        }, Object.create(null));
-        this.isLoading = false;
-      });
     const main = this.$refs.main as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
@@ -342,20 +295,24 @@ export default defineComponent({
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();
   },
-  components: { IconSearch, BaseFlatDialog, BaseCircleLoad },
+  components: { IconSearch, BaseCircleLoad },
 });
 </script>
 
 <style lang="scss" scoped>
-.main {
+.user-song-container {
   width: 100%;
   display: flex;
   flex-direction: column;
   h3 {
     text-align: center;
   }
-  .data {
-    & .filter {
+  .tool {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    &__filter {
       display: flex;
       flex-direction: row;
       justify-content: flex-end;
@@ -390,6 +347,8 @@ export default defineComponent({
         }
       }
     }
+  }
+  .data {
     table {
       width: 100%;
       thead {
@@ -401,6 +360,9 @@ export default defineComponent({
             background: var(--background-glass-color-primary);
             text-align: center;
             cursor: pointer;
+            &.index {
+              max-width: 10px;
+            }
           }
         }
       }
@@ -412,6 +374,9 @@ export default defineComponent({
             background: var(--background-glass-color-secondary);
             text-align: center;
             border-bottom: 1px solid var(--background-glass-color-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-clamp: 2;
             a {
               color: var(--color-primary);
               text-decoration: none;

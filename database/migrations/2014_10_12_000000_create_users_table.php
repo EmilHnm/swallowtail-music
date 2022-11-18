@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('region')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

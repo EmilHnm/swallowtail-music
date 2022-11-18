@@ -60,7 +60,7 @@ class PlaylistController extends Controller
             ]);
         }
         if (
-            $playlist->user_id !== Auth::user()->user_id &&
+            $playlist->user_id != Auth::user()->user_id &&
             $playlist->type === 'Private'
         ) {
             return response()->json([
