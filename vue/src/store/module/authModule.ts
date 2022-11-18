@@ -32,6 +32,7 @@ export const authModule = {
       state.user.data.username = payload.user.name;
       state.user.data.email = payload.user.email;
       state.user.data.profile_photo_url = payload.user.profile_photo_url ?? "";
+      state.user.data.role = payload.user.role;
       if (payload.token) {
         state.user.token = payload.token;
         localStorage.setItem("TOKEN", payload.token);

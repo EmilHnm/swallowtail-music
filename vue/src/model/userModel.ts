@@ -6,8 +6,9 @@ export interface user {
   email_verified_at?: string;
   gender?: string;
   profile_photo_url?: string;
+  role?: string;
   dob?: string;
   region?: string;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 }

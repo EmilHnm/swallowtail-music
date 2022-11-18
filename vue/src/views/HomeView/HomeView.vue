@@ -685,7 +685,7 @@ export default {
                 this.timeOut = null;
               }
             });
-        }, 5000);
+        }, 45000);
         this.timeOut.resume();
         this.audio.src = this.playingAudioSrc;
         if (this.isPlaying) this.playAudio();

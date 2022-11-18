@@ -18,7 +18,6 @@ export class Timer {
   resume() {
     if (!this.timerId) {
       this.timerId = window.setTimeout(this.callback, this.remaining);
-      console.log(this.timerId);
     } else {
       return;
     }

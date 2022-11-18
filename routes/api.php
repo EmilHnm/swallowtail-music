@@ -10,6 +10,7 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PlaylistController;
+use App\Http\Controllers\admin\UserAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,7 +51,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/search', [SongController::class, 'searchSong']);
         Route::get('/{id}', [SongController::class, 'getSongInfo']);
         Route::get('/{id}/play', [SongController::class, 'getSongForPlay']);
-        Route::post('/{id}/listens', [SongController::class, 'increaseSongListens']);
+        Route::middleware('requestTimeDelay')
+            ->post('/{id}/listens', [SongController::class, 'increaseSongListens']);
         Route::post('/{id}/like', [SongController::class, 'likeSong']);
         Route::get('/{id}/liked', [SongController::class, 'likedSong']);
         Route::delete('/{id}/delete', [SongController::class, 'deleteSong']);
@@ -106,6 +108,22 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/update', [SongController::class, 'updateSong']);
             Route::get('/uploaded', [SongController::class, 'uploadedSong']);
             Route::delete('/{id}/delete', [SongController::class, 'deleteSong']);
+        });
+    });
+
+    Route::prefix('admin')->group(function () {
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserAdminController::class, 'getAll']);
+            Route::get('/{id}', [UserAdminController::class, 'show']);
+            Route::get('/{id}/songs', [UserAdminController::class, 'showUserUploadSong']);
+            Route::get('/{id}/albums', [UserAdminController::class, 'showUserUploadAlbum']);
+            Route::delete('/{id}/delete', [UserAdminController::class, 'deleteUser']);
+        });
+
+        Route::prefix('songs')->group(function () {
+            Route::get('/', [SongAdminController::class, 'getAll']);
+            Route::get('/{id}', [SongAdminController::class, 'show']);
+            Route::delete('/{id}/delete', [SongAdminController::class, 'deleteSong']);
         });
     });
 });
