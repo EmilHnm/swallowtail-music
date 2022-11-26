@@ -172,6 +172,15 @@ class SongController extends Controller
                 'message' => 'Song not found'
             ]);
         }
+        if (Auth::user()->user_id != $song->user_id && $song->display == 'private') {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => 'You are not authorized to access this resource.'
+                ],
+                403
+            );
+        }
         $genre = $song->genre()->where('song_id', $id)->get();
         $artist = $song->artist()->where('song_id', $id)->get();
         return response()->json([
@@ -354,6 +363,7 @@ class SongController extends Controller
                     DB::raw('CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked')
                 )
                 ->where('songs.title', 'like',  '%' . $query . '%')
+                ->orWhere('songs.sub_title', 'like',  '%' . $query . '%')
                 ->where('songs.display', '=', 'public')
                 ->get();
             return response()->json([

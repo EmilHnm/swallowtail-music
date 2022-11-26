@@ -4,7 +4,7 @@
       <div class="icon"><IconAvatarProfile /></div>
       <div class="title">Users</div>
     </button>
-    <button>
+    <button @click="$router.push({ name: 'accountAdminDisc' })">
       <div class="icon"><IconDisk /></div>
       <div class="title">Song</div>
     </button>

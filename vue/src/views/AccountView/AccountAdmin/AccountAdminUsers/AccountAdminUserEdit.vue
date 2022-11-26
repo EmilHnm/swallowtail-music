@@ -10,6 +10,20 @@
       </template>
       <template #action><div></div></template>
     </BaseFlatDialog>
+    <BaseFlatDialog
+      :open="roleEditDialog.show"
+      :title="roleEditDialog.title"
+      :mode="roleEditDialog.mode"
+      @close="onCancelUpdateRole"
+    >
+      <template #default>
+        <p>{{ roleEditDialog.content }}</p>
+      </template>
+      <template #action>
+        <BaseButton :mode="'danger'" @click="updateRole">Update</BaseButton>
+        <BaseButton @click="onCancelUpdateRole">Cancel</BaseButton>
+      </template>
+    </BaseFlatDialog>
   </teleport>
   <div class="user-container">
     <div class="details">
@@ -51,6 +65,14 @@
             user ? new Date(user.created_at).toLocaleDateString() : ""
           }}</span>
         </div>
+        <div
+          class="user__row"
+          v-if="authUser.role === 'Admin' && user.role !== 'Admin'"
+        >
+          <button class="danger" @click="onUpdateRoleConfirm">
+            {{ user.role === "Mod" ? "Demote to User" : "Promote to Mod" }}
+          </button>
+        </div>
       </div>
     </div>
     <div class="upload">
@@ -75,17 +97,24 @@ import AccountAdminUserAlbum from "./AccountAdminUserAlbum.vue";
 import type { user } from "@/model/userModel";
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
+import BaseButton from "@/components/UI/BaseButton.vue";
 
 export default defineComponent({
   data() {
     return {
       componentName: "AccountAdminUserSong",
       isLoading: false,
+      roleEditDialog: {
+        show: false,
+        title: "Confirm Update Role",
+        mode: "danger",
+        content: "Are you sure you want to update this user's role?",
+      },
       user: {} as user,
     };
   },
   methods: {
-    ...mapActions("admin", ["getUser", "getUserUploadSong"]),
+    ...mapActions("admin", ["getUser", "changeUserRole"]),
     loadUser() {
       this.isLoading = true;
       this.getUser({
@@ -98,7 +127,26 @@ export default defineComponent({
           if (res.status === "success") this.user = res.user;
         });
     },
-
+    onUpdateRoleConfirm() {
+      this.roleEditDialog.show = true;
+    },
+    onCancelUpdateRole() {
+      this.roleEditDialog.show = false;
+    },
+    updateRole() {
+      this.roleEditDialog.show = false;
+      this.isLoading = true;
+      this.changeUserRole({
+        token: this.token,
+        user_id: this.$route.params.id,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.loadUser();
+          }
+        });
+    },
     changeComponent(componentName: string) {
       this.componentName = componentName;
     },
@@ -106,6 +154,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       token: "auth/userToken",
+      authUser: "auth/userData",
     }),
   },
   created() {
@@ -116,6 +165,7 @@ export default defineComponent({
     BaseLineLoad,
     AccountAdminUserSong,
     AccountAdminUserAlbum,
+    BaseButton,
   },
 });
 </script>
@@ -161,6 +211,23 @@ export default defineComponent({
           font-size: 1.2rem;
           font-weight: 400;
           color: var(--text-primary-color);
+        }
+        button.danger {
+          width: max-content;
+          align-self: center;
+          height: 40px;
+          border-radius: 5px;
+          background-color: transparent;
+          color: var(--color-danger);
+          border: 1px solid var(--color-danger);
+          font-size: 1.2rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+          &:hover {
+            color: var(--text-primary-color);
+            background-color: var(--color-danger);
+          }
         }
       }
     }

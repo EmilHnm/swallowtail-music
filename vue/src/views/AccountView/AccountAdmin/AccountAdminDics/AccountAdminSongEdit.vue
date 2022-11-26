@@ -11,6 +11,20 @@
       </template>
     </BaseFlatDialog>
     <BaseFlatDialog
+      :open="dialogDelete.show"
+      :title="dialogDelete.title"
+      :mode="dialogDelete.mode"
+      @close="closeDeleteDialog"
+    >
+      <template #default>
+        <p>{{ dialogDelete.content }}</p>
+      </template>
+      <template #action>
+        <BaseButton :mode="'danger'" @click="onDeleteSong">Delete</BaseButton>
+        <BaseButton @click="closeDeleteDialog">Cancel</BaseButton>
+      </template>
+    </BaseFlatDialog>
+    <BaseFlatDialog
       :open="isLoading"
       :title="'Loading ...'"
       :mode="'announcement'"
@@ -27,6 +41,10 @@
       <div class="form__row">
         <label for="">Song Name</label>
         <input type="text" placeholder="Song Name" v-model="songName" />
+      </div>
+      <div class="form__row">
+        <label for="">Song Sub Name</label>
+        <input type="text" placeholder="Song Name" v-model="songSubName" />
       </div>
       <div class="form__row">
         <div class="tagList">
@@ -127,6 +145,9 @@
       </div>
       <div class="form__row">
         <button type="submit">Submit</button>
+        <button type="button" class="danger" @click="onDeleteSongConfirm">
+          Delete
+        </button>
       </div>
     </form>
   </div>
@@ -142,6 +163,7 @@ import BaseRadio from "@/components/UI/BaseRadio.vue";
 import BaseTag from "@/components/UI/BaseTag.vue";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
 export default {
   data() {
     return {
@@ -156,19 +178,28 @@ export default {
       artistName: "",
       genreName: "",
       songName: "",
+      songSubName: "",
       displayMode: "",
       isLoading: false,
       dialogWaring: {
-        title: "Warning",
         mode: "warning",
+        title: "Warning",
         content: "Please fill in all the fields",
+        show: false,
+      },
+      dialogDelete: {
+        mode: "danger",
+        title: "Delete song",
+        content:
+          "Are You Sure You Want To Delete This Song?\n After Deleting, You Cannot Recover It.",
         show: false,
       },
     };
   },
   methods: {
-    ...mapActions("song", ["getSong", "getGenreList", "updateSong"]),
+    ...mapActions("song", ["getGenreList"]),
     ...mapActions("artist", ["getArtistList"]),
+    ...mapActions("admin", ["getSong", "updateSong", "deleteSong"]),
     pushItemtoArray(item: genre | artist, array: genre[] | artist[]): void {
       _function.pushItemtoArray(item, array);
       this.artistName = "";
@@ -185,6 +216,25 @@ export default {
     },
     closeDialog() {
       this.dialogWaring.show = false;
+    },
+    closeDeleteDialog() {
+      this.dialogDelete.show = false;
+    },
+    onDeleteSongConfirm() {
+      this.dialogDelete.show = true;
+    },
+    onDeleteSong() {
+      this.dialogDelete.show = false;
+      this.isLoading = true;
+      this.deleteSong({ song_id: this.song_id, token: this.token })
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success")
+            this.$router.push({ name: "accountAdminDiscSong" });
+        });
     },
     onSubmit() {
       if (this.songName == "") {
@@ -206,6 +256,7 @@ export default {
       const songForm = new FormData();
       songForm.append("song_id", this.song_id as string);
       songForm.append("songName", this.songName);
+      songForm.append("songSubName", this.songSubName);
       songForm.append("displayMode", this.displayMode);
       let artistArrUpload: string[] = [];
       this.artistArray.forEach((artist: artist) => {
@@ -246,9 +297,11 @@ export default {
     BaseTag,
     BaseFlatDialog,
     BaseCircleLoad,
+    BaseButton,
   },
   created() {
-    this.song_id = this.$route.query.id;
+    this.song_id = this.$route.params.id;
+    console.log(this.song_id);
     if (this.song_id) {
       this.isLoading = true;
       this.getSong({ token: this.token, song_id: this.song_id })
@@ -257,6 +310,7 @@ export default {
           this.isLoading = false;
           if (res.status === "success") {
             this.songName = res.song.title;
+            this.songSubName = res.song.sub_title;
             this.displayMode = res.song.display;
             for (const artist of res.artist) {
               this.artistArray.push({
@@ -363,14 +417,28 @@ export default {
         height: 40px;
         background: transparent;
         color: var(--color-primary);
+        margin: 0.5rem auto;
         padding: 0 20px;
         font-size: 1rem;
         border: 1px solid var(--color-primary);
-        width: max-content;
+        width: 80%;
         float: right;
         cursor: pointer;
         font-weight: 500;
         transition: all 0.3s ease;
+        &.danger {
+          background: transparent;
+          color: var(--color-danger);
+          border: 1px solid var(--color-danger);
+          &:focus {
+            outline: none;
+          }
+          &:hover {
+            transform: scale(1.05);
+            background: var(--color-danger);
+            color: var(--background-color-secondary);
+          }
+        }
         &:focus {
           outline: none;
         }

@@ -262,9 +262,11 @@ class AlbumController extends Controller
     {
         if ($request->query->has('query')) {
             $query = $request->query->get('query');
-            $albums = Album::where('name', 'like',  '%' . $query . '%')->get();
-            $songs = Song::where('album_id', $albums[0]->album_id)->count();
-            $albums->song_count = $songs;
+            $albums = DB::table('albums')
+                ->leftJoin('songs', 'songs.album_id', '=', 'albums.album_id')
+                ->select('albums.*', DB::raw('count(songs.song_id) as song_count'))
+                ->groupBy('albums.album_id')
+                ->where('name', 'like',  '%' . $query . '%')->get();
             return response()->json([
                 'status' => 'success',
                 'albums' => $albums

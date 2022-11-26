@@ -10,6 +10,8 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PlaylistController;
+use App\Http\Controllers\AlbumAdminController;
+use App\Http\Controllers\admin\SongAdminController;
 use App\Http\Controllers\admin\UserAdminController;
 
 /*
@@ -117,13 +119,22 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{id}', [UserAdminController::class, 'show']);
             Route::get('/{id}/songs', [UserAdminController::class, 'showUserUploadSong']);
             Route::get('/{id}/albums', [UserAdminController::class, 'showUserUploadAlbum']);
+            Route::post('/{id}/role/update', [UserAdminController::class, 'updateRole']);
             Route::delete('/{id}/delete', [UserAdminController::class, 'deleteUser']);
         });
 
         Route::prefix('songs')->group(function () {
             Route::get('/', [SongAdminController::class, 'getAll']);
+            Route::post('/update', [SongAdminController::class, 'update']);
             Route::get('/{id}', [SongAdminController::class, 'show']);
-            Route::delete('/{id}/delete', [SongAdminController::class, 'deleteSong']);
+            Route::delete('/{id}/delete', [SongAdminController::class, 'delete']);
+        });
+
+        Route::prefix('albums')->group(function () {
+            Route::get('/', [AlbumAdminController::class, 'getAll']);
+            Route::post('/update', [AlbumAdminController::class, 'update']);
+            Route::get('/{id}', [AlbumAdminController::class, 'show']);
+            Route::delete('/{id}/delete', [AlbumAdminController::class, 'delete']);
         });
     });
 });

@@ -15,7 +15,7 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: HomeView,
-      redirect: "home",
+      redirect: { name: "mainPage" },
       meta: {
         requiresAuth: true,
       },
@@ -103,7 +103,7 @@ const router = createRouter({
 
     {
       path: "/auth",
-      redirect: "/login",
+      redirect: { name: "login" },
       name: "auth",
       component: AuthView,
       meta: { isGuest: true },
@@ -125,7 +125,7 @@ const router = createRouter({
       path: "/account",
       name: "account",
       component: AccountView,
-      redirect: "/account/overview",
+      redirect: { name: "accountOverview" },
       meta: {
         requiresAuth: true,
       },
@@ -156,7 +156,7 @@ const router = createRouter({
         {
           path: "upload",
           name: "accountUpload",
-          redirect: "upload/song",
+          redirect: { name: "accountUploadSong" },
           component: () =>
             import(
               "../views/AccountView/AccountUpload/AccountUploadManagementView.vue"
@@ -199,7 +199,7 @@ const router = createRouter({
         {
           path: "admin",
           name: "accountAdmin",
-          redirect: "admin/dashboard",
+          redirect: { name: "accountAdminDashboard" },
           component: () =>
             import("../views/AccountView/AccountAdmin/AccountAdminView.vue"),
           children: [
@@ -226,6 +226,41 @@ const router = createRouter({
                 import(
                   "../views/AccountView/AccountAdmin/AccountAdminUsers/AccountAdminUserEdit.vue"
                 ),
+            },
+            {
+              path: "disc",
+              name: "accountAdminDisc",
+              redirect: { name: "accountAdminDiscSong" },
+              component: () =>
+                import(
+                  "../views/AccountView/AccountAdmin/AccountAdminDics/AccountAdminDiscsView.vue"
+                ),
+              children: [
+                {
+                  path: "song",
+                  name: "accountAdminDiscSong",
+                  component: () =>
+                    import(
+                      "../views/AccountView/AccountAdmin/AccountAdminDics/AccountAdminSongs.vue"
+                    ),
+                },
+                {
+                  path: "song/:id",
+                  name: "accountAdminDiscSongEdit",
+                  component: () =>
+                    import(
+                      "../views/AccountView/AccountAdmin/AccountAdminDics/AccountAdminSongEdit.vue"
+                    ),
+                },
+                {
+                  path: "album",
+                  name: "accountAdminDiscAlbum",
+                  component: () =>
+                    import(
+                      "../views/AccountView/AccountAdmin/AccountAdminDics/AccountAdminAlbums.vue"
+                    ),
+                },
+              ],
             },
           ],
         },
@@ -276,6 +311,7 @@ router.beforeEach((to, from, next) => {
             if (to.meta.requiresAuth) {
               next();
             } else {
+              console.log("redirect to home 1");
               next({ name: "home" });
             }
           }
@@ -284,6 +320,7 @@ router.beforeEach((to, from, next) => {
       if (to.meta.requiresAuth) {
         next();
       } else {
+        //next();
         next({ name: "home" });
       }
     }

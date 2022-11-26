@@ -10,31 +10,31 @@
     />
     <ul class="menu">
       <li @click="closeSideBar">
-        <router-link :to="{ name: 'accountOverview' }">
+        <router-link :to="{ name: 'accountOverview', replace: true }">
           <IconHome />
           <span>Overview</span>
         </router-link>
       </li>
       <li @click="closeSideBar">
-        <router-link :to="{ name: 'accountProfile' }">
+        <router-link :to="{ name: 'accountProfile', replace: true }">
           <IconBallPen />
           <span>Profile</span>
         </router-link>
       </li>
       <li @click="closeSideBar">
-        <router-link :to="{ name: 'accountAvatar' }">
+        <router-link :to="{ name: 'accountAvatar', replace: true }">
           <IconAvatarProfile />
           <span>Avatar</span>
         </router-link>
       </li>
       <li @click="closeSideBar">
-        <router-link :to="{ name: 'accountSecurity' }">
+        <router-link :to="{ name: 'accountSecurity', replace: true }">
           <IconSecurity />
           <span>Security</span>
         </router-link>
       </li>
       <li @click="closeSideBar">
-        <router-link :to="{ name: 'accountUpload' }">
+        <router-link :to="{ name: 'accountUpload', replace: true }">
           <IconDisk />
           <span>Upload Management</span>
         </router-link>
@@ -99,8 +99,11 @@ nav {
   padding: 2rem 0;
   width: 25%;
   flex: 0 0 auto;
-  overflow: hidden;
+  overflow: scroll;
   height: calc(100vh - 150px);
+  &::-webkit-scrollbar {
+    display: none;
+  }
   img {
     width: 4rem;
     height: 4rem;

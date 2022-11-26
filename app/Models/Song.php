@@ -42,4 +42,13 @@ class Song extends Model
             'playlist_id'
         )->withTimestamps();
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+    public function album()
+    {
+        return $this->belongsTo(Album::class, 'album_id', 'album_id');
+    }
 }

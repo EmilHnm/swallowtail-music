@@ -1,8 +1,12 @@
 <template>
   <div class="admin-wrapper">
     <div class="admin-nav" v-if="$route.name !== 'accountAdminDashboard'">
-      <button><IconAvatarProfile /></button>
-      <button><IconDisk /></button>
+      <button @click="$router.replace({ name: 'accountAdminUser' })">
+        <IconAvatarProfile />
+      </button>
+      <button @click="$router.replace({ name: 'accountAdminDisc' })">
+        <IconDisk />
+      </button>
       <button><IconArtist /></button>
       <button><IconTag /></button>
     </div>
@@ -19,8 +23,8 @@ import IconArtist from "@/components/icons/IconArtist.vue";
 import IconTag from "@/components/icons/IconTag.vue";
 export default defineComponent({
   created() {
-    if (this.user.role !== "Admin") {
-      this.$router.push({ name: "accountOverview" });
+    if (this.user.role === "") {
+      this.$router.push({ name: "accountOverview", replace: true });
     }
   },
   computed: {

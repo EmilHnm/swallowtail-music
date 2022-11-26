@@ -94,6 +94,12 @@ import IconSearch from "@/components/icons/IconSearch.vue";
 
 type albumData = album & { songCount: number };
 
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    filteredAlbumList: albumData[];
+  }
+}
+
 export default defineComponent({
   data() {
     return {
@@ -114,6 +120,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("admin", ["getUserUploadAlbum"]),
+    //TODO: onDeleteAlbum
     onDeleteAlbum(id: string) {},
     sortList(colname: string) {
       if (colname === "title") {

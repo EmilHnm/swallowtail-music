@@ -4,6 +4,7 @@ export interface song {
   user_id: string;
   album_id: string;
   title: string;
+  sub_title?: string;
   listens: number;
   duration: number;
   display: string;
