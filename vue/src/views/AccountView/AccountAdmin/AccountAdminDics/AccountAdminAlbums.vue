@@ -16,7 +16,7 @@
     <div class="tool">
       <div class="item-count">
         <label for="itemPerPage">Item Per Page</label>
-        <select name="filterType" id="itemPerPage" v-model="itemPerPage">
+        <select name="itemPerPage" id="itemPerPage" v-model="itemPerPage">
           <option value="10" :selected="itemPerPage === 10">10</option>
           <option value="30" :selected="itemPerPage === 30">30</option>
           <option value="50" :selected="itemPerPage === 50">50</option>
@@ -30,7 +30,7 @@
           <option value="uploader" :selected="filterType === 'uploader'">
             Uploader
           </option>
-          <option value="album" :selected="filterType === 'year'">
+          <option value="year" :selected="filterType === 'year'">
             Release Year
           </option>
         </select>
@@ -258,15 +258,16 @@ export default defineComponent({
                 .includes(this.filterText.toLowerCase())
             )
           );
-          // return this.albumsList.filter((album) => {
-          //   return album.release_year
-          //     .toString()
-          //     .toLowerCase()
-          //     .includes(this.filterText.toLowerCase());
-          // });
-          return this.albumsList;
+          return this.albumsList.filter((album) => {
+            return album.release_year
+              .toString()
+              .toLowerCase()
+              .includes(this.filterText.toLowerCase());
+          });
+          // return this.albumsList;
         }
       }
+      console.log(this.filterType);
       return [] as albumData[];
     },
   },
