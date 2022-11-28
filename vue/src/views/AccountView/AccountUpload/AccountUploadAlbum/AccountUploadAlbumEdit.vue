@@ -186,7 +186,7 @@ import type { LocationQueryValue } from "vue-router";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
 import type { song } from "@/model/songModel";
-import { _function } from "@/mixins
+import { _function } from "@/mixins";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
@@ -194,22 +194,31 @@ type songItem = {
   song_id?: string;
   title?: string;
 };
-type songData = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    created_at: string;
-  }[];
+
+type songInfo = {
+  song_id: string;
+  title: string;
+  artist_name: string;
+  artist_id: string;
+  created_at: string;
 };
+
+type songList = {
+  [song_id: string]: songInfo[];
+};
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    filteredSongList: songList;
+  }
+}
 
 export default defineComponent({
   data() {
     return {
       environment: environment,
       album_id: null as LocationQueryValue | LocationQueryValue[] | null,
-      uploadedSongList: [] as songData[],
+      uploadedSongList: {} as songList,
       songs: [] as songItem[],
       album: {} as album,
       file: null as File | null,
@@ -344,16 +353,18 @@ export default defineComponent({
     }),
     filteredSongList() {
       return Object.fromEntries(
-        Object.entries(this.uploadedSongList).filter((song: songData) => {
-          return (
-            song[1][0].title
-              .toLowerCase()
-              .includes(this.filterText.toLowerCase()) ||
-            song[1][0].artist_name
-              ?.toLowerCase()
-              .includes(this.filterText.toLowerCase())
-          );
-        })
+        Object.entries(this.uploadedSongList).filter(
+          (song: [string, songInfo[]]) => {
+            return (
+              song[1][0].title
+                .toLowerCase()
+                .includes(this.filterText.toLowerCase()) ||
+              song[1][0].artist_name
+                ?.toLowerCase()
+                .includes(this.filterText.toLowerCase())
+            );
+          }
+        )
       );
     },
   },

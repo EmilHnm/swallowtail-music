@@ -260,6 +260,14 @@ const router = createRouter({
                       "../views/AccountView/AccountAdmin/AccountAdminDics/AccountAdminAlbums.vue"
                     ),
                 },
+                {
+                  path: "album/:id",
+                  name: "accountAdminDiscAlbumEdit",
+                  component: () =>
+                    import(
+                      "../views/AccountView/AccountAdmin/AccountAdminDics/AccountAdminAlbumEdit.vue"
+                    ),
+                },
               ],
             },
           ],
