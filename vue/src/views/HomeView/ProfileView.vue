@@ -120,6 +120,7 @@ type songData = {
     image_path: string;
     duration: number;
     listens?: number;
+    liked: number;
   }[];
 };
 

@@ -267,13 +267,22 @@ export default {
           this.isOnShuffle = false;
           this.shuffledList = {};
           if (res.songList) {
-            this.audioList = res.songList.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            this.audioIndex = 0;
-            this.playAudio();
+            if (res.songList.length) {
+              this.audioList = res.songList.reduce((r: any, a: any) => {
+                r[a.song_id] = r[a.song_id] || [];
+                r[a.song_id].push(a);
+                return r;
+              }, Object.create(null));
+              this.audioIndex = 0;
+              this.playAudio();
+            } else {
+              this.dialogWaring = {
+                title: "Error",
+                mode: "warning",
+                content: "This playlist is empty, cannot be played",
+                show: true,
+              };
+            }
           } else {
             this.dialogWaring = {
               title: "Error",

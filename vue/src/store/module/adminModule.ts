@@ -140,5 +140,45 @@ export const adminModule = {
         },
       });
     },
+    getAlbum(
+      context: any,
+      { token, album_id }: { token: string; album_id: string }
+    ) {
+      return fetch(`${environment.api}/admin/albums/${album_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+    },
+  },
+  updateAlbumInfo(
+    context: any,
+    payload: { userToken: string; albumInfo: FormData }
+  ): Promise<Response> {
+    return fetch(`${environment.api}/admin/albums/update`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${payload.userToken}`,
+        Accept: "application/json",
+      },
+      body: payload.albumInfo,
+    });
+  },
+  removeAlbumSongs(
+    context: any,
+    payload: { userToken: string; songId: string }
+  ): Promise<Response> {
+    return fetch(`${environment.api}/admin/albums/song-remove`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.userToken}`,
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ song_id: payload.songId }),
+    });
   },
 };
