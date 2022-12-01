@@ -70,7 +70,7 @@
             <td>{{ album.name }}</td>
             <td v-if="mainWidth > 500">{{ album.release_year }}</td>
             <td v-if="mainWidth > 700">{{ album.type }}</td>
-            <td v-if="mainWidth > 600">{{ album.songCount }}</td>
+            <td v-if="mainWidth > 600">{{ album.song_count }}</td>
             <td>{{ new Date(album.created_at).toLocaleDateString() }}</td>
             <td>
               <button class="delete" @click="onDeleteAlbum(album.album_id)">

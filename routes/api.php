@@ -134,6 +134,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/', [AlbumAdminController::class, 'getAll']);
             Route::post('/update', [AlbumAdminController::class, 'update']);
             Route::post('/song-remove', [AlbumAdminController::class, 'songRemove']);
+            Route::post('/song-add', [AlbumAdminController::class, 'songAdd']);
             Route::get('/{id}', [AlbumAdminController::class, 'show']);
             Route::delete('/{id}/delete', [AlbumAdminController::class, 'delete']);
         });

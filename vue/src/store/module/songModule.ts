@@ -64,9 +64,13 @@ export const songModule = {
         body: data.songForm,
       });
     },
-    searchSong(context: any, data: { token: string; query: string }) {
+    searchSong(
+      context: any,
+      data: { token: string; query: string; signal: AbortSignal }
+    ) {
       return fetch(`${environment.api}/song/search?query=${data.query}`, {
         method: "GET",
+        signal: data.signal,
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${data.token}`,

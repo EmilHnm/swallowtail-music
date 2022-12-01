@@ -57,4 +57,40 @@ class AlbumAdminController extends Controller
             ]);
         }
     }
+
+    public function songAddable()
+    {
+        if (Auth::user()->role === '') {
+            return response()->json(['message' => 'You are not authorized to do this action.'], 403);
+        } else {
+            $songs = Song::where('album_id', '')->get();
+        }
+    }
+
+    public function songAdd(Request $request)
+    {
+        if (Auth::user()->role === '') {
+            return response()->json(['message' => 'You are not authorized to do this action.'], 403);
+        }
+        $album = Album::where('album_id', $request->album_id)->first;
+        if (!$album) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Album not found!'
+            ], http_response_code(402));
+        }
+        $song = Song::where('song_id', $request->song_id)->first();
+        if (!$song) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Song not found!'
+            ], http_response_code(402));
+        }
+        $song->album_id = $album->id;
+        $song->save();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Add song to album successfully!'
+        ], http_response_code(200));
+    }
 }
