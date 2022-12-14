@@ -181,4 +181,17 @@ export const adminModule = {
       body: JSON.stringify({ song_id: payload.songId }),
     });
   },
+  deleteAlbum(
+    context: any,
+    payload: { userToken: string; albumId: string }
+  ): Promise<Response> {
+    return fetch(`${environment.api}/admin/albums/${payload.albumId}/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.userToken}`,
+        Accept: "application/json",
+      },
+    });
+  },
 };

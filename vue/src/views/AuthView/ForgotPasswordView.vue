@@ -10,16 +10,32 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseDialog>
+    <BaseDialog
+      :open="dialogAlert.show"
+      :title="dialogAlert.title"
+      :mode="dialogAlert.mode"
+      @close="confirmForgotPassword"
+    >
+      <template #default>
+        <p>{{ dialogAlert.content }}</p>
+      </template>
+    </BaseDialog>
+    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action><div></div></template>
+    </BaseDialog>
   </teleport>
-  <div class="login">
-    <div class="login__header">
-      <h1 class="login__title">Log In</h1>
-      <p class="login__subtitle">
-        Welcome back, please log in to your account.
+  <div class="forgot">
+    <div class="forgot__header">
+      <h1 class="forgot__title">Forgot Password</h1>
+      <p class="forgot__subtitle">
+        Enter your email here to recover your account.
       </p>
     </div>
-    <form class="login__form" @submit.prevent="onSubmitForm">
-      <div class="login__form__input">
+    <form class="forgot__form" @submit.prevent="onSubmitForm">
+      <div class="forgot__form__input">
         <BaseInput
           :label="'Email'"
           :type="'email'"
@@ -28,29 +44,12 @@
           v-model="email"
         ></BaseInput>
       </div>
-      <div class="login__form__input">
-        <BaseInput
-          :label="'Password'"
-          :type="'password'"
-          :required="true"
-          :id="'password'"
-          v-model="password"
-        ></BaseInput>
+      <div class="forgot__form__input">
+        Back to
+        <router-link :to="{ name: 'login' }">Login</router-link>
       </div>
-      <div class="login__form__input">
-        <input type="checkbox" name="remember_me" id="rememer_me" />
-        <label for="rememer_me">Remember Me</label>
-      </div>
-      <div class="login__form__input">
-        <BaseButton :type="'submit'">Log In</BaseButton>
-      </div>
-      <div class="login__form__input">
-        Forgot your password?
-        <router-link :to="{ name: 'forgotPassword' }">Reset it</router-link>
-      </div>
-      <div class="login__form__input">
-        Have no account?
-        <router-link :to="{ name: 'signup' }">Sign Up here!</router-link>
+      <div class="forgot__form__input">
+        <BaseButton :type="'submit'">Submit</BaseButton>
       </div>
     </form>
   </div>
@@ -62,44 +61,63 @@ import BaseInput from "../../components/UI/BaseInput.vue";
 import BaseButton from "../../components/UI/BaseButton.vue";
 import { mapActions, mapMutations } from "vuex";
 import BaseDialog from "../../components/UI/BaseDialog.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 
 export default defineComponent({
-  name: "LogInView",
-  components: { BaseInput, BaseButton, BaseDialog },
+  name: "ForgotPasswordView",
+  components: { BaseInput, BaseButton, BaseDialog, BaseLineLoad },
   data() {
     return {
       email: "",
-      password: "",
       dialogWaring: {
         title: "Warning",
         mode: "warning",
         content: "Please fill in all the fields",
         show: false,
       },
+      dialogAlert: {
+        title: "Alert",
+        mode: "announcement",
+        content: "Please check your email to reset your password",
+        show: false,
+      },
+      isLoading: false,
     };
   },
   methods: {
     onSubmitForm() {
-      if (this.email === "" || this.password === "") {
-        this.dialogWaring.show = true;
+      this.isLoading = true;
+      if (this.email === "") {
+        this.dialogWaring = {
+          title: "Warning",
+          mode: "warning",
+          content: "Please fill in all the fields",
+          show: true,
+        };
       } else {
-        this.login({ email: this.email, password: this.password })
+        this.forgotPassword({ email: this.email })
           .then((res) => res.json())
           .then((res) => {
-            if (res.error) {
-              this.dialogWaring.content = res.error;
-              this.dialogWaring.show = true;
-            } else {
-              this.setUser(res);
-              this.$router.push({ name: "mainPage" });
+            if (res.status === "success") {
+              this.isLoading = false;
+              this.email = "";
+              this.dialogAlert = {
+                title: "Alert",
+                mode: "announcement",
+                content: "Please check your email to reset your password",
+                show: true,
+              };
             }
           });
       }
     },
     ...mapMutations("auth", ["setUser"]),
-    ...mapActions("auth", ["login"]),
+    ...mapActions("auth", ["forgotPassword"]),
     closeDialog() {
       this.dialogWaring.show = false;
+    },
+    confirmForgotPassword() {
+      this.dialogAlert.show = false;
     },
   },
 });
@@ -109,7 +127,7 @@ export default defineComponent({
 $mobile-width: 480px;
 $tablet-width: 768px;
 
-.login {
+.forgot {
   position: relative;
   border: none;
   border-top: 1px solid var(--color-primary);

@@ -119,9 +119,19 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions("admin", ["getUserUploadAlbum"]),
-    //TODO: onDeleteAlbum
-    onDeleteAlbum(id: string) {},
+    ...mapActions("admin", ["getUserUploadAlbum", "deleteAlbum"]),
+    onDeleteAlbum(id: string) {
+      this.deleteAlbum({
+        userToken: this.token,
+        albumId: id,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === "success") {
+            this.loadAlbum();
+          }
+        });
+    },
     sortList(colname: string) {
       if (colname === "title") {
         if (this.sortMode.title == "asc") {
@@ -208,7 +218,7 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
     }),
-    filteredAlbumList() {
+    filteredAlbumList(): albumData[] {
       return this.albumList.filter(
         (album: albumData) =>
           album.name.toLowerCase().includes(this.filterText.toLowerCase()) ||

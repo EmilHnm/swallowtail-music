@@ -102,5 +102,28 @@ export const authModule = {
         },
       });
     },
+    forgotPassword(context: any, data: { email: string }) {
+      return fetch(`${environment.api}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+    },
+    resetPassword(
+      context: any,
+      data: { token: string; password: string; password_confirmation: string }
+    ) {
+      return fetch(`${environment.api}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+    },
   },
 };
