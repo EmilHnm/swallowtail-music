@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EmailVerificationToken;
 use App\Models\PasswordReset;
 use Carbon\Carbon;
 use App\Models\User;
@@ -109,13 +110,12 @@ class AuthController extends Controller
             "emailTemplate.resetPasswordMail",
             [
                 "token" => $token,
-                "username" => $user->username,
+                "username" => $user->name,
             ],
             function ($message) use ($request) {
                 $message->to($request->email)->subject("Reset Password");
             }
         );
-        // Session::flash("flash_message", "Send message successfully!");
         return response()->json([
             "status" => "success",
             "message" => "Send message successfully!",
@@ -129,8 +129,33 @@ class AuthController extends Controller
             "password" => "required|string|confirmed",
         ]);
 
-        $user = PasswordReset::where("token", $validateData["token"])->first();
-        $user = User::where("user_id", $user->user_id)->first();
+        $pwdReset = PasswordReset::where(
+            "token",
+            $validateData["token"]
+        )->first();
+        try {
+            $timelast = date($pwdReset->update_at->timestamp);
+            $timenow = date(Carbon::now()->timestamp);
+            if ($timenow - $timelast > 3600) {
+                $pwdReset->delete();
+                return response(
+                    [
+                        "status" => "error",
+                        "message" => "Token expired",
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+        } catch (\Throwable $th) {
+            return response(
+                [
+                    "status" => "error",
+                    "message" => "Invalid token",
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        $user = User::where("user_id", $pwdReset->user_id)->first();
         if (!$user) {
             return response(
                 [
@@ -150,6 +175,67 @@ class AuthController extends Controller
             ],
             Response::HTTP_OK
         );
+    }
+
+    public function verificationEmail()
+    {
+        if (!Auth::user()->email_verified_at) {
+            $email = Auth::user()->email;
+            $token = '$' . bin2hex(random_bytes(9));
+            EmailVerificationToken::updateOrCreate(
+                ["user_id" => Auth::user()->user_id],
+                ["token" => $token]
+            );
+            try {
+                Mail::send(
+                    "emailTemplate.verificationEmailMail",
+                    [
+                        "token" => $token,
+                        "username" => Auth::user()->name,
+                    ],
+                    function ($message) use ($email) {
+                        $message->to($email)->subject("Verify Email");
+                    }
+                );
+                return response()->json([
+                    "status" => "success",
+                    "message" => "We have successfully sent verification email to {$email}! \r\n Please check your email or in spam folder",
+                ]);
+            } catch (\Exception) {
+                return response()->json([
+                    "status" => "error",
+                    "message" =>
+                        "Something went wrong, please try again later!",
+                ]);
+            }
+        } else {
+            return response()->json([
+                "status" => "error",
+                "message" => "You have already verified your email!",
+            ]);
+        }
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        $token = $request->get("token");
+        $emailToken = EmailVerificationToken::where("token", $token)->first();
+        if ($emailToken) {
+            $user_id = $emailToken->user_id;
+            $user = User::where("user_id", $user_id)->first();
+            $user->email_verified_at = Carbon::now();
+            $user->save();
+            EmailVerificationToken::where("token", $token)->delete();
+            return response()->json([
+                "status" => "success",
+                "message" => "Email verified successfully!",
+            ]);
+        } else {
+            return response()->json([
+                "status" => "error",
+                "message" => "Invalid token!",
+            ]);
+        }
     }
 
     public function user(Request $request)

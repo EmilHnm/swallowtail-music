@@ -22,7 +22,7 @@ class AccountController extends Controller
         );
     }
 
-    public function updateAccount(Request $request)
+    public function updateAccount(Request $request): Response
     {
         $credentials = $request->validate([
             "username" => "required|string",
