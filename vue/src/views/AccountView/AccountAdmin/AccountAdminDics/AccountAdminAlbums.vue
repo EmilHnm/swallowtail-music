@@ -213,7 +213,7 @@ export default defineComponent({
         });
     },
     navigateToEdit(id: string) {
-      this.$router.push({ name: "accountAdminDiscSongEdit", params: { id } });
+      this.$router.push({ name: "accountAdminDiscAlbumEdit", params: { id } });
     },
   },
   computed: {

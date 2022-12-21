@@ -272,7 +272,7 @@ export default defineComponent({
         });
     },
     loadAlbumSongs() {
-      this.getAlbumSongs({ userToken: this.token, albumId: this.album_id })
+      this.getAlbumSongs({ userToken: this.token, album_id: this.album_id })
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
@@ -370,8 +370,9 @@ export default defineComponent({
   },
   created() {
     this.isLoading = true;
-    this.album_id = this.$route.query.id;
-    this.getAlbum({ userToken: this.token, albumId: this.album_id })
+    this.album_id = this.$route.params.id;
+    console.log(this.album_id);
+    this.getAlbum({ token: this.token, album_id: this.album_id })
       .then((res) => res.json())
       .then((res) => {
         this.isLoading = false;
