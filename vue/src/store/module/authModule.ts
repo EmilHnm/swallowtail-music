@@ -9,6 +9,7 @@ export const authModule = {
           username: "",
           email: "",
           profile_photo_url: "",
+          email_verified_at: "",
           role: "",
         },
         token: "",
@@ -18,7 +19,7 @@ export const authModule = {
   getters: {
     userData: (state: any) => state.user.data,
     userToken: (state: any) => state.user.token,
-    checkLocalToken: (state: any) => {
+    checkLocalToken: () => {
       const token = localStorage.getItem("TOKEN");
       if (token) {
         return true;
@@ -32,6 +33,7 @@ export const authModule = {
       state.user.data.username = payload.user.name;
       state.user.data.email = payload.user.email;
       state.user.data.profile_photo_url = payload.user.profile_photo_url ?? "";
+      state.user.data.email_verified_at = payload.user.email_verified_at ?? "";
       state.user.data.role = payload.user.role;
       if (payload.token) {
         state.user.token = payload.token;
@@ -125,5 +127,25 @@ export const authModule = {
         body: JSON.stringify(data),
       });
     },
+    emailVerification(context: any, token: string) {
+      return fetch(`${environment.api}/auth/verify-email`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    emailVerify(context: any, token: string) {
+      return fetch(`${environment.api}/auth/verify-email?token=${token}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+    },
+    twoFactor(context: any, data: { code: string }) {},
   },
 };

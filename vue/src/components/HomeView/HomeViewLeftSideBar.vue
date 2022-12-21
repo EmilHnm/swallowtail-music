@@ -21,7 +21,7 @@
       </router-link>
     </div>
     <div class="nav__navigation">
-      <router-link :to="{ name: 'uploadPage' }">
+      <router-link :to="{ name: 'uploadPage' }" v-if="user.email_verified_at">
         <base-list-item>
           <IconUpload />
           <div class="nav__navigation--title">Upload</div>
@@ -67,6 +67,7 @@ import IconPlus from "../icons/IconPlus.vue";
 import IconHeartFilled from "../icons/IconHeartFilled.vue";
 import IconUpload from "../icons/IconUpload.vue";
 import type { playlist } from "@/model/playlistModel";
+import { mapGetters } from "vuex";
 
 type playlistData = playlist & {
   songCount: number;
@@ -103,6 +104,11 @@ export default defineComponent({
     return {};
   },
   methods: {},
+  computed: {
+    ...mapGetters({
+      user: "auth/userData",
+    }),
+  },
 });
 </script>
 <style lang="scss" scoped>

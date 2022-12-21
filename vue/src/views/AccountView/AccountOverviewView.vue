@@ -10,6 +10,13 @@
       </template>
       <template #action><div></div></template>
     </BaseFlatDialog>
+    <BaseFlatDialog
+      :open="alertDialog.show"
+      :title="alertDialog.title"
+      :mode="alertDialog.mode"
+      @close="onCloseDialog"
+      >{{ alertDialog.message }}</BaseFlatDialog
+    >
   </teleport>
   <div class="container">
     <h2>Account Overview</h2>
@@ -48,6 +55,15 @@
         <span class="lab">Join Date</span>
         <span class="content">{{ user ? user.created_at : "" }}</span>
       </div>
+      <div class="account__row">
+        <span class="lab">Email Verified</span>
+        <span class="content">
+          <span v-if="user.email_verified_at != null">{{
+            new Date(user.email_verified_at).toLocaleDateString()
+          }}</span>
+          <BaseButton @click="onVerify" v-else>Click here to verify</BaseButton>
+        </span>
+      </div>
     </div>
     <router-link :to="{ name: 'accountProfile' }">Edit Profile</router-link>
   </div>
@@ -55,33 +71,75 @@
 
 <script lang="ts">
 import type { user } from "@/model/userModel";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
 export default {
   data() {
     return {
-      user: null as user | null,
+      user: {} as user,
       isLoading: false,
+      alertDialog: {
+        title: "",
+        message: "",
+        show: false,
+        mode: "announcement",
+      },
     };
   },
   methods: {
-    ...mapActions("auth", ["checkAuth"]),
+    ...mapActions("auth", ["checkAuth", "emailVerification"]),
+    onVerify() {
+      this.isLoading = true;
+      this.emailVerification(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status == "success") {
+            this.alertDialog = {
+              title: res.status,
+              message: res.message,
+              show: true,
+              mode: "announcement",
+            };
+          } else {
+            this.alertDialog = {
+              title: res.status,
+              message: res.message,
+              show: true,
+              mode: "danger",
+            };
+            this.onLoadUser();
+          }
+        });
+    },
+    onLoadUser() {
+      this.isLoading = true;
+      this.checkAuth()
+        .then((res) => res.json())
+        .then((res) => {
+          this.user = res;
+          if (this.user)
+            this.user.created_at = new Date(res.created_at).toLocaleDateString(
+              "en-US"
+            );
+          this.isLoading = false;
+        });
+    },
+    onCloseDialog() {
+      this.alertDialog.show = false;
+    },
   },
   created() {
-    this.isLoading = true;
-    this.checkAuth()
-      .then((res) => res.json())
-      .then((res) => {
-        this.user = res;
-        if (this.user)
-          this.user.created_at = new Date(res.created_at).toLocaleDateString(
-            "en-US"
-          );
-        this.isLoading = false;
-      });
+    this.onLoadUser();
   },
-  components: { BaseFlatDialog, BaseCircleLoad },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
+  },
+  components: { BaseFlatDialog, BaseCircleLoad, BaseButton },
 };
 </script>
 
