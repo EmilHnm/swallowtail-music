@@ -6,9 +6,13 @@ export const userModule = {
   },
   mutations: {},
   actions: {
-    searchUser(context: any, data: { token: string; query: string }) {
+    searchUser(
+      context: any,
+      data: { token: string; query: string; signal: AbortSignal }
+    ) {
       return fetch(`${environment.api}/user/search?query=${data.query}`, {
         method: "GET",
+        signal: data.signal,
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${data.token}`,

@@ -12,24 +12,24 @@
       <div class="song-item__left" :class="{ small: small }">
         <div class="song-item__left--image" @click="selectSong">
           <img
-            :src="`${environment.album_cover}/${data[0].image_path}`"
+            :src="`${environment.album_cover}/${data.album.image_path}`"
             alt=""
             srcset=""
           />
         </div>
         <div class="song-item__left--title">
-          <span @click="selectSong">{{ data[0].title }}</span>
-          <span v-if="data.length > 0">
+          <span @click="selectSong">{{ data.title }}</span>
+          <span v-if="data.artist.length > 0">
             <span>
               <router-link
                 :to="{
                   name: 'artistPage',
                   params: { id: artistitem.artist_id },
                 }"
-                v-for="(artistitem, index) in data"
+                v-for="(artistitem, index) in data.artist"
                 :key="artistitem.artist_id"
-                >{{ artistitem.artist_name }}
-                <span v-if="index !== data.length - 1">,</span>
+                >{{ artistitem.name
+                }}<span v-if="index !== data.artist.length - 1">,</span>
               </router-link></span
             >
           </span>
@@ -38,35 +38,30 @@
       </div>
       <div class="song-item__right" :class="{ small: small }">
         <div class="song-item__right--album" :class="{ small: small }">
-          <span
-            v-if="data[0].album_id"
-            @click="redirectToAlbum(data[0].album_id)"
-            >{{ data[0].album_name }}</span
-          >
+          <span v-if="data.album_id" @click="redirectToAlbum(data.album_id)">{{
+            data.album.name
+          }}</span>
           <span v-else><BaseLineLoad /></span>
         </div>
         <div
-          class="song-item__right--hears"
-          v-if="data[0].listens !== undefined"
-          :class="{ medium: medium }"
-        >
-          <span>{{ data[0].listens }}</span>
-        </div>
-        <div
           class="song-item__right--addDate"
-          v-else
+          v-if="data.playlist != null && data.playlist.length > 0"
           :class="{ medium: medium }"
         >
-          <span v-if="data[0].added_date">{{
-            new Date(data[0].added_date).toLocaleDateString()
+          <span>{{
+            new Date(data.playlist[0].pivot.created_at).toLocaleDateString()
           }}</span>
         </div>
+        <div class="song-item__right--hears" v-else :class="{ medium: medium }">
+          <span>{{ data.listens }}</span>
+        </div>
+
         <div
           class="song-item__right--duration"
           :class="{ medium: medium, small: small }"
         >
           <span>{{
-            new Date(data[0].duration * 1000).toISOString().substring(14, 19)
+            new Date(data.duration * 1000).toISOString().substring(14, 19)
           }}</span>
         </div>
         <div
@@ -87,25 +82,25 @@
       <div class="menu__song">
         <div class="menu__song--img">
           <img
-            :src="`${environment.album_cover}/${data[0].image_path}`"
+            :src="`${environment.album_cover}/${data.album.image_path}`"
             alt=""
             srcset=""
           />
         </div>
         <div class="menu__song--title">
-          <span class="title">{{ data[0].title }}</span>
+          <span class="title">{{ data.title }}</span>
           <span class="artist">
             <router-link
               :to="{ name: 'artistPage', params: { id: artistitem.artist_id } }"
-              v-for="(artistitem, index) in data"
+              v-for="(artistitem, index) in data.artist"
               :key="artistitem.artist_id"
-              >{{ artistitem.artist_name }}
-              <span v-if="index !== data.length - 1">,</span>
+              >{{ artistitem.name }}
+              <span v-if="index !== data.artist.length - 1">,</span>
             </router-link>
           </span>
         </div>
         <div class="menu__song--album">
-          <span v-if="data[0].album_id">{{ data[0].album_name }}</span>
+          <span v-if="data.album_id">{{ data.album.name }}</span>
           <span v-else><BaseLineLoad /></span>
         </div>
       </div>
@@ -136,10 +131,10 @@
         <div class="" v-if="menuMode === 'artist'">
           <router-link
             :to="{ name: 'artistPage', params: { id: artistitem.artist_id } }"
-            v-for="artistitem in data"
+            v-for="artistitem in data.artist"
             :key="artistitem.artist_id"
           >
-            <BaseListItem>{{ artistitem.artist_name }}</BaseListItem>
+            <BaseListItem>{{ artistitem.name }}</BaseListItem>
           </router-link>
         </div>
         <div class="" v-if="menuMode === 'playlist'">
@@ -164,20 +159,25 @@ import BaseLineLoad from "./BaseLineLoad.vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseDialog from "./BaseDialog.vue";
 import type { playlist } from "@/model/playlistModel";
+import type { song } from "@/model/songModel";
+import type { album } from "@/model/albumModel";
+import type { like } from "@/model/likeModel";
+import type { artist } from "@/model/artistModel";
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  added_date?: string;
-  album_name: string;
-  album_id: string;
-  duration: number;
-  image_path: string;
-  listens?: number;
-  liked: number;
-}[];
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
+  playlist?: playlist &
+    {
+      pivot: {
+        song_id: string;
+        playlist_id: string;
+        created_at: string;
+        updated_at: string;
+      };
+    }[];
+};
 
 type playlistData = playlist & {
   songCount: number;
@@ -253,16 +253,16 @@ export default defineComponent({
     },
     addToQueue() {
       this.isMenuOpen = false;
-      this.$emit("addToQueue", { [this.data[0].song_id]: this.data });
+      this.$emit("addToQueue", { [this.data.song_id]: this.data });
     },
     selectSong() {
-      this.$emit("selectSong", this.data[0].song_id);
+      this.$emit("selectSong", this.data.song_id);
     },
     onAddSongToPlaylistlist(id: string) {
       this.isLoading = true;
       this.addSongToPlaylist({
         token: this.token,
-        song_id: this.data[0].song_id,
+        song_id: this.data.song_id,
         playlist_id: id,
       }).then(() => {
         this.isLoading = false;
@@ -275,7 +275,7 @@ export default defineComponent({
     loadLiked() {
       this.likedSong({
         userToken: this.token,
-        songId: this.data[0].song_id,
+        songId: this.data.song_id,
       })
         .then((res: any) => {
           return res.json();
@@ -291,9 +291,9 @@ export default defineComponent({
         this.isMenuOpen = false;
         this.likeSong({
           userToken: this.token,
-          songId: this.data[0].song_id,
+          songId: this.data.song_id,
         }).then(() => {
-          this.$emit("likeSong", this.data[0].song_id);
+          this.$emit("likeSong", this.data.song_id);
           this.loadLiked();
         });
       }
@@ -309,7 +309,7 @@ export default defineComponent({
     if (this.observer && songItem) this.observer.observe(songItem);
   },
   created() {
-    this.liked = this.data[0].liked;
+    this.liked = this.data.like.length > 0 ? 1 : 0;
   },
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();
@@ -414,8 +414,10 @@ $tablet-width: 768px;
       margin: 10px auto;
       span {
         display: block;
+        width: 100%;
         font-size: 0.8rem;
         color: var(--text-color-secondary);
+        overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
       }

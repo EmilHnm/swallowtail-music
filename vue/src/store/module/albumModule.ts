@@ -26,9 +26,13 @@ export const albumModule = {
         },
       });
     },
-    searchAlbums(context: any, data: { token: string; query: string }) {
+    searchAlbums(
+      context: any,
+      data: { token: string; query: string; signal: AbortSignal }
+    ) {
       return fetch(`${environment.api}/album/search?query=${data.query}`, {
         method: "GET",
+        signal: data.signal,
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${data.token}`,
@@ -92,15 +96,22 @@ export const albumModule = {
         body: payload.albumInfo,
       });
     },
-    getAddableSong(context: any, userToken: string): Promise<Response> {
-      return fetch(`${environment.api}/account/album/addable`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-          Accept: "application/json",
-        },
-      });
+    getAddableSong(
+      context: any,
+      payload: { userToken: string; signal: AbortSignal; query: string }
+    ): Promise<Response> {
+      return fetch(
+        `${environment.api}/account/album/addable?query=${payload.query}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+            Accept: "application/json",
+          },
+          signal: payload.signal,
+        }
+      );
     },
     deleteAlbum(context: any, payload: { userToken: string; albumId: string }) {
       return fetch(

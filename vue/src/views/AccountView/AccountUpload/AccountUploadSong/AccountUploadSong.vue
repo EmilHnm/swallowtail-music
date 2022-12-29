@@ -62,8 +62,8 @@
                   params: { id: artist.artist_id },
                 }"
               >
-                {{ artist.artist_name }}
-                <span v-if="index !== song.length - 1">,</span>
+                {{ artist.artist_name
+                }}<span v-if="index !== song.length - 1">,</span>
               </router-link>
             </td>
             <td v-if="!song[0].artist_name && mainWidth > 600">Unset</td>

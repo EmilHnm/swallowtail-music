@@ -31,7 +31,7 @@ class SongController extends Controller
         $newGenre = json_decode($request->newGenre);
 
         $song = new Song();
-        $song->song_id = 'song_' . date('YmdHi') . Str::random(10);
+        $song->song_id = "song_" . date("YmdHi") . Str::random(10);
         $song->user_id = Auth::user()->user_id;
         $song->title = $request->songName;
         $song->display = $request->displayMode;
@@ -45,8 +45,16 @@ class SongController extends Controller
         }
 
         foreach ($newArtist as $name) {
+            $check = Artist::where("name", $name)->first();
+            if ($check) {
+                $song_artist = new SongArtist();
+                $song_artist->song_id = $song->song_id;
+                $song_artist->artist_id = $check->artist_id;
+                $song_artist->save();
+                continue;
+            }
             $artist = new Artist();
-            $artist->artist_id = 'artist_' . Str::random(10);
+            $artist->artist_id = "artist_" . Str::random(10);
             $artist->name = $name;
             $artist->image_path = "";
             $artist->save();
@@ -64,8 +72,16 @@ class SongController extends Controller
         }
 
         foreach ($newGenre as $name) {
+            $check = Genre::where('$name', $name)->first();
+            if ($check) {
+                $song_genre = new SongGenre();
+                $song_genre->song_id = $song->song_id;
+                $song_genre->genre_id = $check->genre_id;
+                $song_genre->save();
+                continue;
+            }
             $genre = new Genre();
-            $genre->genre_id = 'genre_' . Str::random(10);
+            $genre->genre_id = "genre_" . Str::random(10);
             $genre->name = $name;
             $genre->save();
             $song_genre = new SongGenre();
@@ -74,24 +90,32 @@ class SongController extends Controller
             $song_genre->save();
         }
 
-        if ($request->file('songFile')) {
+        if ($request->file("songFile")) {
             try {
                 echo json_encode([
-                    'status' => 'success',
-                    'message' => 'Song uploaded successfully. It will ready in some minutes.'
+                    "status" => "success",
+                    "message" =>
+                        "Song uploaded successfully. It will ready in some minutes.",
                 ]);
                 // dd($request->file('songFile'));
-                $file = $request->file('songFile');
-                $filename = date('YmdHi') . $file->getClientOriginalName();
-                $file->move(public_path('storage/upload/song_src'), $filename);
-                FFMpeg::fromDisk('final_audio')
+                $file = $request->file("songFile");
+                $filename = date("YmdHi") . $file->getClientOriginalName();
+                $file->move(public_path("storage/upload/song_src"), $filename);
+                FFMpeg::fromDisk("final_audio")
                     ->open($filename)
                     ->export()
-                    ->addFilter(["-strict", "-2", "-acodec", "vorbis", '-b:a', '320k'])
-                    ->save($song->song_id . '.ogg');
-                @unlink(public_path('storage/upload/song_src/') . $filename);
-                $duration = FFMpeg::fromDisk('final_audio')
-                    ->open($song->song_id . '.ogg')
+                    ->addFilter([
+                        "-strict",
+                        "-2",
+                        "-acodec",
+                        "vorbis",
+                        "-b:a",
+                        "320k",
+                    ])
+                    ->save($song->song_id . ".ogg");
+                @unlink(public_path("storage/upload/song_src/") . $filename);
+                $duration = FFMpeg::fromDisk("final_audio")
+                    ->open($song->song_id . ".ogg")
                     ->getDurationInSeconds();
                 $song->duration = $duration;
                 $song->save();
@@ -111,10 +135,10 @@ class SongController extends Controller
         $genre = json_decode($request->genre);
         $newGenre = json_decode($request->newGenre);
         $song = Song::find($request->song_id);
-        if ($song->user_id !== Auth::user()->user_id) {
+        if ($song->user_id != Auth::user()->user_id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'You are not allowed to update this song.'
+                "status" => "error",
+                "message" => "You are not allowed to update this song.",
             ]);
         }
         $song->title = $request->songName;
@@ -125,26 +149,41 @@ class SongController extends Controller
         $song->artist()->attach($artist);
         $song->genre()->attach($genre);
         foreach ($newArtist as $name) {
+            $check = Artist::where("name", $name)->first();
+            if ($check) {
+                $song_artist = new SongArtist();
+                $song_artist->song_id = $song->song_id;
+                $song_artist->artist_id = $check->artist_id;
+                $song_artist->save();
+                continue;
+            }
             $saveNewArtist = new Artist();
-            $saveNewArtist->artist_id = 'artist_' . Str::random(10);
+            $saveNewArtist->artist_id = "artist_" . Str::random(10);
             $saveNewArtist->name = $name;
             $saveNewArtist->image_path = "";
             $saveNewArtist->save();
             $song->artist()->attach([$saveNewArtist->artist_id]);
         }
         foreach ($newGenre as $name) {
+            $check = Genre::where('$name', $name)->first();
+            if ($check) {
+                $song_genre = new SongGenre();
+                $song_genre->song_id = $song->song_id;
+                $song_genre->genre_id = $check->genre_id;
+                $song_genre->save();
+                continue;
+            }
             $savenewGenre = new Genre();
-            $savenewGenre->genre_id = 'genre_' . Str::random(10);
+            $savenewGenre->genre_id = "genre_" . Str::random(10);
             $savenewGenre->name = $name;
             $savenewGenre->save();
             $song->genre()->attach([$genre->genre_id]);
         }
         return response()->json([
-            'status' => 'success',
-            'message' => 'Song Updated Successfully'
+            "status" => "success",
+            "message" => "Song Updated Successfully",
         ]);
     }
-
 
     public function uploadedSong()
     {
@@ -158,108 +197,90 @@ class SongController extends Controller
         );
 
         return response()->json([
-            'status' => 'success',
-            'songs' => $songsData
+            "status" => "success",
+            "songs" => $songsData,
         ]);
     }
 
     public function getSongInfo($id)
     {
-        $song = Song::where('song_id', $id)->first();
+        $song = Song::where("song_id", $id)->first();
         if (!$song->id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Song not found'
+                "status" => "error",
+                "message" => "Song not found",
             ]);
         }
-        if (Auth::user()->user_id != $song->user_id && $song->display == 'private') {
+        if (
+            Auth::user()->user_id != $song->user_id &&
+            $song->display == "private"
+        ) {
             return response()->json(
                 [
-                    'status' => 'error',
-                    'message' => 'You are not authorized to access this resource.'
+                    "status" => "error",
+                    "message" =>
+                        "You are not authorized to access this resource.",
                 ],
                 403
             );
         }
-        $genre = $song->genre()->where('song_id', $id)->get();
-        $artist = $song->artist()->where('song_id', $id)->get();
+        $genre = $song
+            ->genre()
+            ->where("song_id", $id)
+            ->get();
+        $artist = $song
+            ->artist()
+            ->where("song_id", $id)
+            ->get();
         return response()->json([
-            'status' => 'success',
-            'song' => $song,
-            'genre' => $genre,
-            'artist' => $artist
+            "status" => "success",
+            "song" => $song,
+            "genre" => $genre,
+            "artist" => $artist,
         ]);
     }
 
     public function getSongForPlay($id)
     {
-        $song =
-            DB::table('songs')
-            ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
-            ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
-            ->join('albums', 'songs.album_id', '=', 'albums.album_id')
-            ->leftJoin('liked_songs', 'songs.song_id', '=', 'liked_songs.song_id')
-            ->select(
-                'songs.song_id',
-                'songs.title',
-                'songs.song_id',
-                'songs.duration',
-                'songs.listens',
-                "artists.artist_id",
-                "artists.name as artist_name",
-                "albums.name as album_name",
-                "albums.album_id as album_id",
-                "albums.image_path as image_path",
-                DB::raw('CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked')
-            )
-            ->where('songs.song_id', $id)
-            ->get();
+        $song = Song::where("song_id", $id)
+            ->with(["artist", "album", "like"])
+            ->first();
         return response()->json([
-            'status' => 'success',
-            'song' => $song
+            "status" => "success",
+            "song" => $song,
         ]);
     }
 
     public function increaseSongListens($id, Request $request)
     {
-        // $reqTime = Redis::get($request->bearerToken());
-        // if ($reqTime) {
-        //     $timelast = date($reqTime);
-        //     $timenow = date(Carbon::now()->timestamp);
-        //     $diff = $timenow - $timelast;
-        //     if ($diff < 45) {
-        //         return response()->json([
-        //             'status' => 'error',
-        //             'message' => 'You are not allowed to increase listens'
-        //         ]);
-        //     }
-        // }
         $song = Song::find($id);
         $song->listens = $song->listens + 1;
         // Redis::set($request->bearerToken(),  Carbon::now()->timestamp);
         $song->save();
         return response()->json([
-            'status' => 'success',
-            'message' => 'Song listens increased'
+            "status" => "success",
+            "message" => "Song listens increased",
         ]);
     }
 
     public function likeSong($id)
     {
-        $song = Song::where('song_id', $id)->first();
+        $song = Song::where("song_id", $id)->first();
         if (!$song->id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Song not found'
+                "status" => "error",
+                "message" => "Song not found",
             ]);
         }
 
-        $liked = LikedSong::where('song_id', $id)->where('user_id', Auth::user()->user_id)->first();
+        $liked = LikedSong::where("song_id", $id)
+            ->where("user_id", Auth::user()->user_id)
+            ->first();
         if ($liked) {
             $liked->delete();
             return response()->json([
-                'status' => 'success',
-                'message' => 'Song unliked successfully'
+                "status" => "success",
+                "message" => "Song unliked successfully",
             ]);
         } else {
             $liked = new LikedSong();
@@ -267,113 +288,129 @@ class SongController extends Controller
             $liked->user_id = Auth::user()->user_id;
             $liked->save();
             return response()->json([
-                'status' => 'success',
-                'message' => 'Song liked successfully'
+                "status" => "success",
+                "message" => "Song liked successfully",
             ]);
         }
     }
 
     public function likedSong($id)
     {
-        $song = Song::where('song_id', $id)->first();
+        $song = Song::where("song_id", $id)->first();
         if (!$song->id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Song not found'
+                "status" => "error",
+                "message" => "Song not found",
             ]);
         }
 
-        $liked = LikedSong::where('song_id', $id)->where('user_id', Auth::user()->user_id)->first();
+        $liked = LikedSong::where("song_id", $id)
+            ->where("user_id", Auth::user()->user_id)
+            ->first();
         if ($liked) {
             return response()->json([
-                'status' => 'success',
-                'liked' => true
+                "status" => "success",
+                "liked" => true,
             ]);
         } else {
             return response()->json([
-                'status' => 'success',
-                'liked' => false
+                "status" => "success",
+                "liked" => false,
             ]);
         }
     }
 
     public function deleteSong($id)
     {
-        $song = Song::where('song_id', $id)->first();
+        $song = Song::where("song_id", $id)->first();
         if (!$song->id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Song not found'
+                "status" => "error",
+                "message" => "Song not found",
             ]);
         }
         if ($song->user_id != Auth::user()->user_id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'You are not allowed to delete this song!'
+                "status" => "error",
+                "message" => "You are not allowed to delete this song!",
             ]);
         }
-        SongArtist::where('song_id', $id)->delete();
-        SongGenre::where('song_id', $id)->delete();
-        PlaylistSong::where('song_id', $id)->delete();
-        LikedSong::where('song_id', $id)->delete();
-        @unlink(public_path('storage/upload/song_src/') . $id . '.ogg');
+        SongArtist::where("song_id", $id)->delete();
+        SongGenre::where("song_id", $id)->delete();
+        PlaylistSong::where("song_id", $id)->delete();
+        LikedSong::where("song_id", $id)->delete();
+        @unlink(public_path("storage/upload/song_src/") . $id . ".ogg");
         $song->delete();
         return response()->json([
-            'status' => 'success',
-            'message' => 'Song deleted successfully'
+            "status" => "success",
+            "message" => "Song deleted successfully",
         ]);
     }
 
     public function latestSong()
     {
-
-        $songs = DB::table('songs')
-            ->leftJoin('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
-            ->leftJoin('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
-            ->select('songs.*', 'artists.name AS artist_name', 'artists.artist_id AS artist_id')
-            ->orderBy('songs.created_at', 'DESC')
+        $songs = Song::with("artist")
+            ->where("display", "public")
+            ->orderBy("created_at", "DESC")
             ->limit(5)
             ->get();
         return response()->json([
-            'status' => 'success',
-            'songs' => $songs
+            "status" => "success",
+            "songs" => $songs,
         ]);
     }
 
     public function searchSong(Request $request)
     {
-        if ($request->query->has('query')) {
-            $query = $request->query->get('query');
-            $songs = DB::table('songs')
-                ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
-                ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
-                ->join('albums', 'songs.album_id', '=', 'albums.album_id')
-                ->leftJoin('liked_songs', 'songs.song_id', '=', 'liked_songs.song_id')
+        if ($request->query->has("query")) {
+            $query = $request->query->get("query");
+            $songs = DB::table("songs")
+                ->join(
+                    "song_artists",
+                    "songs.song_id",
+                    "=",
+                    "song_artists.song_id"
+                )
+                ->join(
+                    "artists",
+                    "song_artists.artist_id",
+                    "=",
+                    "artists.artist_id"
+                )
+                ->join("albums", "songs.album_id", "=", "albums.album_id")
+                ->leftJoin(
+                    "liked_songs",
+                    "songs.song_id",
+                    "=",
+                    "liked_songs.song_id"
+                )
                 ->select(
-                    'songs.song_id',
-                    'songs.title',
-                    'songs.song_id',
-                    'songs.duration',
-                    'songs.listens',
+                    "songs.song_id",
+                    "songs.title",
+                    "songs.song_id",
+                    "songs.duration",
+                    "songs.listens",
                     "artists.artist_id",
                     "artists.name as artist_name",
                     "albums.name as album_name",
                     "albums.album_id as album_id",
                     "albums.image_path as image_path",
-                    DB::raw('CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked')
+                    DB::raw(
+                        'CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked'
+                    )
                 )
-                ->where('songs.title', 'like',  '%' . $query . '%')
-                ->orWhere('songs.sub_title', 'like',  '%' . $query . '%')
-                ->where('songs.display', '=', 'public')
+                ->where("songs.title", "like", "%" . $query . "%")
+                ->orWhere("songs.sub_title", "like", "%" . $query . "%")
+                ->where("songs.display", "=", "public")
                 ->get();
             return response()->json([
-                'status' => 'success',
-                'songs' => $songs
+                "status" => "success",
+                "songs" => $songs,
             ]);
         } else {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Query not found'
+                "status" => "error",
+                "message" => "Query not found",
             ]);
         }
     }

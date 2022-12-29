@@ -12,32 +12,32 @@
           <base-list-item v-for="(song, index) in latestSongs" :key="index">
             <div class="latest-song__song">
               <div class="latest-song__song--title">
-                <h3>{{ song[0].title }}</h3>
+                <h3>{{ song.title }}</h3>
                 <h4>
                   <router-link
-                    v-for="(artist, i) in song"
+                    v-for="(artist, i) in song.artist"
                     :key="artist.artist_id"
                     :to="{
                       name: 'artistPage',
                       params: { id: artist.artist_id },
                     }"
                   >
-                    {{ artist.artist_name }}
-                    <span v-if="i != song.length - 1">,</span>
+                    {{ artist.name
+                    }}<span v-if="i != song.artist.length - 1">, </span>
                   </router-link>
                 </h4>
               </div>
               <div class="latest-song__song--duration">
                 {{
-                  Math.floor(song[0].duration / 60) +
+                  Math.floor(song.duration / 60) +
                   ":" +
-                  (Math.floor(song[0].duration % 60) < 10
-                    ? "0" + Math.floor(song[0].duration % 60)
-                    : Math.floor(song[0].duration % 60))
+                  (Math.floor(song.duration % 60) < 10
+                    ? "0" + Math.floor(song.duration % 60)
+                    : Math.floor(song.duration % 60))
                 }}
               </div>
               <div class="latest-song__song--add-queue">
-                <IconPlay @click="playSong(song[0].song_id)" />
+                <IconPlay @click="playSong(song.song_id)" />
               </div>
             </div>
           </base-list-item>
@@ -134,16 +134,10 @@ import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { playlist } from "@/model/playlistModel";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import type { song } from "@/model/songModel";
 
-type songData = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    duration: number;
-    created_at: string;
-  }[];
+type LatestSong = song & {
+  artist: artist[];
 };
 
 type LatestAlbum = album & {
@@ -198,7 +192,7 @@ export default defineComponent({
       min: false,
       medium: false,
       testArr: [1, 2, 3, 4, 5, 6, 7, 8],
-      latestSongs: {} as songData,
+      latestSongs: [] as LatestSong[],
       latestAlbums: [] as LatestAlbum[],
       topAlbums: [] as TopAlbum[],
       topArtist: [] as artist[],
@@ -228,39 +222,47 @@ export default defineComponent({
     playSong(song_id: string) {
       this.$emit("playSong", song_id);
     },
+    onLoadLatestSong() {
+      this.getLatestSong(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          this.isLatestSongLoading = false;
+          this.latestSongs = res.songs;
+        });
+    },
+    onLoadLatestAlbum() {
+      this.getLatestAlbums(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          this.latestAlbums = [...res.albums];
+          this.isLatestAlbumLoading = false;
+        });
+    },
+    onLoadTopAlbum() {
+      this.getTopAlbums(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          this.topAlbums = [...res.albums];
+          this.isTopAlbumLoading = false;
+        });
+    },
+    onLoadTopArtist() {
+      this.getTopArtists(this.token)
+        .then((res) => res.json())
+        .then((res) => {
+          this.topArtist = [...res.artists];
+          this.isTopArtistLoading = false;
+        });
+    },
   },
   computed: {
     ...mapGetters({ token: "auth/userToken" }),
   },
   created() {
-    this.getLatestSong(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        this.latestSongs = res.songs.reduce((r: any, a: any) => {
-          r[a.song_id] = r[a.song_id] || [];
-          r[a.song_id].push(a);
-          return r;
-        }, Object.create(null));
-        this.isLatestSongLoading = false;
-      });
-    this.getLatestAlbums(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        this.latestAlbums = [...res.albums];
-        this.isLatestAlbumLoading = false;
-      });
-    this.getTopAlbums(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        this.topAlbums = [...res.albums];
-        this.isTopAlbumLoading = false;
-      });
-    this.getTopArtists(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        this.topArtist = [...res.artists];
-        this.isTopArtistLoading = false;
-      });
+    this.onLoadLatestSong();
+    this.onLoadLatestAlbum();
+    this.onLoadTopAlbum();
+    this.onLoadTopArtist();
   },
   mounted() {
     const newsEle = this.$refs.news as HTMLElement;

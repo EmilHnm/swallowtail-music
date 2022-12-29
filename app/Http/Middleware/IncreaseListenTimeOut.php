@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
-class IncreaseListenTimeDelay
+class IncreaseListenTimeOut
 {
     /**
      * Handle an incoming request.
@@ -25,12 +25,12 @@ class IncreaseListenTimeDelay
             $diff = $timenow - $timelast;
             if ($diff < 45) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'You are not allowed to increase listens'
+                    "status" => "error",
+                    "message" => "You are not allowed to increase listens",
                 ]);
             }
         }
-        Redis::set($request->bearerToken(),  Carbon::now()->timestamp);
+        Redis::set($request->bearerToken(), Carbon::now()->timestamp);
         return $next($request);
     }
 }

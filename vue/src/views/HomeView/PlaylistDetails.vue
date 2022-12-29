@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <BaseDialog
-      v-if="playlistDetail.user_id === user.user_id"
+      v-if="playlistDetail.user_id == user.user_id"
       :open="playlistEditDialog.show"
       :title="playlistEditDialog.title"
       :mode="playlistEditDialog.mode"
@@ -121,9 +121,7 @@
             {{ playlistOwner.name }}
           </div></router-link
         >
-        <div class="info__other--songCount">
-          - {{ Object.keys(songList).length }} Songs -
-        </div>
+        <div class="info__other--songCount">- {{ songCount }} Songs -</div>
         <div class="info__other--totalDuration">
           {{ totalDuration }}
         </div>
@@ -228,7 +226,7 @@
       <BaseSongItem
         v-for="song in songList"
         :data="song"
-        :key="song[0].song_id"
+        :key="song.song_id"
         @addToQueue="addToQueue"
         @selectSong="playSongInPlaylist"
       />
@@ -237,7 +235,7 @@
       <BaseSongItem
         v-for="song in songFilterResuilt"
         :data="song"
-        :key="song[0].song_id"
+        :key="song.song_id"
         @addToQueue="addToQueue"
         @selectSong="playSongInPlaylist"
       />
@@ -261,7 +259,7 @@
       <BaseSongItem
         v-for="song in songSearchResuilt"
         :data="song"
-        :key="song[0].song_id"
+        :key="song.song_id"
         :control="false"
         @selectSong="onAddSongToList"
       />
@@ -294,23 +292,24 @@ import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 import IconBallPen from "@/components/icons/IconBallPen.vue";
+import type { song } from "@/model/songModel";
+import type { album } from "@/model/albumModel";
+import type { like } from "@/model/likeModel";
+import type { artist } from "@/model/artistModel";
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  added_date?: string;
-  album_name: string;
-  album_id: string;
-  image_path: string;
-  duration: number;
-  listens?: number;
-  liked: number;
-}[];
-
-type songList = {
-  [song_id: string]: songData;
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
+  playlist: playlist &
+    {
+      pivot: {
+        song_id: string;
+        playlist_id: string;
+        created_at: string;
+        updated_at: string;
+      };
+    }[];
 };
 
 export default defineComponent({
@@ -355,7 +354,7 @@ export default defineComponent({
       totalDuration: "",
       //song list part
       playlistDetail: {} as playlist,
-      songList: {} as songList,
+      songList: [] as songData[],
       playlistOwner: {
         user_id: "1",
       } as user,
@@ -363,10 +362,12 @@ export default defineComponent({
       //filter
       isSearchBarOpen: false,
       filterText: "",
-      filteredSongList: {} as songList,
+      filteredSongList: [] as songData[],
       //search part
       searchText: "",
-      songSearchResuilt: {} as songList,
+      songSearchResuilt: [] as songData[],
+      addbleSongController: null as AbortController | null,
+      addableSongSignal: null as AbortSignal | null,
       //Edit part
       edit: {
         file: null as File | null,
@@ -440,18 +441,11 @@ export default defineComponent({
         .then((res) => {
           this.isSongLoading = false;
           if (res.status !== "error") {
-            this.songList = res.songList.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            this.songCount = res.songCount;
-            let duration = Object.keys(this.songList).reduce(
-              (a: number, key: any) => {
-                return a + this.songList[key][0].duration;
-              },
-              0
-            );
+            this.songList = res.songList;
+            this.songCount = this.songList.length;
+            let duration = this.songList.reduce((a: number, key: songData) => {
+              return a + key.duration;
+            }, 0);
             this.totalDuration = new Date(duration * 1000)
               .toISOString()
               .substring(11, 19);
@@ -459,20 +453,24 @@ export default defineComponent({
         });
     },
     loadSearchResult(query: string) {
+      if (!this.addbleSongController) {
+        this.addbleSongController = new AbortController();
+      } else {
+        this.addbleSongController.abort();
+        this.addbleSongController = new AbortController();
+      }
+      this.addableSongSignal = this.addbleSongController.signal;
       this.getAddableSongs({
         token: this.token,
         playlist_id: this.playlistDetail.playlist_id,
         query: query,
+        signal: this.addableSongSignal,
       })
         .then((res) => res.json())
         .then((res) => {
           this.isGettingSongSearch = false;
           if (res.status !== "error") {
-            this.songSearchResuilt = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.songSearchResuilt = res.songs;
           }
         });
     },
@@ -581,37 +579,23 @@ export default defineComponent({
       const target = e.target as HTMLSelectElement;
       if (this.filterText === "") {
         if (target.value === "title") {
-          this.songList = Object.fromEntries(
-            Object.entries(this.songList).sort(
-              (a: [string, songData], b: [string, songData]) =>
-                a[1][0].title.localeCompare(b[1][0].title)
-            )
-          );
+          this.songList = this.songList.sort((a: songData, b: songData) => {
+            return a.title.localeCompare(b.title);
+          });
         } else if (target.value === "artist") {
-          this.songList = Object.fromEntries(
-            Object.entries(this.songList).sort(
-              (a: [string, songData], b: [string, songData]) =>
-                a[1][0].artist_name.localeCompare(b[1][0].artist_name)
-            )
-          );
+          this.songList = this.songList.sort((a: songData, b: songData) => {
+            return a.artist[0].name.localeCompare(b.artist[0].name);
+          });
         } else if (target.value === "album") {
-          this.songList = Object.fromEntries(
-            Object.entries(this.songList).sort(
-              (a: [string, songData], b: [string, songData]) => {
-                return a[1][0].album_name.localeCompare(b[1][0].album_name);
-              }
-            )
-          );
+          this.songList = this.songList.sort((a: songData, b: songData) => {
+            return a.album.name.localeCompare(b.album.name);
+          });
         } else if (target.value === "date") {
-          this.songList = Object.fromEntries(
-            Object.entries(this.songList).sort(
-              (a: [string, songData], b: [string, songData]): number => {
-                if (a[1][0].added_date && b[1][0].added_date)
-                  return a[1][0].added_date.localeCompare(b[1][0].added_date);
-                return 0;
-              }
-            )
-          );
+          this.songList = this.songList.sort((a: songData, b: songData) => {
+            return a.playlist[0].pivot.created_at.localeCompare(
+              b.playlist[0].pivot.created_at
+            );
+          });
         }
       }
     },
@@ -674,10 +658,8 @@ export default defineComponent({
     }),
     songFilterResuilt() {
       if (this.filterText === "") return this.songList;
-      const resuilt = Object.fromEntries(
-        Object.entries(this.songList).filter((song: any) =>
-          song[1][0].title.toLowerCase().includes(this.filterText.toLowerCase())
-        )
+      const resuilt = this.songList.filter((song: any) =>
+        song.title.toLowerCase().includes(this.filterText.toLowerCase())
       );
       return resuilt;
     },
@@ -701,7 +683,7 @@ export default defineComponent({
         this.loadSearchResult(o);
       } else {
         this.isGettingSongSearch = false;
-        this.songSearchResuilt = {};
+        this.songSearchResuilt = [];
       }
     },
     "$route.params.id": {

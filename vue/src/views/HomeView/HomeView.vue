@@ -11,27 +11,19 @@ import HomeViewPlayer from "../../components/HomeView/HomeViewPlayer.vue";
 import HomeViewHeader from "../../components/HomeView/HomeViewHeader.vue";
 import BaseDialog from "../../components/UI/BaseDialog.vue";
 import BaseLineLoad from "../../components/UI/BaseLineLoad.vue";
+import type { song } from "@/model/songModel";
+import type { album } from "@/model/albumModel";
+import type { artist } from "@/model/artistModel";
+import type { like } from "@/model/likeModel";
 
 type playlistData = playlist & {
   songCount: number;
 };
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  added_date?: string;
-  album_name: string;
-  album_id: string;
-  image_path: string;
-  duration: number;
-  listens?: number;
-  liked: number;
-}[];
-
-type songList = {
-  [song_id: string]: songData;
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
 };
 
 declare module "@vue/runtime-core" {
@@ -57,7 +49,7 @@ export default {
       isLeftSideBarActive: false,
       isRightSideBarActive: false,
       audio: null as HTMLAudioElement | null,
-      audioList: {} as songList,
+      audioList: [] as songData[],
       timeOut: null as null | Timer,
       //play song property
       isPlaying: false,
@@ -66,7 +58,7 @@ export default {
       volume: 100,
       repeat: "off",
       isOnShuffle: false,
-      shuffledList: {} as songList,
+      shuffledList: [] as songData[],
       isAudioWaitting: false,
       // visualizer
       ctx: null as AudioContext | null,
@@ -120,8 +112,11 @@ export default {
       this.isPlaying = false;
     },
     nextSong() {
-      if (this.audioIndex === Object.keys(this.audioList).length - 1) {
-        if (this.repeat === "off") return;
+      if (this.audioIndex === this.audioList.length - 1) {
+        if (this.repeat === "off") {
+          this.isPlaying = false;
+          return;
+        }
         this.audioIndex = 0;
       } else {
         this.audioIndex++;
@@ -130,7 +125,7 @@ export default {
     prevSong() {
       if (this.audioIndex === 0) {
         if (this.repeat === "off") return;
-        this.audioIndex = Object.keys(this.audioList).length - 1;
+        this.audioIndex = this.audioList.length - 1;
       } else {
         this.audioIndex--;
       }
@@ -151,10 +146,10 @@ export default {
       this.progress = this.audio.currentTime;
     },
     getDuration() {
-      this.playingAudio[0].duration = this.audio.duration;
+      this.playingAudio.duration = this.audio.duration;
     },
     setProgress(progress: number) {
-      this.audio.currentTime = (progress * this.playingAudio[0].duration) / 100;
+      this.audio.currentTime = (progress * this.playingAudio.duration) / 100;
     },
     setVolume(value: string) {
       this.volume = +value;
@@ -184,19 +179,13 @@ export default {
     // NOTE:playinglist
     onDrop(start: number, end: number) {
       if (this.isOnShuffle) {
-        const tempValue = Object.values(this.shuffledList)[start];
-        const tempKey = Object.keys(this.shuffledList)[start];
-        this.shuffledList = _function.spliceObject(this.shuffledList, start, 1);
-        this.shuffledList = _function.spliceObject(this.shuffledList, end, 0, {
-          [tempKey]: tempValue,
-        });
+        const temp = this.shuffledList[start];
+        this.shuffledList.splice(start, 1);
+        this.shuffledList.splice(end, 0, temp);
       } else {
-        const tempValue = Object.values(this.audioList)[start];
-        const tempKey = Object.keys(this.audioList)[start];
-        this.audioList = _function.spliceObject(this.audioList, start, 1);
-        this.audioList = _function.spliceObject(this.audioList, end, 0, {
-          [tempKey]: tempValue,
-        });
+        const temp = this.audioList[start];
+        this.audioList.splice(start, 1);
+        this.audioList.splice(end, 0, temp);
       }
       if (start === this.audioIndex) {
         this.audioIndex = end;
@@ -211,9 +200,9 @@ export default {
         return;
       }
       if (this.isOnShuffle) {
-        this.shuffledList = _function.spliceObject(this.shuffledList, index, 1);
+        this.shuffledList.splice(index, 1);
       } else {
-        this.audioList = _function.spliceObject(this.audioList, index, 1);
+        this.audioList.splice(index, 1);
       }
       if (index < this.audioIndex) {
         this.audioIndex++;
@@ -265,14 +254,10 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.songList) {
             if (res.songList.length) {
-              this.audioList = res.songList.reduce((r: any, a: any) => {
-                r[a.song_id] = r[a.song_id] || [];
-                r[a.song_id].push(a);
-                return r;
-              }, Object.create(null));
+              this.audioList = res.songList;
               this.audioIndex = 0;
               this.playAudio();
             } else {
@@ -300,14 +285,10 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.songList) {
-            const newSongList = res.songList.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            this.audioList = { ...this.audioList, ...newSongList };
+            const newSongList = res.songList;
+            this.audioList = [...this.audioList, newSongList];
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -325,18 +306,12 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.songList) {
-            this.audioList = res.songList.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            Object.keys(this.audioList).forEach((key, index) => {
-              if (key === array[1]) {
-                this.audioIndex = index;
-              }
-            });
+            this.audioList = res.songList;
+            this.audioIndex = this.audioList.findIndex(
+              (song: songData) => song.song_id == array[1]
+            );
             this.playAudio();
           } else {
             this.dialogWaring = {
@@ -356,7 +331,7 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.status === "success") {
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -382,14 +357,10 @@ export default {
         .then((res) => {
           this.isLoading = false;
           if (res.status === "success") {
-            const newSongList = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            this.audioList = { ...this.audioList, ...newSongList };
+            const newSongList = res.songs;
+            this.audioList = [...this.audioList, newSongList];
             if (this.isOnShuffle)
-              this.shuffledList = { ...this.shuffledList, ...newSongList };
+              this.shuffledList = [...this.shuffledList, newSongList];
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -407,7 +378,7 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.status === "success") {
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -444,7 +415,7 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.status === "success") {
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -475,14 +446,14 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.status === "success") {
-            const newSongList: songList = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            this.audioList = { ...this.audioList, ...newSongList };
+            // const newSongList: songData[] = res.songs.reduce((r: any, a: any) => {
+            //   r[a.song_id] = r[a.song_id] || [];
+            //   r[a.song_id].push(a);
+            //   return r;
+            // }, Object.create(null));
+            //this.audioList = { ...this.audioList, ...newSongList };
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -505,7 +476,7 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.status === "success") {
             this.audioList = res.songs.reduce((r: any, a: any) => {
               r[a.song_id] = r[a.song_id] || [];
@@ -537,13 +508,9 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.status === "success") {
-            this.audioList = res.likedList.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.audioList = res.likedList;
             this.audioIndex = 0;
             this.playAudio();
           } else {
@@ -563,14 +530,9 @@ export default {
         .then((res) => {
           this.isLoading = false;
           this.isOnShuffle = false;
-          this.shuffledList = {};
+          this.shuffledList = [];
           if (res.status === "success") {
-            const newSongList = res.likedList.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            this.audioList = { ...this.audioList, ...newSongList };
+            this.audioList = [...this.audioList, res.likedList];
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -583,9 +545,8 @@ export default {
     },
     // NOTE: Song
     addToQueue(song: any) {
-      this.audioList = { ...this.audioList, ...song };
-      if (this.isOnShuffle)
-        this.shuffledList = { ...this.shuffledList, ...song };
+      this.audioList = [...this.audioList, song];
+      if (this.isOnShuffle) this.shuffledList = [...this.shuffledList, song];
     },
     playSong(song_id: string) {
       this.getSongForPlay({
@@ -597,11 +558,8 @@ export default {
         })
         .then((res) => {
           if (res.status === "success") {
-            this.audioList = res.song.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.audioList.length = 0;
+            this.audioList.push(res.song);
             this.audioIndex = 0;
             this.playAudio();
           } else {
@@ -629,21 +587,18 @@ export default {
     },
     isOnShuffle(n) {
       if (n) {
-        let playingData = Object.values(this.audioList)[this.audioIndex];
-        let playingKey = Object.keys(this.audioList)[this.audioIndex];
-        let listNotContainPlaying = _function.filterObject(
-          this.audioList,
-          playingKey
+        let playingSongData = this.audioList[this.audioIndex];
+        let listNotContainPlaying = this.audioList.filter(
+          (item: songData) => item.song_id !== playingSongData.song_id
         );
-        this.shuffledList = {
-          [playingKey]: playingData,
-          ..._function.shuffleObject(listNotContainPlaying),
-        };
+        console.log(listNotContainPlaying);
+        let temp: songData[] = _function.shuffleArr(listNotContainPlaying);
+        this.shuffledList = [playingSongData, ...temp];
         this.audioIndex = 0;
       } else {
-        let playingKey = Object.keys(this.shuffledList)[this.audioIndex];
-        let audioIndex = Object.keys(this.audioList).findIndex(
-          (key) => key === playingKey
+        let playingKey = this.shuffledList[this.audioIndex].song_id;
+        let audioIndex = this.audioList.findIndex(
+          (key: songData) => key.song_id === playingKey
         );
         this.audioIndex = audioIndex;
       }
@@ -686,7 +641,7 @@ export default {
         this.timeOut = new Timer(() => {
           this.increaseSongListens({
             token: this.token,
-            song_id: this.playingAudio[0].song_id,
+            song_id: this.playingAudio.song_id,
           })
             .then((res) => res.json())
             .then((res) => {
@@ -705,15 +660,15 @@ export default {
     ...mapGetters({
       token: "auth/userToken",
     }),
-    playingAudio() {
+    playingAudio(): songData {
       if (this.isOnShuffle) {
         return Object.values(this.shuffledList)[this.audioIndex];
       }
       return Object.values(this.audioList)[this.audioIndex];
     },
-    playingAudioSrc() {
+    playingAudioSrc(): string {
       return this.playingAudio
-        ? `${environment.song_src}/${this.playingAudio[0].song_id}.ogg`
+        ? `${environment.song_src}/${this.playingAudio.song_id}.ogg`
         : "";
     },
   },

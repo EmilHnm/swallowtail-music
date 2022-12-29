@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\EmailVerificationToken;
-use App\Models\PasswordReset;
+use DateTime;
 use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\PasswordReset;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Models\EmailVerificationToken;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Password;
 
@@ -134,9 +135,9 @@ class AuthController extends Controller
             $validateData["token"]
         )->first();
         try {
-            $timelast = date($pwdReset->update_at->timestamp);
-            $timenow = date(Carbon::now()->timestamp);
-            if ($timenow - $timelast > 3600) {
+            $timelast = new DateTime($pwdReset->updated_at);
+            $timenow = new DateTime(Carbon::now());
+            if ($timenow->diff($timelast)->i > 3600) {
                 $pwdReset->delete();
                 return response(
                     [
@@ -150,7 +151,7 @@ class AuthController extends Controller
             return response(
                 [
                     "status" => "error",
-                    "message" => "Invalid token",
+                    "message" => $th->getMessage(),
                 ],
                 Response::HTTP_BAD_REQUEST
             );

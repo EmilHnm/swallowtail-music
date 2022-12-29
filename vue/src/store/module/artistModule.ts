@@ -34,9 +34,13 @@ export const artistModule = {
         },
       });
     },
-    searchArtist(context: any, payload: { token: string; query: string }) {
+    searchArtist(
+      context: any,
+      payload: { token: string; query: string; signal: AbortSignal }
+    ) {
       return fetch(`${environment.api}/artist/search?query=${payload.query}`, {
         method: "GET",
+        signal: payload.signal,
         headers: {
           Authorization: `Bearer ${payload.token}`,
           Accept: "application/json",

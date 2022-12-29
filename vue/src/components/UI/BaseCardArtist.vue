@@ -98,6 +98,8 @@ export default defineComponent({
     font-size: 1.2rem;
     font-weight: 600;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
     margin-top: 0.5rem;
     user-select: none;
   }

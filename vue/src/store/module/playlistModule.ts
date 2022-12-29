@@ -89,7 +89,15 @@ export const playlistModule = {
         body: JSON.stringify(data.type),
       });
     },
-    getAddableSongs(context: any, data: any): Promise<Response> {
+    getAddableSongs(
+      context: any,
+      data: {
+        playlist_id: string;
+        token: string;
+        query: string;
+        signal: AbortSignal;
+      }
+    ): Promise<Response> {
       return fetch(
         `${environment.api}/playlist/${data.playlist_id}/addable/?query=${data.query}`,
         {
@@ -98,6 +106,7 @@ export const playlistModule = {
             Accept: "application/json",
             Authorization: `Bearer ${data.token}`,
           },
+          signal: data.signal,
         }
       );
     },

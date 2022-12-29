@@ -25,11 +25,17 @@ class AlbumController extends Controller
         $type = $request->albumType;
         $songCount = json_decode($request->songCount);
         $album = new Album();
-        if ($request->file('albumImage')) {
-            $imageFile = $request->file('albumImage');
-            $fileName = $album_id . '.' . $imageFile->getClientOriginalExtension();
-            @unlink(public_path('storage/upload/album_cover') . "/" . $fileName);
-            $imageFile->move(public_path('storage/upload/album_cover'), $fileName);
+        if ($request->file("albumImage")) {
+            $imageFile = $request->file("albumImage");
+            $fileName =
+                $album_id . "." . $imageFile->getClientOriginalExtension();
+            @unlink(
+                public_path("storage/upload/album_cover") . "/" . $fileName
+            );
+            $imageFile->move(
+                public_path("storage/upload/album_cover"),
+                $fileName
+            );
             $album->image_path = $fileName;
         }
 
@@ -38,32 +44,42 @@ class AlbumController extends Controller
         $album->user_id = Auth::user()->user_id;
         $album->release_year = $release_year;
         $album->type = $type;
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Album uploaded successfully!
-            All songs uploaded will be ready in some minutes and saved as private by default when finish.
-            Please go to Account/Upload Management/Song to update song infomation.'
-        ]);
+
         for ($i = 0; $i < $songCount; $i++) {
             $song = new Song();
-            $song->song_id = 'song_' . date('YmdHi') . Str::random(10);
+            $song->song_id = "song_" . date("YmdHi") . Str::random(10);
             $song->user_id = Auth::user()->user_id;
-            $song->title = $request['songName_' . $i];
-            $song->display = 'private';
+            $song->title = $request["songName_" . $i];
+            $song->display = "private";
             $song->listens = 0;
-            if ($request->file('songFile_' . $i)) {
+            if ($request->file("songFile_" . $i)) {
                 try {
-                    $songFile = $request->file('songFile_' . $i);
-                    $filename = date('YmdHi') . $songFile->getClientOriginalName();
-                    $songFile->move(public_path('storage/upload/song_src'), $filename);
-                    FFMpeg::fromDisk('final_audio')
+                    $songFile = $request->file("songFile_" . $i);
+                    $filename =
+                        date("YmdHi") . $songFile->getClientOriginalName();
+                    $songFile->move(
+                        public_path("storage/upload/song_src"),
+                        $filename
+                    );
+                    FFMpeg::fromDisk("final_audio")
                         ->open($filename)
                         ->export()
-                        ->addFilter(["-strict", "-2", "-acodec", "vorbis", '-b:a', '320k'])
-                        ->save($song->song_id . '.ogg');
-                    @unlink(public_path('storage/upload/song_src/') . "/" . $filename);
-                    $duration = FFMpeg::fromDisk('final_audio')
-                        ->open($song->song_id . '.ogg')
+                        ->addFilter([
+                            "-strict",
+                            "-2",
+                            "-acodec",
+                            "vorbis",
+                            "-b:a",
+                            "320k",
+                        ])
+                        ->save($song->song_id . ".ogg");
+                    @unlink(
+                        public_path("storage/upload/song_src/") .
+                            "/" .
+                            $filename
+                    );
+                    $duration = FFMpeg::fromDisk("final_audio")
+                        ->open($song->song_id . ".ogg")
                         ->getDurationInSeconds();
                     $song->duration = $duration;
                     $song->save();
@@ -79,124 +95,153 @@ class AlbumController extends Controller
         }
 
         $album->save();
+
+        return response()->json([
+            "status" => "success",
+            "message" => 'Album uploaded successfully!
+            All songs uploaded will be ready in some minutes and saved as private by default when finish.
+            Please go to Account/Upload Management/Song to update song infomation.',
+        ]);
     }
 
     public function getUploadedAlbum()
     {
-        $albumUploaded = DB::table('albums')
-            ->leftJoin('songs', 'albums.album_id', '=', 'songs.album_id')
-            ->select('albums.*', DB::raw('count(songs.song_id) as songCount'))
-            ->where('albums.user_id', Auth::user()->user_id)
-            ->groupBy('albums.id')
+        $albumUploaded = DB::table("albums")
+            ->leftJoin("songs", "albums.album_id", "=", "songs.album_id")
+            ->select("albums.*", DB::raw("count(songs.song_id) as songCount"))
+            ->where("albums.user_id", Auth::user()->user_id)
+            ->groupBy("albums.id")
             ->get();
         return response()->json([
-            'status' => 'success',
-            'album' => $albumUploaded
+            "status" => "success",
+            "album" => $albumUploaded,
         ]);
     }
 
     public function getAlbumInfo($id)
     {
-        $album = Album::where('album_id', $id)->first();
-        $songs = Song::where('album_id', $id)->count();
+        $album = Album::where("album_id", $id)->first();
+        $songs = Song::where("album_id", $id)->count();
         $album->song_count = $songs;
         return response()->json([
-            'status' => 'success',
-            'album' => $album,
+            "status" => "success",
+            "album" => $album,
         ]);
     }
 
     public function getAlbumSongs($id)
     {
-        $songList = DB::table('songs')
-            ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
-            ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
-            ->join('albums', 'songs.album_id', '=', 'albums.album_id')
-            ->leftJoin('liked_songs', 'songs.song_id', '=', 'liked_songs.song_id')
+        $songList = DB::table("songs")
+            ->join("song_artists", "songs.song_id", "=", "song_artists.song_id")
+            ->join(
+                "artists",
+                "song_artists.artist_id",
+                "=",
+                "artists.artist_id"
+            )
+            ->join("albums", "songs.album_id", "=", "albums.album_id")
+            ->leftJoin(
+                "liked_songs",
+                "songs.song_id",
+                "=",
+                "liked_songs.song_id"
+            )
             ->select(
-                'songs.song_id',
-                'songs.title',
-                'songs.song_id',
-                'songs.duration',
-                'songs.listens',
+                "songs.song_id",
+                "songs.title",
+                "songs.song_id",
+                "songs.duration",
+                "songs.listens",
                 "artists.artist_id",
                 "artists.name as artist_name",
                 "albums.name as album_name",
                 "albums.album_id as album_id",
                 "albums.image_path as image_path",
-                DB::raw('CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked')
+                DB::raw(
+                    'CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked'
+                )
             )
-            ->where('songs.album_id', $id)
-            ->where('songs.display', '=', 'public')
+            ->where("songs.album_id", $id)
+            ->where("songs.display", "=", "public")
             ->get();
         return response()->json([
-            'status' => 'success',
-            'songs' => $songList,
+            "status" => "success",
+            "songs" => $songList,
         ]);
     }
 
     public function removeAlbumSong(Request $request)
     {
-        $song = Song::where('song_id', $request->song_id)->first();
+        $song = Song::where("song_id", $request->song_id)->first();
         if ($song->user_id != Auth::user()->user_id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'You are not allowed to delete this song!'
+                "status" => "error",
+                "message" => "You are not allowed to delete this song!",
             ]);
         }
         $song->album_id = null;
         $song->save();
         return response()->json([
-            'status' => 'success',
-            'message' => 'Song removed successfully!'
+            "status" => "success",
+            "message" => "Song removed successfully!",
         ]);
     }
 
     public function addAlbumSong(Request $request)
     {
-        $song = Song::where('song_id', $request->song_id)->first();
+        $song = Song::where("song_id", $request->song_id)->first();
         if ($song->user_id != Auth::user()->user_id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'You are not allowed to delete this song!'
+                "status" => "error",
+                "message" => "You are not allowed to delete this song!",
             ]);
         }
-        $album = Album::where('album_id', $request->album_id)->first();
+        $album = Album::where("album_id", $request->album_id)->first();
         if (!$album) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Album not found!'
+                "status" => "error",
+                "message" => "Album not found!",
             ]);
         }
         $song->album_id = $request->album_id;
         $song->save();
         return response()->json([
-            'status' => 'success',
-            'message' => 'Song removed successfully!'
+            "status" => "success",
+            "message" => "Song removed successfully!",
         ]);
     }
 
     public function updateAlbum(Request $request)
     {
         $albumData = json_decode($request->albumData);
-        $album = Album::where('album_id', $albumData->album_id)->first();
+        $album = Album::where("album_id", $albumData->album_id)->first();
         if (!$album) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Album not found!'
+                "status" => "error",
+                "message" => "Album not found!",
             ]);
         }
         if ($album->user_id != Auth::user()->user_id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'You are not allowed to update this album!'
+                "status" => "error",
+                "message" => "You are not allowed to update this album!",
             ]);
         }
-        if ($request->file('image')) {
-            $imageFile = $request->file('image');
-            $fileName = $album->album_id . '.' . $imageFile->getClientOriginalExtension();
-            @unlink(public_path('storage/upload/album_cover') . "/" . $album->image_path);
-            $imageFile->move(public_path('storage/upload/album_cover'), $fileName);
+        if ($request->file("image")) {
+            $imageFile = $request->file("image");
+            $fileName =
+                $album->album_id .
+                "." .
+                $imageFile->getClientOriginalExtension();
+            @unlink(
+                public_path("storage/upload/album_cover") .
+                    "/" .
+                    $album->image_path
+            );
+            $imageFile->move(
+                public_path("storage/upload/album_cover"),
+                $fileName
+            );
             $album->image_path = $fileName;
         }
         $album->name = $albumData->name;
@@ -204,8 +249,8 @@ class AlbumController extends Controller
         $album->type = $albumData->type;
         $album->save();
         return response()->json([
-            'status' => 'success',
-            'message' => 'Album updated successfully!'
+            "status" => "success",
+            "message" => "Album updated successfully!",
         ]);
     }
 
@@ -214,29 +259,30 @@ class AlbumController extends Controller
         $album = Album::find($id);
         if (!$album->id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Album not found'
+                "status" => "error",
+                "message" => "Album not found",
             ]);
         }
         if ($album->user_id != Auth::user()->user_id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'You are not allowed to delete this album!'
+                "status" => "error",
+                "message" => "You are not allowed to delete this album!",
             ]);
         }
-        @unlink(public_path('storage/upload/album_cover/') . "/" . $album->album_id);
-        $song = Song::where('album_id', $album->album_id)->get();
+        @unlink(
+            public_path("storage/upload/album_cover/") . "/" . $album->album_id
+        );
+        $song = Song::where("album_id", $album->album_id)->get();
         foreach ($song as $s) {
             $s->album_id = null;
             $s->save();
         }
         $album->delete();
         return response()->json([
-            'status' => 'success',
-            'message' => 'Album deleted successfully!'
+            "status" => "success",
+            "message" => "Album deleted successfully!",
         ]);
     }
-
 
     public function getLatestAlbum()
     {
@@ -244,69 +290,81 @@ class AlbumController extends Controller
         //     ->take(8)
         //     ->with('user')
         //     ->get();
-        $album = DB::table('albums')
-            ->join('users', 'users.user_id', '=', 'albums.user_id')
-            ->leftJoin('songs', 'songs.album_id', '=', 'albums.album_id')
-            ->select('albums.*', 'users.name as user_name', DB::raw('count(songs.song_id) as songCount'))
-            ->orderBy('albums.created_at', 'desc')
-            ->groupBy('albums.album_id')
+        $album = DB::table("albums")
+            ->join("users", "users.user_id", "=", "albums.user_id")
+            ->leftJoin("songs", "songs.album_id", "=", "albums.album_id")
+            ->select(
+                "albums.*",
+                "users.name as user_name",
+                DB::raw("count(songs.song_id) as songCount")
+            )
+            ->orderBy("albums.created_at", "desc")
+            ->groupBy("albums.album_id")
             ->take(8)
             ->get();
         return response()->json([
-            'status' => 'success',
-            'albums' => $album
+            "status" => "success",
+            "albums" => $album,
         ]);
     }
 
     public function searchAlbum(Request $request)
     {
-        if ($request->query->has('query')) {
-            $query = $request->query->get('query');
-            $albums = DB::table('albums')
-                ->leftJoin('songs', 'songs.album_id', '=', 'albums.album_id')
-                ->select('albums.*', DB::raw('count(songs.song_id) as song_count'))
-                ->groupBy('albums.album_id')
-                ->where('name', 'like',  '%' . $query . '%')->get();
+        if ($request->query->has("query")) {
+            $query = $request->query->get("query");
+            $albums = DB::table("albums")
+                ->leftJoin("songs", "songs.album_id", "=", "albums.album_id")
+                ->select(
+                    "albums.*",
+                    DB::raw("count(songs.song_id) as song_count")
+                )
+                ->groupBy("albums.album_id")
+                ->where("name", "like", "%" . $query . "%")
+                ->get();
             return response()->json([
-                'status' => 'success',
-                'albums' => $albums
+                "status" => "success",
+                "albums" => $albums,
             ]);
         } else {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Query not found'
+                "status" => "error",
+                "message" => "Query not found",
             ]);
         }
     }
 
-
     public function getTopAlbum()
     {
-        $album = DB::table('albums')
-            ->join('users', 'users.user_id', '=', 'albums.user_id')
-            ->leftJoin('songs', 'songs.album_id', '=', 'albums.album_id')
-            ->select('albums.*', 'users.name as user_name', DB::raw('sum(songs.listens) as totalListen'))
-            ->orderBy('totalListen', 'desc')
-            ->groupBy('albums.album_id')
+        $album = DB::table("albums")
+            ->join("users", "users.user_id", "=", "albums.user_id")
+            ->leftJoin("songs", "songs.album_id", "=", "albums.album_id")
+            ->select(
+                "albums.*",
+                "users.name as user_name",
+                DB::raw("sum(songs.listens) as totalListen")
+            )
+            ->orderBy("totalListen", "desc")
+            ->groupBy("albums.album_id")
             ->take(8)
             ->get();
         return response()->json([
-            'status' => 'success',
-            'albums' => $album
+            "status" => "success",
+            "albums" => $album,
         ]);
     }
 
-    public function getSongNotInAlbum()
+    public function getSongNotInAlbum(Request $request)
     {
-        $songs = DB::table('songs')
-            ->leftJoin('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
-            ->leftJoin('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
-            ->select('songs.*', 'artists.name as artist_name', "artists.artist_id as artist_id")
-            ->where('album_id', null)
-            ->where('user_id', Auth::user()->user_id)->get();
+        $query = urldecode($request->get("query"));
+        $songs = Song::with("artist")
+            ->where("user_id", Auth::user()->user_id)
+            ->where("title", "LIKE", "%" . $query . "%")
+            ->where("album_id", null)
+            ->orWhere("album_id", "")
+            ->get();
         return response()->json([
-            'status' => 'success',
-            'songs' => $songs
+            "status" => "success",
+            "songs" => $songs,
         ]);
     }
 }

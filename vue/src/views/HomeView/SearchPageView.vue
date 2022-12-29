@@ -124,10 +124,10 @@ export default defineComponent({
       artistResult: [] as artist[],
       userResult: [],
       container: null as HTMLElement | null,
-      songController: new AbortController(),
-      albumController: new AbortController(),
-      artistController: new AbortController(),
-      userController: new AbortController(),
+      songController: null as AbortController | null,
+      albumController: null as AbortController | null,
+      artistController: null as AbortController | null,
+      userController: null as AbortController | null,
       songSignal: null as null | AbortSignal,
       albumSignal: null as null | AbortSignal,
       artistSignal: null as null | AbortSignal,
@@ -211,7 +211,12 @@ export default defineComponent({
     },
     onSearchSong(query: string) {
       this.searching.song = true;
-      this.songController.abort();
+      if (!this.songController) {
+        this.songController = new AbortController();
+      } else {
+        this.songController.abort();
+        this.songController = new AbortController();
+      }
       this.songSignal = this.songController.signal;
       this.searchSong({
         token: this.token,
@@ -232,11 +237,17 @@ export default defineComponent({
     },
     onSearchAlbums(query: string) {
       this.searching.album = true;
-      this.albumController.abort();
+      if (!this.albumController) {
+        this.albumController = new AbortController();
+      } else {
+        this.albumController.abort();
+        this.albumController = new AbortController();
+      }
       this.albumSignal = this.albumController.signal;
       this.searchAlbums({
         token: this.token,
         query: query,
+        signal: this.albumSignal,
       })
         .then((res: any) => res.json())
         .then((res) => {
@@ -247,12 +258,18 @@ export default defineComponent({
         });
     },
     onSearchArtist(query: string) {
-      this.artistController.abort();
+      if (!this.artistController) {
+        this.artistController = new AbortController();
+      } else {
+        this.artistController.abort();
+        this.artistController = new AbortController();
+      }
       this.artistSignal = this.artistController.signal;
       this.searching.artist = true;
       this.searchArtist({
         token: this.token,
         query: query,
+        signal: this.artistSignal,
       })
         .then((res: any) => res.json())
         .then((res) => {
@@ -264,11 +281,17 @@ export default defineComponent({
     },
     onSearchUser(query: string) {
       this.searching.user = true;
-      this.userController.abort();
+      if (!this.userController) {
+        this.userController = new AbortController();
+      } else {
+        this.userController.abort();
+        this.userController = new AbortController();
+      }
       this.userSignal = this.userController.signal;
       this.searchUser({
         token: this.token,
         query: query,
+        signal: this.userSignal,
       })
         .then((res: any) => res.json())
         .then((res) => {

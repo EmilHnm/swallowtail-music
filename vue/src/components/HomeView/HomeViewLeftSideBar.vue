@@ -21,7 +21,10 @@
       </router-link>
     </div>
     <div class="nav__navigation">
-      <router-link :to="{ name: 'uploadPage' }" v-if="user.email_verified_at">
+      <router-link
+        :to="{ name: 'uploadPage' }"
+        v-if="user.email_verified_at !== null"
+      >
         <base-list-item>
           <IconUpload />
           <div class="nav__navigation--title">Upload</div>

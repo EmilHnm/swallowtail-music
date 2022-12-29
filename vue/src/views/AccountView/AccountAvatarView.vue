@@ -9,6 +9,19 @@
       <template #default>
         <p>{{ dialogWaring.content }}</p>
       </template>
+      <template #action>
+        <div></div>
+      </template>
+    </BaseFlatDialog>
+    <BaseFlatDialog
+      :open="isUploading"
+      :title="'Uploading'"
+      :mode="'announcement'"
+      @close="closeDialog"
+    >
+      <template #default>
+        <BaseLineLoad />
+      </template>
     </BaseFlatDialog>
   </teleport>
 
@@ -61,6 +74,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
 import BaseFlatDialog from "../../components/UI/BaseFlatDialog.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 
 export default defineComponent({
   data() {
@@ -70,6 +84,7 @@ export default defineComponent({
       show: false,
       imgDataUrl: "",
       tab: false,
+      isUploading: false,
       dialogWaring: {
         title: "Warning",
         mode: "warning",
@@ -94,6 +109,7 @@ export default defineComponent({
   methods: {
     ...mapActions("account", ["updateProfilePhoto"]),
     upload() {
+      this.isUploading = true;
       const formData = new FormData();
       const file: Blob = this.dataURItoBlob(this.imgDataUrl);
       formData.append("profile_image", file);
@@ -103,6 +119,7 @@ export default defineComponent({
       })
         .then((res) => res.json())
         .then((res) => {
+          this.isUploading = false;
           if (res.status === "success") {
             this.$router.go(0);
           } else {
@@ -180,6 +197,7 @@ export default defineComponent({
   components: {
     BaseFlatDialog,
     VueCropper,
+    BaseLineLoad,
   },
   mounted() {
     const container = this.$refs.container as HTMLElement;

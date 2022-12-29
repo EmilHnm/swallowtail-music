@@ -106,25 +106,18 @@ import BaseLineLoad from "./BaseLineLoad.vue";
 import BaseCircleLoad from "./BaseCircleLoad.vue";
 import BaseListItem from "./BaseListItem.vue";
 import type { playlist } from "@/model/playlistModel";
+import type { song } from "@/model/songModel";
+import type { artist } from "@/model/artistModel";
+import type { like } from "@/model/likeModel";
 
 type albumData = album & {
   song_count: number;
 };
 
-type songPlaylist = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    added_date?: string;
-    album_name: string;
-    album_id: string;
-    image_path: string;
-    duration: number;
-    listens?: number;
-    liked: number;
-  }[];
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
 };
 
 type playlistData = playlist & {
@@ -150,7 +143,7 @@ export default defineComponent({
     return {
       environment: environment,
       isMenuOpen: false,
-      songs: {} as songPlaylist,
+      songs: [] as songData[],
       isPlaylistOpening: false,
       isLoading: false,
       isSongsLoading: true,

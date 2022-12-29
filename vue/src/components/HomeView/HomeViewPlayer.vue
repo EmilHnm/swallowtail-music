@@ -3,20 +3,34 @@
     <div class="now_playing__info">
       <div class="now_playing__info--cover" @click="navigateToPlaying">
         <img
-          :src="`${environment.album_cover}/${playingAudio[0].image_path}`"
+          :src="`${environment.album_cover}/${playingAudio.album.image_path}`"
           alt="cover"
         />
       </div>
-      <div class="now_playing__info--title">
+      <div class="now_playing__info--title" ref="title">
         <div class="now_playing__info--title--name" @click="navigateToPlaying">
-          {{ playingAudio[0].title }}
+          {{ playingAudio.title }}
         </div>
-        <div class="now_playing__info--title--artist">
+        <div
+          class="now_playing__info--title--artist"
+          :style="{
+            transform:
+              isHovered && artistOverflow
+                ? `translateX(-${artistListWidth - titleWidth}px)`
+                : 'translateX(0%)',
+          }"
+          @mouseover="isHovered = true"
+          @mouseleave="isHovered = false"
+          ref="artistList"
+        >
           <span
-            v-for="item in playingAudio"
+            v-for="(item, index) in playingAudio.artist"
             :key="item.artist_id"
             @click="redirectToArtist(item.artist_id)"
-            >{{ item.artist_name }}</span
+            >{{ item.name
+            }}<span v-if="index != playingAudio.artist.length - 1"
+              >,
+            </span></span
           >
         </div>
       </div>
@@ -67,19 +81,19 @@
           <div
             class="now_playing__controls--progress--bar--progress"
             :style="{
-              width: (progress / playingAudio[0].duration) * 100 + '%',
+              width: (progress / playingAudio.duration) * 100 + '%',
             }"
           ></div>
           <input
             type="range"
             class="now_playing__controls--progress--bar--range"
-            :value="(progress / playingAudio[0].duration) * 100"
+            :value="(progress / playingAudio.duration) * 100"
             @input="setProgress"
           />
         </div>
         <div class="now_playing__controls--progress--time--duration">
           {{
-            new Date(playingAudio[0].duration * 1000)
+            new Date(playingAudio.duration * 1000)
               .toISOString()
               .substring(14, 19)
           }}
@@ -133,19 +147,25 @@ import IconPause from "../icons/IconPause.vue";
 import IconRepeatOne from "../icons/IconRepeatOne.vue";
 import IconMuted from "../icons/IconMuted.vue";
 import { mapActions, mapGetters } from "vuex";
+import type { song } from "@/model/songModel";
+import type { album } from "@/model/albumModel";
+import type { artist } from "@/model/artistModel";
+import type { like } from "@/model/likeModel";
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  added_date?: string;
-  album_name: string;
-  album_id: string;
-  image_path: string;
-  duration: number;
-  listens?: number;
-}[];
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    $refs: {
+      artistList: HTMLDivElement;
+      title: HTMLDivElement;
+    };
+  }
+}
+
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
+};
 
 export default defineComponent({
   name: "HomeViewPlayer",
@@ -197,6 +217,12 @@ export default defineComponent({
       durationTime: "",
       isLike: null as boolean | null,
       isLikeLoading: false,
+      isHovered: false,
+      artistOverflow: false,
+      titleObserver: null as ResizeObserver | null,
+      artistListObserver: null as ResizeObserver | null,
+      titleWidth: 0,
+      artistListWidth: 0,
     };
   },
   methods: {
@@ -250,7 +276,7 @@ export default defineComponent({
       this.isLikeLoading = true;
       this.isLike = null;
       this.likedSong({
-        songId: this.playingAudio[0].song_id,
+        songId: this.playingAudio.song_id,
         userToken: this.token,
       })
         .then((res: any) => {
@@ -265,7 +291,7 @@ export default defineComponent({
         this.isLike = null;
         this.likeSong({
           userToken: this.token,
-          songId: this.playingAudio[0].song_id,
+          songId: this.playingAudio.song_id,
         }).then(() => {
           this.onLoadLikeSong();
         });
@@ -277,6 +303,21 @@ export default defineComponent({
       token: "auth/userToken",
     }),
   },
+  mounted() {
+    this.titleObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        this.titleWidth = entry.contentRect.width;
+      }
+    });
+    this.titleObserver.observe(this.$refs.title);
+
+    this.artistListObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        this.artistListWidth = entry.contentRect.width;
+      }
+    });
+    this.artistListObserver.observe(this.$refs.artistList);
+  },
   watch: {
     playingAudio: {
       handler() {
@@ -284,6 +325,20 @@ export default defineComponent({
       },
       immediate: true,
       deep: true,
+    },
+    artistListWidth() {
+      if (this.artistListWidth > this.titleWidth) {
+        this.artistOverflow = true;
+      } else {
+        this.artistOverflow = false;
+      }
+    },
+    titleWidth() {
+      if (this.artistListWidth > this.titleWidth) {
+        this.artistOverflow = true;
+      } else {
+        this.artistOverflow = false;
+      }
     },
   },
 });
@@ -345,6 +400,14 @@ $tablet-width: 768px;
         color: var(--text-subdued);
         white-space: nowrap;
         cursor: pointer;
+        display: flex;
+        width: max-content;
+        transition: all 2s ease-in-out;
+        span {
+          flex: 0 0 auto;
+          padding-right: 2px;
+          font-size: 12px;
+        }
       }
     }
     &--heart {

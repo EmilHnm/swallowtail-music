@@ -3,7 +3,7 @@
     <div class="information" :class="{ mobile: mobile }" v-if="playingAudio">
       <BaseCircleProgress
         :completed-steps="progress"
-        :total-steps="playingAudio[0].duration"
+        :total-steps="playingAudio.duration"
         :animation-duration="500"
         :diameter="300"
       >
@@ -12,7 +12,7 @@
           :class="{ 'animation-pause': !isPlaying }"
         >
           <img
-            :src="`${environment.album_cover}/${playingAudio[0].image_path}`"
+            :src="`${environment.album_cover}/${playingAudio.album.image_path}`"
             alt=""
           />
         </div>
@@ -20,12 +20,17 @@
       <div class="information__detail">
         <div class="information__detail--sub">Now Playing</div>
         <div class="information__detail--title">
-          {{ playingAudio[0].title }}
+          {{ playingAudio.title }}
         </div>
         <div class="information__detail--artist">
-          <span v-for="item in playingAudio" :key="item.artist_id">{{
-            item.artist_name
-          }}</span>
+          <span
+            v-for="(artist, index) in playingAudio.artist"
+            :key="artist.artist_id"
+            >{{ artist.name
+            }}<span v-if="index != playingAudio.artist.length - 1"
+              >,
+            </span></span
+          >
         </div>
         <div class="information__detail--duration">
           {{
@@ -37,7 +42,7 @@
           }}
           -
           {{
-            new Date(playingAudio[0].duration * 1000)
+            new Date(playingAudio.duration * 1000)
               .toISOString()
               .substring(14, 19)
           }}
@@ -59,21 +64,17 @@
 <script lang="ts">
 import { environment } from "@/environment/environment";
 import { defineComponent } from "vue";
-import BaseCircleProgress from "../../components/UI/BaseCircleProgress.vue";
+import BaseCircleProgress from "@/components/UI/BaseCircleProgress.vue";
+import type { album } from "@/model/albumModel";
+import type { artist } from "@/model/artistModel";
+import type { like } from "@/model/likeModel";
+import type { song } from "@/model/songModel";
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  added_date?: string;
-  album_name: string;
-  album_id: string;
-  image_path: string;
-  duration: number;
-  listens?: number;
-  liked: number;
-}[];
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
+};
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {

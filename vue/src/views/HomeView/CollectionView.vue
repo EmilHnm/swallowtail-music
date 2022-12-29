@@ -73,7 +73,7 @@
     <div class="songList__content">
       <BaseSongItem
         v-for="song in likedList"
-        :key="song[0].song_id"
+        :key="song.song_id"
         :data="song"
         @likeSong="likeSong"
       />
@@ -90,23 +90,15 @@ import IconHeartFilled from "../../components/icons/IconHeartFilled.vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import type { song } from "@/model/songModel";
+import type { album } from "@/model/albumModel";
+import type { like } from "@/model/likeModel";
+import type { artist } from "@/model/artistModel";
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  added_date?: string;
-  album_name: string;
-  album_id: string;
-  image_path: string;
-  duration: number;
-  listens?: number;
-  liked: number;
-}[];
-
-type songList = {
-  [song_id: string]: songData;
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
 };
 
 export default defineComponent({
@@ -145,7 +137,7 @@ export default defineComponent({
       observer: null as ResizeObserver | null,
       small: false,
       medium: false,
-      likedList: {} as songList,
+      likedList: [] as songData[],
       songCount: 0,
       totalDuration: "",
       isLoading: false,
@@ -165,19 +157,13 @@ export default defineComponent({
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
-            this.likedList = res.likedList.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            this.songCount = res.songCount;
-            let duration = Object.keys(this.likedList).reduce(
-              (a: number, key: any) => {
-                return a + this.likedList[key][0].duration;
-              },
+            this.likedList = res.likedList;
+            this.songCount = this.likedList.length;
+            const tempDuration = this.likedList.reduce(
+              (acc, cur) => acc + cur.duration,
               0
             );
-            this.totalDuration = new Date(duration * 1000)
+            this.totalDuration = new Date(tempDuration * 1000)
               .toISOString()
               .substring(11, 19);
             this.isLoading = false;

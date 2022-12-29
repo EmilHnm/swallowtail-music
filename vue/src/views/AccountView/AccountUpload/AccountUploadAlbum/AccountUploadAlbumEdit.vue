@@ -146,30 +146,31 @@
           <div class="song-add__result">
             <div
               class="song-add__result--item"
-              v-for="song in filteredSongList"
-              :key="song[0].song_id"
+              v-for="song in addableSongList"
+              :key="song.song_id"
             >
               <div class="song-add__result--item--title">
-                <span>{{ song[0].title }}</span>
+                <span>{{ song.title }}</span>
               </div>
               <div
                 class="song-add__result--item--artist"
-                v-if="song[0].artist_name"
+                v-if="song.artist.length > 0"
               >
                 <router-link
-                  v-for="artist in song"
+                  v-for="(artist, index) in song.artist"
                   :key="artist.artist_id"
                   :to="{
                     name: 'artistOverviewPage',
                     params: { id: artist.artist_id },
                   }"
                 >
-                  {{ artist.artist_name }}
+                  {{ artist.name
+                  }}<span v-if="index !== song.artist.length - 1">,</span>
                 </router-link>
               </div>
               <div class="song-add__result--item--artist" v-else>Unset</div>
               <div class="song-add__result--item--action">
-                <button @click="addSongs(song[0].song_id)">Add</button>
+                <button @click="addSongs(song.song_id)">Add</button>
               </div>
             </div>
           </div>
@@ -189,6 +190,7 @@ import type { song } from "@/model/songModel";
 import { _function } from "@/mixins";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import type { artist } from "@/model/artistModel";
 
 type songItem = {
   song_id?: string;
@@ -207,11 +209,15 @@ type songList = {
   [song_id: string]: songInfo[];
 };
 
-declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
-    filteredSongList: songList;
-  }
-}
+type addableSong = song & {
+  artist: artist[];
+};
+
+// declare module "@vue/runtime-core" {
+//   interface ComponentCustomProperties {
+//     filteredSongList: songList;
+//   }
+// }
 
 export default defineComponent({
   data() {
@@ -220,12 +226,15 @@ export default defineComponent({
       album_id: null as LocationQueryValue | LocationQueryValue[] | null,
       uploadedSongList: {} as songList,
       songs: [] as songItem[],
+      addableSongList: [] as addableSong[],
       album: {} as album,
       file: null as File | null,
       imgPath: "",
       songData: reactive([] as songItem[]),
       filterText: "",
       isLoading: false,
+      searchController: null as AbortController | null,
+      searchSignal: null as AbortSignal | null,
       dialogWaring: {
         title: "Warning",
         mode: "warning",
@@ -251,7 +260,6 @@ export default defineComponent({
           this.isLoading = false;
           if (res.status === "success") {
             this.loadAlbumSongs();
-            this.loadAddableSong();
           }
         });
     },
@@ -267,7 +275,7 @@ export default defineComponent({
           this.isLoading = false;
           if (res.status === "success") {
             this.loadAlbumSongs();
-            this.loadAddableSong();
+            this.filterText = "";
           }
         });
     },
@@ -287,15 +295,23 @@ export default defineComponent({
         });
     },
     loadAddableSong() {
-      this.getAddableSong(this.token)
+      if (!this.searchController) {
+        this.searchController = new AbortController();
+        this.searchSignal = this.searchController.signal;
+      } else {
+        this.searchController.abort();
+        this.searchController = new AbortController();
+        this.searchSignal = this.searchController.signal;
+      }
+      this.getAddableSong({
+        userToken: this.token,
+        signal: this.searchSignal,
+        query: this.filterText,
+      })
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
-            this.uploadedSongList = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.addableSongList = res.songs;
           }
         });
     },
@@ -351,27 +367,19 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
     }),
-    filteredSongList() {
-      return Object.fromEntries(
-        Object.entries(this.uploadedSongList).filter(
-          (song: [string, songInfo[]]) => {
-            return (
-              song[1][0].title
-                .toLowerCase()
-                .includes(this.filterText.toLowerCase()) ||
-              song[1][0].artist_name
-                ?.toLowerCase()
-                .includes(this.filterText.toLowerCase())
-            );
-          }
-        )
-      );
+  },
+  watch: {
+    filterText() {
+      if (this.filterText.length === 0) {
+        this.addableSongList.length = 0;
+        return;
+      }
+      this.loadAddableSong();
     },
   },
   created() {
     this.isLoading = true;
     this.album_id = this.$route.query.id;
-    console.log(this.album_id);
     this.getAlbum({ token: this.token, album_id: this.album_id })
       .then((res) => res.json())
       .then((res) => {
@@ -381,7 +389,6 @@ export default defineComponent({
         }
       });
     this.loadAlbumSongs();
-    this.loadAddableSong();
   },
   components: { BaseFlatDialog, BaseCircleLoad },
 });
@@ -620,8 +627,10 @@ $tablet-width: 768px;
               width: calc(40% - 20px);
               padding: 0 10px;
               font-size: 1rem;
-              text-align: center;
               line-height: 40px;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              overflow: hidden;
               & a {
                 color: var(--text-primary-color);
               }

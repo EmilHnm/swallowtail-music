@@ -6,13 +6,13 @@
         <div class="playing-list__song">
           <IconPlay />
           <div class="playing-list__song--title">
-            {{ playingAudio[0].title }}
+            {{ playingAudio.title }}
           </div>
           <div class="playing-list__song--duration">
             {{
-              Math.floor(playingAudio[0].duration / 60) +
+              Math.floor(playingAudio.duration / 60) +
               ":" +
-              Math.floor(playingAudio[0].duration % 60)
+              Math.floor(playingAudio.duration % 60)
             }}
           </div>
         </div>
@@ -20,16 +20,15 @@
     </div>
     <div class="playing-list__queue" ref="queue" v-if="!shuffle">
       <div class="playing-list--title"><h3>In Queue</h3></div>
-      <!-- BUG: transition not work  -->
       <transition-group tag="ul" name="queue-list">
         <li
           class="playing-list__queue--item"
-          v-for="(item, key, i) in playlist"
-          :key="key"
+          v-for="(item, i) in playlist"
+          :key="item.song_id"
           draggable="true"
-          @dragstart="dragStart($event, item)"
+          @dragstart="dragStart($event, i)"
           @dragend="onDrop($event)"
-          @dragenter="dragEnter($event, item)"
+          @dragenter="dragEnter($event, i)"
         >
           <BaseSongItem
             :selected="i === audioIndex ? true : false"
@@ -46,12 +45,12 @@
       <transition-group tag="ul" name="queue-list" mode="out-in">
         <li
           class="playing-list__queue--item"
-          v-for="(item, key, i) in shuffledPlaylist"
-          :key="key"
+          v-for="(item, i) in shuffledPlaylist"
+          :key="item.song_id"
           draggable="true"
-          @dragstart="dragStart($event, item)"
+          @dragstart="dragStart($event, i)"
           @dragend="onDrop($event)"
-          @dragenter="dragEnter($event, item)"
+          @dragenter="dragEnter($event, i)"
         >
           <BaseSongItem
             :selected="i === audioIndex ? true : false"
@@ -66,25 +65,18 @@
   </div>
 </template>
 <script lang="ts">
+import type { album } from "@/model/albumModel";
+import type { artist } from "@/model/artistModel";
+import type { like } from "@/model/likeModel";
+import type { song } from "@/model/songModel";
 import { defineComponent } from "vue";
 import IconPlay from "../icons/IconPlay.vue";
 import BaseSongItem from "../UI/BaseSongItem.vue";
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  added_date?: string;
-  album_name: string;
-  album_id: string;
-  image_path: string;
-  duration: number;
-  listens?: number;
-}[];
-
-type songList = {
-  [song_id: string]: songData;
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
 };
 
 export default defineComponent({
@@ -95,15 +87,15 @@ export default defineComponent({
       default: false,
     },
     playlist: {
-      type: Object as () => songList,
+      type: Array as () => songData[],
       required: true,
     },
     shuffledPlaylist: {
-      type: Object as () => songList,
+      type: Array as () => songData[],
       required: true,
     },
     playingAudio: {
-      type: Array as () => songData,
+      type: Object as () => songData,
       required: true,
     },
     audioIndex: {
@@ -122,32 +114,16 @@ export default defineComponent({
     };
   },
   methods: {
-    dragStart(e: DragEvent, item: songData) {
+    dragStart(e: DragEvent, i: number) {
       if (e.target) (e.target as HTMLLIElement).classList.add("dragging");
-      if (this.shuffle) {
-        this.movingIndex = Object.keys(this.shuffledPlaylist).findIndex(
-          (i) => i === item[0].song_id
-        );
-      } else {
-        this.movingIndex = Object.keys(this.playlist).findIndex(
-          (i) => i === item[0].song_id
-        );
-      }
+      this.movingIndex = i;
     },
     onDrop(e: DragEvent) {
       if (e.target) (e.target as HTMLLIElement).classList.remove("dragging");
       this.$emit("onDrop", this.movingIndex, this.movingOverIndex);
     },
-    dragEnter(e: DragEvent, item: songData) {
-      if (this.shuffle) {
-        this.movingOverIndex = Object.keys(this.shuffledPlaylist).findIndex(
-          (i) => i === item[0].song_id
-        );
-      } else {
-        this.movingOverIndex = Object.keys(this.playlist).findIndex(
-          (i) => i === item[0].song_id
-        );
-      }
+    dragEnter(e: DragEvent, i: number) {
+      this.movingOverIndex = i;
     },
     setPlaySong(index: number) {
       this.$emit("setPlaySong", index);
