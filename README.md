@@ -15,30 +15,30 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 
 -   For first setup
 
-```bash
-cd swallowtail-music
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate
-php artisan db:seed
-```
+    ```bash
+    cd swallowtail-music
+    composer install
+    cp .env.example .env
+    php artisan key:generate
+    php artisan migrate
+    php artisan db:seed
+    ```
 
 -   To run server with default port 8000
 
-```bash
-cd swallowtail-music
-php artisan serve
-```
+    ```bash
+    cd swallowtail-music
+    php artisan serve
+    ```
 
 -   To run client
 
-```bash
-cd swallowtail-music
-cd vue
-npm install
-npm run dev
-```
+    ```bash
+    cd swallowtail-music
+    cd vue
+    npm install
+    npm run dev
+    ```
 
 ## Feature
 
