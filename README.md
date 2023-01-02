@@ -50,6 +50,7 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 -   [x] CRUD Song/Album/Gernes
 -   [x] Filter Database
 -   [ ] Display Logs
+-   [ ] Display Report
 -   [x] Dashboard
 
 **Client**
@@ -84,6 +85,7 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
     -   [x] Play Album
 
 -   Playlist
+
     -   [x] Display Playlist
     -   [x] Filter Playlist
     -   [x] Search Playlist
@@ -91,3 +93,9 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
     -   [x] Edit Playlist
     -   [x] Delete Playlist
     -   [x] Play Playlist
+
+-   Other
+
+    -   [ ] Notification
+    -   [x] Change Profile Picture
+    -   [x] Edit Profile
