@@ -11,91 +11,85 @@ use Illuminate\Support\Facades\Auth;
 class AlbumAdminController extends Controller
 {
     //
-    public function getAll()
+    public function getAll(Request $request)
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                [
-                    "message" =>
-                        "You are not authorized to access this resource.",
-                ],
-                403
-            );
-        } else {
-            $albums = Album::with(["user"])
-                ->withCount(["song"])
-                ->get();
-            return response()->json(
-                [
-                    "albums" => $albums,
-                    "status" => "success",
-                ],
-                200
-            );
+        $albums = [];
+        $itemPerPage = $request->get("itemPerPage") ?? 10;
+        switch ($request->get("type")) {
+            case "title":
+                $albums = Album::with(["user"])
+                    ->where("name", "like", "%" . $request->get("query") . "%")
+                    ->withCount(["song"])
+                    ->paginate($itemPerPage);
+                break;
+            case "uploader":
+                $albums = Album::with(["user"])
+                    ->whereHas("user", function ($query) use ($request) {
+                        $query->where(
+                            "name",
+                            "like",
+                            "%" . $request->get("query") . "%"
+                        );
+                    })
+                    ->withCount(["song"])
+                    ->paginate($itemPerPage);
+                break;
+            case "year":
+                $albums = Album::with(["user"])
+                    ->where(
+                        "release_year",
+                        "like",
+                        "%" . $request->get("query") . "%"
+                    )
+                    ->withCount(["song"])
+                    ->paginate($itemPerPage);
+                break;
+            default:
+                $albums = Album::with(["user"])
+                    ->withCount(["song"])
+                    ->paginate($itemPerPage);
+                break;
         }
+        return response()->json(
+            [
+                "albums" => $albums,
+                "status" => "success",
+            ],
+            200
+        );
     }
 
     public function show($id)
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                [
-                    "message" =>
-                        "You are not authorized to access this resource.",
-                ],
-                403
-            );
-        } else {
-            $album = Album::with(["user"])
-                ->withCount(["song"])
-                ->find($id);
-            $songs = Song::where("album_id", $id)->get();
-            return response()->json([
-                "status" => "success",
-                "album" => $album,
-                "songs" => $songs,
-            ]);
-        }
+        $album = Album::with(["user"])
+            ->withCount(["song"])
+            ->find($id);
+        $songs = Song::where("album_id", $id)->get();
+        return response()->json([
+            "status" => "success",
+            "album" => $album,
+            "songs" => $songs,
+        ]);
     }
 
     public function songRemove(Request $request)
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                ["message" => "You are not authorized to do this action."],
-                403
-            );
-        } else {
-            $song = Song::where("song_id", $request->song_id)->first();
-            $song->album_id = null;
-            $song->save();
-            return response()->json([
-                "status" => "success",
-                "message" => "Song removed successfully!",
-            ]);
-        }
+        $song = Song::where("song_id", $request->song_id)->first();
+        $song->album_id = null;
+        $song->save();
+        return response()->json([
+            "status" => "success",
+            "message" => "Song removed successfully!",
+        ]);
     }
 
     public function songAddable()
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                ["message" => "You are not authorized to do this action."],
-                403
-            );
-        } else {
-            $songs = Song::where("album_id", "")->get();
-        }
+        $songs = Song::where("album_id", "")->get();
     }
 
     public function songAdd(Request $request)
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                ["message" => "You are not authorized to do this action."],
-                403
-            );
-        }
         $album = Album::where("album_id", $request->album_id)->first;
         if (!$album) {
             return response()->json(
@@ -103,7 +97,7 @@ class AlbumAdminController extends Controller
                     "status" => "error",
                     "message" => "Album not found!",
                 ],
-                http_response_code(402)
+                402
             );
         }
         $song = Song::where("song_id", $request->song_id)->first();
@@ -113,7 +107,7 @@ class AlbumAdminController extends Controller
                     "status" => "error",
                     "message" => "Song not found!",
                 ],
-                http_response_code(402)
+                402
             );
         }
         $song->album_id = $album->id;
@@ -123,19 +117,12 @@ class AlbumAdminController extends Controller
                 "status" => "success",
                 "message" => "Add song to album successfully!",
             ],
-            http_response_code(200)
+            200
         );
     }
 
     public function delete($id)
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                ["message" => "You are not authorized to do this action."],
-                403
-            );
-        }
-
         $album = Album::find($id);
         if (!$album) {
             return response()->json(
@@ -143,7 +130,7 @@ class AlbumAdminController extends Controller
                     "status" => "error",
                     "message" => "Album not found!",
                 ],
-                http_response_code(402)
+                402
             );
         }
         $songs = Song::where("album_id", $id)->get();
@@ -160,7 +147,7 @@ class AlbumAdminController extends Controller
                 "status" => "success",
                 "message" => "Delete album successfully!",
             ],
-            http_response_code(200)
+            200
         );
     }
 }

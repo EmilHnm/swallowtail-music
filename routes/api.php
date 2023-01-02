@@ -178,7 +178,7 @@ Route::middleware("auth:sanctum")->group(function () {
     });
 
     Route::prefix("admin")
-        ->middleware(["verified"])
+        ->middleware(["verified", "moderatorAccess"])
         ->group(function () {
             Route::prefix("users")->group(function () {
                 Route::get("/", [UserAdminController::class, "getAll"]);

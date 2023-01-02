@@ -20,76 +20,53 @@ class SongAdminController extends Controller
 
     public function getAll(Request $request)
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                [
-                    "message" =>
-                        "You are not authorized to access this resource.",
-                ],
-                403
-            );
-        } else {
-            $songs = [];
-            switch ($request->get("type")) {
-                case "title":
-                    $songs = Song::with(["user", "album"])
-                        ->where(
-                            "title",
+        $songs = [];
+        $itemPerPage = $request->get("itemPerPage") ?? 10;
+        switch ($request->get("type")) {
+            case "title":
+                $songs = Song::with(["user", "album"])
+                    ->where("title", "like", "%" . $request->get("query") . "%")
+                    ->paginate($itemPerPage);
+                break;
+            case "uploader":
+                $songs = Song::with(["user", "album"])
+                    ->whereHas("user", function ($query) use ($request) {
+                        $query->where(
+                            "name",
                             "like",
                             "%" . $request->get("query") . "%"
-                        )
-                        ->paginate($request->get("itemPerPage"));
-                    break;
-                case "uploader":
-                    $songs = Song::with(["user", "album"])
-                        ->whereHas("user", function ($query) use ($request) {
-                            $query->where(
-                                "name",
-                                "like",
-                                "%" . $request->get("query") . "%"
-                            );
-                        })
-                        ->paginate($request->get("itemPerPage"));
-                    break;
-                case "album":
-                    $songs = Song::with(["user", "album"])
-                        ->whereHas("album", function ($query) use ($request) {
-                            $query->where(
-                                "name",
-                                "like",
-                                "%" . $request->get("query") . "%"
-                            );
-                        })
-                        ->paginate($request->get("itemPerPage"));
-                    break;
-                default:
-                    $songs = Song::with(["user", "album"])->paginate(
-                        $request->get("itemPerPage")
-                    );
-                    break;
-            }
-            return response()->json(
-                [
-                    "songs" => $songs,
-                    "status" => "success",
-                ],
-                200
-            );
+                        );
+                    })
+                    ->paginate($itemPerPage);
+                break;
+            case "album":
+                $songs = Song::with(["user", "album"])
+                    ->whereHas("album", function ($query) use ($request) {
+                        $query->where(
+                            "name",
+                            "like",
+                            "%" . $request->get("query") . "%"
+                        );
+                    })
+                    ->paginate($itemPerPage);
+                break;
+            default:
+                $songs = Song::with(["user", "album"])->paginate(
+                    $request->get("itemPerPage")
+                );
+                break;
         }
+        return response()->json(
+            [
+                "songs" => $songs,
+                "status" => "success",
+            ],
+            200
+        );
     }
 
     public function show($id)
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                [
-                    "status" => "error",
-                    "message" =>
-                        "You are not authorized to access this resource.",
-                ],
-                403
-            );
-        }
         $song = Song::find($id);
         if (!$song) {
             return response()->json(
@@ -124,16 +101,6 @@ class SongAdminController extends Controller
     }
     public function update(Request $request)
     {
-        if (Auth::user()->role == "") {
-            echo Auth::user()->role;
-            return response()->json(
-                [
-                    "status" => "error",
-                    "message" => "You are not authorized to do this action.",
-                ],
-                403
-            );
-        }
         $artist = json_decode($request->artist);
         $newArtist = json_decode($request->newArtist);
         $genre = json_decode($request->genre);
@@ -171,16 +138,6 @@ class SongAdminController extends Controller
 
     public function delete($id)
     {
-        if (Auth::user()->role === "") {
-            return response()->json(
-                [
-                    "status" => "error",
-                    "message" =>
-                        "You are not authorized to access this resource.",
-                ],
-                403
-            );
-        }
         $song = Song::find($id);
         if (!$song) {
             return response()->json(

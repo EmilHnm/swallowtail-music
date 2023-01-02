@@ -144,15 +144,29 @@ export const adminModule = {
         },
       });
     },
-    getAllAlbums(context: any, token: string) {
-      return fetch(`${environment.api}/admin/albums`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      });
+    getAllAlbums(
+      context: any,
+      data: {
+        token: string;
+        page: number;
+        filterText: string;
+        filterType: string;
+        signal: AbortSignal;
+        itemPerPage: number;
+      }
+    ) {
+      return fetch(
+        `${environment.api}/admin/albums?page=${data.page}&itemPerPage=${data.itemPerPage}&query=${data.filterText}&type=${data.filterType}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.token}`,
+            Accept: "application/json",
+          },
+          signal: data.signal,
+        }
+      );
     },
     getAlbum(
       context: any,

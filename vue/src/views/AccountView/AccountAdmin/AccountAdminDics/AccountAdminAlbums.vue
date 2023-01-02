@@ -49,10 +49,10 @@
             <td>Control</td>
           </tr>
         </thead>
-        <tbody v-if="!filterText && albumsList.length > 0">
-          <tr v-for="(item, index) in countItemInPage" :key="item.album_id">
+        <tbody>
+          <tr v-for="(item, index) in albumsList" :key="item.album_id">
             <td>
-              {{ index + currentPage * itemPerPage }}
+              {{ index + 1 + currentPage * itemPerPage }}
             </td>
             <td>
               {{ item.name }}
@@ -106,14 +106,6 @@ type albumData = album & {
   user: user;
 };
 
-declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
-    filteredAlbumList: albumData[];
-    totalPages: number;
-    countItemInPage: number;
-  }
-}
-
 export default defineComponent({
   data() {
     return {
@@ -121,10 +113,13 @@ export default defineComponent({
       mainWidth: 0,
       albumsList: [] as albumData[],
       currentPage: 0,
+      totalPages: 0,
       itemPerPage: 10,
       filterType: "title",
       filterText: "",
       isLoading: false,
+      filterController: null as AbortController | null,
+      filterSignal: null as AbortSignal | null,
     };
   },
   methods: {
@@ -146,11 +141,21 @@ export default defineComponent({
     },
     loadAlbumList() {
       this.isLoading = true;
-      this.getAllAlbums(this.token)
+      this.getAllAlbums({
+        token: this.token,
+        page: this.currentPage,
+        filterText: this.filterText,
+        filterType: this.filterType,
+        itemPerPage: this.itemPerPage,
+      })
         .then((res: any) => res.json())
         .then((res: any) => {
           this.isLoading = false;
-          if (res.status === "success") this.albumsList = res.albums;
+          if (res.status === "success") {
+            this.albumsList = res.albums.data;
+            this.currentPage = res.albums.current_page - 1;
+            this.totalPages = res.albums.last_page;
+          }
         });
     },
     navigateToEdit(id: string) {
@@ -161,56 +166,6 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
     }),
-    totalPages() {
-      if (this.albumsList.length === 0) return 0;
-      if (this.filterText !== "")
-        return Math.ceil(this.filteredAlbumList.length / this.itemPerPage);
-      return Math.ceil(this.albumsList.length / this.itemPerPage);
-    },
-    countItemInPage() {
-      if (this.filterText !== "")
-        return +this.currentPage + 1 === this.totalPages
-          ? this.filteredAlbumList.length - this.currentPage * +this.itemPerPage
-          : +this.itemPerPage;
-      return +this.currentPage + 1 === this.totalPages
-        ? this.albumsList.length - this.currentPage * +this.itemPerPage
-        : +this.itemPerPage;
-    },
-    filteredAlbumList(): albumData[] {
-      if (this.filterText !== "") {
-        if (this.filterType === "title") {
-          return this.albumsList.filter((album) =>
-            album.name.toLowerCase().includes(this.filterText.toLowerCase())
-          );
-        }
-        if (this.filterType === "uploader") {
-          return this.albumsList.filter((album) =>
-            album.user.name
-              .toLowerCase()
-              .includes(this.filterText.toLowerCase())
-          );
-        }
-        if (this.filterType === "year") {
-          console.log(
-            this.albumsList.filter((album) =>
-              album.release_year
-                .toString()
-                .toLowerCase()
-                .includes(this.filterText.toLowerCase())
-            )
-          );
-          return this.albumsList.filter((album) => {
-            return album.release_year
-              .toString()
-              .toLowerCase()
-              .includes(this.filterText.toLowerCase());
-          });
-          // return this.albumsList;
-        }
-      }
-      console.log(this.filterType);
-      return [] as albumData[];
-    },
   },
   created() {
     this.loadAlbumList();
@@ -229,10 +184,10 @@ export default defineComponent({
   },
   watch: {
     itemPerPage() {
-      this.currentPage = 0;
+      this.loadAlbumList();
     },
     filterText() {
-      this.currentPage = 0;
+      this.loadAlbumList();
     },
   },
   components: { BaseTableBodyPagination, BaseFlatDialog, BaseLineLoad },
