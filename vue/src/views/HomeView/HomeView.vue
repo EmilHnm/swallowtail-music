@@ -5,16 +5,16 @@ import { Timer } from "@/mixins/Timer";
 import { mapActions, mapGetters } from "vuex";
 import type { playlist } from "@/model/playlistModel";
 import { environment } from "@/environment/environment";
-import HomeViewLeftSideBar from "../../components/HomeView/HomeViewLeftSideBar.vue";
-import HomeViewRightSideBar from "../../components/HomeView/HomeViewRightSideBar.vue";
-import HomeViewPlayer from "../../components/HomeView/HomeViewPlayer.vue";
-import HomeViewHeader from "../../components/HomeView/HomeViewHeader.vue";
-import BaseDialog from "../../components/UI/BaseDialog.vue";
-import BaseLineLoad from "../../components/UI/BaseLineLoad.vue";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
+import HomeViewLeftSideBar from "@/components/HomeView/HomeViewLeftSideBar.vue";
+import HomeViewRightSideBar from "@/components/HomeView/HomeViewRightSideBar.vue";
+import HomeViewPlayer from "@/components/HomeView/HomeViewPlayer.vue";
+import HomeViewHeader from "@/components/HomeView/HomeViewHeader.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 
 type playlistData = playlist & {
   songCount: number;
@@ -60,6 +60,7 @@ export default {
       isOnShuffle: false,
       shuffledList: [] as songData[],
       isAudioWaitting: false,
+      // playingAudio: {} as songData,
       // visualizer
       ctx: null as AudioContext | null,
       audioSource: null as MediaElementAudioSourceNode | null,
@@ -333,11 +334,7 @@ export default {
           this.isOnShuffle = false;
           this.shuffledList = [];
           if (res.status === "success") {
-            this.audioList = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.audioList = res.songs;
             this.audioIndex = 0;
             this.playAudio();
           } else {
@@ -358,9 +355,9 @@ export default {
           this.isLoading = false;
           if (res.status === "success") {
             const newSongList = res.songs;
-            this.audioList = [...this.audioList, newSongList];
+            this.audioList = [...this.audioList, ...newSongList];
             if (this.isOnShuffle)
-              this.shuffledList = [...this.shuffledList, newSongList];
+              this.shuffledList = [...this.shuffledList, ...newSongList];
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -380,13 +377,9 @@ export default {
           this.isOnShuffle = false;
           this.shuffledList = [];
           if (res.status === "success") {
-            this.audioList = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            Object.keys(this.audioList).forEach((key, index) => {
-              if (key === array[1]) {
+            this.audioList = res.songs;
+            this.audioList.forEach((key, index) => {
+              if (key.song_id === array[1]) {
                 this.audioIndex = index;
               }
             });
@@ -417,11 +410,7 @@ export default {
           this.isOnShuffle = false;
           this.shuffledList = [];
           if (res.status === "success") {
-            this.audioList = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.audioList = res.songs;
             this.audioIndex = 0;
             this.playAudio();
           } else {
@@ -448,12 +437,8 @@ export default {
           this.isOnShuffle = false;
           this.shuffledList = [];
           if (res.status === "success") {
-            // const newSongList: songData[] = res.songs.reduce((r: any, a: any) => {
-            //   r[a.song_id] = r[a.song_id] || [];
-            //   r[a.song_id].push(a);
-            //   return r;
-            // }, Object.create(null));
-            //this.audioList = { ...this.audioList, ...newSongList };
+            const newSongList: songData[] = res.songs;
+            this.audioList = [...this.audioList, ...newSongList];
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -478,13 +463,9 @@ export default {
           this.isOnShuffle = false;
           this.shuffledList = [];
           if (res.status === "success") {
-            this.audioList = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
-            Object.keys(this.audioList).forEach((key, index) => {
-              if (key === array[1]) {
+            this.audioList = res.songs;
+            this.audioList.forEach((key, index) => {
+              if (key.song_id === array[1]) {
                 this.audioIndex = index;
               }
             });
@@ -585,13 +566,12 @@ export default {
         this.audio.loop = false;
       }
     },
-    isOnShuffle(n) {
-      if (n) {
+    isOnShuffle() {
+      if (this.isOnShuffle) {
         let playingSongData = this.audioList[this.audioIndex];
         let listNotContainPlaying = this.audioList.filter(
           (item: songData) => item.song_id !== playingSongData.song_id
         );
-        console.log(listNotContainPlaying);
         let temp: songData[] = _function.shuffleArr(listNotContainPlaying);
         this.shuffledList = [playingSongData, ...temp];
         this.audioIndex = 0;
@@ -661,10 +641,12 @@ export default {
       token: "auth/userToken",
     }),
     playingAudio(): songData {
+      // BUG : when isOnShuffle change, this run 2 time
+      // Once isOnShuffle change, and once audioIndex change
       if (this.isOnShuffle) {
-        return Object.values(this.shuffledList)[this.audioIndex];
+        return this.shuffledList[this.audioIndex];
       }
-      return Object.values(this.audioList)[this.audioIndex];
+      return this.audioList[this.audioIndex];
     },
     playingAudioSrc(): string {
       return this.playingAudio

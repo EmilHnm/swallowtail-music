@@ -265,11 +265,7 @@
       />
     </div>
     <div class="searchMore__result">
-      <h3
-        v-if="
-          Object.keys(songSearchResuilt).length === 0 && !isGettingSongSearch
-        "
-      >
+      <h3 v-if="songSearchResuilt.length === 0 && !isGettingSongSearch">
         No result
       </h3>
     </div>

@@ -2,16 +2,12 @@
   <div class="main">
     <div class="popular">
       <h2>Popular</h2>
-      <div class="songs" v-if="Object.keys(songs).length > 0">
+      <div class="songs" v-if="songs.length > 0">
         <div v-for="index in isSongListOpen ? 10 : 5" :key="index">
           <BaseSongItem
-            v-if="index <= Object.keys(songs).length"
+            v-if="index <= songs.length"
             :data="Object.values(songs)[index - 1]"
-            @select-song="
-              playSongOfArtist(
-                Object.values(songs)[index - 1][0].song_id as string
-              )
-            "
+            @select-song="playSongOfArtist(songs[index - 1].song_id)"
           />
         </div>
         <span @click="toggleTopSong">{{
@@ -41,30 +37,21 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import BaseHorizontalScroll from "../../../components/UI/BaseHorizontalScroll.vue";
-import BaseCardAlbum from "../../../components/UI/BaseCardAlbum.vue";
-import BaseSongItem from "../../../components/UI/BaseSongItem.vue";
+import BaseHorizontalScroll from "@/components/UI/BaseHorizontalScroll.vue";
+import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
+import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import { mapActions, mapGetters } from "vuex";
-import { environment } from "../../../environment/environment";
+import { environment } from "@/environment/environment";
 import BaseCircleLoadVue from "@/components/UI/BaseCircleLoad.vue";
 import type { album } from "@/model/albumModel";
+import type { song } from "@/model/songModel";
+import type { artist } from "@/model/artistModel";
+import type { like } from "@/model/likeModel";
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  added_date?: string;
-  album_name: string;
-  album_id: string;
-  image_path: string;
-  duration: number;
-  listens?: number;
-  liked: number;
-}[];
-
-type songList = {
-  [song_id: string]: songData;
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
 };
 
 type albumData = album & {
@@ -76,7 +63,7 @@ export default defineComponent({
     return {
       environment: environment,
       isSongListOpen: false,
-      songs: {} as songList,
+      songs: [] as songData[],
       albums: [] as albumData[],
     };
   },
@@ -112,12 +99,7 @@ export default defineComponent({
               return res.json();
             })
             .then((res) => {
-              if (res.status === "success")
-                this.songs = res.songs.reduce((r: any, a: any) => {
-                  r[a.song_id] = r[a.song_id] || [];
-                  r[a.song_id].push(a);
-                  return r;
-                }, Object.create(null));
+              if (res.status === "success") this.songs = res.songs;
             });
           this.getArtistAlbumById({
             token: this.token,

@@ -81,15 +81,29 @@ export const adminModule = {
         },
       });
     },
-    getAllSongs(context: any, token: string) {
-      return fetch(`${environment.api}/admin/songs`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      });
+    getAllSongs(
+      context: any,
+      data: {
+        token: string;
+        page: number;
+        filterText: string;
+        filterType: string;
+        signal: AbortSignal;
+        itemPerPage: number;
+      }
+    ) {
+      return fetch(
+        `${environment.api}/admin/songs?page=${data.page}&itemPerPage=${data.itemPerPage}&query=${data.filterText}&type=${data.filterType}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.token}`,
+            Accept: "application/json",
+          },
+          signal: data.signal,
+        }
+      );
     },
     getSong(
       context: any,

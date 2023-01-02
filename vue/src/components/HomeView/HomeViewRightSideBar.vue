@@ -223,7 +223,7 @@ $tablet-width: 768px;
 }
 
 .queue-list-enter-active {
-  transition: all 0.5s ease-out;
+  transition: all 0.3s ease-out;
 }
 
 .queue-list-enter-to,
@@ -233,7 +233,7 @@ $tablet-width: 768px;
 }
 
 .queue-list-leave-active {
-  transition: all 0.5s ease-in;
+  transition: all 0.3s ease-in;
   position: absolute;
 }
 
@@ -243,6 +243,6 @@ $tablet-width: 768px;
 }
 
 .queue-list-move {
-  transition: transform 0.8s ease;
+  transition: transform 0.3s ease;
 }
 </style>

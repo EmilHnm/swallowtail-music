@@ -32,8 +32,8 @@
       <div class="header__center--logo">
         <router-link class="header__center--logo" :to="{ name: 'mainPage' }">
           <icon-logo></icon-logo>
+          <span class="header__center--logo-text">Swallowtail Music</span>
         </router-link>
-        <span class="header__center--logo-text">Swallowtail Music</span>
       </div>
     </div>
     <div class="header__right">
@@ -49,7 +49,7 @@
             :src="
               userData.profile_photo_url
                 ? `${environment.profile_image}/${userData.profile_photo_url}`
-                : 'http://127.0.0.1:5173/src/assets/default/default-avatar.jpg'
+                : `http://127.0.0.1:5173/src/assets/default/default-avatar.jpg`
             "
             alt=""
             srcset=""
@@ -202,6 +202,9 @@ $tablet-width: 768px;
         margin-right: 5px;
         background: var(--color-primary);
         fill: var(--background-color-primary);
+      }
+      span {
+        color: var(--text-primary-color);
       }
     }
   }

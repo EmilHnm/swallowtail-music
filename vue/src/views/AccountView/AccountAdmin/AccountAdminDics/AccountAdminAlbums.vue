@@ -50,85 +50,26 @@
           </tr>
         </thead>
         <tbody v-if="!filterText && albumsList.length > 0">
-          <tr
-            v-for="index in countItemInPage"
-            :key="index + currentPage * itemPerPage"
-          >
+          <tr v-for="(item, index) in countItemInPage" :key="item.album_id">
             <td>
               {{ index + currentPage * itemPerPage }}
             </td>
             <td>
-              {{ albumsList[index - 1 + currentPage * itemPerPage].name }}
+              {{ item.name }}
             </td>
             <td v-if="mainWidth > 550">
-              {{ albumsList[index - 1 + currentPage * itemPerPage].user.name }}
+              {{ item.user.name }}
             </td>
             <td v-if="mainWidth > 600">
-              {{ albumsList[index - 1 + currentPage * itemPerPage].song_count }}
+              {{ item.song_count }}
             </td>
             <td>
-              {{
-                new Date(
-                  albumsList[index - 1 + currentPage * itemPerPage].created_at
-                ).toLocaleDateString()
-              }}
+              {{ new Date(item.created_at).toLocaleDateString() }}
             </td>
             <td>
               <button
                 class="btn btn-danger"
-                @click="
-                  navigateToEdit(
-                    albumsList[index - 1 + currentPage * itemPerPage].album_id
-                  )
-                "
-              >
-                Edit
-              </button>
-            </td>
-          </tr>
-        </tbody>
-        <tbody v-if="filterText && filteredAlbumList.length > 0">
-          <tr
-            v-for="index in countItemInPage"
-            :key="index + currentPage * itemPerPage"
-          >
-            <td>
-              {{ index + currentPage * itemPerPage }}
-            </td>
-            <td>
-              {{
-                filteredAlbumList[index - 1 + currentPage * itemPerPage].name
-              }}
-            </td>
-            <td v-if="mainWidth > 550">
-              {{
-                filteredAlbumList[index - 1 + currentPage * itemPerPage].user
-                  .name
-              }}
-            </td>
-            <td v-if="mainWidth > 600">
-              {{
-                filteredAlbumList[index - 1 + currentPage * itemPerPage]
-                  .song_count
-              }}
-            </td>
-            <td>
-              {{
-                new Date(
-                  filteredAlbumList[
-                    index - 1 + currentPage * itemPerPage
-                  ].created_at
-                ).toLocaleDateString()
-              }}
-            </td>
-            <td>
-              <button
-                class="btn btn-danger"
-                @click="
-                  navigateToEdit(
-                    albumsList[index - 1 + currentPage * itemPerPage].album_id
-                  )
-                "
+                @click="navigateToEdit(item.album_id)"
               >
                 Edit
               </button>

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Song;
 use App\Models\Album;
-use App\Models\SongAlbum;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -131,38 +130,15 @@ class AlbumController extends Controller
 
     public function getAlbumSongs($id)
     {
-        $songList = DB::table("songs")
-            ->join("song_artists", "songs.song_id", "=", "song_artists.song_id")
-            ->join(
-                "artists",
-                "song_artists.artist_id",
-                "=",
-                "artists.artist_id"
-            )
-            ->join("albums", "songs.album_id", "=", "albums.album_id")
-            ->leftJoin(
-                "liked_songs",
-                "songs.song_id",
-                "=",
-                "liked_songs.song_id"
-            )
-            ->select(
-                "songs.song_id",
-                "songs.title",
-                "songs.song_id",
-                "songs.duration",
-                "songs.listens",
-                "artists.artist_id",
-                "artists.name as artist_name",
-                "albums.name as album_name",
-                "albums.album_id as album_id",
-                "albums.image_path as image_path",
-                DB::raw(
-                    'CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked'
-                )
-            )
-            ->where("songs.album_id", $id)
-            ->where("songs.display", "=", "public")
+        $songList = Song::where("album_id", $id)
+            ->where("display", "public")
+            ->with([
+                "artist",
+                "album",
+                "like" => function ($query) {
+                    $query->where("user_id", Auth::user()->user_id);
+                },
+            ])
             ->get();
         return response()->json([
             "status" => "success",
@@ -286,10 +262,6 @@ class AlbumController extends Controller
 
     public function getLatestAlbum()
     {
-        // $album = Album::orderBy('created_at', 'desc')
-        //     ->take(8)
-        //     ->with('user')
-        //     ->get();
         $album = DB::table("albums")
             ->join("users", "users.user_id", "=", "albums.user_id")
             ->leftJoin("songs", "songs.album_id", "=", "albums.album_id")

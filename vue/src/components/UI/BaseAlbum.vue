@@ -83,9 +83,9 @@
         <BaseSongItem
           v-for="song in songs"
           :data="song"
-          :key="song[0].song_id"
+          :key="song.song_id"
           :control="true"
-          @select-song="playSongInAlbum(song[0].song_id)"
+          @select-song="playSongInAlbum(song.song_id)"
         />
       </div>
     </div>
@@ -213,11 +213,7 @@ export default defineComponent({
       })
       .then((res) => {
         if (res.status === "success") {
-          this.songs = res.songs.reduce((r: any, a: any) => {
-            r[a.song_id] = r[a.song_id] || [];
-            r[a.song_id].push(a);
-            return r;
-          }, Object.create(null));
+          this.songs = res.songs;
           this.isSongsLoading = false;
         }
       });

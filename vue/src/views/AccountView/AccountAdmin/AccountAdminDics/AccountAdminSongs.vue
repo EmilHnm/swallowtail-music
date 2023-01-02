@@ -1,5 +1,5 @@
 <template>
-  <teleport to="body">
+  <!-- <teleport to="body">
     <BaseFlatDialog
       :open="isLoading"
       :title="'Loading ...'"
@@ -10,13 +10,13 @@
       </template>
       <template #action><div></div></template>
     </BaseFlatDialog>
-  </teleport>
+  </teleport> -->
   <div class="admin-songs-container" ref="main">
     <h3>Songs List</h3>
     <div class="tool">
       <div class="item-count">
         <label for="itemPerPage">Item Per Page</label>
-        <select name="filterType" id="itemPerPage" v-model="itemPerPage">
+        <select name="itemPerPage" id="itemPerPage" v-model="itemPerPage">
           <option value="10" :selected="itemPerPage === 10">10</option>
           <option value="30" :selected="itemPerPage === 30">30</option>
           <option value="50" :selected="itemPerPage === 50">50</option>
@@ -38,7 +38,7 @@
       </div>
     </div>
     <div class="data">
-      <table v-if="songsList.length !== 0">
+      <table v-if="songsList.length !== 0 && !isLoading">
         <thead>
           <tr>
             <td>#</td>
@@ -49,87 +49,27 @@
             <td>Control</td>
           </tr>
         </thead>
-        <tbody v-if="!filterText && songsList.length > 0">
-          <tr
-            v-for="index in countItemInPage"
-            :key="index + currentPage * itemPerPage"
-          >
+        <tbody v-if="songsList.length > 0">
+          <tr v-for="(data, index) in songsList" :key="data.song_id">
             <td>
-              {{ index + currentPage * itemPerPage }}
+              {{ index + 1 + currentPage * itemPerPage }}
             </td>
             <td>
-              {{ songsList[index - 1 + currentPage * itemPerPage].title }}
+              {{ data.title }}
             </td>
             <td v-if="mainWidth > 550">
-              {{ songsList[index - 1 + currentPage * itemPerPage].user.name }}
+              {{ data.user.name }}
             </td>
             <td v-if="mainWidth > 600">
-              {{ songsList[index - 1 + currentPage * itemPerPage].album.name }}
+              {{ data.album.name }}
             </td>
             <td>
-              {{
-                new Date(
-                  songsList[index - 1 + currentPage * itemPerPage].created_at
-                ).toLocaleDateString()
-              }}
+              {{ new Date(data.created_at).toLocaleDateString() }}
             </td>
             <td>
               <button
                 class="btn btn-danger"
-                @click="
-                  navigateToEdit(
-                    songsList[index - 1 + currentPage * itemPerPage].song_id
-                  )
-                "
-              >
-                Edit
-              </button>
-            </td>
-          </tr>
-        </tbody>
-
-        <tbody v-if="filterText && filteredSongList.length > 0">
-          <tr
-            v-for="index in countItemInPage"
-            :key="index + currentPage * itemPerPage"
-          >
-            <td>
-              {{ index + currentPage * itemPerPage }}
-            </td>
-            <td>
-              {{
-                filteredSongList[index - 1 + currentPage * itemPerPage].title
-              }}
-            </td>
-            <td v-if="mainWidth > 550">
-              {{
-                filteredSongList[index - 1 + currentPage * itemPerPage].user
-                  .name
-              }}
-            </td>
-            <td v-if="mainWidth > 600">
-              {{
-                filteredSongList[index - 1 + currentPage * itemPerPage].album
-                  .name
-              }}
-            </td>
-            <td>
-              {{
-                new Date(
-                  filteredSongList[
-                    index - 1 + currentPage * itemPerPage
-                  ].created_at
-                ).toLocaleDateString()
-              }}
-            </td>
-            <td>
-              <button
-                class="btn btn-danger"
-                @click="
-                  navigateToEdit(
-                    songsList[index - 1 + currentPage * itemPerPage].song_id
-                  )
-                "
+                @click="navigateToEdit(data.song_id)"
               >
                 Edit
               </button>
@@ -137,8 +77,9 @@
           </tr>
         </tbody>
       </table>
+      <BaseCircleLoad v-if="isLoading" />
     </div>
-    <div class="pagination">
+    <div class="pagination" v-if="!isLoading">
       <BaseTableBodyPagination
         :totalPages="totalPages"
         :currentPage="currentPage"
@@ -153,8 +94,7 @@
 </template>
 
 <script lang="ts">
-import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
-import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import BaseTableBodyPagination from "@/components/UI/BaseTableBodyPagination.vue";
 import type { album } from "@/model/albumModel";
 import type { song } from "@/model/songModel";
@@ -169,7 +109,6 @@ type songData = song & {
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
-    filteredSongList: songData[];
     totalPages: number;
     countItemInPage: number;
   }
@@ -182,10 +121,13 @@ export default defineComponent({
       mainWidth: 0,
       songsList: [] as songData[],
       currentPage: 0,
+      totalPages: 0,
       itemPerPage: 10,
       filterType: "title",
       filterText: "",
       isLoading: false,
+      filterController: null as AbortController | null,
+      filterSignal: null as AbortSignal | null,
     };
   },
   methods: {
@@ -207,11 +149,29 @@ export default defineComponent({
     },
     loadSongList() {
       this.isLoading = true;
-      this.getAllSongs(this.token)
+      if (!this.filterController) {
+        this.filterController = new AbortController();
+      } else {
+        this.filterController.abort();
+        this.filterController = new AbortController();
+      }
+      this.filterSignal = this.filterController.signal;
+      this.getAllSongs({
+        token: this.token,
+        page: this.currentPage + 1,
+        itemPerPage: this.itemPerPage,
+        filterType: this.filterType,
+        filterText: this.filterText,
+        signal: this.filterSignal,
+      })
         .then((res: any) => res.json())
         .then((res: any) => {
           this.isLoading = false;
-          if (res.status === "success") this.songsList = res.songs;
+          if (res.status === "success") {
+            this.songsList = res.songs.data;
+            this.currentPage = res.songs.current_page - 1;
+            this.totalPages = res.songs.last_page;
+          }
         });
     },
     navigateToEdit(id: string) {
@@ -222,49 +182,6 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
     }),
-    totalPages() {
-      if (this.songsList.length === 0) return 0;
-      if (this.filterText !== "")
-        return Math.ceil(this.filteredSongList.length / this.itemPerPage);
-      return Math.ceil(this.songsList.length / this.itemPerPage);
-    },
-    countItemInPage() {
-      if (this.filterText !== "")
-        return +this.currentPage + 1 === this.totalPages
-          ? this.filteredSongList.length - this.currentPage * +this.itemPerPage
-          : +this.itemPerPage;
-      return +this.currentPage + 1 === this.totalPages
-        ? this.songsList.length - this.currentPage * +this.itemPerPage
-        : +this.itemPerPage;
-    },
-    filteredSongList(): songData[] {
-      if (this.filterText !== "") {
-        if (this.filterType === "title") {
-          return this.songsList.filter(
-            (song) =>
-              song.title
-                .toLowerCase()
-                .includes(this.filterText.toLowerCase()) ||
-              song.sub_title
-                ?.toLowerCase()
-                .includes(this.filterText.toLowerCase())
-          );
-        }
-        if (this.filterType === "uploader") {
-          return this.songsList.filter((song) =>
-            song.user.name.toLowerCase().includes(this.filterText.toLowerCase())
-          );
-        }
-        if (this.filterType === "album") {
-          return this.songsList.filter((song) =>
-            song.album.name
-              .toLowerCase()
-              .includes(this.filterText.toLowerCase())
-          );
-        }
-      }
-      return [] as songData[];
-    },
   },
   created() {
     this.loadSongList();
@@ -282,14 +199,23 @@ export default defineComponent({
     if (this.observer) this.observer.disconnect();
   },
   watch: {
-    itemPerPage() {
-      this.currentPage = 0;
-    },
     filterText() {
-      this.currentPage = 0;
+      this.loadSongList();
+    },
+    currentPage() {
+      this.loadSongList();
+    },
+    itemPerPage() {
+      this.loadSongList();
+    },
+    filterType() {
+      if (this.filterText.length != 0) this.loadSongList();
     },
   },
-  components: { BaseTableBodyPagination, BaseFlatDialog, BaseLineLoad },
+  components: {
+    BaseTableBodyPagination,
+    BaseCircleLoad,
+  },
 });
 </script>
 
