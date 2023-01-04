@@ -1,19 +1,7 @@
 <template>
-  <!-- <teleport to="body">
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseLineLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
-  </teleport> -->
   <div class="admin-songs-container" ref="main">
     <h3>Songs List</h3>
-    <div class="tool">
+    <div class="tool" v-if="!isLoading && songsList.length > 0">
       <div class="item-count">
         <label for="itemPerPage">Item Per Page</label>
         <select name="itemPerPage" id="itemPerPage" v-model="itemPerPage">
@@ -79,7 +67,7 @@
       </table>
       <BaseCircleLoad v-if="isLoading" />
     </div>
-    <div class="pagination" v-if="!isLoading">
+    <div class="pagination" v-if="!isLoading && songsList.length > 0">
       <BaseTableBodyPagination
         :totalPages="totalPages"
         :currentPage="currentPage"
@@ -89,6 +77,9 @@
         @onGoToNextPage="onGoToNextPage"
         @onGoToLastPage="onGoToLastPage"
       />
+    </div>
+    <div class="no-results" v-if="!isLoading && songsList.length <= 0">
+      <h3>No results</h3>
     </div>
   </div>
 </template>

@@ -108,7 +108,7 @@ class SongAdminController extends Controller
         $song = Song::find($request->song_id);
 
         $song->title = $request->songName;
-        $song->sub_title = $request->songSubName;
+        $song->sub_title = $request->songSubName ?? null;
         $song->display = $request->displayMode;
         $song->save();
         $song->artist()->detach();

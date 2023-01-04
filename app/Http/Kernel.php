@@ -71,5 +71,7 @@ class Kernel extends HttpKernel
         "requestTimeDelay" => \App\Http\Middleware\IncreaseListenTimeOut::class,
         "moderatorAccess" =>
             \App\Http\Middleware\ModeratorAccessMiddleware::class,
+        "adminAccess" => \App\Http\Middleware\AdminAccessMiddleware::class,
+        "logRequest" => \App\Http\Middleware\LogRequest::class,
     ];
 }

@@ -119,13 +119,9 @@
       </div>
       <div class="form__row">
         <h3>Song List</h3>
-        <div
-          class="song-detail"
-          v-for="(song, index) in songData"
-          :key="song.song_id"
-        >
+        <div class="song-detail" v-for="song in songs" :key="song.song_id">
           <div class="song-detail__title">
-            {{ songData[index].title }}
+            {{ song.title }}
           </div>
           <div class="song-detail__action">
             <button @click="removeSongs(song.song_id)">Remove</button>
@@ -146,30 +142,30 @@
           <div class="song-add__result">
             <div
               class="song-add__result--item"
-              v-for="song in filteredSongList"
-              :key="song[0].song_id"
+              v-for="song in addableSongs"
+              :key="song.song_id"
             >
               <div class="song-add__result--item--title">
-                <span>{{ song[0].title }}</span>
+                <span>{{ song.title }}</span>
               </div>
               <div
                 class="song-add__result--item--artist"
-                v-if="song[0].artist_name"
+                v-if="song.artist.length > 0"
               >
                 <router-link
-                  v-for="artist in song"
+                  v-for="artist in song.artist"
                   :key="artist.artist_id"
                   :to="{
                     name: 'artistOverviewPage',
                     params: { id: artist.artist_id },
                   }"
                 >
-                  {{ artist.artist_name }}
+                  {{ artist.name }}
                 </router-link>
               </div>
               <div class="song-add__result--item--artist" v-else>Unset</div>
               <div class="song-add__result--item--action">
-                <button @click="addSongs(song[0].song_id)">Add</button>
+                <button @click="addSongs(song.song_id)">Add</button>
               </div>
             </div>
           </div>
@@ -189,43 +185,26 @@ import type { song } from "@/model/songModel";
 import { _function } from "@/mixins";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import type { artist } from "@/model/artistModel";
 
-type songItem = {
-  song_id?: string;
-  title?: string;
+type songData = song & {
+  artist: artist[];
 };
-
-type songInfo = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  created_at: string;
-};
-
-type songList = {
-  [song_id: string]: songInfo[];
-};
-
-declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
-    filteredSongList: songList;
-  }
-}
 
 export default defineComponent({
   data() {
     return {
       environment: environment,
       album_id: null as LocationQueryValue | LocationQueryValue[] | null,
-      uploadedSongList: {} as songList,
-      songs: [] as songItem[],
+      addableSongs: [] as songData[],
       album: {} as album,
       file: null as File | null,
       imgPath: "",
-      songData: reactive([] as songItem[]),
+      songs: reactive([] as song[]),
       filterText: "",
       isLoading: false,
+      addableSongController: null as AbortController | null,
+      addableSongSignal: null as AbortSignal | null,
       dialogWaring: {
         title: "Warning",
         mode: "warning",
@@ -235,7 +214,7 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions("album", [
+    ...mapActions("admin", [
       "getAlbum",
       "getAddableSong",
       "getAlbumSongs",
@@ -251,7 +230,6 @@ export default defineComponent({
           this.isLoading = false;
           if (res.status === "success") {
             this.loadAlbumSongs();
-            this.loadAddableSong();
           }
         });
     },
@@ -267,7 +245,7 @@ export default defineComponent({
           this.isLoading = false;
           if (res.status === "success") {
             this.loadAlbumSongs();
-            this.loadAddableSong();
+            this.filterText = "";
           }
         });
     },
@@ -276,26 +254,28 @@ export default defineComponent({
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
-            this.songData.length = 0;
-            res.songs.forEach((song: song) => {
-              this.songData.push({
-                song_id: song.song_id,
-                title: song.title,
-              });
-            });
+            this.songs.length = 0;
+            this.songs = res.songs;
           }
         });
     },
     loadAddableSong() {
-      this.getAddableSong(this.token)
+      if (!this.addableSongController) {
+        this.addableSongController = new AbortController();
+      } else {
+        this.addableSongController.abort();
+        this.addableSongController = new AbortController();
+      }
+      this.addableSongSignal = this.addableSongController.signal;
+      this.getAddableSong({
+        userToken: this.token,
+        signal: this.addableSongSignal,
+        query: this.filterText,
+      })
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
-            this.uploadedSongList = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.addableSongs = res.songs;
           }
         });
     },
@@ -351,27 +331,19 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
     }),
-    filteredSongList(): songList {
-      return Object.fromEntries(
-        Object.entries(this.uploadedSongList).filter(
-          (song: [string, songInfo[]]) => {
-            return (
-              song[1][0].title
-                .toLowerCase()
-                .includes(this.filterText.toLowerCase()) ||
-              song[1][0].artist_name
-                ?.toLowerCase()
-                .includes(this.filterText.toLowerCase())
-            );
-          }
-        )
-      );
+  },
+  watch: {
+    filterText() {
+      if (!this.filterText) {
+        this.addableSongs.length = 0;
+        return;
+      }
+      this.loadAddableSong();
     },
   },
   created() {
     this.isLoading = true;
     this.album_id = this.$route.params.id;
-    console.log(this.album_id);
     this.getAlbum({ token: this.token, album_id: this.album_id })
       .then((res) => res.json())
       .then((res) => {
@@ -381,7 +353,6 @@ export default defineComponent({
         }
       });
     this.loadAlbumSongs();
-    this.loadAddableSong();
   },
   components: { BaseFlatDialog, BaseCircleLoad },
 });
@@ -622,6 +593,9 @@ $tablet-width: 768px;
               font-size: 1rem;
               text-align: center;
               line-height: 40px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
               & a {
                 color: var(--text-primary-color);
               }

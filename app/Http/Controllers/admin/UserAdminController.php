@@ -18,48 +18,40 @@ class UserAdminController extends Controller
     //
     public function getAll()
     {
-        if (Auth::user()->role === '') {
-            return response()->json(['message' => 'You are not authorized to access this resource.'], 403);
-        } else {
-            $users = User::get();
-            return response()->json([
-                'users' => $users,
-                'status' => "success"
-            ], 200);
-        }
+        $users = User::get();
+        return response()->json(
+            [
+                "users" => $users,
+                "status" => "success",
+            ],
+            200
+        );
     }
 
     public function show($id)
     {
-        if (Auth::user()->role === '') {
-            return response()->json(['message' => 'You are not authorized to access this resource.'], 403);
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(
+                [
+                    "message" => "User not found",
+                    "status" => "error",
+                ],
+                404
+            );
         } else {
-            $user = User::find($id);
-            if (!$user) {
-                return response()->json([
-                    'message' => 'User not found',
-                    'status' => 'error'
-                ], 404);
-            } else {
-                return response()->json([
-                    'user' => $user,
-                    'status' => 'success'
-                ], 200);
-            }
+            return response()->json(
+                [
+                    "user" => $user,
+                    "status" => "success",
+                ],
+                200
+            );
         }
     }
 
     public function showUserUploadSong($id)
     {
-        if (Auth::user()->role === '') {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'You are not authorized to access this resource.'
-                ],
-                403
-            );
-        }
         $songs = DB::select(
             'SELECT songs.*,
                     artists.name AS artist_name,artists.artist_id AS artist_id,
@@ -73,54 +65,60 @@ class UserAdminController extends Controller
         );
 
         return response()->json([
-            'status' => 'success',
-            'songs' => $songs
+            "status" => "success",
+            "songs" => $songs,
         ]);
     }
 
     public function updateRole($id)
     {
-        if (Auth::user()->role !== 'Admin') {
-            return response()->json(['message' => 'You are not authorized to access this resource.'], 403);
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(
+                [
+                    "message" => "User not found",
+                    "status" => "error",
+                ],
+                404
+            );
         } else {
-            $user = User::find($id);
-            if (!$user) {
-                return response()->json([
-                    'message' => 'User not found',
-                    'status' => 'error'
-                ], 404);
+            if ($user->role === "Mod") {
+                $user->role = "";
             } else {
-                if ($user->role === 'Mod') {
-                    $user->role = '';
-                } else {
-                    $user->role = 'Mod';
-                }
-                $user->save();
-                return response()->json([
-                    'message' => 'Update role successfully',
-                    'status' => 'success'
-                ], 200);
+                $user->role = "Mod";
             }
+            $user->save();
+            return response()->json(
+                [
+                    "message" => "Update role successfully",
+                    "status" => "success",
+                ],
+                200
+            );
         }
     }
 
     public function deleteUser($id)
     {
-        if (Auth::user()->role === '' && Auth::user()->user_id === $id) {
+        if (Auth::user()->user_id === $id) {
             return response()->json(
                 [
-                    'status' => 'error',
-                    'message' => 'You are not authorized to access this resource.'
+                    "status" => "error",
+                    "message" =>
+                        "You are not authorized to access this resource.",
                 ],
                 403
             );
         } else {
             $user = User::find($id);
             if (!$user) {
-                return response()->json([
-                    'message' => 'User not found',
-                    'status' => 'error'
-                ], 404);
+                return response()->json(
+                    [
+                        "message" => "User not found",
+                        "status" => "error",
+                    ],
+                    404
+                );
             } else {
                 // $albums = Album::where('user_id', $id)->get();
                 // foreach ($albums as $album) {
@@ -137,76 +135,66 @@ class UserAdminController extends Controller
                 //     $playlist->song()->detach();
                 // }
                 // Playlist::where('user_id', $id)->delete();
-                if ($user->role === 'Admin') {
-                    return response()->json([
-                        'message' => 'You can not delete admin',
-                        'status' => 'error'
-                    ], 403);
+                if ($user->role === "Admin") {
+                    return response()->json(
+                        [
+                            "message" => "You can not delete admin",
+                            "status" => "error",
+                        ],
+                        403
+                    );
                 }
-                DB::table('personal_access_tokens')->where('tokenable_id', $id)->delete();
+                DB::table("personal_access_tokens")
+                    ->where("tokenable_id", $id)
+                    ->delete();
                 $user->delete();
-                return response()->json([
-                    'message' => 'User deleted successfully',
-                    'status' => 'success'
-                ], 200);
+                return response()->json(
+                    [
+                        "message" => "User deleted successfully",
+                        "status" => "success",
+                    ],
+                    200
+                );
             }
         }
     }
 
     public function showUserUploadAlbum($id)
     {
-        if (Auth::user()->role === '') {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'You are not authorized to access this resource.'
-                ],
-                403
-            );
-        }
-        $albumUploaded = DB::table('albums')
-            ->leftJoin('songs', 'albums.album_id', '=', 'songs.album_id')
-            ->select('albums.*', DB::raw('count(songs.song_id) as songCount'))
-            ->where('albums.user_id', Auth::user()->user_id)
-            ->groupBy('albums.id')
-            ->where('albums.user_id', $id)
+        $albumUploaded = DB::table("albums")
+            ->leftJoin("songs", "albums.album_id", "=", "songs.album_id")
+            ->select("albums.*", DB::raw("count(songs.song_id) as songCount"))
+            ->where("albums.user_id", Auth::user()->user_id)
+            ->groupBy("albums.id")
+            ->where("albums.user_id", $id)
             ->get();
         return response()->json([
-            'status' => 'success',
-            'album' => $albumUploaded
+            "status" => "success",
+            "album" => $albumUploaded,
         ]);
     }
 
-
-
     public function deleteAlbum($id)
     {
-        if (Auth::user()->role === '') {
-            return response()->json(
-                [
-                    'status' => 'error',
-                    'message' => 'You are not authorized to access this resource.'
-                ],
-                403
-            );
-        }
         $album = Album::find($id);
         if (!$album->id) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Album not found'
+                "status" => "error",
+                "message" => "Album not found",
             ]);
         }
-        @unlink(public_path('storage/upload/album_cover/') . "/" . $album->album_id);
-        $song = Song::where('album_id', $album->album_id)->get();
+        @unlink(
+            public_path("storage/upload/album_cover/") . "/" . $album->album_id
+        );
+        $song = Song::where("album_id", $album->album_id)->get();
         foreach ($song as $s) {
             $s->album_id = null;
             $s->save();
         }
         $album->delete();
         return response()->json([
-            'status' => 'success',
-            'message' => 'Album deleted successfully!'
+            "status" => "success",
+            "message" => "Album deleted successfully!",
         ]);
     }
 }

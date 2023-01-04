@@ -181,45 +181,134 @@ export const adminModule = {
         },
       });
     },
-  },
-  updateAlbumInfo(
-    context: any,
-    payload: { userToken: string; albumInfo: FormData }
-  ): Promise<Response> {
-    return fetch(`${environment.api}/admin/albums/update`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${payload.userToken}`,
-        Accept: "application/json",
-      },
-      body: payload.albumInfo,
-    });
-  },
-  removeAlbumSongs(
-    context: any,
-    payload: { userToken: string; songId: string }
-  ): Promise<Response> {
-    return fetch(`${environment.api}/admin/albums/song-remove`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${payload.userToken}`,
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ song_id: payload.songId }),
-    });
-  },
-  deleteAlbum(
-    context: any,
-    payload: { userToken: string; albumId: string }
-  ): Promise<Response> {
-    return fetch(`${environment.api}/admin/albums/${payload.albumId}/delete`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${payload.userToken}`,
-        Accept: "application/json",
-      },
-    });
+    updateAlbumInfo(
+      context: any,
+      payload: { userToken: string; albumInfo: FormData }
+    ): Promise<Response> {
+      return fetch(`${environment.api}/admin/albums/update`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+        body: payload.albumInfo,
+      });
+    },
+    removeAlbumSongs(
+      context: any,
+      payload: { userToken: string; songId: string }
+    ): Promise<Response> {
+      return fetch(`${environment.api}/admin/albums/song-remove`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ song_id: payload.songId }),
+      });
+    },
+    deleteAlbum(
+      context: any,
+      payload: { userToken: string; albumId: string }
+    ): Promise<Response> {
+      return fetch(
+        `${environment.api}/admin/albums/${payload.albumId}/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+            Accept: "application/json",
+          },
+        }
+      );
+    },
+    getAddableSong(
+      context: any,
+      payload: { userToken: string; signal: AbortSignal; query: string }
+    ): Promise<Response> {
+      return fetch(
+        `${environment.api}/admin/albums/addable?query=${payload.query}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+            Accept: "application/json",
+          },
+          signal: payload.signal,
+        }
+      );
+    },
+    getAlbumSongs(
+      context: any,
+      payload: { userToken: string; album_id: string }
+    ): Promise<Response> {
+      return fetch(`${environment.api}/admin/albums/${payload.album_id}/song`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+      });
+    },
+    addAlbumSongs(
+      context: any,
+      payload: { userToken: string; songId: string; albumId: string }
+    ): Promise<Response> {
+      return fetch(`${environment.api}/admin/albums/song-add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          song_id: payload.songId,
+          album_id: payload.albumId,
+        }),
+      });
+    },
+    getArtists(
+      context: any,
+      payload: {
+        userToken: string;
+        signal: AbortSignal;
+        query: string;
+        itemPerPage: number;
+        currentPage: number;
+      }
+    ) {
+      return fetch(
+        `${environment.api}/admin/artists?query=${payload.query}&itemPerPage=${payload.itemPerPage}&page=${payload.currentPage}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+            Accept: "application/json",
+          },
+          signal: payload.signal,
+        }
+      );
+    },
+    deleteArtist(
+      context: any,
+      payload: { userToken: string; artistId: string }
+    ) {
+      return fetch(
+        `${environment.api}/admin/artists/${payload.artistId}/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+            Accept: "application/json",
+          },
+        }
+      );
+    },
   },
 };

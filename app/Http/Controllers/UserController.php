@@ -15,110 +15,135 @@ class UserController extends Controller
     //
     public function show($id)
     {
-        $user = User::where('user_id', $id)->select(
-            'users.name',
-            'users.user_id',
-            'users.profile_photo_url',
-        )->first();
+        $user = User::where("user_id", $id)
+            ->select("users.name", "users.user_id", "users.profile_photo_url")
+            ->first();
         if (!$user) {
             return response()->json([
-                'status' => 'error',
-                'message' => "User Not Found"
+                "status" => "error",
+                "message" => "User Not Found",
             ]);
         }
-        $publicPlaylist_count = Playlist::where('user_id', $id)->where('type', "Public")->count();
-        $songUploaded_count = Song::where('user_id', $id)->where('display', "public")->count();
-        $albumUploaded_count = Album::where('user_id', $id)->count();
+        $publicPlaylist_count = Playlist::where("user_id", $id)
+            ->where("type", "Public")
+            ->count();
+        $songUploaded_count = Song::where("user_id", $id)
+            ->where("display", "public")
+            ->count();
+        $albumUploaded_count = Album::where("user_id", $id)->count();
         $user->publicPlaylist_count = $publicPlaylist_count;
         $user->songUploaded_count = $songUploaded_count;
         $user->albumUploaded_count = $albumUploaded_count;
         return response()->json([
-            'status' => 'success',
-            'user' => $user
+            "status" => "success",
+            "user" => $user,
         ]);
     }
     public function searchUser(Request $request)
     {
-        if ($request->query->has('query')) {
-            $query = $request->query->get('query');
-            $users = DB::table('users')
+        if ($request->query->has("query")) {
+            $query = $request->query->get("query");
+            $users = DB::table("users")
                 ->join("songs", "users.user_id", "=", "songs.user_id")
                 ->select(
-                    'users.name',
-                    'users.user_id',
-                    'users.profile_photo_url',
-                    DB::raw('count(songs.song_id) as song_count')
+                    "users.name",
+                    "users.user_id",
+                    "users.profile_photo_url",
+                    DB::raw("count(songs.song_id) as song_count")
                 )
-                ->where('name', 'like', '%' . $query . '%')
+                ->where("name", "like", "%" . $query . "%")
                 ->groupBy("users.user_id")
                 ->get();
             return response()->json([
-                'status' => 'success',
-                'users' => $users
+                "status" => "success",
+                "users" => $users,
             ]);
         } else {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Query not found'
+                "status" => "error",
+                "message" => "Query not found",
             ]);
         }
     }
     public function getUserTopArtist($id)
     {
-        $artist = DB::table('artists')
-            ->leftJoin('song_artists', 'artists.artist_id', '=', 'song_artists.artist_id')
-            ->leftJoin('songs', 'song_artists.song_id', '=', 'songs.song_id')
-            ->select('artists.*', DB::raw('sum(songs.listens) as total'))
-            ->groupBy('artists.artist_id')
-            ->where('songs.user_id', $id)
+        $artist = DB::table("artists")
+            ->leftJoin(
+                "song_artists",
+                "artists.artist_id",
+                "=",
+                "song_artists.artist_id"
+            )
+            ->leftJoin("songs", "song_artists.song_id", "=", "songs.song_id")
+            ->select("artists.*", DB::raw("sum(songs.listens) as total"))
+            ->groupBy("artists.artist_id")
+            ->where("songs.user_id", $id)
             ->limit(8)
             ->get();
         return response()->json([
-            'status' => 'success',
-            'artists' => $artist
+            "status" => "success",
+            "artists" => $artist,
         ]);
     }
 
     public function getTopTracks($id)
     {
-        $songs = DB::table('songs')
-            ->join('song_artists', 'songs.song_id', '=', 'song_artists.song_id')
-            ->join('artists', 'song_artists.artist_id', '=', 'artists.artist_id')
-            ->join('albums', 'songs.album_id', '=', 'albums.album_id')
-            ->select(
-                'songs.song_id',
-                'songs.title',
-                'songs.song_id',
-                'songs.duration',
-                'songs.listens',
-                "artists.artist_id",
-                "artists.name as artist_name",
-                "albums.name as album_name",
-                "albums.album_id as album_id",
-                "albums.image_path as image_path",
-            )
-            ->where('songs.user_id', $id)
-            ->orderBy('songs.listens', 'desc')
+        // $songs = DB::table("songs")
+        //     ->join("song_artists", "songs.song_id", "=", "song_artists.song_id")
+        //     ->join(
+        //         "artists",
+        //         "song_artists.artist_id",
+        //         "=",
+        //         "artists.artist_id"
+        //     )
+        //     ->join("albums", "songs.album_id", "=", "albums.album_id")
+        //     ->select(
+        //         "songs.song_id",
+        //         "songs.title",
+        //         "songs.song_id",
+        //         "songs.duration",
+        //         "songs.listens",
+        //         "artists.artist_id",
+        //         "artists.name as artist_name",
+        //         "albums.name as album_name",
+        //         "albums.album_id as album_id",
+        //         "albums.image_path as image_path"
+        //     )
+        //     ->where("songs.user_id", $id)
+        //     ->orderBy("songs.listens", "desc")
+        //     ->limit(5)
+        //     ->get();
+        $songs = Song::with(["artist", "album", "like"])
+            ->where("user_id", $id)
+            ->orderBy("listens", "desc")
             ->limit(5)
             ->get();
         return response()->json([
-            'status' => 'success',
-            'songs' => $songs
+            "status" => "success",
+            "songs" => $songs,
         ]);
     }
 
     public function getPublicPlaylist($id)
     {
         $playlists = DB::table("playlists")
-            ->leftJoin('playlist_songs', 'playlists.playlist_id', "=", "playlist_songs.playlist_id")
-            ->select('playlists.*', DB::raw('count(playlist_songs.song_id) as songCount'))
-            ->where('playlists.user_id', $id)
-            ->where('playlists.type', "Public")
-            ->groupBy('playlists.playlist_id')
+            ->leftJoin(
+                "playlist_songs",
+                "playlists.playlist_id",
+                "=",
+                "playlist_songs.playlist_id"
+            )
+            ->select(
+                "playlists.*",
+                DB::raw("count(playlist_songs.song_id) as songCount")
+            )
+            ->where("playlists.user_id", $id)
+            ->where("playlists.type", "Public")
+            ->groupBy("playlists.playlist_id")
             ->get();
         return response()->json([
-            'status' => 'success',
-            'playlists' => $playlists
+            "status" => "success",
+            "playlists" => $playlists,
         ]);
     }
 }

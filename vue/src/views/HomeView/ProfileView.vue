@@ -59,7 +59,7 @@
       <span>This only visible to you</span>
       <BaseSongItem
         v-for="song in topTracks"
-        :key="song[0].song_id"
+        :key="song.song_id"
         :data="song"
       />
     </div>
@@ -97,6 +97,9 @@ import { environment } from "@/environment/environment";
 import type { playlist } from "@/model/playlistModel";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import type { song } from "@/model/songModel";
+import type { album } from "@/model/albumModel";
+import type { like } from "@/model/likeModel";
 
 type userProfileData = user & {
   publicPlaylist_count: number;
@@ -108,24 +111,13 @@ type playlistData = playlist & {
   songCount: number;
 };
 
-type songData = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    added_date?: string;
-    album_name: string;
-    album_id: string;
-    image_path: string;
-    duration: number;
-    listens?: number;
-    liked: number;
-  }[];
+type songData = song & {
+  artist: artist[];
+  album: album;
+  like: like[];
 };
 
 export default defineComponent({
-  setup() {},
   components: {
     BaseButton,
     BaseHorizontalScroll,
@@ -135,6 +127,7 @@ export default defineComponent({
     BaseDialog,
     BaseLineLoad,
   },
+  inject: ["userPlaylist"],
   data() {
     return {
       environment: environment,
@@ -147,7 +140,7 @@ export default defineComponent({
       medium: false,
       user: {} as userProfileData,
       topArtist: [] as artist[],
-      topTracks: {} as songData,
+      topTracks: {} as songData[],
       playlists: [] as playlistData[],
     };
   },
@@ -212,11 +205,7 @@ export default defineComponent({
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
-            this.topTracks = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.topTracks = res.songs;
           } else {
             this.$router.push({ name: "mainPage" });
           }

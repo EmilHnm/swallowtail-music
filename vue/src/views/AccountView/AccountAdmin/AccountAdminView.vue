@@ -7,7 +7,9 @@
       <button @click="$router.replace({ name: 'accountAdminDisc' })">
         <IconDisk />
       </button>
-      <button><IconArtist /></button>
+      <button @click="$router.replace({ name: 'accountAdminArtists' })">
+        <IconArtist />
+      </button>
       <button><IconTag /></button>
     </div>
     <RouterView />

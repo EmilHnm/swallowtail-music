@@ -213,7 +213,7 @@ export default defineComponent({
       token: "auth/userToken",
       user: "auth/userData",
     }),
-    filteredUser() {
+    filteredUser(): user[] {
       return this.users.filter((user) => {
         console.log(user.user_id);
         return (

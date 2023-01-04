@@ -72,6 +72,15 @@ class AlbumAdminController extends Controller
         ]);
     }
 
+    public function song($id)
+    {
+        $songs = Song::where("album_id", $id)->get();
+        return response()->json([
+            "status" => "success",
+            "songs" => $songs,
+        ]);
+    }
+
     public function songRemove(Request $request)
     {
         $song = Song::where("song_id", $request->song_id)->first();
@@ -83,14 +92,23 @@ class AlbumAdminController extends Controller
         ]);
     }
 
-    public function songAddable()
+    public function getSongNotInAlbum(Request $request)
     {
-        $songs = Song::where("album_id", "")->get();
+        $query = urldecode($request->get("query"));
+        $songs = Song::with("artist")
+            ->where("album_id", null)
+            ->where("title", "like", "%" . $query . "%")
+            ->get();
+        return response()->json([
+            "status" => "success",
+            "songs" => $songs,
+        ]);
     }
 
     public function songAdd(Request $request)
     {
-        $album = Album::where("album_id", $request->album_id)->first;
+        $album = Album::find($request->album_id);
+        $album = Album::where("album_id", $request->album_id)->first();
         if (!$album) {
             return response()->json(
                 [
@@ -110,7 +128,7 @@ class AlbumAdminController extends Controller
                 402
             );
         }
-        $song->album_id = $album->id;
+        $song->album_id = $album->album_id;
         $song->save();
         return response()->json(
             [
@@ -119,6 +137,49 @@ class AlbumAdminController extends Controller
             ],
             200
         );
+    }
+
+    public function update(Request $request)
+    {
+        $albumData = json_decode($request->albumData);
+        $album = Album::where("album_id", $albumData->album_id)->first();
+        if (!$album) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Album not found!",
+            ]);
+        }
+        if ($album->user_id != Auth::user()->user_id) {
+            return response()->json([
+                "status" => "error",
+                "message" => "You are not allowed to update this album!",
+            ]);
+        }
+        if ($request->file("image")) {
+            $imageFile = $request->file("image");
+            $fileName =
+                $album->album_id .
+                "." .
+                $imageFile->getClientOriginalExtension();
+            @unlink(
+                public_path("storage/upload/album_cover") .
+                    "/" .
+                    $album->image_path
+            );
+            $imageFile->move(
+                public_path("storage/upload/album_cover"),
+                $fileName
+            );
+            $album->image_path = $fileName;
+        }
+        $album->name = $albumData->name;
+        $album->release_year = $albumData->release_year;
+        $album->type = $albumData->type;
+        $album->save();
+        return response()->json([
+            "status" => "success",
+            "message" => "Album updated successfully!",
+        ]);
     }
 
     public function delete($id)

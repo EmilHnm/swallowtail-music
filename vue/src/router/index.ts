@@ -280,6 +280,14 @@ const router = createRouter({
                 },
               ],
             },
+            {
+              path: "artists",
+              name: "accountAdminArtists",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountAdmin/AccountAdminArtist/AccountAdminArtistView.vue"
+                ),
+            },
           ],
         },
       ],

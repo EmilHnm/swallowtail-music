@@ -12,7 +12,11 @@
       <div class="song-item__left" :class="{ small: small }">
         <div class="song-item__left--image" @click="selectSong">
           <img
-            :src="`${environment.album_cover}/${data.album.image_path}`"
+            :src="
+              data.album
+                ? `${environment.album_cover}/${data.album.image_path}`
+                : `${environment.default}/no_image.jpg`
+            "
             alt=""
             srcset=""
           />
@@ -38,10 +42,10 @@
       </div>
       <div class="song-item__right" :class="{ small: small }">
         <div class="song-item__right--album" :class="{ small: small }">
-          <span v-if="data.album_id" @click="redirectToAlbum(data.album_id)">{{
+          <span v-if="data.album" @click="redirectToAlbum(data.album_id)">{{
             data.album.name
           }}</span>
-          <span v-else><BaseLineLoad /></span>
+          <span v-else>Unknown</span>
         </div>
         <div
           class="song-item__right--addDate"
@@ -82,7 +86,11 @@
       <div class="menu__song">
         <div class="menu__song--img">
           <img
-            :src="`${environment.album_cover}/${data.album.image_path}`"
+            :src="
+              data.album
+                ? `${environment.album_cover}/${data.album.image_path}`
+                : `${environment.default}/no_image.jpg`
+            "
             alt=""
             srcset=""
           />
@@ -100,7 +108,7 @@
           </span>
         </div>
         <div class="menu__song--album">
-          <span v-if="data.album_id">{{ data.album.name }}</span>
+          <span v-if="data.album">{{ data.album.name }}</span>
           <span v-else><BaseLineLoad /></span>
         </div>
       </div>
@@ -165,7 +173,7 @@ import type { like } from "@/model/likeModel";
 import type { artist } from "@/model/artistModel";
 
 type songData = song & {
-  album: album;
+  album?: album;
   artist: artist[];
   like: like[];
   playlist?: playlist &

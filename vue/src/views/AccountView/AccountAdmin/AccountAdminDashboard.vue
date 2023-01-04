@@ -8,7 +8,7 @@
       <div class="icon"><IconDisk /></div>
       <div class="title">Song</div>
     </button>
-    <button>
+    <button @click="$router.push({ name: 'accountAdminArtists' })">
       <div class="icon"><IconArtist /></div>
       <div class="title">Artist</div>
     </button>

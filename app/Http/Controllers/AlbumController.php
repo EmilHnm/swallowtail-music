@@ -18,89 +18,90 @@ class AlbumController extends Controller
 
     public function uploadAlbum(Request $request)
     {
-        $album_id = "album_" . Str::random(8) . Carbon::now()->timestamp;
-        $name = $request->albumTitle;
-        $release_year = $request->albumReleaseYear;
-        $type = $request->albumType;
-        $songCount = json_decode($request->songCount);
-        $album = new Album();
-        if ($request->file("albumImage")) {
-            $imageFile = $request->file("albumImage");
-            $fileName =
-                $album_id . "." . $imageFile->getClientOriginalExtension();
-            @unlink(
-                public_path("storage/upload/album_cover") . "/" . $fileName
-            );
-            $imageFile->move(
-                public_path("storage/upload/album_cover"),
-                $fileName
-            );
-            $album->image_path = $fileName;
-        }
-
-        $album->name = $name;
-        $album->album_id = $album_id;
-        $album->user_id = Auth::user()->user_id;
-        $album->release_year = $release_year;
-        $album->type = $type;
-
-        for ($i = 0; $i < $songCount; $i++) {
-            $song = new Song();
-            $song->song_id = "song_" . date("YmdHi") . Str::random(10);
-            $song->user_id = Auth::user()->user_id;
-            $song->title = $request["songName_" . $i];
-            $song->display = "private";
-            $song->listens = 0;
-            if ($request->file("songFile_" . $i)) {
-                try {
-                    $songFile = $request->file("songFile_" . $i);
-                    $filename =
-                        date("YmdHi") . $songFile->getClientOriginalName();
-                    $songFile->move(
-                        public_path("storage/upload/song_src"),
-                        $filename
-                    );
-                    FFMpeg::fromDisk("final_audio")
-                        ->open($filename)
-                        ->export()
-                        ->addFilter([
-                            "-strict",
-                            "-2",
-                            "-acodec",
-                            "vorbis",
-                            "-b:a",
-                            "320k",
-                        ])
-                        ->save($song->song_id . ".ogg");
-                    @unlink(
-                        public_path("storage/upload/song_src/") .
-                            "/" .
-                            $filename
-                    );
-                    $duration = FFMpeg::fromDisk("final_audio")
-                        ->open($song->song_id . ".ogg")
-                        ->getDurationInSeconds();
-                    $song->duration = $duration;
-                    $song->save();
-                    FFMpeg::cleanupTemporaryFiles();
-                } catch (EncodingException $exception) {
-                    $command = $exception->getCommand();
-                    $errorLog = $exception->getErrorOutput();
-                    dd($command, $errorLog);
-                }
-            }
-            $song->album_id = $album_id;
-            $song->save();
-        }
-
-        $album->save();
-
-        return response()->json([
-            "status" => "success",
-            "message" => 'Album uploaded successfully!
+        try {
+            return response()->json([
+                "status" => "success",
+                "message" => 'Album uploaded successfully!
             All songs uploaded will be ready in some minutes and saved as private by default when finish.
             Please go to Account/Upload Management/Song to update song infomation.',
-        ]);
+            ]);
+        } finally {
+            $album_id = "album_" . Str::random(8) . Carbon::now()->timestamp;
+            $name = $request->albumTitle;
+            $release_year = $request->albumReleaseYear;
+            $type = $request->albumType;
+            $songCount = json_decode($request->songCount);
+            $album = new Album();
+            if ($request->file("albumImage")) {
+                $imageFile = $request->file("albumImage");
+                $fileName =
+                    $album_id . "." . $imageFile->getClientOriginalExtension();
+                @unlink(
+                    public_path("storage/upload/album_cover") . "/" . $fileName
+                );
+                $imageFile->move(
+                    public_path("storage/upload/album_cover"),
+                    $fileName
+                );
+                $album->image_path = $fileName;
+            }
+
+            $album->name = $name;
+            $album->album_id = $album_id;
+            $album->user_id = Auth::user()->user_id;
+            $album->release_year = $release_year;
+            $album->type = $type;
+
+            for ($i = 0; $i < $songCount; $i++) {
+                $song = new Song();
+                $song->song_id = "song_" . date("YmdHi") . Str::random(10);
+                $song->user_id = Auth::user()->user_id;
+                $song->title = $request["songName_" . $i];
+                $song->display = "private";
+                $song->listens = 0;
+                if ($request->file("songFile_" . $i)) {
+                    try {
+                        $songFile = $request->file("songFile_" . $i);
+                        $filename =
+                            date("YmdHi") . $songFile->getClientOriginalName();
+                        $songFile->move(
+                            public_path("storage/upload/song_src"),
+                            $filename
+                        );
+                        FFMpeg::fromDisk("final_audio")
+                            ->open($filename)
+                            ->export()
+                            ->addFilter([
+                                "-strict",
+                                "-2",
+                                "-acodec",
+                                "vorbis",
+                                "-b:a",
+                                "320k",
+                            ])
+                            ->save($song->song_id . ".ogg");
+                        @unlink(
+                            public_path("storage/upload/song_src/") .
+                                "/" .
+                                $filename
+                        );
+                        $duration = FFMpeg::fromDisk("final_audio")
+                            ->open($song->song_id . ".ogg")
+                            ->getDurationInSeconds();
+                        $song->duration = $duration;
+                        $song->save();
+                        FFMpeg::cleanupTemporaryFiles();
+                    } catch (EncodingException $exception) {
+                        $command = $exception->getCommand();
+                        $errorLog = $exception->getErrorOutput();
+                        dd($command, $errorLog);
+                    }
+                }
+                $song->album_id = $album_id;
+                $song->save();
+            }
+            $album->save();
+        }
     }
 
     public function getUploadedAlbum()
@@ -224,10 +225,13 @@ class AlbumController extends Controller
         $album->release_year = $albumData->release_year;
         $album->type = $albumData->type;
         $album->save();
-        return response()->json([
-            "status" => "success",
-            "message" => "Album updated successfully!",
-        ]);
+        return response()->json(
+            [
+                "status" => "success",
+                "message" => "Album updated successfully!",
+            ],
+            200
+        );
     }
 
     public function deleteAlbum($id)

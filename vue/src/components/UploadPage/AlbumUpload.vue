@@ -271,7 +271,7 @@ export default defineComponent({
       };
       xhr.onload = () => {
         if (xhr.status === 200) {
-          const response = xhr.response.json();
+          const response = JSON.parse(xhr.response);
           if (response.status == "success") {
             this.dialogWaring.content = response.message;
             this.dialogWaring.show = true;
@@ -286,6 +286,7 @@ export default defineComponent({
           this.dialogWaring.content = "Something went wrong";
           this.dialogWaring.show = true;
           this.dialogWaring.mode = "warning";
+          this.dialogProgress.progress = 0;
         }
       };
       xhr.send(albumForm);

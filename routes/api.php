@@ -1,5 +1,8 @@
 <?php
 
+use Monolog\Logger;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SongController;
@@ -10,8 +13,11 @@ use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\AlbumAdminController;
+use App\Http\Controllers\ArtistAdminController;
+use App\Http\Controllers\StaticAdminController;
 use App\Http\Controllers\admin\SongAdminController;
 use App\Http\Controllers\admin\UserAdminController;
+use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -194,11 +200,11 @@ Route::middleware("auth:sanctum")->group(function () {
                 Route::post("/{id}/role/update", [
                     UserAdminController::class,
                     "updateRole",
-                ]);
+                ])->middleware(["adminAccess"]);
                 Route::delete("/{id}/delete", [
                     UserAdminController::class,
                     "deleteUser",
-                ]);
+                ])->middleware(["adminAccess"]);
             });
 
             Route::prefix("songs")->group(function () {
@@ -222,11 +228,32 @@ Route::middleware("auth:sanctum")->group(function () {
                     AlbumAdminController::class,
                     "songAdd",
                 ]);
+                Route::get("/addable", [
+                    AlbumAdminController::class,
+                    "getSongNotInAlbum",
+                ]);
                 Route::get("/{id}", [AlbumAdminController::class, "show"]);
+                Route::get("/{id}/song", [AlbumAdminController::class, "song"]);
                 Route::delete("/{id}/delete", [
                     AlbumAdminController::class,
                     "delete",
                 ]);
+            });
+
+            Route::prefix("artists")->group(function () {
+                Route::get("/", [ArtistAdminController::class, "getAll"]);
+                Route::post("/update", [
+                    ArtistAdminController::class,
+                    "update",
+                ]);
+                Route::get("/{id}", [ArtistAdminController::class, "show"]);
+                Route::delete("/{id}/delete", [
+                    ArtistAdminController::class,
+                    "delete",
+                ]);
+            });
+            Route::prefix("static")->group(function () {
+                Route::get("/logs", [LogViewerController::class, "index"]);
             });
         });
 });

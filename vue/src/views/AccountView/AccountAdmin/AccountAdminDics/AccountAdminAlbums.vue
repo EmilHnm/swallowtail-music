@@ -1,19 +1,7 @@
 <template>
-  <teleport to="body">
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseLineLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
-  </teleport>
-  <div class="admin-songs-container" ref="main">
-    <h3>Songs List</h3>
-    <div class="tool">
+  <div class="admin-albums-container" ref="main">
+    <h3>Albums List</h3>
+    <div class="tool" v-if="!isLoading && albumsList.length !== 0">
       <div class="item-count">
         <label for="itemPerPage">Item Per Page</label>
         <select name="itemPerPage" id="itemPerPage" v-model="itemPerPage">
@@ -38,7 +26,7 @@
       </div>
     </div>
     <div class="data">
-      <table v-if="albumsList.length !== 0">
+      <table v-if="albumsList.length !== 0 && !isLoading">
         <thead>
           <tr>
             <td>#</td>
@@ -77,8 +65,9 @@
           </tr>
         </tbody>
       </table>
+      <BaseCircleLoad v-if="isLoading" />
     </div>
-    <div class="pagination">
+    <div class="pagination" v-if="!isLoading && albumsList.length !== 0">
       <BaseTableBodyPagination
         :totalPages="totalPages"
         :currentPage="currentPage"
@@ -89,12 +78,14 @@
         @onGoToLastPage="onGoToLastPage"
       />
     </div>
+    <div class="no-results" v-if="!isLoading && albumsList.length <= 0">
+      <h3>No results</h3>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
-import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import BaseTableBodyPagination from "@/components/UI/BaseTableBodyPagination.vue";
 import type { album } from "@/model/albumModel";
 import type { user } from "@/model/userModel";
@@ -141,12 +132,20 @@ export default defineComponent({
     },
     loadAlbumList() {
       this.isLoading = true;
+      if (!this.filterController) {
+        this.filterController = new AbortController();
+      } else {
+        this.filterController.abort();
+        this.filterController = new AbortController();
+      }
+      this.filterSignal = this.filterController.signal;
       this.getAllAlbums({
         token: this.token,
         page: this.currentPage,
         filterText: this.filterText,
         filterType: this.filterType,
         itemPerPage: this.itemPerPage,
+        currentPage: this.currentPage,
       })
         .then((res: any) => res.json())
         .then((res: any) => {
@@ -189,15 +188,21 @@ export default defineComponent({
     filterText() {
       this.loadAlbumList();
     },
+    currentPage() {
+      this.loadAlbumList();
+    },
   },
-  components: { BaseTableBodyPagination, BaseFlatDialog, BaseLineLoad },
+  components: {
+    BaseTableBodyPagination,
+    BaseCircleLoad,
+  },
 });
 </script>
 
 <style lang="scss" scoped>
 $mobile-width: 480px;
 $tablet-width: 768px;
-.admin-songs-container {
+.admin-albums-container {
   width: 100%;
   display: flex;
   flex-direction: column;

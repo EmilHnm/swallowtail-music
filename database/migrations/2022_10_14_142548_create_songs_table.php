@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -13,12 +12,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('songs', function (Blueprint $table) {
+        Schema::create("songs", function (Blueprint $table) {
             $table->id();
-            $table->string("song_id")->nullable()->unique();
+            $table
+                ->string("song_id")
+                ->nullable()
+                ->unique();
             $table->string("user_id")->nullable();
             $table->string("album_id")->nullable();
             $table->string("title")->nullable();
+            $table->string("sub_title")->nullable();
             $table->integer("listens")->nullable();
             $table->integer("duration")->nullable();
             $table->string("display")->nullable();
@@ -33,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('songs');
+        Schema::dropIfExists("songs");
     }
 };
