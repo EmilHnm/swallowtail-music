@@ -1,7 +1,7 @@
 <template>
   <div class="admin-albums-container" ref="main">
     <h3>Albums List</h3>
-    <div class="tool" v-if="!isLoading && albumsList.length !== 0">
+    <div class="tool">
       <div class="item-count">
         <label for="itemPerPage">Item Per Page</label>
         <select name="itemPerPage" id="itemPerPage" v-model="itemPerPage">

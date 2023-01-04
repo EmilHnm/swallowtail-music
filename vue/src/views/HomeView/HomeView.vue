@@ -689,7 +689,6 @@ export default {
     <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
     <main>
       <router-view
-        :slot="{ Component }"
         @updatePlaylist="loadPlaylist"
         @deletePlaylist="removePlaylist"
         @playPlaylist="playPlaylist"

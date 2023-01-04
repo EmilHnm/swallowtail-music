@@ -276,6 +276,17 @@ export default defineComponent({
             this.dialogWaring.content = response.message;
             this.dialogWaring.show = true;
             this.dialogWaring.mode = "anouncement";
+            this.albumImage = null;
+            this.albumImageTempPath = "";
+            this.albumTitle = "";
+            this.albumReleaseYear = "";
+            this.albumType = "";
+            this.songForm = [
+              {
+                songName: "",
+                songFile: null,
+              },
+            ];
           } else {
             this.dialogWaring.content = response.message;
             this.dialogWaring.show = true;

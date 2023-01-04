@@ -286,7 +286,7 @@ export const adminModule = {
         {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "pplication/json",
             Authorization: `Bearer ${payload.userToken}`,
             Accept: "application/json",
           },
