@@ -5,10 +5,6 @@ namespace App\Http\Controllers\admin;
 use App\Models\Song;
 use App\Models\User;
 use App\Models\Album;
-use App\Models\LikedSong;
-use App\Models\SongGenre;
-use App\Models\SongArtist;
-use App\Models\PlaylistSong;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -120,21 +116,6 @@ class UserAdminController extends Controller
                     404
                 );
             } else {
-                // $albums = Album::where('user_id', $id)->get();
-                // foreach ($albums as $album) {
-                //     $album->user_id = Auth::user()->user_id;
-                //     $album->save();
-                // }
-                // $songs = Song::where('user_id', $id)->get();
-                // foreach ($songs as $song) {
-                //     $song->user_id = Auth::user()->user_id;
-                //     $song->save();
-                // }
-                // $playlists = Playlist::where('user_id', $id)->get();
-                // foreach ($playlists as $playlist) {
-                //     $playlist->song()->detach();
-                // }
-                // Playlist::where('user_id', $id)->delete();
                 if ($user->role === "Admin") {
                     return response()->json(
                         [

@@ -19,13 +19,6 @@ class AlbumController extends Controller
     public function uploadAlbum(Request $request)
     {
         try {
-            return response()->json([
-                "status" => "success",
-                "message" => 'Album uploaded successfully!
-            All songs uploaded will be ready in some minutes and saved as private by default when finish.
-            Please go to Account/Upload Management/Song to update song infomation.',
-            ]);
-        } finally {
             $album_id = "album_" . Str::random(8) . Carbon::now()->timestamp;
             $name = $request->albumTitle;
             $release_year = $request->albumReleaseYear;
@@ -51,7 +44,13 @@ class AlbumController extends Controller
             $album->user_id = Auth::user()->user_id;
             $album->release_year = $release_year;
             $album->type = $type;
-
+            return response()->json([
+                "status" => "success",
+                "message" => 'Album uploaded successfully!
+            All songs uploaded will be ready in some minutes and saved as private by default when finish.
+            Please go to Account/Upload Management/Song to update song infomation.',
+            ]);
+        } finally {
             for ($i = 0; $i < $songCount; $i++) {
                 $song = new Song();
                 $song->song_id = "song_" . date("YmdHi") . Str::random(10);

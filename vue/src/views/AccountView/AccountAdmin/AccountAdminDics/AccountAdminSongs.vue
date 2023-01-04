@@ -49,7 +49,7 @@
               {{ data.user.name }}
             </td>
             <td v-if="mainWidth > 600">
-              {{ data.album.name }}
+              {{ data.album ? data.album.name : "No album" }}
             </td>
             <td>
               {{ new Date(data.created_at).toLocaleDateString() }}

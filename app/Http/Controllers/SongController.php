@@ -25,105 +25,112 @@ class SongController extends Controller
 
     public function uploadSong(Request $request)
     {
-        $artist = json_decode($request->artist);
-        $newArtist = json_decode($request->newArtist);
-        $genre = json_decode($request->genre);
-        $newGenre = json_decode($request->newGenre);
+        try {
+            $artist = json_decode($request->artist);
+            $newArtist = json_decode($request->newArtist);
+            $genre = json_decode($request->genre);
+            $newGenre = json_decode($request->newGenre);
 
-        $song = new Song();
-        $song->song_id = "song_" . date("YmdHi") . Str::random(10);
-        $song->user_id = Auth::user()->user_id;
-        $song->title = $request->songName;
-        $song->display = $request->displayMode;
-        $song->listens = 0;
+            $song = new Song();
+            $song->song_id = "song_" . date("YmdHi") . Str::random(10);
+            $song->user_id = Auth::user()->user_id;
+            $song->title = $request->songName;
+            $song->display = $request->displayMode;
+            $song->listens = 0;
 
-        foreach ($artist as $id) {
-            $song_artist = new SongArtist();
-            $song_artist->song_id = $song->song_id;
-            $song_artist->artist_id = $id;
-            $song_artist->save();
-        }
-
-        foreach ($newArtist as $name) {
-            $check = Artist::where("name", $name)->first();
-            if ($check) {
+            foreach ($artist as $id) {
                 $song_artist = new SongArtist();
                 $song_artist->song_id = $song->song_id;
-                $song_artist->artist_id = $check->artist_id;
+                $song_artist->artist_id = $id;
                 $song_artist->save();
-                continue;
             }
-            $artist = new Artist();
-            $artist->artist_id = "artist_" . Str::random(10);
-            $artist->name = $name;
-            $artist->image_path = "";
-            $artist->save();
-            $song_artist = new SongArtist();
-            $song_artist->artist_id = $artist->artist_id;
-            $song_artist->song_id = $song->song_id;
-            $song_artist->save();
-        }
 
-        foreach ($genre as $id) {
-            $song_genre = new SongGenre();
-            $song_genre->song_id = $song->song_id;
-            $song_genre->genre_id = $id;
-            $song_genre->save();
-        }
+            foreach ($newArtist as $name) {
+                $check = Artist::where("name", $name)->first();
+                if ($check) {
+                    $song_artist = new SongArtist();
+                    $song_artist->song_id = $song->song_id;
+                    $song_artist->artist_id = $check->artist_id;
+                    $song_artist->save();
+                    continue;
+                }
+                $artist = new Artist();
+                $artist->artist_id = "artist_" . Str::random(10);
+                $artist->name = $name;
+                $artist->image_path = "";
+                $artist->save();
+                $song_artist = new SongArtist();
+                $song_artist->artist_id = $artist->artist_id;
+                $song_artist->song_id = $song->song_id;
+                $song_artist->save();
+            }
 
-        foreach ($newGenre as $name) {
-            $check = Genre::where('$name', $name)->first();
-            if ($check) {
+            foreach ($genre as $id) {
                 $song_genre = new SongGenre();
                 $song_genre->song_id = $song->song_id;
-                $song_genre->genre_id = $check->genre_id;
+                $song_genre->genre_id = $id;
                 $song_genre->save();
-                continue;
             }
-            $genre = new Genre();
-            $genre->genre_id = "genre_" . Str::random(10);
-            $genre->name = $name;
-            $genre->save();
-            $song_genre = new SongGenre();
-            $song_genre->genre_id = $genre->genre_id;
-            $song_genre->song_id = $song->song_id;
-            $song_genre->save();
-        }
 
-        if ($request->file("songFile")) {
-            try {
-                echo json_encode([
-                    "status" => "success",
-                    "message" =>
-                        "Song uploaded successfully. It will ready in some minutes.",
-                ]);
-                // dd($request->file('songFile'));
-                $file = $request->file("songFile");
-                $filename = date("YmdHi") . $file->getClientOriginalName();
-                $file->move(public_path("storage/upload/song_src"), $filename);
-                FFMpeg::fromDisk("final_audio")
-                    ->open($filename)
-                    ->export()
-                    ->addFilter([
-                        "-strict",
-                        "-2",
-                        "-acodec",
-                        "vorbis",
-                        "-b:a",
-                        "320k",
-                    ])
-                    ->save($song->song_id . ".ogg");
-                @unlink(public_path("storage/upload/song_src/") . $filename);
-                $duration = FFMpeg::fromDisk("final_audio")
-                    ->open($song->song_id . ".ogg")
-                    ->getDurationInSeconds();
-                $song->duration = $duration;
-                $song->save();
-                FFMpeg::cleanupTemporaryFiles();
-            } catch (EncodingException $exception) {
-                $command = $exception->getCommand();
-                $errorLog = $exception->getErrorOutput();
-                dd($command, $errorLog);
+            foreach ($newGenre as $name) {
+                $check = Genre::where('$name', $name)->first();
+                if ($check) {
+                    $song_genre = new SongGenre();
+                    $song_genre->song_id = $song->song_id;
+                    $song_genre->genre_id = $check->genre_id;
+                    $song_genre->save();
+                    continue;
+                }
+                $genre = new Genre();
+                $genre->genre_id = "genre_" . Str::random(10);
+                $genre->name = $name;
+                $genre->save();
+                $song_genre = new SongGenre();
+                $song_genre->genre_id = $genre->genre_id;
+                $song_genre->song_id = $song->song_id;
+                $song_genre->save();
+            }
+            return json_encode([
+                "status" => "success",
+                "message" =>
+                    "Song uploaded successfully. It will ready in some minutes.",
+            ]);
+        } finally {
+            if ($request->file("songFile")) {
+                try {
+                    // dd($request->file('songFile'));
+                    $file = $request->file("songFile");
+                    $filename = date("YmdHi") . $file->getClientOriginalName();
+                    $file->move(
+                        public_path("storage/upload/song_src"),
+                        $filename
+                    );
+                    FFMpeg::fromDisk("final_audio")
+                        ->open($filename)
+                        ->export()
+                        ->addFilter([
+                            "-strict",
+                            "-2",
+                            "-acodec",
+                            "vorbis",
+                            "-b:a",
+                            "320k",
+                        ])
+                        ->save($song->song_id . ".ogg");
+                    @unlink(
+                        public_path("storage/upload/song_src/") . $filename
+                    );
+                    $duration = FFMpeg::fromDisk("final_audio")
+                        ->open($song->song_id . ".ogg")
+                        ->getDurationInSeconds();
+                    $song->duration = $duration;
+                    $song->save();
+                    FFMpeg::cleanupTemporaryFiles();
+                } catch (EncodingException $exception) {
+                    $command = $exception->getCommand();
+                    $errorLog = $exception->getErrorOutput();
+                    dd($command, $errorLog);
+                }
             }
         }
     }

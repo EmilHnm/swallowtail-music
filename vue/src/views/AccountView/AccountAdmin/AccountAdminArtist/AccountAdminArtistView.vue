@@ -84,7 +84,7 @@
             </td>
             <td>
               <button class="show" @click="showArtist(artist.artist_id)">
-                Show
+                Edit
               </button>
               <button
                 class="delete"

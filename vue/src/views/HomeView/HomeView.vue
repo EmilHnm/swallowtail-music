@@ -688,7 +688,8 @@ export default {
   <div class="main-body" :class="{ full: Object.keys(audioList).length <= 0 }">
     <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
     <main>
-      <RouterView
+      <router-view
+        :slot="{ Component }"
         @updatePlaylist="loadPlaylist"
         @deletePlaylist="removePlaylist"
         @playPlaylist="playPlaylist"
@@ -704,7 +705,7 @@ export default {
         @addLikedSongToQueue="addLikedSongToQueue"
         @addToQueue="addToQueue"
         @playSong="playSong"
-      />
+      ></router-view>
     </main>
     <HomeViewRightSideBar
       v-if="Object.keys(audioList).length > 0"

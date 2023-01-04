@@ -3,7 +3,11 @@
     <div class="now_playing__info">
       <div class="now_playing__info--cover" @click="navigateToPlaying">
         <img
-          :src="`${environment.album_cover}/${playingAudio.album.image_path}`"
+          :src="
+            playingAudio.album
+              ? `${environment.album_cover}/${playingAudio.album.image_path}`
+              : `${environment.default}/no_image.jpg`
+          "
           alt="cover"
         />
       </div>

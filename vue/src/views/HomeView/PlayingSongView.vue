@@ -12,7 +12,11 @@
           :class="{ 'animation-pause': !isPlaying }"
         >
           <img
-            :src="`${environment.album_cover}/${playingAudio.album.image_path}`"
+            :src="
+              playingAudio.album
+                ? `${environment.album_cover}/${playingAudio.album.image_path}`
+                : `${environment.default}/no_image.jpg`
+            "
             alt=""
           />
         </div>

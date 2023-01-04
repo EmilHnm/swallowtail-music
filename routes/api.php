@@ -1,8 +1,5 @@
 <?php
 
-use Monolog\Logger;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SongController;
@@ -17,7 +14,6 @@ use App\Http\Controllers\ArtistAdminController;
 use App\Http\Controllers\StaticAdminController;
 use App\Http\Controllers\admin\SongAdminController;
 use App\Http\Controllers\admin\UserAdminController;
-use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -253,7 +249,10 @@ Route::middleware("auth:sanctum")->group(function () {
                 ]);
             });
             Route::prefix("static")->group(function () {
-                Route::get("/logs", [LogViewerController::class, "index"]);
+                Route::get("/logs", [
+                    StaticAdminController::class,
+                    "getLogger",
+                ]);
             });
         });
 });
