@@ -102,8 +102,8 @@
               :to="{ name: 'artistPage', params: { id: artistitem.artist_id } }"
               v-for="(artistitem, index) in data.artist"
               :key="artistitem.artist_id"
-              >{{ artistitem.name }}
-              <span v-if="index !== data.artist.length - 1">,</span>
+              >{{ artistitem.name
+              }}<span v-if="index !== data.artist.length - 1">,</span>
             </router-link>
           </span>
         </div>
@@ -376,6 +376,7 @@ $tablet-width: 768px;
   }
   &__song {
     width: 100%;
+    text-align: center;
     &--img {
       aspect-ratio: 1/1;
       width: calc(100% - 40px);
@@ -399,6 +400,7 @@ $tablet-width: 768px;
 
         &.artist {
           display: flex;
+          flex-wrap: wrap;
           a {
             color: var(--text-color-primary);
             text-decoration: none;
@@ -423,7 +425,8 @@ $tablet-width: 768px;
       span {
         display: block;
         width: 100%;
-        font-size: 0.8rem;
+        font-size: 1rem;
+        font-weight: 700;
         color: var(--text-color-secondary);
         overflow: hidden;
         white-space: nowrap;

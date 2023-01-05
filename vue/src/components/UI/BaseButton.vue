@@ -17,7 +17,7 @@ export default defineComponent({
       default: "",
     },
     type: {
-      type: String,
+      type: String as () => "button" | "submit" | "reset" | undefined,
       default: "button",
     },
   },

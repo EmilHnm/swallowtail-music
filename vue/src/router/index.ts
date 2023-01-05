@@ -288,6 +288,14 @@ const router = createRouter({
                   "../views/AccountView/AccountAdmin/AccountAdminArtist/AccountAdminArtistView.vue"
                 ),
             },
+            {
+              path: "artist/:id",
+              name: "accountAdminArtistEdit",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountAdmin/AccountAdminArtist/AccountAdminArtistEdit.vue"
+                ),
+            },
           ],
         },
       ],
@@ -346,7 +354,6 @@ router.beforeEach((to, from, next) => {
             if (to.meta.requiresAuth) {
               next();
             } else {
-              console.log("redirect to home 1");
               next({ name: "home" });
             }
           }

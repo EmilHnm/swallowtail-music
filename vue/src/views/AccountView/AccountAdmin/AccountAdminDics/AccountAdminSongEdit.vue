@@ -301,7 +301,6 @@ export default {
   },
   created() {
     this.song_id = this.$route.params.id;
-    console.log(this.song_id);
     if (this.song_id) {
       this.isLoading = true;
       this.getSong({ token: this.token, song_id: this.song_id })

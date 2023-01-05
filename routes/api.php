@@ -242,10 +242,15 @@ Route::middleware("auth:sanctum")->group(function () {
                     ArtistAdminController::class,
                     "update",
                 ]);
+                Route::post("/group", [ArtistAdminController::class, "group"]);
                 Route::get("/{id}", [ArtistAdminController::class, "show"]);
                 Route::delete("/{id}/delete", [
                     ArtistAdminController::class,
                     "delete",
+                ]);
+                Route::get("/{id}/song", [
+                    ArtistAdminController::class,
+                    "getArtistSong",
                 ]);
             });
             Route::prefix("static")->group(function () {

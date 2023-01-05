@@ -215,7 +215,6 @@ export default defineComponent({
     }),
     filteredUser(): user[] {
       return this.users.filter((user) => {
-        console.log(user.user_id);
         return (
           user.name.toLowerCase().includes(this.filterText.toLowerCase()) ||
           user.user_id

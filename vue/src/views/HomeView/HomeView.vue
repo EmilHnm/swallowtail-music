@@ -206,14 +206,13 @@ export default {
         this.audioList.splice(index, 1);
       }
       if (index < this.audioIndex) {
-        this.audioIndex++;
+        this.audioIndex--;
       }
     },
     // NOTE:visualizer
     renderFrame() {
-      if (this.frequencyData) {
-        if (this.analayzer)
-          this.analayzer.getByteFrequencyData(this.frequencyData);
+      if (this.frequencyData && this.analayzer) {
+        this.analayzer.getByteFrequencyData(this.frequencyData);
       }
     },
     // NOTE:playlist
@@ -685,7 +684,7 @@ export default {
     </BaseDialog>
   </teleport>
   <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
-  <div class="main-body" :class="{ full: Object.keys(audioList).length <= 0 }">
+  <div class="main-body" :class="{ full: audioList.length <= 0 }">
     <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
     <main>
       <router-view
@@ -704,7 +703,8 @@ export default {
         @addLikedSongToQueue="addLikedSongToQueue"
         @addToQueue="addToQueue"
         @playSong="playSong"
-      ></router-view>
+      >
+      </router-view>
     </main>
     <HomeViewRightSideBar
       v-if="Object.keys(audioList).length > 0"

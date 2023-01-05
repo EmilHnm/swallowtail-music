@@ -294,6 +294,45 @@ export const adminModule = {
         }
       );
     },
+    getArtist(context: any, payload: { userToken: string; artistId: string }) {
+      return fetch(`${environment.api}/admin/artists/${payload.artistId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+        },
+      });
+    },
+    updateArtist(
+      context: any,
+      payload: { userToken: string; artistData: FormData }
+    ) {
+      return fetch(`${environment.api}/admin/artists/update`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+        body: payload.artistData,
+      });
+    },
+    groupArtist(
+      context: any,
+      payload: { userToken: string; from: string; to: string }
+    ) {
+      return fetch(`${environment.api}/admin/artists/group`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          from: payload.from,
+          to: payload.to,
+        }),
+      });
+    },
     deleteArtist(
       context: any,
       payload: { userToken: string; artistId: string }
