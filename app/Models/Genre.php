@@ -9,7 +9,7 @@ class Genre extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'genre_id';
+    protected $primaryKey = "genre_id";
     public $incrementing = false;
     public $timestamps = true;
 
@@ -17,9 +17,9 @@ class Genre extends Model
     {
         return $this->belongsToMany(
             Song::class,
-            'song_genres',
-            'song_id',
-            'genre_id'
-        );
+            "song_genres",
+            "genre_id",
+            "song_id"
+        )->withTimestamps();
     }
 }

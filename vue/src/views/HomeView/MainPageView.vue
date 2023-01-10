@@ -45,7 +45,9 @@
       </div>
       <div class="latest-album">
         <h2>Latest Album Update</h2>
-        <BaseCircleLoad v-if="isLatestAlbumLoading" />
+        <BaseHorizontalScroll v-if="isLatestAlbumLoading">
+          <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
+        /></BaseHorizontalScroll>
         <BaseHorizontalScroll v-else>
           <BaseCardAlbum
             v-for="album in latestAlbums"
@@ -63,7 +65,9 @@
     <div class="top">
       <div class="top__album">
         <h2>Top Album All Time</h2>
-        <BaseCircleLoad v-if="isTopAlbumLoading" />
+        <BaseHorizontalScroll v-if="isTopAlbumLoading">
+          <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
+        /></BaseHorizontalScroll>
         <BaseHorizontalScroll v-else>
           <BaseCardAlbum
             v-for="album in topAlbums"
@@ -80,7 +84,9 @@
       </div>
       <div class="top__artist">
         <h2>Top Artist All Time</h2>
-        <BaseCircleLoad v-if="isTopArtistLoading" />
+        <BaseHorizontalScroll v-if="isTopArtistLoading">
+          <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
+        /></BaseHorizontalScroll>
         <BaseHorizontalScroll>
           <BaseCardArtist
             v-for="artist in topArtist"
@@ -126,6 +132,7 @@
 import { defineComponent } from "vue";
 import IconPlay from "../../components/icons/IconPlay.vue";
 import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
+import BaseSkeletonsLoadingCard from "../../components/UI/BaseSkeletonsLoadingCard.vue";
 import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
 import { mapActions, mapGetters } from "vuex";
@@ -160,6 +167,7 @@ export default defineComponent({
     BaseCardArtist,
     BaseCardAlbum,
     BaseCircleLoad,
+    BaseSkeletonsLoadingCard,
   },
   inject: {
     userPlaylist: {

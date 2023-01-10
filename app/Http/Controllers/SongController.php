@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Models\Song;
 use App\Models\Genre;
 use App\Models\Artist;
@@ -11,11 +10,9 @@ use App\Models\SongGenre;
 use App\Models\SongArtist;
 use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
-use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redis;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
 
@@ -371,44 +368,9 @@ class SongController extends Controller
     {
         if ($request->query->has("query")) {
             $query = $request->query->get("query");
-            $songs = DB::table("songs")
-                ->join(
-                    "song_artists",
-                    "songs.song_id",
-                    "=",
-                    "song_artists.song_id"
-                )
-                ->join(
-                    "artists",
-                    "song_artists.artist_id",
-                    "=",
-                    "artists.artist_id"
-                )
-                ->join("albums", "songs.album_id", "=", "albums.album_id")
-                ->leftJoin(
-                    "liked_songs",
-                    "songs.song_id",
-                    "=",
-                    "liked_songs.song_id"
-                )
-                ->select(
-                    "songs.song_id",
-                    "songs.title",
-                    "songs.song_id",
-                    "songs.duration",
-                    "songs.listens",
-                    "artists.artist_id",
-                    "artists.name as artist_name",
-                    "albums.name as album_name",
-                    "albums.album_id as album_id",
-                    "albums.image_path as image_path",
-                    DB::raw(
-                        'CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked'
-                    )
-                )
+            $songs = Song::with(["artist", "album", "like"])
                 ->where("songs.title", "like", "%" . $query . "%")
                 ->orWhere("songs.sub_title", "like", "%" . $query . "%")
-                ->where("songs.display", "=", "public")
                 ->get();
             return response()->json([
                 "status" => "success",

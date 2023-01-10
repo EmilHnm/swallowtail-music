@@ -296,6 +296,22 @@ const router = createRouter({
                   "../views/AccountView/AccountAdmin/AccountAdminArtist/AccountAdminArtistEdit.vue"
                 ),
             },
+            {
+              path: "genres",
+              name: "accountAdminGenres",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountAdmin/AccountAdminGenre/AccountAdminGenreView.vue"
+                ),
+            },
+            {
+              path: "genre/:id",
+              name: "accountAdminGenreEdit",
+              component: () =>
+                import(
+                  "../views/AccountView/AccountAdmin/AccountAdminGenre/AccountAdminGenreEdit.vue"
+                ),
+            },
           ],
         },
       ],

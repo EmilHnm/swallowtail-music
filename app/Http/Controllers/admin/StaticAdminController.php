@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use App\Http\Controllers\Controller;
 use Illuminate\Pagination\Paginator;
-use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 class StaticAdminController extends Controller
 {

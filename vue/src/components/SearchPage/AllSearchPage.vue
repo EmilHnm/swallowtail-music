@@ -1,14 +1,11 @@
 <template>
   <div class="search-result__container">
-    <div
-      class="search-result__container--song"
-      v-if="Object.keys(songResult).length > 0"
-    >
+    <div class="search-result__container--song" v-if="songResult.length > 0">
       <h3>Song</h3>
       <div v-for="index in 5" :key="index">
         <BaseSongItem
-          v-if="index <= Object.keys(songResult).length"
-          :data="Object.values(songResult)[index - 1]"
+          v-if="index <= songResult.length"
+          :data="songResult[index - 1]"
         />
       </div>
       <span @click="changeSearchPage('SongSearchPage')">See more</span>
@@ -66,29 +63,22 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
-import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
-import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
-import BaseCardUser from "../../components/UI/BaseCardUser.vue";
-import BaseSongItem from "../UI/BaseSongItem.vue";
+import BaseHorizontalScroll from "@/components/UI/BaseHorizontalScroll.vue";
+import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
+import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
+import BaseCardUser from "@/components/UI/BaseCardUser.vue";
+import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { user } from "@/model/userModel";
 import { environment } from "@/environment/environment";
+import type { song } from "@/model/songModel";
+import type { like } from "@/model/likeModel";
 
-type songPlaylist = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    added_date?: string;
-    album_name: string;
-    album_id: string;
-    image_path: string;
-    duration: number;
-    listens?: number;
-  }[];
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
 };
 
 type albumData = album & { song_count: number };
@@ -97,7 +87,7 @@ type userData = user & { song_count: number };
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
-    songResult: songPlaylist;
+    songResult: songData[];
     albumResult: albumData[];
     artistResult: artist[];
     userResult: userData[];

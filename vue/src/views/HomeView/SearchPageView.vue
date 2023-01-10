@@ -19,10 +19,7 @@
           <span v-else>All</span>
         </BaseButton>
       </div>
-      <div
-        class="search-result__tag--song"
-        v-if="Object.keys(songResult).length > 0"
-      >
+      <div class="search-result__tag--song" v-if="songResult.length > 0">
         <BaseButton @click="changeComponent('SongSearchPage')">
           <BaseDotLoading v-if="searching.song" />
           <span v-else>Song</span>
@@ -70,31 +67,24 @@
 
 <script lang="ts">
 import { computed, defineComponent } from "vue";
-import BaseInput from "../../components/UI/BaseInput.vue";
-import BaseButton from "../../components/UI/BaseButton.vue";
-import AllSearchPage from "../../components/SearchPage/AllSearchPage.vue";
-import ArtistSearchPage from "../../components/SearchPage/ArtistSearchPage.vue";
-import AlbumSearchPage from "../../components/SearchPage/AlbumSearchPage.vue";
-import UserSearchPage from "../../components/SearchPage/UserSearchPage.vue";
-import SongSearchPage from "../../components/SearchPage/SongSearchPage.vue";
+import BaseInput from "@/components/UI/BaseInput.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
+import AllSearchPage from "@/components/SearchPage/AllSearchPage.vue";
+import ArtistSearchPage from "@/components/SearchPage/ArtistSearchPage.vue";
+import AlbumSearchPage from "@/components/SearchPage/AlbumSearchPage.vue";
+import UserSearchPage from "@/components/SearchPage/UserSearchPage.vue";
+import SongSearchPage from "@/components/SearchPage/SongSearchPage.vue";
 import { mapActions, mapGetters } from "vuex";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
+import type { song } from "@/model/songModel";
+import type { like } from "@/model/likeModel";
 
-type songListData = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    added_date?: string;
-    album_name: string;
-    album_id: string;
-    image_path: string;
-    duration: number;
-    listens?: number;
-  }[];
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
 };
 
 type albumData = album & { song_count: number };
@@ -119,7 +109,7 @@ export default defineComponent({
   ],
   data() {
     return {
-      songResult: {} as songListData,
+      songResult: [] as songData[],
       albumResult: [] as albumData[],
       artistResult: [] as artist[],
       userResult: [],
@@ -227,11 +217,7 @@ export default defineComponent({
         .then((res) => {
           this.searching.song = false;
           if (res.status === "success") {
-            this.songResult = res.songs.reduce((r: any, a: any) => {
-              r[a.song_id] = r[a.song_id] || [];
-              r[a.song_id].push(a);
-              return r;
-            }, Object.create(null));
+            this.songResult = res.songs;
           }
         });
     },
@@ -331,7 +317,7 @@ export default defineComponent({
         this.onSearchArtist(this.searchText);
         this.onSearchUser(this.searchText);
       } else {
-        this.songResult = {};
+        this.songResult = [];
         this.albumResult = [];
         this.artistResult = [];
         this.userResult = [];

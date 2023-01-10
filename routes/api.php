@@ -10,10 +10,11 @@ use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\AlbumAdminController;
-use App\Http\Controllers\ArtistAdminController;
-use App\Http\Controllers\StaticAdminController;
 use App\Http\Controllers\admin\SongAdminController;
 use App\Http\Controllers\admin\UserAdminController;
+use App\Http\Controllers\admin\GenreAdminController;
+use App\Http\Controllers\admin\ArtistAdminController;
+use App\Http\Controllers\admin\StaticAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -251,6 +252,20 @@ Route::middleware("auth:sanctum")->group(function () {
                 Route::get("/{id}/song", [
                     ArtistAdminController::class,
                     "getArtistSong",
+                ]);
+            });
+            Route::prefix("genres")->group(function () {
+                Route::get("/", [GenreAdminController::class, "getAll"]);
+                Route::post("/update", [GenreAdminController::class, "update"]);
+                Route::post("/group", [GenreAdminController::class, "group"]);
+                Route::get("/{id}", [GenreAdminController::class, "get"]);
+                Route::get("/{id}/songs", [
+                    GenreAdminController::class,
+                    "getSong",
+                ]);
+                Route::delete("/{id}/delete", [
+                    GenreAdminController::class,
+                    "delete",
                 ]);
             });
             Route::prefix("static")->group(function () {

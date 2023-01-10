@@ -760,6 +760,7 @@ export default {
   main {
     flex: 1;
     overflow-y: auto;
+    user-select: none;
   }
 }
 </style>

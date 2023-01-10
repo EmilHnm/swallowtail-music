@@ -55,40 +55,27 @@
         <thead>
           <tr>
             <td>#</td>
-            <td>Image</td>
-            <td>Artist Name</td>
-            <td v-if="mainWidth > 600">Added Date</td>
+            <td>Id</td>
+            <td>Name</td>
             <td v-if="mainWidth > 500">Song Count</td>
             <td>Control</td>
           </tr>
         </thead>
         <tbody v-if="!isListLoading">
-          <tr v-for="(artist, index) in artists" :key="artist.artist_id">
-            <td>{{ index + 1 }}</td>
-            <td>
-              <img
-                :src="
-                  artist.image_path
-                    ? `${environment.artist_image}/${artist.image_path}`
-                    : `${environment.default}/no_image.jpg`
-                "
-                alt=""
-              />
-            </td>
-            <td>{{ artist.name }}</td>
+          <tr v-for="(genre, index) in gernes" :key="genre.genre_id">
+            <td>{{ index + 1 + currentPage * itemPerPage }}</td>
+            <td>{{ genre.genre_id }}</td>
+            <td>{{ genre.name }}</td>
             <td v-if="mainWidth > 500">
-              {{ new Date(artist.created_at).toLocaleDateString() }}
-            </td>
-            <td v-if="mainWidth > 600">
-              {{ artist.song_count }}
+              {{ genre.song_count }}
             </td>
             <td>
-              <button class="show" @click="showArtist(artist.artist_id)">
+              <button class="show" @click="editGenre(genre.genre_id)">
                 Edit
               </button>
               <button
                 class="delete"
-                @click="deleteArtistConfirm(artist.artist_id)"
+                @click="deleteGenreConfirm(genre.genre_id)"
               >
                 Delete
               </button>
@@ -115,21 +102,21 @@
 <script lang="ts">
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
-import type { artist } from "@/model/artistModel";
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import BaseTableBodyPagination from "@/components/UI/BaseTableBodyPagination.vue";
+import type { genre } from "@/model/genreModel";
 
-type artistData = artist & {
+type genreData = genre & {
   song_count: number;
 };
 
 export default defineComponent({
   data() {
     return {
-      artists: [] as artistData[],
+      gernes: [] as genreData[],
       filterText: "",
       itemPerPage: 10,
       currentPage: 0,
@@ -146,8 +133,8 @@ export default defineComponent({
       dialogGenreDelete: {
         title: "Warning",
         mode: "warning",
-        artist_id: "",
-        content: `Are you sure you want to delete this artist?`,
+        genre_id: "",
+        content: `Are you sure you want to delete this genre?`,
         show: false,
       },
       isLoading: false,
@@ -157,17 +144,28 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions("admin", ["getArtists", "deleteArtist"]),
-    showArtist(id: string) {
-      this.$router.push({ name: "accountAdminArtistEdit", params: { id: id } });
+    ...mapActions("admin", ["getGenres", "deleteGenre"]),
+    editGenre(id: string) {
+      this.$router.push({ name: "accountAdminGenreEdit", params: { id: id } });
     },
-    deleteArtistConfirm(artist_id: string) {
-      this.dialogGenreDelete.artist_id = artist_id;
+    deleteGenreConfirm(genre_id: string) {
+      this.dialogGenreDelete.genre_id = genre_id;
       this.dialogGenreDelete.show = true;
     },
     onDeleteGenre() {
       this.dialogGenreDelete.show = false;
       this.isLoading = true;
+      this.deleteGenre({
+        userToken: this.token,
+        genre_id: this.dialogGenreDelete.genre_id,
+      })
+        .then(() => {
+          this.isLoading = false;
+          this.onLoadGenres();
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
     },
     closeDialog() {
       this.dialogWaring.show = false;
@@ -190,7 +188,7 @@ export default defineComponent({
     onGoToLastPage() {
       this.currentPage = this.totalPages - 1;
     },
-    onLoadGenre() {
+    onLoadGenres() {
       this.isListLoading = true;
       if (!this.filterController) {
         this.filterController = new AbortController();
@@ -199,7 +197,7 @@ export default defineComponent({
         this.filterController = new AbortController();
       }
       this.filterSignal = this.filterController.signal;
-      this.getArtists({
+      this.getGenres({
         userToken: this.token,
         signal: this.filterSignal,
         query: this.filterText,
@@ -209,9 +207,9 @@ export default defineComponent({
         .then((res) => res.json())
         .then((res) => {
           this.isListLoading = false;
-          this.artists = res.artists.data;
-          this.currentPage = res.artists.current_page - 1;
-          this.totalPages = res.artists.last_page;
+          this.gernes = res.genres.data;
+          this.currentPage = res.genres.current_page - 1;
+          this.totalPages = res.genres.last_page;
         });
     },
   },
@@ -222,17 +220,17 @@ export default defineComponent({
   },
   watch: {
     itemPerPage() {
-      this.onLoadGenre();
+      this.onLoadGenres();
     },
     filterText() {
-      this.onLoadGenre();
+      this.onLoadGenres();
     },
     currentPage() {
-      this.onLoadGenre();
+      this.onLoadGenres();
     },
   },
   created() {
-    this.onLoadGenre();
+    this.onLoadGenres();
   },
   mounted() {
     const main = this.$refs.main as HTMLElement;

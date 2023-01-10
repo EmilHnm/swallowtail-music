@@ -1,4 +1,5 @@
 import { environment } from "@/environment/environment";
+import type { genre } from "@/model/genreModel";
 
 export const adminModule = {
   namespaced: true,
@@ -286,7 +287,7 @@ export const adminModule = {
         {
           method: "GET",
           headers: {
-            "Content-Type": "pplication/json",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${payload.userToken}`,
             Accept: "application/json",
           },
@@ -302,6 +303,31 @@ export const adminModule = {
           Authorization: `Bearer ${payload.userToken}`,
         },
       });
+    },
+    getArtistSongs(
+      context: any,
+      payload: {
+        token: string;
+        page: number;
+        filterText: string;
+        filterType: string;
+        signal: AbortSignal;
+        itemPerPage: number;
+        currentPage: number;
+        artistId: string;
+      }
+    ) {
+      return fetch(
+        `${environment.api}/admin/artists/${payload.artistId}/song?query=${payload.filterText}&itemPerPage=${payload.itemPerPage}&page=${payload.currentPage}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.token}`,
+          },
+          signal: payload.signal,
+        }
+      );
     },
     updateArtist(
       context: any,
@@ -348,6 +374,109 @@ export const adminModule = {
           },
         }
       );
+    },
+    getGenres(
+      context: any,
+      payload: {
+        userToken: string;
+        page: number;
+        query: string;
+        filterType: string;
+        signal: AbortSignal;
+        itemPerPage: number;
+        currentPage: number;
+      }
+    ) {
+      return fetch(
+        `${environment.api}/admin/genres?query=${payload.query}&itemPerPage=${payload.itemPerPage}&page=${payload.currentPage}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+          },
+          signal: payload.signal,
+        }
+      );
+    },
+    getGenre(context: any, payload: { userToken: string; genre_id: string }) {
+      return fetch(`${environment.api}/admin/genres/${payload.genre_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+      });
+    },
+    updateGenre(context: any, payload: { userToken: string; genre: genre }) {
+      return fetch(`${environment.api}/admin/genres/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload.genre),
+      });
+    },
+    deleteGenre(
+      context: any,
+      payload: { userToken: string; genre_id: string }
+    ) {
+      return fetch(
+        `${environment.api}/admin/genres/${payload.genre_id}/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+            Accept: "application/json",
+          },
+        }
+      );
+    },
+    getGenreSong(
+      context: any,
+      payload: {
+        userToken: string;
+        genre_id: string;
+        page: number;
+        query: string;
+        signal: AbortSignal;
+        itemPerPage: number;
+        currentPage: number;
+      }
+    ) {
+      return fetch(
+        `${environment.api}/admin/genres/${payload.genre_id}/songs?query=${payload.query}&itemPerPage=${payload.itemPerPage}&page=${payload.currentPage}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${payload.userToken}`,
+            Accept: "application/json",
+          },
+          signal: payload.signal,
+        }
+      );
+    },
+    groupGenre(
+      context: any,
+      payload: { userToken: string; from: string; to: string }
+    ) {
+      return fetch(`${environment.api}/admin/genres/group`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          from: payload.from,
+          to: payload.to,
+        }),
+      });
     },
   },
 };

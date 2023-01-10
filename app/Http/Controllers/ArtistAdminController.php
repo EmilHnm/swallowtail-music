@@ -106,15 +106,23 @@ class ArtistAdminController extends Controller
         $songs = $artist_from->song()->get();
         foreach ($songs as $song) {
             $song->artist()->detach($artist_from->artist_id);
-            $song->artist()->attach($artist_to->artist_id);
+            if (
+                !$song
+                    ->artist()
+                    ->where("artist_id", $artist_to->artist_id)
+                    ->exists()
+            ) {
+                $song->artist()->attach($artist_to->artist_id);
+            }
         }
         return response()->json([
             "status" => "success",
         ]);
     }
 
-    public function getArtistSong($id)
+    public function getArtistSong($id, Request $request)
     {
+        $query = urldecode($request->get("query"));
         $artist = Artist::find($id);
         if (!$artist) {
             return response()->json([
@@ -124,7 +132,8 @@ class ArtistAdminController extends Controller
         }
         $songs = $artist
             ->song()
-            ->with(["user"])
+            ->with(["user", "album"])
+            ->where("title", "like", "%" . $query . "%")
             ->paginate(10);
         return response()->json([
             "status" => "success",

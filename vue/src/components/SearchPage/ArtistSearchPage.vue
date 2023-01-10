@@ -2,8 +2,9 @@
   <div class="search-result__container">
     <div class="search-result__container--artist">
       <BaseCardArtist
-        v-for="item in testArr"
-        :key="item"
+        v-for="artist in artistResult"
+        :key="artist.artist_id"
+        :data="artist"
         :title="'虹ヶ咲学園スクールアイドル同好会'"
       />
     </div>
@@ -11,11 +12,18 @@
 </template>
 
 <script lang="ts">
+import type { artist } from "@/model/artistModel";
 import { defineComponent } from "vue";
-import BaseCardArtist from "../UI/BaseCardArtist.vue";
+import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    artistResult: artist[];
+  }
+}
 
 export default defineComponent({
-  inject: ["testArr"],
+  inject: ["artistResult"],
   components: { BaseCardArtist },
 });
 </script>

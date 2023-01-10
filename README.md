@@ -47,7 +47,7 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 -   [x] Admin Theme
 -   [x] Login, Logout
 -   [x] User management and authentication
--   [x] CRUD Song/Album/Gernes
+-   [ ] CRUD Song/Album/Gernes/Artist
 -   [x] Filter Database
 -   [ ] Display Logs
 -   [ ] Display Report

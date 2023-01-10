@@ -1,32 +1,23 @@
 <template>
-  <BaseSongItem
-    v-for="song in songResult"
-    :key="song[0].song_id"
-    :data="song"
-  />
+  <BaseSongItem v-for="song in songResult" :key="song.song_id" :data="song" />
 </template>
 <script lang="ts">
+import type { album } from "@/model/albumModel";
+import type { artist } from "@/model/artistModel";
+import type { like } from "@/model/likeModel";
+import type { song } from "@/model/songModel";
 import { defineComponent } from "vue";
-import BaseSongItem from "../UI/BaseSongItem.vue";
+import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 
-type songPlaylist = {
-  [song_id: string]: {
-    song_id: string;
-    title: string;
-    artist_name: string;
-    artist_id: string;
-    added_date?: string;
-    album_name: string;
-    album_id: string;
-    image_path: string;
-    duration: number;
-    listens?: number;
-  }[];
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
 };
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
-    songResult: songPlaylist;
+    songResult: songData[];
   }
 }
 

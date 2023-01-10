@@ -12,7 +12,7 @@
       <div class="icon"><IconArtist /></div>
       <div class="title">Artist</div>
     </button>
-    <button>
+    <button @click="$router.push({ name: 'accountAdminGenres' })">
       <div class="icon"><IconTag /></div>
       <div class="title">Song Genre</div>
     </button>
