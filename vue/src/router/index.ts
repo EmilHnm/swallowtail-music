@@ -312,11 +312,23 @@ const router = createRouter({
                   "../views/AccountView/AccountAdmin/AccountAdminGenre/AccountAdminGenreEdit.vue"
                 ),
             },
+            {
+              path: "statistics",
+              children: [
+                {
+                  path: "logger",
+                  name: "accountAdminStatistics",
+                  component: () =>
+                    import(
+                      "../views/AccountView/AccountAdmin/AccountAdminStatistic/AccountAdminStatisticLogs.vue"
+                    ),
+                },
+              ],
+            },
           ],
         },
       ],
     },
-
     {
       path: "/verify-email",
       name: "verifyEmail",
@@ -325,7 +337,6 @@ const router = createRouter({
       },
       component: () => import("../views/VerifyEmailView.vue"),
     },
-
     {
       path: "/test",
       meta: {

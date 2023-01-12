@@ -1,6 +1,6 @@
 import { environment } from "@/environment/environment";
 import type { genre } from "@/model/genreModel";
-
+import { logsModule } from "./StatisticModule/LogsModule";
 export const adminModule = {
   namespaced: true,
   state: {},
@@ -478,5 +478,8 @@ export const adminModule = {
         }),
       });
     },
+  },
+  modules: {
+    logs: logsModule,
   },
 };

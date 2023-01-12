@@ -14,7 +14,7 @@ use App\Http\Controllers\admin\SongAdminController;
 use App\Http\Controllers\admin\UserAdminController;
 use App\Http\Controllers\admin\GenreAdminController;
 use App\Http\Controllers\admin\ArtistAdminController;
-use App\Http\Controllers\admin\StaticAdminController;
+use App\Http\Controllers\admin\StatisticAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -268,12 +268,14 @@ Route::middleware("auth:sanctum")->group(function () {
                     "delete",
                 ]);
             });
-            Route::prefix("static")->group(function () {
-                Route::get("/logs", [
-                    StaticAdminController::class,
-                    "getLogger",
-                ]);
-            });
+            Route::prefix("statistic")
+                ->middleware(["adminAccess"])
+                ->group(function () {
+                    Route::get("/logs", [
+                        StatisticAdminController::class,
+                        "getLogger",
+                    ]);
+                });
         });
 });
 Route::prefix("auth")->group(function () {
