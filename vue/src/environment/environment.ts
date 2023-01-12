@@ -1,11 +1,11 @@
 export const environment = {
-  api: "http://localhost:8000/api",
-  default: "http://localhost:8000/storage/default",
-  album_cover: "http://localhost:8000/storage/upload/album_cover",
-  playlist_cover: "http://localhost:8000/storage/upload/playlist_cover",
-  profile_image: "http://localhost:8000/storage/upload/profile_image",
-  artist_image: "http://localhost:8000/storage/upload/artist_image",
-  // song_src: "http://localhost:8000/storage/upload/song_src",
-  song_src:
-    "http://localhost/laravel-learn/swallowtail-music/public/storage/upload/song_src",
+  api: "swallowtail-music.vn/api",
+  default: "swallowtail-music.vn/storage/default",
+  album_cover: "swallowtail-music.vn/storage/upload/album_cover",
+  playlist_cover: "swallowtail-music.vn/storage/upload/playlist_cover",
+  profile_image: "swallowtail-music.vn/storage/upload/profile_image",
+  artist_image: "swallowtail-music.vn/storage/upload/artist_image",
+  song_src: "swallowtail-music.vn/storage/upload/song_src",
+  // song_src:
+  //   "http://localhost/laravel-learn/swallowtail-music/public/storage/upload/song_src",
 };
