@@ -1,5 +1,5 @@
 export interface log {
-  [index: number]: {
+  [index: string]: {
     context: string;
     level: "error" | "emergency" | "info";
     folder?: string;

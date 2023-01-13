@@ -13,8 +13,8 @@
 </template>
 
 <script lang="ts">
-import AccountViewHeader from "../../components/AccountView/AccountViewHeader.vue";
-import AccountViewSideBar from "../../components/AccountView/AccountViewSideBar.vue";
+import AccountViewHeader from "@/components/AccountView/AccountViewHeader.vue";
+import AccountViewSideBar from "@/components/AccountView/AccountViewSideBar.vue";
 export default {
   name: "AccountView",
   components: { AccountViewHeader, AccountViewSideBar },
@@ -34,8 +34,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$mobile-width: 480px;
-$tablet-width: 768px;
+$screen-width: 1280px;
 .wrapper {
   display: flex;
   width: 80%;
@@ -44,7 +43,7 @@ $tablet-width: 768px;
   height: calc(100vh - 80px);
 }
 
-@media (max-width: $tablet-width) {
+@media (max-width: $screen-width) {
   .wrapper {
     width: 100%;
   }

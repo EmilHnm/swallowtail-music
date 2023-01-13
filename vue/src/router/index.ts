@@ -314,10 +314,11 @@ const router = createRouter({
             },
             {
               path: "statistics",
+              name: "accountAdminStatistics",
               children: [
                 {
                   path: "logger",
-                  name: "accountAdminStatistics",
+                  name: "accountAdminStatisticsLog",
                   component: () =>
                     import(
                       "../views/AccountView/AccountAdmin/AccountAdminStatistic/AccountAdminStatisticLogs.vue"

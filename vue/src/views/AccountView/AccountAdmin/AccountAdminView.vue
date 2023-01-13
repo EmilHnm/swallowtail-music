@@ -1,6 +1,12 @@
 <template>
   <div class="admin-wrapper">
-    <div class="admin-nav" v-if="$route.name !== 'accountAdminDashboard'">
+    <div
+      class="admin-nav"
+      v-if="
+        $route.name !== 'accountAdminDashboard' &&
+        $route.name !== 'accountAdminStatisticsLog'
+      "
+    >
       <button @click="$router.replace({ name: 'accountAdminUser' })">
         <IconAvatarProfile />
       </button>
@@ -43,6 +49,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .admin-wrapper {
   width: 100%;
+  overflow-x: scroll;
+  overflow-y: hidden;
 }
 .admin-nav {
   width: 100%;

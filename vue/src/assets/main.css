@@ -2,7 +2,7 @@
 body {
   background-color: var(--background-color-primary);
   color: var(--text-primary-color);
-  font-family: Consolas;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
   font-size: 16px;
   line-height: 1.5;
   margin: 0;
