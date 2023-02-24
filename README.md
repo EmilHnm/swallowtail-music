@@ -49,7 +49,7 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 -   [x] User management and authentication
 -   [x] CRUD Song/Album/Gernes/Artist
 -   [x] Filter Database
--   [ ] Display Logs
+-   [x] Display Logs
 -   [ ] Display Report
 -   [x] Dashboard
 
