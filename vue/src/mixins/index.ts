@@ -84,37 +84,6 @@ export const _function = {
     return array;
   },
   // Splice Object
-  // IDEA
-  // spliceObject(object: any, index: number, count: number, item: any) {
-  //   const newObj: any = {};
-  //   if (index > Object.keys(object).length || index < 0)
-  //     index = Object.keys(object).length;
-  //   if (count < 0) count = 0;
-  //   if (count > Object.keys(object).length - index) count = 0;
-  //   if (item)
-  //     for (let i = 0; i <= Object.keys(object).length; i++) {
-  //       if (i < index) {
-  //         newObj[Object.keys(object)[i]] = Object.values(object)[i];
-  //       }
-  //       if (i === index) {
-  //         for (let i = 0; i < Object.keys(item).length; i++) {
-  //           newObj[Object.keys(item)[i]] = Object.values(item)[i];
-  //         }
-  //       }
-  //       if (i > index + count) {
-  //         newObj[Object.keys(object)[i - 1]] = Object.values(object)[i - 1];
-  //       }
-  //     }
-  //   else {
-  //     for (let i = 0; i <= Object.keys(object).length; i++) {
-  //       if (i < index && i >= index + count) {
-  //         newObj[Object.keys(object)[i]] = Object.values(object)[i];
-  //       }
-  //     }
-  //   }
-  //   return newObj;
-  // },
-  // OPTIMIZE
   spliceObject(object: any, index: number, count: number, item: any = {}) {
     //get object lenght
     const totalProps = Object.keys(object).length;

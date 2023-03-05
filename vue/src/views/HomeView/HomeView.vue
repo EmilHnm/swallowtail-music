@@ -660,6 +660,27 @@ export default {
     this.audio = this.$refs["audio"] as HTMLAudioElement;
     this.audio.crossOrigin = "anonymous";
     this.audio.volume = this.volume / 100;
+    document.addEventListener("keydown", (e) => {
+      if (e.keyCode === 32) {
+        e.preventDefault();
+        if (this.playingAudio) {
+          if (this.isPlaying) this.pauseAudio();
+          else this.playAudio();
+        }
+      }
+      if (e.keyCode === 39) {
+        e.preventDefault();
+        if (this.playingAudio) {
+          this.nextSong();
+        }
+      }
+      if (e.keyCode === 37) {
+        e.preventDefault();
+        if (this.playingAudio) {
+          this.prevSong();
+        }
+      }
+    });
   },
 };
 </script>
