@@ -132,6 +132,7 @@
 import { defineComponent, reactive } from "vue";
 import { mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
+import { _function } from "@/mixins/index";
 import BaseInput from "../UI/BaseInput.vue";
 import BaseButton from "../UI/BaseButton.vue";
 import BaseDialog from "../UI/BaseDialog.vue";
@@ -183,7 +184,7 @@ export default defineComponent({
   methods: {
     albumImageChange(e: any) {
       if (e.target.files.length > 0) {
-        if (!this.validateImageFileType(e.target.files[0])) {
+        if (!_function.validateImageFileType(e.target.files[0])) {
           this.dialogWaring.content = "Please upload valid image file";
           this.dialogWaring.show = true;
           return;
@@ -198,7 +199,7 @@ export default defineComponent({
     },
     songFileChange(e: any, index: number) {
       if (e.target.files.length > 0) {
-        if (this.validateSongFileType(e.target.files[0].type)) {
+        if (_function.validateSongFileType(e.target.files[0].type)) {
           this.dialogWaring.content = "Please upload valid audio file";
           this.dialogWaring.show = true;
           return;
@@ -304,37 +305,6 @@ export default defineComponent({
     },
     closeDialog() {
       this.dialogWaring.show = false;
-    },
-    validateSongFileType(file: File): boolean {
-      const validTypes = [
-        "audio/mpeg",
-        "audio/mp3",
-        "audio/aac",
-        "audio/ogg",
-        "audio/flac",
-        "audio/alac",
-        "audio/wav",
-        "audio/aiff",
-        "audio/dsd",
-        "audio/pcm",
-      ];
-      if (validTypes.indexOf(file.type) === -1) {
-        return false;
-      }
-      return true;
-    },
-    validateImageFileType(file: File): boolean {
-      const validTypes = [
-        "image/jpg",
-        "image/jpeg",
-        "image/bmp",
-        "image/gif",
-        "image/png",
-      ];
-      if (validTypes.indexOf(file.type) === -1) {
-        return false;
-      }
-      return true;
     },
   },
   computed: {

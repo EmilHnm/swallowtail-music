@@ -68,11 +68,15 @@
 </template>
 
 <script lang="ts">
-import VueCropper from "vue-cropperjs";
+import VueCropper, {
+  type CroppedCanvasOptions,
+  type VueCropperMethods,
+} from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
+import { _function } from "@/mixins/index";
 import BaseFlatDialog from "../../components/UI/BaseFlatDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 
@@ -104,6 +108,11 @@ export default defineComponent({
         dragMode: "move",
         movable: false,
       },
+      cropOptions: {
+        width: 180,
+        height: 180,
+        imageSmoothingEnabled: true,
+      } as CroppedCanvasOptions,
     };
   },
   methods: {
@@ -136,40 +145,23 @@ export default defineComponent({
       this.dialogWaring.show = false;
     },
     cropImage() {
-      this.imgDataUrl = (<VueCropper>this.$refs.cropper)
-        .getCroppedCanvas({
-          width: 180,
-          height: 180,
-          imageSmoothingEnabled: true,
-        })
+      this.imgDataUrl = (<VueCropperMethods>this.$refs.cropper)
+        .getCroppedCanvas(this.cropOptions)
         .toDataURL("image/jpeg", 1.0);
     },
     photoChange(e: any) {
       if (e.target.files.length > 0) {
-        if (!this.validateImageFileType(e.target.files[0])) {
+        if (!_function.validateImageFileType(e.target.files[0])) {
           this.dialogWaring.content = "Please upload valid image file";
           this.dialogWaring.show = true;
           return;
         }
         let reader = new FileReader();
         reader.readAsDataURL(e.target.files[0]);
-        reader.onload = (e) => {
+        reader.onload = () => {
           this.options.img = reader.result as string;
         };
       }
-    },
-    validateImageFileType(file: File): boolean {
-      const validTypes = [
-        "image/jpg",
-        "image/jpeg",
-        "image/bmp",
-        "image/gif",
-        "image/png",
-      ];
-      if (validTypes.indexOf(file.type) === -1) {
-        return false;
-      }
-      return true;
     },
     dataURItoBlob(dataURI: string) {
       // convert base64 to raw binary data held in a string
