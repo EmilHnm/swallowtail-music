@@ -77,7 +77,12 @@
             </div>
             <div class="header__right--account--menu-item">
               <base-list-item>
-                <a href="">Settings</a>
+                <router-link
+                  :to="{
+                    name: 'accountProfile',
+                  }"
+                  >Settings</router-link
+                >
               </base-list-item>
             </div>
             <hr />
@@ -190,6 +195,7 @@ $tablet-width: 768px;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 10px;
       font-weight: bolder;
       font-size: 1.5rem;
       user-select: none;
