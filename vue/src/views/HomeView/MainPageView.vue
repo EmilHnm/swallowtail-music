@@ -43,7 +43,10 @@
           </base-list-item>
         </div>
       </div>
-      <div class="latest-album">
+      <div
+        class="latest-album"
+        v-if="!isLatestAlbumLoading && latestAlbums.length > 0"
+      >
         <h2>Latest Album Update</h2>
         <BaseHorizontalScroll v-if="isLatestAlbumLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
@@ -63,7 +66,10 @@
       </div>
     </div>
     <div class="top">
-      <div class="top__album">
+      <div
+        class="top__album"
+        v-if="!isTopAlbumLoading && topAlbums.length != 0"
+      >
         <h2>Top Album All Time</h2>
         <BaseHorizontalScroll v-if="isTopAlbumLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
@@ -405,9 +411,12 @@ export default defineComponent({
         color: var(--text-subdued);
         opacity: 0;
         transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         & svg {
-          width: 100%;
-          height: 100%;
+          width: 70%;
+          height: 70%;
           fill: #fff;
         }
       }
@@ -483,9 +492,12 @@ export default defineComponent({
         opacity: 0;
         transition: 0.3s;
         cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         & svg {
-          width: 100%;
-          height: 100%;
+          width: 70%;
+          height: 70%;
           fill: #fff;
         }
       }

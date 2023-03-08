@@ -58,10 +58,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import BaseInput from "../../components/UI/BaseInput.vue";
-import BaseButton from "../../components/UI/BaseButton.vue";
+import BaseInput from "@/components/UI/BaseInput.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
 import { mapActions, mapMutations } from "vuex";
-import BaseDialog from "../../components/UI/BaseDialog.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
 
 export default defineComponent({
   name: "LogInView",
@@ -86,8 +86,8 @@ export default defineComponent({
         this.login({ email: this.email, password: this.password })
           .then((res) => res.json())
           .then((res) => {
-            if (res.error) {
-              this.dialogWaring.content = res.error;
+            if (res.errors) {
+              this.dialogWaring.content = res.message;
               this.dialogWaring.show = true;
             } else {
               this.setUser(res);
