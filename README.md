@@ -105,4 +105,5 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 - [ ] Create crawler
 - [ ] Create API for backup and sync
 - [ ] Change music storage from public storage to minio storage
+- [ ] Stream file instead of download
 - [ ] Change admin dashboard
