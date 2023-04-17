@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
+use SongManager;
 
 class SongController extends Controller
 {
@@ -90,44 +91,14 @@ class SongController extends Controller
             return json_encode([
                 "status" => "success",
                 "message" =>
-                    "Song uploaded successfully. It will ready in some minutes.",
+                "Song uploaded successfully. It will ready in some minutes.",
             ]);
         } finally {
             if ($request->file("songFile")) {
-                try {
-                    // dd($request->file('songFile'));
-                    $file = $request->file("songFile");
-                    $filename = date("YmdHi") . $file->getClientOriginalName();
-                    $file->move(
-                        public_path("storage/upload/song_src"),
-                        $filename
-                    );
-                    FFMpeg::fromDisk("final_audio")
-                        ->open($filename)
-                        ->export()
-                        ->addFilter([
-                            "-strict",
-                            "-2",
-                            "-acodec",
-                            "vorbis",
-                            "-b:a",
-                            "320k",
-                        ])
-                        ->save($song->song_id . ".ogg");
-                    @unlink(
-                        public_path("storage/upload/song_src/") . $filename
-                    );
-                    $duration = FFMpeg::fromDisk("final_audio")
-                        ->open($song->song_id . ".ogg")
-                        ->getDurationInSeconds();
-                    $song->duration = $duration;
-                    $song->save();
-                    FFMpeg::cleanupTemporaryFiles();
-                } catch (EncodingException $exception) {
-                    $command = $exception->getCommand();
-                    $errorLog = $exception->getErrorOutput();
-                    dd($command, $errorLog);
-                }
+                $file = $request->file("songFile");
+                $song_manager = new SongManager($song);
+                $song_manager->convert($song, $file);
+                $song_manager->save();
             }
         }
     }
@@ -223,7 +194,7 @@ class SongController extends Controller
                 [
                     "status" => "error",
                     "message" =>
-                        "You are not authorized to access this resource.",
+                    "You are not authorized to access this resource.",
                 ],
                 403
             );

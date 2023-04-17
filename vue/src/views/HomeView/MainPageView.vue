@@ -136,18 +136,18 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import IconPlay from "../../components/icons/IconPlay.vue";
-import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
-import BaseSkeletonsLoadingCard from "../../components/UI/BaseSkeletonsLoadingCard.vue";
-import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
-import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { playlist } from "@/model/playlistModel";
-import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import type { song } from "@/model/songModel";
+import IconPlay from "@/components/icons/IconPlay.vue";
+import BaseHorizontalScroll from "@/components/UI/BaseHorizontalScroll.vue";
+import BaseSkeletonsLoadingCard from "@/components/UI/BaseSkeletonsLoadingCard.vue";
+import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
+import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
 type LatestSong = song & {
   artist: artist[];
@@ -205,7 +205,6 @@ export default defineComponent({
       environment: environment,
       min: false,
       medium: false,
-      testArr: [1, 2, 3, 4, 5, 6, 7, 8],
       latestSongs: [] as LatestSong[],
       latestAlbums: [] as LatestAlbum[],
       topAlbums: [] as TopAlbum[],
