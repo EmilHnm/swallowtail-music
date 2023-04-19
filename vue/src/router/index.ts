@@ -376,6 +376,7 @@ router.beforeEach((to, from, next) => {
                 email: res.email,
                 profile_photo_url: res.profile_photo_url,
                 role: res.role,
+                email_verified_at: res.email_verified_at,
               },
             };
             store.commit("auth/setUser", data);
