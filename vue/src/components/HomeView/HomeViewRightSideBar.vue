@@ -70,8 +70,8 @@ import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
 import type { song } from "@/model/songModel";
 import { defineComponent } from "vue";
-import IconPlay from "../icons/IconPlay.vue";
-import BaseSongItem from "../UI/BaseSongItem.vue";
+import IconPlay from "@/components/icons/IconPlay.vue";
+import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 
 type songData = song & {
   album: album;

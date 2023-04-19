@@ -102,6 +102,7 @@ export default defineComponent({
 .switch {
   width: 100%;
   height: 100%;
+  cursor: pointer;
 }
 .switch-checkbox {
   display: none;

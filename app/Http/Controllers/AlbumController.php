@@ -7,6 +7,7 @@ use App\Models\Song;
 use App\Models\Album;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use app\Services\SongManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
@@ -60,36 +61,10 @@ class AlbumController extends Controller
                 $song->listens = 0;
                 if ($request->file("songFile_" . $i)) {
                     try {
-                        $songFile = $request->file("songFile_" . $i);
-                        $filename =
-                            date("YmdHi") . $songFile->getClientOriginalName();
-                        $songFile->move(
-                            public_path("storage/upload/song_src"),
-                            $filename
-                        );
-                        FFMpeg::fromDisk("final_audio")
-                            ->open($filename)
-                            ->export()
-                            ->addFilter([
-                                "-strict",
-                                "-2",
-                                "-acodec",
-                                "vorbis",
-                                "-b:a",
-                                "320k",
-                            ])
-                            ->save($song->song_id . ".ogg");
-                        @unlink(
-                            public_path("storage/upload/song_src/") .
-                                "/" .
-                                $filename
-                        );
-                        $duration = FFMpeg::fromDisk("final_audio")
-                            ->open($song->song_id . ".ogg")
-                            ->getDurationInSeconds();
-                        $song->duration = $duration;
-                        $song->save();
-                        FFMpeg::cleanupTemporaryFiles();
+                        $file = $request->file("songFile_" . $i);
+                        $song_manager = new SongManager($song);
+                        $song_manager->convert($file);
+                        $song_manager->save();
                     } catch (EncodingException $exception) {
                         $command = $exception->getCommand();
                         $errorLog = $exception->getErrorOutput();

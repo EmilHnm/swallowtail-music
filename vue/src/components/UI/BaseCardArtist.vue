@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import BaseCard from "./BaseCard.vue";
-import IconPlay from "../icons/IconPlay.vue";
+import IconPlay from "@/components/icons/IconPlay.vue";
 import type { artist } from "@/model/artistModel";
 import { environment } from "@/environment/environment";
 

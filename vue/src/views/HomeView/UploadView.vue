@@ -2,22 +2,27 @@
   <div class="upload-container">
     <div class="upload-container__header">
       <h1 class="upload-container__title">Upload</h1>
-      <div class="upload-container__type">
+      <div class="upload-container__type" v-if="userdata.email_verified_at">
         <BaseButton @click="toggleComponent('SongUpload')">Songs</BaseButton>
         <BaseButton @click="toggleComponent('AlbumUpload')">Album</BaseButton>
       </div>
-      <keep-alive>
+      <keep-alive v-if="userdata.email_verified_at">
         <component :is="componentName"></component>
       </keep-alive>
+      <div v-else class="upload-container__noti">
+        <h3>You need to verify your email to upload songs or albums.</h3>
+        <p>Please go to Account > Profile to verify your email</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import BaseButton from "../../components/UI/BaseButton.vue";
-import SongUpload from "../../components/UploadPage/SongUpload.vue";
-import AlbumUpload from "../../components/UploadPage/AlbumUpload.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
+import SongUpload from "@/components/UploadPage/SongUpload.vue";
+import AlbumUpload from "@/components/UploadPage/AlbumUpload.vue";
+import { mapGetters } from "vuex";
 export default defineComponent({
   data() {
     return { componentName: "SongUpload" };
@@ -26,6 +31,11 @@ export default defineComponent({
     toggleComponent(component: string) {
       this.componentName = component;
     },
+  },
+  computed: {
+    ...mapGetters({
+      userdata: "auth/userData",
+    }),
   },
   components: { BaseButton, SongUpload, AlbumUpload },
   emits: [
@@ -63,6 +73,12 @@ export default defineComponent({
     margin: 1rem 0;
     & > * {
       margin: 0 0.5rem;
+    }
+  }
+  &__noti {
+    text-align: center;
+    & > * {
+      margin: 0.5rem 0;
     }
   }
 }

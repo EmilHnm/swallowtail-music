@@ -556,6 +556,10 @@ export default {
     closeDialog() {
       this.dialogWaring.show = false;
     },
+    // NOTE: audio
+    getAudio() {
+      this.audio = this.$refs.audio as HTMLAudioElement;
+    },
   },
   watch: {
     repeat(n) {
@@ -630,8 +634,18 @@ export default {
             });
         }, 45000);
         this.timeOut.resume();
-        this.audio.src = this.playingAudioSrc;
-        if (this.isPlaying) this.playAudio();
+        fetch(`${environment.api}/song/${this.playingAudio.song_id}/stream`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        })
+          .then((res) => res.blob())
+          .then((blob) => {
+            const objectUrl = URL.createObjectURL(blob);
+            this.audio.src = objectUrl;
+            if (this.isPlaying) this.playAudio();
+          });
       }
     },
   },
@@ -647,19 +661,40 @@ export default {
       }
       return this.audioList[this.audioIndex];
     },
-    playingAudioSrc(): string {
-      return this.playingAudio
-        ? `${environment.song_src}/${this.playingAudio.song_id}.ogg`
-        : "";
-    },
   },
   created() {
     this.loadPlaylist();
-  },
-  mounted() {
-    this.audio = this.$refs["audio"] as HTMLAudioElement;
+    this.audio = new Audio();
     this.audio.crossOrigin = "anonymous";
     this.audio.volume = this.volume / 100;
+    this.audio.ontimeupdate = () => {
+      this.getCurrentTime();
+    };
+    this.audio.ondurationchange = () => {
+      this.getDuration();
+    };
+    this.audio.onended = () => {
+      this.nextSong();
+    };
+    this.audio.oncanplay = () => {
+      this.canplay();
+    };
+    this.audio.onwaiting = () => {
+      this.waiting();
+    };
+    this.audio.onloadeddata = () => {
+      this.loadeddata();
+    };
+    // this.audio.onpause = () => {
+    //   this.isPlaying = false;
+    // };
+    // this.audio.onplay = () => {
+    //   this.isPlaying = true;
+    // };
+  },
+  mounted() {
+    // this.audio = this.$refs["audio"] as HTMLAudioElement;
+
     document.addEventListener("keydown", (e) => {
       if (e.keyCode === 32) {
         e.preventDefault();
@@ -759,7 +794,7 @@ export default {
     @setVolume="setVolume"
     @setMuted="setMuted"
   />
-  <audio
+  <!-- <audio
     ref="audio"
     :volumn="volume"
     @timeupdate="getCurrentTime"
@@ -768,7 +803,7 @@ export default {
     @canplay="canplay"
     @waiting="waiting"
     @loadeddata="loadeddata"
-  ></audio>
+  ></audio> -->
 </template>
 <style lang="scss" scoped>
 .main-body {

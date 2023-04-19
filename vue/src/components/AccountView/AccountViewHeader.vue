@@ -63,11 +63,11 @@
 import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
 import { mapActions, mapGetters, mapMutations } from "vuex";
-import IconLogo from "../icons/IconLogo.vue";
-import IconDownArrow from "../icons/IconDownArrow.vue";
-import IconUpArrow from "../icons/IconUpArrow.vue";
+import IconLogo from "@/components/icons/IconLogo.vue";
+import IconDownArrow from "@/components/icons/IconDownArrow.vue";
+import IconUpArrow from "@/components/icons/IconUpArrow.vue";
 import DarkModeButton from "../UI/DarkModeButton.vue";
-import IconMenu from "../icons/IconMenu.vue";
+import IconMenu from "@/components/icons/IconMenu.vue";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 

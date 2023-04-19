@@ -194,7 +194,6 @@ export default defineComponent({
     height: 190px;
     overflow: hidden;
     flex: 0 0 auto;
-    border-radius: 50%;
     & img {
       width: 100%;
       height: 100%;

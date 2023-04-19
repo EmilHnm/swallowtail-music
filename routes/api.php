@@ -75,6 +75,7 @@ Route::middleware("auth:sanctum")->group(function () {
             SongController::class,
             "increaseSongListens",
         ]);
+        Route::get("{id}/stream", [SongController::class, "streamSong"]);
         Route::post("/{id}/like", [SongController::class, "likeSong"]);
         Route::get("/{id}/liked", [SongController::class, "likedSong"]);
         Route::delete("/{id}/delete", [SongController::class, "deleteSong"]);

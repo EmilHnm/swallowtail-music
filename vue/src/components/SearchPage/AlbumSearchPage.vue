@@ -17,7 +17,7 @@
 import type { album } from "@/model/albumModel";
 import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
-import BaseCardAlbum from "../UI/BaseCardAlbum.vue";
+import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 
 type albumData = album & { song_count: number };
 declare module "@vue/runtime-core" {

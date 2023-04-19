@@ -101,7 +101,7 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapMutations, mapActions } from "vuex";
 import { environment } from "@/environment/environment";
-import IconMenu from "../icons/IconMenu.vue";
+import IconMenu from "@/components/icons/IconMenu.vue";
 
 export default defineComponent({
   components: {

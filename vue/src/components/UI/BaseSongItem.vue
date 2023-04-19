@@ -162,7 +162,7 @@
 import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
 import BaseListItem from "./BaseListItem.vue";
-import IconThreeDots from "../icons/IconThreeDots.vue";
+import IconThreeDots from "@/components/icons/IconThreeDots.vue";
 import BaseLineLoad from "./BaseLineLoad.vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseDialog from "./BaseDialog.vue";

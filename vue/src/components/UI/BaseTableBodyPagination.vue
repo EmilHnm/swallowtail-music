@@ -57,8 +57,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import IconNextArrow from "../icons/IconNextArrow.vue";
-import IconPreviousArrow from "../icons/IconPreviousArrow.vue";
+import IconNextArrow from "@/components/icons/IconNextArrow.vue";
+import IconPreviousArrow from "@/components/icons/IconPreviousArrow.vue";
 
 export default defineComponent({
   props: {

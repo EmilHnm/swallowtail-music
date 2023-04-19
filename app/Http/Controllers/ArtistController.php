@@ -113,6 +113,7 @@ class ArtistController extends Controller
                     $query->where("user_id", Auth::user()->user_id);
                 },
             ])
+            ->where("display", "public")
             ->get();
 
         $songs = $songs->filter(function ($song) use ($id) {

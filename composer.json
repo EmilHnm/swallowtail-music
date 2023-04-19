@@ -13,6 +13,8 @@
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "league/flysystem-sftp-v3": "^3.6.0",
         "pbmedia/laravel-ffmpeg": "^8.1",
         "predis/predis": "^2.0",
         "rap2hpoutre/laravel-log-viewer": "^2.2"

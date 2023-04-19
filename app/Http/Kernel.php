@@ -21,7 +21,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \App\Http\Middleware\CORS::class,
+        // \App\Http\Middleware\CORS::class,
     ];
 
     /**
@@ -56,23 +56,23 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         "auth" => \App\Http\Middleware\Authenticate::class,
         "auth.basic" =>
-            \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         "auth.session" =>
-            \Illuminate\Session\Middleware\AuthenticateSession::class,
+        \Illuminate\Session\Middleware\AuthenticateSession::class,
         "cache.headers" => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         "can" => \Illuminate\Auth\Middleware\Authorize::class,
         "guest" => \App\Http\Middleware\RedirectIfAuthenticated::class,
         "password.confirm" =>
-            \Illuminate\Auth\Middleware\RequirePassword::class,
+        \Illuminate\Auth\Middleware\RequirePassword::class,
         "signed" => \App\Http\Middleware\ValidateSignature::class,
         "throttle" => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         "verified" => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         "cors" => \App\Http\Middleware\CORS::class,
         "requestTimeDelay" => \App\Http\Middleware\IncreaseListenTimeOut::class,
         "moderatorAccess" =>
-            \App\Http\Middleware\ModeratorAccessMiddleware::class,
+        \App\Http\Middleware\ModeratorAccessMiddleware::class,
         "adminAccess" =>
-            \App\Http\Middleware\AdministratorAccessMiddleware::class,
+        \App\Http\Middleware\AdministratorAccessMiddleware::class,
         "logRequest" => \App\Http\Middleware\LogRequest::class,
     ];
 }

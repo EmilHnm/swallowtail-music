@@ -32,8 +32,8 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import IconLeftArrow from "../icons/IconLeftArrow.vue";
-import IconRightArrow from "../icons/IconRightArrow.vue";
+import IconLeftArrow from "@/components/icons/IconLeftArrow.vue";
+import IconRightArrow from "@/components/icons/IconRightArrow.vue";
 
 export default defineComponent({
   data() {

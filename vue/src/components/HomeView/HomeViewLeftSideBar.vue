@@ -63,12 +63,12 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import IconHome from "../icons/IconHome.vue";
-import IconSearch from "../icons/IconSearch.vue";
-import IconLibrary from "../icons/IconLibrary.vue";
-import IconPlus from "../icons/IconPlus.vue";
-import IconHeartFilled from "../icons/IconHeartFilled.vue";
-import IconUpload from "../icons/IconUpload.vue";
+import IconHome from "@/components/icons/IconHome.vue";
+import IconSearch from "@/components/icons/IconSearch.vue";
+import IconLibrary from "@/components/icons/IconLibrary.vue";
+import IconPlus from "@/components/icons/IconPlus.vue";
+import IconHeartFilled from "@/components/icons/IconHeartFilled.vue";
+import IconUpload from "@/components/icons/IconUpload.vue";
 import type { playlist } from "@/model/playlistModel";
 import { mapGetters } from "vuex";
 

@@ -11,11 +11,9 @@ use App\Models\SongArtist;
 use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
 use Illuminate\Http\Request;
+use App\Services\SongManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
-use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
-use SongManager;
 
 class SongController extends Controller
 {
@@ -97,7 +95,7 @@ class SongController extends Controller
             if ($request->file("songFile")) {
                 $file = $request->file("songFile");
                 $song_manager = new SongManager($song);
-                $song_manager->convert($song, $file);
+                $song_manager->convert($file);
                 $song_manager->save();
             }
         }
@@ -158,6 +156,28 @@ class SongController extends Controller
             "status" => "success",
             "message" => "Song Updated Successfully",
         ]);
+    }
+
+    public function streamSong($id)
+    {
+        $song = Song::where("song_id", $id)->first();
+        if (!$song) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Song not found",
+            ]);
+        }
+        if (
+            Auth::user()->user_id != $song->user_id &&
+            $song->display == "private"
+        ) {
+            return response()->json([
+                "status" => "error",
+                "message" => "You are not allowed to stream this song.",
+            ]);
+        }
+        $url = (new SongManager($song))->stream($song);
+        return  $url;
     }
 
     public function uploadedSong()

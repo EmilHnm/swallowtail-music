@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import BaseCard from "./BaseCard.vue";
-import IconPlay from "../icons/IconPlay.vue";
+import IconPlay from "@/components/icons/IconPlay.vue";
 
 export default {
   components: { BaseCard, IconPlay },
