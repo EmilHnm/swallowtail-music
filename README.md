@@ -108,4 +108,5 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 -   [x] Change to chunk upload
 -   [x] Change music storage from public storage to minio storage
 -   [x] Stream file instead of download
+-   [ ] Login with social
 -   [ ] Change admin dashboard

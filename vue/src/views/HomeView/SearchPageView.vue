@@ -1,15 +1,13 @@
 <template>
   <div class="search-form">
-    <div>
-      <BaseInput
-        :id="'search'"
-        :label="'Search'"
-        :type="'text'"
-        :placeholder="'Enter your key word!'"
-        v-model="searchText"
-      />
-      <BaseButton :type="'submit'">Search</BaseButton>
-    </div>
+    <BaseInput
+      :id="'search'"
+      :label="'Search'"
+      :type="'text'"
+      :placeholder="'Enter your key word!'"
+      v-model="searchText"
+    />
+    <BaseButton :type="'submit'">Search</BaseButton>
   </div>
   <div class="search-result">
     <div class="search-result__tag" ref="container" @wheel="searchFilterScroll">
@@ -335,6 +333,9 @@ export default defineComponent({
   margin: 0 auto;
   width: 80%;
   padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   form > * {
     margin: 10px 0;
   }

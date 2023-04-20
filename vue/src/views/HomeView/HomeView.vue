@@ -733,6 +733,7 @@ export default {
             this.uploadChunk(this.uploadingFile);
           } else {
             this.uploadingIndex = -1;
+            window.removeEventListener("beforeunload", () => {});
           }
         }
         if (
@@ -741,6 +742,12 @@ export default {
           this.uploadingFile.progress === 0
         ) {
           this.uploadChunk(this.uploadingFile);
+          window.addEventListener("beforeunload", (e) => {
+            let confirmationMessage =
+              "You have uploading file, are you sure to leave?";
+            (e || window.event).returnValue = confirmationMessage;
+            return confirmationMessage;
+          });
         }
       },
       immediate: true,
