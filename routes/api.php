@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SongController;
 use App\Http\Controllers\UserController;
@@ -9,9 +10,9 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PlaylistController;
-use App\Http\Controllers\AlbumAdminController;
 use App\Http\Controllers\admin\SongAdminController;
 use App\Http\Controllers\admin\UserAdminController;
+use App\Http\Controllers\admin\AlbumAdminController;
 use App\Http\Controllers\admin\GenreAdminController;
 use App\Http\Controllers\admin\ArtistAdminController;
 use App\Http\Controllers\admin\StatisticAdminController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\admin\StatisticAdminController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
 
 Route::middleware("auth:sanctum")->group(function () {
     Route::prefix("auth")->group(function () {
@@ -77,6 +79,7 @@ Route::middleware("auth:sanctum")->group(function () {
         ]);
         Route::get("{id}/stream", [SongController::class, "streamSong"]);
         Route::post("/{id}/like", [SongController::class, "likeSong"]);
+        Route::post("/{id}/file", [SongController::class, "uploadSongFile"]);
         Route::get("/{id}/liked", [SongController::class, "likedSong"]);
         Route::delete("/{id}/delete", [SongController::class, "deleteSong"]);
     });

@@ -661,7 +661,7 @@ export default defineComponent({
     },
   },
   watch: {
-    songListWidth(o) {
+    songListWidth(o: number) {
       if (o < 600) {
         this.small = true;
         this.medium = true;
@@ -673,7 +673,7 @@ export default defineComponent({
         this.medium = false;
       }
     },
-    searchText(o) {
+    searchText(o: string) {
       this.isGettingSongSearch = true;
       if (o !== "") {
         this.loadSearchResult(o);

@@ -105,7 +105,7 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 -   [ ] Integrate Nodejs for some realtime action
 -   [ ] Create crawler
 -   [ ] Create API for backup and sync
--   [ ] Change to chunk upload
+-   [x] Change to chunk upload
 -   [x] Change music storage from public storage to minio storage
 -   [x] Stream file instead of download
 -   [ ] Change admin dashboard

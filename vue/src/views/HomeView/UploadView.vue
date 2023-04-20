@@ -7,7 +7,7 @@
         <BaseButton @click="toggleComponent('AlbumUpload')">Album</BaseButton>
       </div>
       <keep-alive v-if="userdata.email_verified_at">
-        <component :is="componentName"></component>
+        <component :is="componentName" @uploadSong="uploadSong"></component>
       </keep-alive>
       <div v-else class="upload-container__noti">
         <h3>You need to verify your email to upload songs or albums.</h3>
@@ -30,6 +30,9 @@ export default defineComponent({
   methods: {
     toggleComponent(component: string) {
       this.componentName = component;
+    },
+    uploadSong(args: []) {
+      this.$emit("uploadSong", args);
     },
   },
   computed: {
@@ -54,6 +57,7 @@ export default defineComponent({
     "addLikedSongToQueue",
     "addToQueue",
     "playSong",
+    "uploadSong",
   ],
 });
 </script>

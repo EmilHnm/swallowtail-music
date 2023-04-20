@@ -7,10 +7,9 @@ use App\Models\Song;
 use App\Models\Album;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use app\Services\SongManager;
+use App\Services\SongManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
 
 class AlbumController extends Controller
@@ -19,63 +18,54 @@ class AlbumController extends Controller
 
     public function uploadAlbum(Request $request)
     {
-        try {
-            $album_id = "album_" . Str::random(8) . Carbon::now()->timestamp;
-            $name = $request->albumTitle;
-            $release_year = $request->albumReleaseYear;
-            $type = $request->albumType;
-            $songCount = json_decode($request->songCount);
-            $album = new Album();
-            if ($request->file("albumImage")) {
-                $imageFile = $request->file("albumImage");
-                $fileName =
-                    $album_id . "." . $imageFile->getClientOriginalExtension();
-                @unlink(
-                    public_path("storage/upload/album_cover") . "/" . $fileName
-                );
-                $imageFile->move(
-                    public_path("storage/upload/album_cover"),
-                    $fileName
-                );
-                $album->image_path = $fileName;
-            }
+        $album_id = "album_" . Str::random(8) . Carbon::now()->timestamp;
+        $name = $request->albumTitle;
+        $release_year = $request->albumReleaseYear;
+        $type = $request->albumType;
+        $songCount = json_decode($request->songCount);
+        $album = new Album();
+        if ($request->file("albumImage")) {
+            $imageFile = $request->file("albumImage");
+            $fileName =
+                $album_id . "." . $imageFile->getClientOriginalExtension();
+            @unlink(
+                public_path("storage/upload/album_cover") . "/" . $fileName
+            );
+            $imageFile->move(
+                public_path("storage/upload/album_cover"),
+                $fileName
+            );
+            $album->image_path = $fileName;
+        }
 
-            $album->name = $name;
-            $album->album_id = $album_id;
-            $album->user_id = Auth::user()->user_id;
-            $album->release_year = $release_year;
-            $album->type = $type;
-            return response()->json([
-                "status" => "success",
-                "message" => 'Album uploaded successfully!
+        $album->name = $name;
+        $album->album_id = $album_id;
+        $album->user_id = Auth::user()->user_id;
+        $album->release_year = $release_year;
+        $album->type = $type;
+        $songData = [];
+        for ($i = 0; $i < $songCount; $i++) {
+            $song = new Song();
+            $song->song_id = "song_" . date("YmdHi") . Str::random(10);
+            $song->user_id = Auth::user()->user_id;
+            $song->title = $request["songName_" . $i];
+            $song->display = "private";
+            $song->listens = 0;
+            $song->album_id = $album_id;
+            $songData[] = (object)[
+                "song_id" => $song->song_id,
+                "index" => $i,
+            ];
+            $song->save();
+        }
+        $album->save();
+        return response()->json([
+            "status" => "success",
+            "message" => 'Album uploaded successfully!
             All songs uploaded will be ready in some minutes and saved as private by default when finish.
             Please go to Account/Upload Management/Song to update song infomation.',
-            ]);
-        } finally {
-            for ($i = 0; $i < $songCount; $i++) {
-                $song = new Song();
-                $song->song_id = "song_" . date("YmdHi") . Str::random(10);
-                $song->user_id = Auth::user()->user_id;
-                $song->title = $request["songName_" . $i];
-                $song->display = "private";
-                $song->listens = 0;
-                if ($request->file("songFile_" . $i)) {
-                    try {
-                        $file = $request->file("songFile_" . $i);
-                        $song_manager = new SongManager($song);
-                        $song_manager->convert($file);
-                        $song_manager->save();
-                    } catch (EncodingException $exception) {
-                        $command = $exception->getCommand();
-                        $errorLog = $exception->getErrorOutput();
-                        dd($command, $errorLog);
-                    }
-                }
-                $song->album_id = $album_id;
-                $song->save();
-            }
-            $album->save();
-        }
+            "songs" => $songData,
+        ]);
     }
 
     public function getUploadedAlbum()

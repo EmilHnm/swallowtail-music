@@ -155,15 +155,16 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
-import { _function } from "../../mixins";
+import { _function } from "@/mixins";
 import type { genre } from "@/model/genreModel";
 import type { artist } from "@/model/artistModel";
-import BaseInput from "../UI/BaseInput.vue";
-import BaseRadio from "../UI/BaseRadio.vue";
-import BaseButton from "../UI/BaseButton.vue";
-import BaseTag from "../UI/BaseTag.vue";
-import BaseDialog from "../UI/BaseDialog.vue";
+import BaseInput from "@/components/UI/BaseInput.vue";
+import BaseRadio from "@/components/UI/BaseRadio.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
+import BaseTag from "@/components/UI/BaseTag.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
 export default defineComponent({
+  emits: ["uploadSong"],
   data() {
     return {
       songName: "",
@@ -258,9 +259,8 @@ export default defineComponent({
       });
       songForm.append("genre", JSON.stringify(genreArrUpload));
       songForm.append("newGenre", JSON.stringify(this.newGenreArray));
-      songForm.append("songFile", this.songFile);
       this.dialogWaring.content =
-        "Uploading Song! Please do not close tab when uploading";
+        "Uploading Song Infomation! Please do not close tab when uploading";
       this.dialogWaring.show = true;
       this.uploadSong({ songForm: songForm, token: this.userToken })
         .then((res) => {
@@ -276,6 +276,7 @@ export default defineComponent({
             this.songName = "";
             this.artistName = "";
             this.genreName = "";
+            this.$emit("uploadSong", [this.songFile, res.song_id]);
             this.songFile = null;
             this.artistArray = [];
             this.genreArray = [];

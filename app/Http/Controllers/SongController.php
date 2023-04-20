@@ -12,8 +12,10 @@ use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
 use Illuminate\Http\Request;
 use App\Services\SongManager;
+use App\Services\StorageManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class SongController extends Controller
 {
@@ -21,82 +23,109 @@ class SongController extends Controller
 
     public function uploadSong(Request $request)
     {
-        try {
-            $artist = json_decode($request->artist);
-            $newArtist = json_decode($request->newArtist);
-            $genre = json_decode($request->genre);
-            $newGenre = json_decode($request->newGenre);
+        $artist = json_decode($request->artist);
+        $newArtist = json_decode($request->newArtist);
+        $genre = json_decode($request->genre);
+        $newGenre = json_decode($request->newGenre);
 
-            $song = new Song();
-            $song->song_id = "song_" . date("YmdHi") . Str::random(10);
-            $song->user_id = Auth::user()->user_id;
-            $song->title = $request->songName;
-            $song->display = $request->displayMode;
-            $song->listens = 0;
+        $song = new Song();
+        $song->song_id = "song_" . date("YmdHi") . Str::random(10);
+        $song->user_id = Auth::user()->user_id;
+        $song->title = $request->songName;
+        $song->display = $request->displayMode;
+        $song->listens = 0;
 
-            foreach ($artist as $id) {
+        foreach ($artist as $id) {
+            $song_artist = new SongArtist();
+            $song_artist->song_id = $song->song_id;
+            $song_artist->artist_id = $id;
+            $song_artist->save();
+        }
+
+        foreach ($newArtist as $name) {
+            $check = Artist::where("name", $name)->first();
+            if ($check) {
                 $song_artist = new SongArtist();
                 $song_artist->song_id = $song->song_id;
-                $song_artist->artist_id = $id;
+                $song_artist->artist_id = $check->artist_id;
                 $song_artist->save();
+                continue;
             }
+            $artist = new Artist();
+            $artist->artist_id = "artist_" . Str::random(10);
+            $artist->name = $name;
+            $artist->image_path = "";
+            $artist->save();
+            $song_artist = new SongArtist();
+            $song_artist->artist_id = $artist->artist_id;
+            $song_artist->song_id = $song->song_id;
+            $song_artist->save();
+        }
 
-            foreach ($newArtist as $name) {
-                $check = Artist::where("name", $name)->first();
-                if ($check) {
-                    $song_artist = new SongArtist();
-                    $song_artist->song_id = $song->song_id;
-                    $song_artist->artist_id = $check->artist_id;
-                    $song_artist->save();
-                    continue;
-                }
-                $artist = new Artist();
-                $artist->artist_id = "artist_" . Str::random(10);
-                $artist->name = $name;
-                $artist->image_path = "";
-                $artist->save();
-                $song_artist = new SongArtist();
-                $song_artist->artist_id = $artist->artist_id;
-                $song_artist->song_id = $song->song_id;
-                $song_artist->save();
-            }
+        foreach ($genre as $id) {
+            $song_genre = new SongGenre();
+            $song_genre->song_id = $song->song_id;
+            $song_genre->genre_id = $id;
+            $song_genre->save();
+        }
 
-            foreach ($genre as $id) {
+        foreach ($newGenre as $name) {
+            $check = Genre::where('$name', $name)->first();
+            if ($check) {
                 $song_genre = new SongGenre();
                 $song_genre->song_id = $song->song_id;
-                $song_genre->genre_id = $id;
+                $song_genre->genre_id = $check->genre_id;
                 $song_genre->save();
+                continue;
             }
-
-            foreach ($newGenre as $name) {
-                $check = Genre::where('$name', $name)->first();
-                if ($check) {
-                    $song_genre = new SongGenre();
-                    $song_genre->song_id = $song->song_id;
-                    $song_genre->genre_id = $check->genre_id;
-                    $song_genre->save();
-                    continue;
-                }
-                $genre = new Genre();
-                $genre->genre_id = "genre_" . Str::random(10);
-                $genre->name = $name;
-                $genre->save();
-                $song_genre = new SongGenre();
-                $song_genre->genre_id = $genre->genre_id;
-                $song_genre->song_id = $song->song_id;
-                $song_genre->save();
-            }
-            return json_encode([
+            $genre = new Genre();
+            $genre->genre_id = "genre_" . Str::random(10);
+            $genre->name = $name;
+            $genre->save();
+            $song_genre = new SongGenre();
+            $song_genre->genre_id = $genre->genre_id;
+            $song_genre->song_id = $song->song_id;
+            $song_genre->save();
+        }
+        $song->save();
+        return
+            response()->json([
                 "status" => "success",
                 "message" =>
-                "Song uploaded successfully. It will ready in some minutes.",
+                "Song information uploaded successfully. The song will ready in some minutes. Please do not close tab until the song is uploaded.",
+                "song_id" => $song->song_id,
             ]);
-        } finally {
-            if ($request->file("songFile")) {
-                $file = $request->file("songFile");
-                $song_manager = new SongManager($song);
-                $song_manager->convert($file);
-                $song_manager->save();
+    }
+
+    public function uploadSongFile(Request $request, $id)
+    {
+        $file = $request->file('file');
+
+        $disk = StorageManager::getDisk();
+
+        $path = Storage::disk($disk)->path("chunks/$id/{$file->getClientOriginalName()}");
+        if (Storage::disk($disk)->exists("chunks/$id/{$file->getClientOriginalName()}")) {
+            // Storage::disk($disk)->append("chunks/{$file->getClientOriginalName()}", $file->get());
+            \File::append($path, $file->get());
+        } else {
+            Storage::disk($disk)->put("chunks/$id/{$file->getClientOriginalName()}", $file->get());
+            // \File::put($path, $file->get());
+        }
+
+        if ($request->has('is_last') && $request->boolean('is_last')) {
+            $name_final = str_replace(".part", "", $file->getClientOriginalName());
+            if (Storage::disk($disk)->exists($name_final)) {
+                Storage::disk($disk)->delete($name_final);
+            }
+            Storage::disk($disk)->move("chunks/$id/{$file->getClientOriginalName()}", $name_final);
+            try {
+                return response()->json(['uploaded' => true]);
+            } finally {
+                $song_mananger = new SongManager(Song::find($id));
+                $song_mananger->convert($name_final);
+                $song_mananger->save();
+                Storage::disk($disk)->delete($name_final);
+                Storage::disk($disk)->delete("chunks/$id");
             }
         }
     }

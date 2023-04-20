@@ -277,6 +277,14 @@ export default defineComponent({
             this.dialogWaring.content = response.message;
             this.dialogWaring.show = true;
             this.dialogWaring.mode = "anouncement";
+            response.songs.forEach(
+              (element: { song_id: string; index: number }) => {
+                this.$emit("uploadSong", [
+                  this.songForm[element.index].songFile,
+                  element.song_id,
+                ]);
+              }
+            );
             this.albumImage = null;
             this.albumImageTempPath = "";
             this.albumTitle = "";
@@ -313,6 +321,7 @@ export default defineComponent({
     }),
   },
   components: { BaseInput, BaseButton, BaseDialog },
+  emits: ["uploadSong"],
 });
 </script>
 <style lang="scss" scoped>

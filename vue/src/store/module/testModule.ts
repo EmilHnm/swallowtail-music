@@ -30,6 +30,7 @@ export const testModule = {
         return 100;
       }
       return finalCounter;
+      console.log("normalizedCounter", finalCounter);
     },
   },
 };
