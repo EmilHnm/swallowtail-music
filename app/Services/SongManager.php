@@ -112,8 +112,12 @@ class SongManager
         return $this;
     }
 
-    public function removeFile($filepath)
+    public function removeFile($filepath = null)
     {
+        if ($filepath == null) {
+            $filepath = $this->songFile->file_path;
+            $this->songFile->delete();
+        }
         if (StorageManager::getDisk() == "local") {
             Storage::disk("local")->delete($filepath);
         }

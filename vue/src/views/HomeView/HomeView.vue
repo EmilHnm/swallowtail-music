@@ -912,9 +912,9 @@ export default {
   display: flex;
   position: relative;
   height: calc(100vh - 60px - 81px);
-
+  overflow: hidden;
   &.full {
-    height: calc(100vh - 81px);
+    height: calc(100vh - 61px);
   }
 
   main {

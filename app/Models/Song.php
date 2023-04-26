@@ -60,4 +60,9 @@ class Song extends Model
             Auth::user()->user_id
         );
     }
+
+    public function file()
+    {
+        return $this->hasOne(SongFile::class, "song_id", "song_id");
+    }
 }

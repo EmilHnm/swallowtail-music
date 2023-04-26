@@ -11,8 +11,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Models\EmailVerificationToken;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -206,7 +204,7 @@ class AuthController extends Controller
                 return response()->json([
                     "status" => "error",
                     "message" =>
-                        "Something went wrong, please try again later!",
+                    "Something went wrong, please try again later!",
                 ]);
             }
         } else {

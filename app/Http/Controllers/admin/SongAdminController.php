@@ -12,7 +12,9 @@ use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use app\Services\SongManager;
 use Illuminate\Support\Facades\Auth;
+use Response;
 
 class SongAdminController extends Controller
 {
@@ -152,7 +154,8 @@ class SongAdminController extends Controller
             SongGenre::where("song_id", $id)->delete();
             PlaylistSong::where("song_id", $id)->delete();
             LikedSong::where("song_id", $id)->delete();
-            @unlink(public_path("storage/upload/song_src/") . $id . ".ogg");
+            $songManager = new SongManager($song);
+            $songManager->removeFile();
             $song->delete();
             return response()->json(
                 [

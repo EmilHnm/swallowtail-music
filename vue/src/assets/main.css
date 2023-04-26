@@ -9,6 +9,11 @@ body {
   padding: 0;
   transition: 0.3s;
 }
+#app {
+  max-height: 100vh;
+  max-width: 100vw;
+  overflow: hidden;
+}
 a {
   text-decoration: none;
 }
