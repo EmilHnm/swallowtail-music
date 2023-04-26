@@ -56,8 +56,9 @@
           <IconPrevious />
         </button>
         <button class="now_playing__controls--button--play" @click="playToggle">
-          <IconPause v-if="isPlaying" />
-          <IconPlay v-else />
+          <IconCircleLoading v-if="isWating" />
+          <IconPause v-if="!isWating && isPlaying" />
+          <IconPlay v-if="!isWating && !isPlaying" />
         </button>
         <button class="now_playing__controls--button--next" @click="nextSong">
           <IconNext />
@@ -150,6 +151,7 @@ import IconVolume from "@/components/icons/IconVolume.vue";
 import IconPause from "@/components/icons/IconPause.vue";
 import IconRepeatOne from "@/components/icons/IconRepeatOne.vue";
 import IconMuted from "@/components/icons/IconMuted.vue";
+import IconCircleLoading from "@/components/icons/IconCircleLoading.vue";
 import { mapActions, mapGetters } from "vuex";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
@@ -198,6 +200,10 @@ export default defineComponent({
       required: true,
       type: Boolean,
     },
+    isWating: {
+      required: true,
+      type: Boolean,
+    },
   },
   components: {
     IconHeartFilled,
@@ -212,6 +218,7 @@ export default defineComponent({
     IconRepeatOne,
     IconMuted,
     IconHeart,
+    IconCircleLoading,
   },
   data() {
     return {
@@ -242,6 +249,7 @@ export default defineComponent({
       this.$emit("repeatToggle");
     },
     playToggle() {
+      if (this.isWating) return;
       if (!this.isPlaying) {
         this.$emit("playSong");
       } else {
@@ -445,6 +453,7 @@ $tablet-width: 768px;
       margin-bottom: 10px;
       &--play {
         height: 100%;
+        aspect-ratio: 1 / 1;
         border-radius: 50%;
         background-color: var(--color-primary);
         display: flex;

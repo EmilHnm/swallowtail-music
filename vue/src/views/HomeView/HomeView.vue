@@ -178,6 +178,7 @@ export default {
       }
     },
     canplay() {
+      this.isAudioWaitting = false;
       if (this.isPlaying) this.playAudio();
     },
     waiting() {
@@ -871,6 +872,7 @@ export default {
     :repeat="repeat"
     :shuffle="isOnShuffle"
     :isPlaying="isPlaying"
+    :isWating="isAudioWaitting"
     @toggleRightSideBar="toggleRightSideBar"
     @shuffleToggle="shuffleToggle"
     @repeatToggle="repeatToggle"

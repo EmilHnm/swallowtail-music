@@ -311,7 +311,7 @@ export default defineComponent({
   height: 100%;
   overflow: auto;
   overflow-x: hidden;
-  // padding-bottom: 40px;
+  padding-bottom: 40px;
   h2 {
     font-size: 1.5rem;
     font-weight: 600;
