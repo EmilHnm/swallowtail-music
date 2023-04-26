@@ -279,7 +279,6 @@ class SongController extends Controller
     {
         $song = Song::find($id);
         $song->listens = $song->listens + 1;
-        // Redis::set($request->bearerToken(),  Carbon::now()->timestamp);
         $song->save();
         return response()->json([
             "status" => "success",

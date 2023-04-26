@@ -88,31 +88,6 @@ class UserController extends Controller
 
     public function getTopTracks($id)
     {
-        // $songs = DB::table("songs")
-        //     ->join("song_artists", "songs.song_id", "=", "song_artists.song_id")
-        //     ->join(
-        //         "artists",
-        //         "song_artists.artist_id",
-        //         "=",
-        //         "artists.artist_id"
-        //     )
-        //     ->join("albums", "songs.album_id", "=", "albums.album_id")
-        //     ->select(
-        //         "songs.song_id",
-        //         "songs.title",
-        //         "songs.song_id",
-        //         "songs.duration",
-        //         "songs.listens",
-        //         "artists.artist_id",
-        //         "artists.name as artist_name",
-        //         "albums.name as album_name",
-        //         "albums.album_id as album_id",
-        //         "albums.image_path as image_path"
-        //     )
-        //     ->where("songs.user_id", $id)
-        //     ->orderBy("songs.listens", "desc")
-        //     ->limit(5)
-        //     ->get();
         $songs = Song::with(["artist", "album", "like"])
             ->where("user_id", $id)
             ->orderBy("listens", "desc")

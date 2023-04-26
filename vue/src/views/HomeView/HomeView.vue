@@ -72,7 +72,6 @@ export default {
       isOnShuffle: false,
       shuffledList: [] as songData[],
       isAudioWaitting: false,
-      // playingAudio: {} as songData,
       // visualizer
       ctx: null as AudioContext | null,
       audioSource: null as MediaElementAudioSourceNode | null,
@@ -795,29 +794,6 @@ export default {
     this.audio.onloadeddata = () => {
       this.loadeddata();
     };
-  },
-  mounted() {
-    // document.addEventListener("keydown", (e) => {
-    //   if (e.keyCode === 32) {
-    //     e.preventDefault();
-    //     if (this.playingAudio) {
-    //       if (this.isPlaying) this.pauseAudio();
-    //       else this.playAudio();
-    //     }
-    //   }
-    //   if (e.keyCode === 39) {
-    //     e.preventDefault();
-    //     if (this.playingAudio) {
-    //       this.nextSong();
-    //     }
-    //   }
-    //   if (e.keyCode === 37) {
-    //     e.preventDefault();
-    //     if (this.playingAudio) {
-    //       this.prevSong();
-    //     }
-    //   }
-    // });
   },
   unmounted() {
     if (this.audio.src) this.audio.src = "";

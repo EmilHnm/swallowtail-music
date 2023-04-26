@@ -192,7 +192,7 @@ class PlaylistController extends Controller
             return response()->json([
                 "status" => "error",
                 "message" =>
-                    'You don\'t have permission to add song this playlist',
+                'You don\'t have permission to add song this playlist',
             ]);
         }
         $playlist->song()->attach($request->song_id);
@@ -229,7 +229,7 @@ class PlaylistController extends Controller
             return response()->json([
                 "status" => "error",
                 "message" =>
-                    'You don\'t have permission to add song this playlist',
+                'You don\'t have permission to add song this playlist',
             ]);
         }
         $playlist->song()->attach(array_column($songs, "song_id"));
@@ -246,51 +246,9 @@ class PlaylistController extends Controller
         }
         $query = "%" . $request->input("query") . "%";
         $playlist_id = $id;
-        // $songs = DB::table("songs")
-        //     ->whereNotIn(
-        //         "songs.song_id",
-        //         fn($q) => $q
-        //             ->select("song_id")
-        //             ->from("playlist_songs")
-        //             ->where("playlist_id", $playlist_id)
-        //             ->get()
-        //     )
-        //     ->join("song_artists", "songs.song_id", "=", "song_artists.song_id")
-        //     ->join(
-        //         "artists",
-        //         "song_artists.artist_id",
-        //         "=",
-        //         "artists.artist_id"
-        //     )
-        //     ->join("albums", "songs.album_id", "=", "albums.album_id")
-        //     ->leftJoin(
-        //         "liked_songs",
-        //         "songs.song_id",
-        //         "=",
-        //         "liked_songs.song_id"
-        //     )
-        //     ->select(
-        //         "songs.song_id",
-        //         "songs.title",
-        //         "songs.song_id",
-        //         "songs.duration",
-        //         "songs.listens",
-        //         "artists.artist_id",
-        //         "artists.name as artist_name",
-        //         "albums.name as album_name",
-        //         "albums.album_id as album_id",
-        //         "albums.image_path as image_path",
-        //         DB::raw(
-        //             'CASE WHEN liked_songs.song_id != "" THEN 1 ELSE 0 END as liked'
-        //         )
-        //     )
-        //     ->where("songs.title", "like", $query)
-        //     ->where("songs.display", "=", "public")
-        //     ->limit(5)
-        //     ->get();
         $songs = Song::whereNotIn(
             "songs.song_id",
-            fn($q) => $q
+            fn ($q) => $q
                 ->select("song_id")
                 ->from("playlist_songs")
                 ->where("playlist_id", $playlist_id)
@@ -324,14 +282,14 @@ class PlaylistController extends Controller
             return response()->json([
                 "status" => "error",
                 "message" =>
-                    'You don\'t have permission to add song this playlist',
+                'You don\'t have permission to add song this playlist',
             ]);
         }
         $song_list = DB::table("playlist_songs")
             ->where("playlist_id", $request->from)
             ->whereNotIn(
                 "song_id",
-                fn($q) => $q
+                fn ($q) => $q
                     ->select("song_id")
                     ->from("playlist_songs")
                     ->where("playlist_id", $request->to)
@@ -364,7 +322,7 @@ class PlaylistController extends Controller
             return response()->json([
                 "status" => "error",
                 "message" =>
-                    'You don\'t have permission to update this playlist',
+                'You don\'t have permission to update this playlist',
             ]);
         }
         if ($request->file("image")) {
@@ -398,7 +356,7 @@ class PlaylistController extends Controller
             return response()->json([
                 "status" => "error",
                 "message" =>
-                    'You don\'t have permission to update this playlist',
+                'You don\'t have permission to update this playlist',
             ]);
         }
         $playlist->type = $type;

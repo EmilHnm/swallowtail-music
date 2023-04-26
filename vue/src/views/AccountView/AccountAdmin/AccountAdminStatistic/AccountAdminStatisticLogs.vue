@@ -232,7 +232,6 @@ export default defineComponent({
       &__content {
         font-size: 14px;
         line-height: 20px;
-        // word-break: keep-all;
         overflow: scroll;
         padding: 10px 20px;
         max-height: 200px;

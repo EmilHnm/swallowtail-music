@@ -69,13 +69,6 @@ class AuthController extends Controller
             "password" => "required|string|confirmed",
         ]);
 
-        // $user = User::create([
-        //     'name' => $validateData['name'],
-        //     'email' => $validateData['email'],
-        //     'user_id' => Carbon::now()->timestamp,
-        //     'password' => bcrypt($validateData['password'])
-        // ]);
-
         $user = new User();
         $user->name = $validateData["name"];
         $user->email = $validateData["email"];
