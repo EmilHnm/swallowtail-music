@@ -17,6 +17,7 @@ import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import type { album } from "@/model/albumModel";
 import { mapActions, mapGetters } from "vuex";
 import { defineComponent } from "vue";
+import { useMeta, createMetaManager } from "vue-meta";
 type albumData = album & {
   song_count: number;
 };
@@ -37,6 +38,7 @@ export default defineComponent({
     "addLikedSongToQueue",
     "addToQueue",
     "playSong",
+    "uploadSong",
   ],
   data() {
     return {
@@ -70,6 +72,12 @@ export default defineComponent({
       })
       .then((res) => {
         this.album = res.album;
+        useMeta(
+          {
+            title: "Album",
+          },
+          createMetaManager()
+        );
       });
   },
   components: { BaseAlbum, BaseCircleLoad },

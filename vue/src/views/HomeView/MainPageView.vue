@@ -138,6 +138,7 @@
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
+import { useMeta } from "vue-meta";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { playlist } from "@/model/playlistModel";
@@ -285,6 +286,9 @@ export default defineComponent({
       }
     });
     this.observer.observe(newsEle);
+    useMeta({
+      title: environment.site_name,
+    });
   },
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();

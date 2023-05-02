@@ -377,6 +377,7 @@ $tablet-width: 768px;
     align-items: center;
     width: 30%;
     margin-left: 20px;
+
     &--cover {
       width: 60px;
       height: 60px;
@@ -385,12 +386,14 @@ $tablet-width: 768px;
       flex: 0 0 auto;
       margin-right: 5px;
       cursor: pointer;
+
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
     }
+
     &--title {
       width: 100%;
       margin: 0 5px;
@@ -399,15 +402,18 @@ $tablet-width: 768px;
       text-overflow: ellipsis;
       max-width: 260px;
       cursor: pointer;
+
       &--name {
         font-weight: 600;
         color: var(--text-color-primary);
         white-space: nowrap;
         cursor: pointer;
+
         &:hover {
           text-decoration: underline;
         }
       }
+
       &--artist {
         color: var(--text-subdued);
         white-space: nowrap;
@@ -415,6 +421,7 @@ $tablet-width: 768px;
         display: flex;
         width: max-content;
         transition: all 2s ease-in-out;
+
         span {
           flex: 0 0 auto;
           padding-right: 2px;
@@ -422,12 +429,14 @@ $tablet-width: 768px;
         }
       }
     }
+
     &--heart {
       width: 25px;
       height: 25px;
       overflow: hidden;
       flex: 0 0 auto;
       cursor: pointer;
+
       svg {
         fill: var(--color-primary);
         width: 100%;
@@ -435,6 +444,7 @@ $tablet-width: 768px;
       }
     }
   }
+
   .now_playing__controls {
     display: flex;
     align-items: center;
@@ -443,6 +453,7 @@ $tablet-width: 768px;
     padding: 10px;
     max-width: 722px;
     width: 40%;
+
     &--button {
       display: flex;
       align-items: center;
@@ -451,6 +462,7 @@ $tablet-width: 768px;
       width: 100%;
       height: 32px;
       margin-bottom: 10px;
+
       &--play {
         height: 100%;
         aspect-ratio: 1 / 1;
@@ -461,12 +473,14 @@ $tablet-width: 768px;
         justify-content: center;
         cursor: pointer;
         border: none;
+
         svg {
           fill: #fff;
           width: 20px;
           height: 20px;
         }
       }
+
       &--shuffle,
       &--prev,
       &--next,
@@ -477,11 +491,13 @@ $tablet-width: 768px;
         border: none;
         overflow: hidden;
         cursor: pointer;
+
         svg {
           width: 100%;
           height: 100%;
         }
       }
+
       &--shuffle.active,
       &--repeat.active {
         svg {
@@ -489,11 +505,13 @@ $tablet-width: 768px;
         }
       }
     }
+
     &--progress {
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
+
       &--bar {
         width: 100%;
         height: 4px;
@@ -502,11 +520,13 @@ $tablet-width: 768px;
         overflow: hidden;
         margin: 0 10px;
         position: relative;
+
         &--progress {
           width: 0%;
           height: 100%;
           background-color: var(--color-primary);
         }
+
         &--range {
           position: absolute;
           top: 0;
@@ -517,11 +537,13 @@ $tablet-width: 768px;
           cursor: pointer;
         }
       }
+
       &--time {
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: 100%;
+
         &--current,
         &--duration {
           color: var(--text-subdued);
@@ -530,10 +552,12 @@ $tablet-width: 768px;
       }
     }
   }
+
   .now_playing__menu {
     display: flex;
     width: 30%;
     margin-right: 20px;
+
     &--container {
       width: 100%;
       height: 100%;
@@ -541,6 +565,7 @@ $tablet-width: 768px;
       align-items: center;
       justify-content: flex-end;
     }
+
     &--playlistToggle {
       background: var(--background-color-primary);
       height: 20px;
@@ -550,22 +575,26 @@ $tablet-width: 768px;
       margin: 0 10px;
       overflow: hidden;
       cursor: pointer;
+
       svg {
         width: 100%;
         height: 100%;
       }
     }
+
     &--playlistToggle.active {
       svg {
         fill: var(--color-primary);
       }
     }
+
     &--volume {
       display: flex;
       justify-content: space-around;
       align-items: center;
       width: 100%;
       max-width: 220px;
+
       &--mute {
         background: var(--background-color-primary);
         height: 30px;
@@ -576,11 +605,13 @@ $tablet-width: 768px;
         overflow: hidden;
         flex-shrink: 1;
         cursor: pointer;
+
         svg {
           width: 100%;
           height: 100%;
         }
       }
+
       &--bar {
         width: 100%;
         height: 4px;
@@ -589,11 +620,13 @@ $tablet-width: 768px;
         overflow: hidden;
         margin: 0 10px;
         position: relative;
+
         &--progress {
           width: 50%;
           height: 100%;
           background-color: var(--color-primary);
         }
+
         &--range {
           position: absolute;
           top: 0;
@@ -607,30 +640,37 @@ $tablet-width: 768px;
     }
   }
 }
+
 @media (max-width: $tablet-width) {
   .now_playing {
     .now_playing__info {
       margin-left: 10px;
       width: 20%;
+
       &--title {
         display: none;
       }
+
       &--heart {
         display: none;
       }
     }
+
     .now_playing__controls {
       width: 60%;
     }
+
     .now_playing__menu {
       margin-right: 10px;
       width: 20%;
+
       &--volume {
         display: none;
       }
     }
   }
 }
+
 // @media (max-width: $mobile-width) {
 //   .now_playing {
 //     .now_playing__controls {
@@ -642,13 +682,15 @@ $tablet-width: 768px;
 // }
 
 input[type="range"] {
-  -webkit-appearance: none;
+  // -webkit-appearance: none;
   margin: 0;
   width: 100%;
 }
+
 input[type="range"]:focus {
   outline: none;
 }
+
 input[type="range"]::-webkit-slider-thumb {
   width: 1px;
   -webkit-appearance: none;

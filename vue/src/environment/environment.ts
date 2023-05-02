@@ -1,4 +1,6 @@
 export const environment = {
+  site_name: import.meta.env.VITE_APP_NAME,
+  site_url: import.meta.env.VITE_APP_URL,
   api: import.meta.env.VITE_API_URL,
   default: import.meta.env.VITE_DEFAULT_FILE,
   album_cover: import.meta.env.VITE_ALBUM_COVER,

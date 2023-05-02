@@ -83,9 +83,6 @@ export default defineComponent({
   transition: all 0.5s ease-in-out;
   background-color: var(--background-color-primary);
   z-index: 100;
-  &.isPlaying {
-    bottom: 92px;
-  }
   button {
     position: absolute;
     display: block;

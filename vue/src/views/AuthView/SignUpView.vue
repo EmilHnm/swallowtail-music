@@ -68,9 +68,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import BaseInput from "../../components/UI/BaseInput.vue";
-import BaseButton from "../../components/UI/BaseButton.vue";
-import BaseDialog from "../../components/UI/BaseDialog.vue";
+import { useMeta } from "vue-meta";
+import BaseInput from "@/components/UI/BaseInput.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
 
 export default defineComponent({
   name: "SignUpView",
@@ -112,6 +113,11 @@ export default defineComponent({
           }
         });
     },
+  },
+  mounted() {
+    useMeta({
+      title: "Sign Up",
+    });
   },
 });
 </script>

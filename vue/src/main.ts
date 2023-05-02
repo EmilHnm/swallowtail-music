@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { createMetaManager } from "vue-meta";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
@@ -14,6 +15,8 @@ import IconLogo from "./components/icons/IconLogo.vue";
 
 const app = createApp(App);
 
+const metaManager = createMetaManager();
+
 app.component("base-card", BaseCard);
 app.component("base-button", BaseButton);
 app.component("darkmode-button", DarkModeButton);
@@ -23,5 +26,6 @@ app.component("base-dialog", BaseDialog);
 app.component("icon-logo", IconLogo);
 app.use(router);
 app.use(store);
+app.use(createMetaManager());
 app.mount("#app");
 app.config.unwrapInjectedRef = true;

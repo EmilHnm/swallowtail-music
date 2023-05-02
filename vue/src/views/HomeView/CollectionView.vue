@@ -82,12 +82,13 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import IconPlay from "../../components/icons/IconPlay.vue";
-import IconHorizontalThreeDot from "../../components/icons/IconHorizontalThreeDot.vue";
-import BaseListItem from "../../components/UI/BaseListItem.vue";
-import BaseSongItem from "../../components/UI/BaseSongItem.vue";
-import IconHeartFilled from "../../components/icons/IconHeartFilled.vue";
+import IconPlay from "@/components/icons/IconPlay.vue";
+import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vue";
+import BaseListItem from "@/components/UI/BaseListItem.vue";
+import BaseSongItem from "@/components/UI/BaseSongItem.vue";
+import IconHeartFilled from "@/components/icons/IconHeartFilled.vue";
 import { mapActions, mapGetters } from "vuex";
+import { useMeta } from "vue-meta";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import type { song } from "@/model/songModel";
@@ -118,6 +119,7 @@ export default defineComponent({
     "addLikedSongToQueue",
     "addToQueue",
     "playSong",
+    "uploadSong",
   ],
   components: {
     IconPlay,
@@ -189,6 +191,9 @@ export default defineComponent({
       }
     });
     if (this.observer && songList) this.observer.observe(songList);
+    useMeta({
+      title: `${this.user.username}'s' Collection`,
+    });
   },
   created() {
     this.loadLikedList();

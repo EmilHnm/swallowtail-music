@@ -273,14 +273,19 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import type { playlist } from "@/model/playlistModel";
-import type { user } from "@/model/userModel";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
 import { _function } from "@/mixins";
-import IconPlay from "../../components/icons/IconPlay.vue";
-import IconSearch from "../../components/icons/IconSearch.vue";
-import IconHorizontalThreeDot from "../../components/icons/IconHorizontalThreeDot.vue";
+import { useMeta } from "vue-meta";
+import type { playlist } from "@/model/playlistModel";
+import type { album } from "@/model/albumModel";
+import type { user } from "@/model/userModel";
+import type { song } from "@/model/songModel";
+import type { like } from "@/model/likeModel";
+import type { artist } from "@/model/artistModel";
+import IconPlay from "@/components/icons/IconPlay.vue";
+import IconSearch from "@/components/icons/IconSearch.vue";
+import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vue";
 import BaseListItem from "@/components/UI/BaseListItem.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
@@ -288,10 +293,6 @@ import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 import IconBallPen from "@/components/icons/IconBallPen.vue";
-import type { song } from "@/model/songModel";
-import type { album } from "@/model/albumModel";
-import type { like } from "@/model/likeModel";
-import type { artist } from "@/model/artistModel";
 
 type songData = song & {
   album: album;
@@ -325,6 +326,7 @@ export default defineComponent({
     "addLikedSongToQueue",
     "addToQueue",
     "playSong",
+    "uploadSong",
   ],
   components: {
     IconPlay,
@@ -424,6 +426,7 @@ export default defineComponent({
             this.playlistOwner = res.owner;
             this.edit.title = this.playlistDetail.title ?? "";
             this.edit.description = this.playlistDetail.description ?? "";
+            this.setMeta(this.edit.title);
           }
         });
     },
@@ -447,6 +450,11 @@ export default defineComponent({
               .substring(11, 19);
           }
         });
+    },
+    setMeta(title: string) {
+      useMeta({
+        title: title,
+      });
     },
     loadSearchResult(query: string) {
       if (!this.addbleSongController) {
@@ -642,6 +650,7 @@ export default defineComponent({
       }
     });
     if (this.observer && songList) this.observer.observe(songList);
+    this.setMeta("Playlist");
   },
   created() {
     this.loadPlaylist();

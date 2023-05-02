@@ -23,6 +23,7 @@ import BaseButton from "@/components/UI/BaseButton.vue";
 import SongUpload from "@/components/UploadPage/SongUpload.vue";
 import AlbumUpload from "@/components/UploadPage/AlbumUpload.vue";
 import { mapGetters } from "vuex";
+import { useMeta } from "vue-meta";
 export default defineComponent({
   data() {
     return { componentName: "SongUpload" };
@@ -59,6 +60,11 @@ export default defineComponent({
     "playSong",
     "uploadSong",
   ],
+  mounted() {
+    useMeta({
+      title: "Upload",
+    });
+  },
 });
 </script>
 

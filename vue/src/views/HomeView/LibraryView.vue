@@ -20,8 +20,9 @@
 import type { playlist } from "@/model/playlistModel";
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
-import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
+import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import { environment } from "@/environment/environment";
+import { useMeta } from "vue-meta";
 
 type playlistData = playlist & {
   songCount: number;
@@ -61,11 +62,17 @@ export default defineComponent({
     "addLikedSongToQueue",
     "addToQueue",
     "playSong",
+    "uploadSong",
   ],
   data() {
     return {
       environment: environment,
     };
+  },
+  mounted() {
+    useMeta({
+      title: "Library",
+    });
   },
 });
 </script>

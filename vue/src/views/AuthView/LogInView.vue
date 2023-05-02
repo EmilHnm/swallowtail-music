@@ -57,10 +57,11 @@
 </template>
 
 <script lang="ts">
+import { useMeta } from "vue-meta";
 import { defineComponent } from "vue";
+import { mapActions, mapMutations } from "vuex";
 import BaseInput from "@/components/UI/BaseInput.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
-import { mapActions, mapMutations } from "vuex";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 
 export default defineComponent({
@@ -101,6 +102,11 @@ export default defineComponent({
     closeDialog() {
       this.dialogWaring.show = false;
     },
+  },
+  mounted() {
+    useMeta({
+      title: "Log In",
+    });
   },
 });
 </script>

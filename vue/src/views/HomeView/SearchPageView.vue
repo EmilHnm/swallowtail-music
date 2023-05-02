@@ -78,6 +78,7 @@ import type { artist } from "@/model/artistModel";
 import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
 import type { song } from "@/model/songModel";
 import type { like } from "@/model/likeModel";
+import { useMeta } from "vue-meta";
 
 type songData = song & {
   album: album;
@@ -104,6 +105,7 @@ export default defineComponent({
     "addLikedSongToQueue",
     "addToQueue",
     "playSong",
+    "uploadSong",
   ],
   data() {
     return {
@@ -324,6 +326,9 @@ export default defineComponent({
   },
   mounted() {
     this.container = this.$refs.container as HTMLElement;
+    useMeta({
+      title: "Search",
+    });
   },
 });
 </script>
