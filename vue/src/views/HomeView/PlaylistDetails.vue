@@ -426,7 +426,6 @@ export default defineComponent({
             this.playlistOwner = res.owner;
             this.edit.title = this.playlistDetail.title ?? "";
             this.edit.description = this.playlistDetail.description ?? "";
-            this.setMeta(this.edit.title);
           }
         });
     },

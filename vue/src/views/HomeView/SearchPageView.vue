@@ -55,6 +55,9 @@
       <component
         :is="selectedSearchFilter"
         @changeSearchPage="changeComponent"
+        @playSong="playSong"
+        @playAlbum="playAlbum"
+        @playArtistSong="playArtistSong"
       ></component>
     </keep-alive>
     <div v-else>
@@ -287,6 +290,15 @@ export default defineComponent({
           }
         });
     },
+    playSong(song_id: string) {
+      this.$emit("playSong", song_id);
+    },
+    playAlbum(album_id: string) {
+      this.$emit("playAlbum", album_id);
+    },
+    playArtistSong(artist_id: string) {
+      this.$emit("playArtistSong", artist_id);
+    },
   },
   computed: {
     ...mapGetters({
@@ -311,6 +323,11 @@ export default defineComponent({
   },
   watch: {
     searchText() {
+      this.$router.replace({
+        query: {
+          q: this.searchText,
+        },
+      });
       if (this.searchText !== "") {
         this.onSearchSong(this.searchText);
         this.onSearchAlbums(this.searchText);
@@ -326,6 +343,7 @@ export default defineComponent({
   },
   mounted() {
     this.container = this.$refs.container as HTMLElement;
+    this.searchText = (this.$route.query.q as string) ?? "";
     useMeta({
       title: "Search",
     });

@@ -101,6 +101,7 @@ export const authModule = {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${context.getters.userToken}`,
+          "Content-Type": "application/json",
         },
       });
     },

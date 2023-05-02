@@ -8,6 +8,7 @@
         :title="album.name"
         :songCount="album.song_count"
         :img="`${environment.album_cover}/${album.image_path}`"
+        @playAlbum="playAlbum"
       />
     </div>
   </div>
@@ -33,6 +34,11 @@ export default defineComponent({
     return {
       environment: environment,
     };
+  },
+  methods: {
+    playAlbum(album_id: string) {
+      this.$emit("playAlbum", album_id);
+    },
   },
 });
 </script>

@@ -26,6 +26,6 @@ app.component("base-dialog", BaseDialog);
 app.component("icon-logo", IconLogo);
 app.use(router);
 app.use(store);
-app.use(createMetaManager());
+app.use(metaManager);
 app.mount("#app");
 app.config.unwrapInjectedRef = true;

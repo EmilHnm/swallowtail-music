@@ -6,6 +6,7 @@
         :key="artist.artist_id"
         :data="artist"
         :title="'虹ヶ咲学園スクールアイドル同好会'"
+        @playArtistSong="playArtistSong"
       />
     </div>
   </div>
@@ -25,6 +26,11 @@ declare module "@vue/runtime-core" {
 export default defineComponent({
   inject: ["artistResult"],
   components: { BaseCardArtist },
+  methods: {
+    playArtistSong(artist_id: string) {
+      this.$emit("playArtistSong", artist_id);
+    },
+  },
 });
 </script>
 

@@ -1,5 +1,10 @@
 <template>
-  <BaseSongItem v-for="song in songResult" :key="song.song_id" :data="song" />
+  <BaseSongItem
+    v-for="song in songResult"
+    :key="song.song_id"
+    :data="song"
+    @select-song="playSong"
+  />
 </template>
 <script lang="ts">
 import type { album } from "@/model/albumModel";
@@ -23,6 +28,11 @@ declare module "@vue/runtime-core" {
 
 export default defineComponent({
   setup() {},
+  methods: {
+    playSong(song_id: string) {
+      this.$emit("playSong", song_id);
+    },
+  },
   inject: ["songResult"],
   components: { BaseSongItem },
 });

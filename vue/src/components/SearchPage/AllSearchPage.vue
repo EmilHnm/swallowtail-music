@@ -6,6 +6,7 @@
         <BaseSongItem
           v-if="index <= songResult.length"
           :data="songResult[index - 1]"
+          @select-song="playSong"
         />
       </div>
       <span @click="changeSearchPage('SongSearchPage')">See more</span>
@@ -22,6 +23,7 @@
             :id="albumResult[index - 1].album_id"
             :title="albumResult[index - 1].name"
             :songCount="albumResult[index - 1].song_count"
+            @playAlbum="playAlbum"
           />
         </div>
       </BaseHorizontalScroll>
@@ -38,6 +40,7 @@
             v-if="index <= artistResult.length"
             :key="artistResult[index - 1].artist_id"
             :data="artistResult[index - 1]"
+            @playArtistSong="playArtistSong"
           />
         </div>
       </BaseHorizontalScroll>
@@ -103,6 +106,15 @@ export default defineComponent({
   methods: {
     changeSearchPage(componentName: string) {
       this.$emit("changeSearchPage", componentName);
+    },
+    playSong(song_id: string) {
+      this.$emit("playSong", song_id);
+    },
+    playAlbum(album_id: string) {
+      this.$emit("playAlbum", album_id);
+    },
+    playArtistSong(artist_id: string) {
+      this.$emit("playArtistSong", artist_id);
     },
   },
   inject: ["songResult", "albumResult", "artistResult", "userResult"],

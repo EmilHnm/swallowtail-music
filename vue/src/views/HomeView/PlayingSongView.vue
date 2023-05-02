@@ -68,6 +68,7 @@
 <script lang="ts">
 import { environment } from "@/environment/environment";
 import { defineComponent } from "vue";
+import { useMeta } from "vue-meta";
 import BaseCircleProgress from "@/components/UI/BaseCircleProgress.vue";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
@@ -128,6 +129,19 @@ export default defineComponent({
       }
     });
     if (container) this.observer.observe(container);
+    useMeta({
+      title: `Now Playing - ${this.playingAudio.title}`,
+      meta: [
+        {
+          name: "description",
+          content: "Now Playing",
+        },
+        {
+          name: "keywords",
+          content: "Now Playing",
+        },
+      ],
+    });
   },
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();
