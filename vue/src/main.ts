@@ -26,7 +26,7 @@ app.component("base-list-item", BaseListItem);
 app.component("base-dialog", BaseDialog);
 app.component("icon-logo", IconLogo);
 app.use(router);
-app.use(store);
+app.use(store as any);
 app.use(metaManager);
 app.directive("lazyload", LazyLoadDirective);
 app.mount("#app");

@@ -1,7 +1,6 @@
-import type { DirectiveBinding } from "vue";
 import { environment } from "@/environment/environment";
 export default {
-  mounted: (el: HTMLImageElement, binding: DirectiveBinding) => {
+  mounted: (el: HTMLImageElement) => {
     function loadImage() {
       if (el) {
         el.addEventListener("load", () => {
