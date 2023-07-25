@@ -67,7 +67,8 @@
             <td>{{ index + 1 }}</td>
             <td>
               <img
-                :src="
+                v-lazyload
+                :data-url="
                   artist.image_path
                     ? `${environment.artist_image}/${artist.image_path}`
                     : `${environment.default}/no_image.jpg`

@@ -3,7 +3,8 @@
     <div class="now_playing__info">
       <div class="now_playing__info--cover" @click="navigateToPlaying">
         <img
-          :src="
+          v-lazyload
+          :data-url="
             playingAudio.album
               ? `${environment.album_cover}/${playingAudio.album.image_path}`
               : `${environment.default}/no_image.jpg`

@@ -3,8 +3,9 @@
     <div class="artist">
       <div class="artist__image">
         <img
+          v-lazyload
           class="img"
-          :src="
+          :data-url="
             data.image_path
               ? `${environment.artist_image}/${data.image_path}`
               : `${environment.default}/no_image.jpg`

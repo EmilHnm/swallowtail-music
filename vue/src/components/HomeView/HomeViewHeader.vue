@@ -47,7 +47,8 @@
         </div>
         <div class="header__right--account--img">
           <img
-            :src="
+            v-lazyload
+            :data-url="
               userData.profile_photo_url
                 ? `${environment.profile_image}/${userData.profile_photo_url}`
                 : `http://127.0.0.1:5173/src/assets/default/default-avatar.jpg`

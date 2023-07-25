@@ -36,7 +36,8 @@
       <div class="header__account" @click="toggleMenu">
         <div class="header__account--avatar">
           <img
-            :src="
+            v-lazyload
+            :data-url="
               user.profile_photo_url
                 ? `${environment.profile_image}/${user.profile_photo_url}`
                 : 'http://127.0.0.1:5173/src/assets/default/default-avatar.jpg'

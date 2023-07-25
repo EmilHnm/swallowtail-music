@@ -3,8 +3,9 @@
     <div class="user">
       <div class="user__image">
         <img
+          v-lazyload
           class="img"
-          :src="
+          :data-url="
             imageSrc
               ? `${environment.profile_image}/${imageSrc}`
               : `${environment.default}/default-avatar.jpg`

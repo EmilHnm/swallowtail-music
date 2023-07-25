@@ -12,7 +12,8 @@
           :class="{ 'animation-pause': !isPlaying }"
         >
           <img
-            :src="
+            v-lazyload
+            :data-url="
               playingAudio.album
                 ? `${environment.album_cover}/${playingAudio.album.image_path}`
                 : `${environment.default}/no_image.jpg`

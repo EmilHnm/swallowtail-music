@@ -9,7 +9,8 @@
     <div class="header__background"></div>
     <div class="header__image">
       <img
-        :src="
+        v-lazyload
+        :data-url="
           artist.image_path
             ? `${environment.artist_image}/${artist.image_path}`
             : `${environment.default}/no_image.jpg`

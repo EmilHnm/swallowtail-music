@@ -36,7 +36,10 @@
   <div class="album-container">
     <div class="album__details">
       <div class="album__details--cover">
-        <img :src="`${environment.album_cover}/${data.image_path}`" />
+        <img
+          v-lazyload
+          :data-url="`${environment.album_cover}/${data.image_path}`"
+        />
       </div>
       <div class="album__details--prof">
         <div class="album__details--prof--title">

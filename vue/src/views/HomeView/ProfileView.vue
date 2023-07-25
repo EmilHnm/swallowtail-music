@@ -15,7 +15,8 @@
     <div class="header__background"></div>
     <div class="header__image">
       <img
-        :src="
+        v-lazyload
+        :data-url="
           user.profile_photo_url
             ? `${environment.profile_image}/${user.profile_photo_url}`
             : `${environment.default}/default-avatar.jpg`

@@ -98,7 +98,8 @@
     <div class="details">
       <div class="details__image">
         <img
-          :src="
+          v-lazyload
+          :data-url="
             artist.image_path
               ? `${environment.artist_image}/${artist.image_path}`
               : `${environment.default}/no_image.jpg`
@@ -107,7 +108,7 @@
           srcset=""
           v-if="!tempImg"
         />
-        <img :src="tempImg" alt="" srcset="" v-else />
+        <img v-lazyload :data-url="tempImg" alt="" srcset="" v-else />
         <input type="file" name="" id="" @change="onImageChange" />
       </div>
       <div class="details__statistic">

@@ -12,7 +12,8 @@
       <div class="song-item__left" :class="{ small: small }">
         <div class="song-item__left--image" @click="selectSong">
           <img
-            :src="
+            v-lazyload
+            :data-url="
               data.album
                 ? `${environment.album_cover}/${data.album.image_path}`
                 : `${environment.default}/no_image.jpg`
@@ -86,7 +87,8 @@
       <div class="menu__song">
         <div class="menu__song--img">
           <img
-            :src="
+            v-lazyload
+            :data-url="
               data.album
                 ? `${environment.album_cover}/${data.album.image_path}`
                 : `${environment.default}/no_image.jpg`

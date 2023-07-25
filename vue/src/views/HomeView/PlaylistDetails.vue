@@ -11,10 +11,11 @@
         <div class="playlist-edit-container">
           <div class="edit__image">
             <input type="file" id="file" @change="onImageFileChange" />
-            <img v-if="edit.img" :src="edit.img" />
+            <img v-if="edit.img" v-lazyload :data-url="edit.img" />
             <img
               v-else
-              :src="
+              v-lazyload
+              :data-url="
                 playlistDetail.image_path
                   ? `${environment.playlist_cover}/${playlistDetail.image_path}`
                   : `${environment.default}/no_image.jpg`
@@ -100,7 +101,8 @@
     ></div>
     <div class="header__image" @click="openEditDetailsDialog">
       <img
-        :src="
+        v-lazyload
+        :data-url="
           playlistDetail.image_path
             ? `${environment.playlist_cover}/${playlistDetail.image_path}`
             : `${environment.default}/no_image.jpg`

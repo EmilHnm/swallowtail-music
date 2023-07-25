@@ -29,7 +29,8 @@
     <h2>Change Avatar</h2>
     <div class="currentAvatar">
       <img
-        :src="
+        v-lazyload
+        :data-url="
           user.profile_photo_url
             ? `${environment.profile_image}/${user.profile_photo_url}`
             : 'http://127.0.0.1:5173/src/assets/default/default-avatar.jpg'
@@ -45,7 +46,8 @@
       <div class="cropArea" :class="{ tab: tab }">
         <VueCropper
           ref="cropper"
-          :src="options.img"
+          v-lazyload
+          :data-url="options.img"
           :cropBoxResizable="options.cropBoxResizable"
           :aspectRatio="options.aspectRatio"
           :background="options.background"
@@ -56,8 +58,8 @@
         ></VueCropper>
       </div>
       <div class="preview" :class="{ tab: tab }">
-        <img class="previewSquare" :src="imgDataUrl" />
-        <img class="previewCircle" :src="imgDataUrl" />
+        <img class="previewSquare" v-lazyload :data-url="imgDataUrl" />
+        <img class="previewCircle" v-lazyload :data-url="imgDataUrl" />
       </div>
     </div>
     <div class="control" v-if="options.img">

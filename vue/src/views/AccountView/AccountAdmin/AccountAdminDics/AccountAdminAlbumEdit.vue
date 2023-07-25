@@ -35,11 +35,17 @@
               @change="imageFileChange"
             />
             <img
-              :src="`${environment.album_cover}/${album.image_path}`"
+              v-lazyload
+              :data-url="`${environment.album_cover}/${album.image_path}`"
               alt="album image"
               v-if="!imgPath"
             />
-            <img :src="imgPath" alt="album image" v-else-if="imgPath" />
+            <img
+              v-lazyload
+              :data-url="imgPath"
+              alt="album image"
+              v-else-if="imgPath"
+            />
             <label for="image" v-else>
               <span>Click or drag your album image here to upload </span>
             </label>

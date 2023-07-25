@@ -43,7 +43,8 @@
           </label>
           <img
             class="preview"
-            :src="albumImageTempPath"
+            v-lazyload
+            :data-url="albumImageTempPath"
             v-if="albumImageTempPath"
           />
         </div>

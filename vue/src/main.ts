@@ -12,6 +12,7 @@ import BaseInput from "./components/UI/BaseInput.vue";
 import BaseListItem from "./components/UI/BaseListItem.vue";
 import BaseDialog from "./components/UI/BaseDialog.vue";
 import IconLogo from "./components/icons/IconLogo.vue";
+import LazyLoadDirective from "./shared/LazyLoadDirective";
 
 const app = createApp(App);
 
@@ -27,5 +28,6 @@ app.component("icon-logo", IconLogo);
 app.use(router);
 app.use(store);
 app.use(metaManager);
+app.directive("lazyload", LazyLoadDirective);
 app.mount("#app");
 app.config.unwrapInjectedRef = true;

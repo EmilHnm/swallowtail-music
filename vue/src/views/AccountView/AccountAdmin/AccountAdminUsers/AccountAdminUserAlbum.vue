@@ -40,7 +40,8 @@
             <td>{{ index + 1 }}</td>
             <td v-if="mainWidth > 450">
               <img
-                :src="`${environment.album_cover}/${album.image_path}`"
+                v-lazyload
+                :data-url="`${environment.album_cover}/${album.image_path}`"
                 alt=""
                 srcset=""
               />
@@ -62,7 +63,8 @@
             <td>{{ index + 1 }}</td>
             <td v-if="mainWidth > 450">
               <img
-                :src="`${environment.album_cover}/${album.image_path}`"
+                v-lazyload
+                :data-url="`${environment.album_cover}/${album.image_path}`"
                 alt=""
                 srcset=""
               />
