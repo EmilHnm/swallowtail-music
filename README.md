@@ -100,13 +100,18 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
     -   [x] Change Profile Picture
     -   [x] Edit Profile
 
-### Todo
+### V1.5
 
--   [ ] Integrate Nodejs for some realtime action
--   [ ] Create crawler
--   [ ] Create API for backup and sync
+-   [ ] <strike>Create crawler</strike>
 -   [x] Change to chunk upload
 -   [x] Change music storage from public storage to minio storage
 -   [x] Stream file instead of download
--   [ ] Login with social
+
+### V2
+
+-   [x] Change theme design
+-   [x] Add Lazyload for Image
+-   [ ] Integrate Nodejs for some realtime action
 -   [ ] Change admin dashboard
+-   [ ] Cross Authenticate
+-   [ ] Create API for backup and sync
