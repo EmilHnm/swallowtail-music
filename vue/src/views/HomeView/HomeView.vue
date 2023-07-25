@@ -824,7 +824,7 @@ export default {
     </BaseDialog>
   </teleport>
   <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
-  <div class="main-body" :class="{ full: audioList.length <= 0 }">
+  <div class="main-body">
     <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
     <main>
       <router-view
@@ -847,6 +847,7 @@ export default {
       >
       </router-view>
     </main>
+
     <HomeViewRightSideBar
       v-if="Object.keys(audioList).length > 0"
       :isActive="isRightSideBarActive"
@@ -859,11 +860,11 @@ export default {
       @setPlaySong="setPlaySong"
       @deleteFromQueue="deleteFromQueue"
     />
+    <HomeUploadBox
+      :isPlaying="playingAudio ? true : false"
+      :uploadQueue="uploadQueue"
+    ></HomeUploadBox>
   </div>
-  <HomeUploadBox
-    :isPlaying="playingAudio ? true : false"
-    :uploadQueue="uploadQueue"
-  ></HomeUploadBox>
   <HomeViewPlayer
     v-if="Object.keys(audioList).length > 0"
     :playingAudio="playingAudio"
@@ -889,14 +890,15 @@ export default {
 .main-body {
   display: flex;
   position: relative;
-  height: calc(100vh - 60px - 81px);
   overflow: hidden;
-  &.full {
-    height: calc(100vh - 61px);
-  }
-
+  flex: 1;
+  justify-content: center;
+  width: calc(100% - 20px);
+  gap: 10px;
   main {
     flex: 1;
+    background: var(--background-glass-color-primary);
+    border-radius: 10px;
     overflow-y: auto;
     user-select: none;
   }

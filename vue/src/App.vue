@@ -1,5 +1,4 @@
 <script lang="ts">
-import { defineComponent } from "vue";
 import { RouterView } from "vue-router";
 import { environment } from "./environment/environment";
 export default {

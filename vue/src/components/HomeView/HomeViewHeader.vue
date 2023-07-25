@@ -23,6 +23,7 @@
     <div class="header__left">
       <button
         class="header__left--sidebar-toggle"
+        aria-label="menu"
         @click="$emit('toggleLeftSideBar')"
       >
         <icon-menu />
@@ -159,7 +160,10 @@ $tablet-width: 768px;
   height: 40px;
   padding: 10px;
   background-color: transparent;
-  border-bottom: 0.5px solid var(--background-color-secondary);
+  background: var(--background-color-primary);
+  border-radius: 10px;
+  width: calc(100% - 40px);
+  margin-top: 10px;
   &__left {
     display: flex;
     align-items: center;

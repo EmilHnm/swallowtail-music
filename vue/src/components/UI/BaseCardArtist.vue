@@ -9,6 +9,7 @@
               ? `${environment.artist_image}/${data.image_path}`
               : `${environment.default}/no_image.jpg`
           "
+          :alt="data.name"
         />
         <div class="artist__image--play">
           <IconPlay @click="playArtistSong" />

@@ -120,8 +120,6 @@ $tablet-width: 768px;
 .nav.active {
   width: 30%;
   max-width: 350px;
-  display: flex;
-  flex-direction: column;
   .nav__navigation {
     display: flex;
     flex-direction: column;
@@ -176,16 +174,16 @@ $tablet-width: 768px;
 }
 .nav {
   width: 100px;
-  background: var(--background-color-secondary);
-  padding: 10px 0px;
+  background: var(--background-color-primary);
   height: 100%;
   overflow: auto;
-
+  border-radius: 10px;
   transition: 0.5s;
   .nav__navigation {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-top: 10px;
     margin-bottom: 20px;
     text-align: center & a {
       text-decoration: none;

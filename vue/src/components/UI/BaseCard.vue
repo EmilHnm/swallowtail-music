@@ -35,6 +35,7 @@ export default {};
     border-radius: 8px;
     translate: -50% -50%;
     transition: 0.5s;
+    filter: blur(10px);
     background: linear-gradient(
       315deg,
       var(--color-primary),

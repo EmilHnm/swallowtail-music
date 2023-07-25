@@ -2,7 +2,7 @@
   <BaseCard>
     <div class="album">
       <div class="album__image">
-        <img class="img" :src="img" />
+        <img class="img" :src="img" :alt="title" />
         <div class="album__image--play">
           <IconPlay @click="play" />
         </div>

@@ -315,7 +315,6 @@ export default defineComponent({
   height: 100%;
   overflow: auto;
   overflow-x: hidden;
-  padding-bottom: 40px;
   h2 {
     font-size: 1.5rem;
     font-weight: 600;
@@ -437,6 +436,7 @@ export default defineComponent({
 .favorite {
   padding: 0 10px;
   width: 100%;
+  padding-bottom: 20px;
   & .favorite__playlist {
     width: 100%;
     & .favorite__playlist--container {

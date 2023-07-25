@@ -361,17 +361,15 @@ $mobile-width: 480px;
 $tablet-width: 768px;
 
 .now_playing {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 200;
   width: 100%;
   height: 79px;
   background-color: var(--background-color-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
-
+  border-radius: 10px;
+  margin-bottom: 10px;
+  width: calc(100% - 20px);
   .now_playing__info {
     display: flex;
     align-items: center;

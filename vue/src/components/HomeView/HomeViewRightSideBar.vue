@@ -143,10 +143,10 @@ $tablet-width: 768px;
   width: 0px;
   max-width: 350px;
   transition: 0.5s;
-  background: var(--background-color-secondary);
+  background: var(--background-color-primary);
+  border-radius: 10px;
   height: 100%;
   overflow: auto;
-  border-right: 0.5px solid var(--text-subdued);
   .playing-list--title {
     width: 100%;
     h3 {

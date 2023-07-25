@@ -10,7 +10,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "@vue/runtime-core";
+import { defineComponent } from "vue";
 export default defineComponent({
   name: "BaseListItem",
   data() {
@@ -51,6 +51,7 @@ export default defineComponent({
     background: var(--text-primary-color);
     border-radius: 8px;
     translate: -50% -50%;
+    filter: blur(10px);
     transition: 0.5s;
   }
 

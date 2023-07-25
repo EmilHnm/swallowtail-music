@@ -2,6 +2,7 @@
   <div class="upload-box" :class="{ active: isActive, isPlaying }">
     <button
       class="upload-box__open"
+      aria-label="upload-box-btn"
       :class="{ active: !isActive }"
       @click="open()"
     >
@@ -76,7 +77,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .upload-box {
   position: absolute;
-  bottom: 12px;
+  bottom: 22px;
   right: -300px;
   min-width: 300px;
   max-width: 300px;

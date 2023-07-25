@@ -329,6 +329,7 @@ export default defineComponent({
       height: 300px;
       border: 2px solid var(--color-primary);
       position: relative;
+      border-radius: 10px;
       &.dragging {
         border: 2px solid transparent;
         background: var(--color-primary);

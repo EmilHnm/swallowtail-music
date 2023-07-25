@@ -1,9 +1,11 @@
 :root {
+  --background-url: url("/src/assets/bg-light.jpg");
+  --background-filter: blur(10px) brightness(0.7);
   --background-color-primary: #ebebeb;
   --background-color-secondary: #fafafa;
-  --background-glass-color-primary: rgba(0, 0, 0, 0.1);
+  --background-glass-color-primary: #ffffff29;
   --color-primary: #36b3dd;
-  --color-primary-blur: rgba(54, 179, 221, 0.05);
+  --color-primary-blur: #36b3dd0d;
   --color-secondary: #744791;
   --accent-color: #5e5e5e;
   --text-primary-color: #222;
@@ -14,11 +16,13 @@
   --color-announcement: #3d91f4;
 }
 :root.dark-theme {
+  --background-url: url("/src/assets/bg-dark.jpg");
+  --background-filter: blur(8px) brightness(0.3);
   --background-color-primary: #1e1e1e;
   --background-color-secondary: #2d2d30;
-  --background-glass-color-primary: rgba(255, 255, 255, 0.05);
+  --background-glass-color-primary: #ffffff0d;
   --color-primary: #744791;
-  --color-primary-blur: rgba(115, 71, 145, 0.05);
+  --color-primary-blur: #7347910d;
   --color-secondary: #36b3dd;
   --accent-color: #3f3f3f;
   --text-primary-color: #ddd;

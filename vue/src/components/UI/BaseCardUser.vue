@@ -9,6 +9,7 @@
               ? `${environment.profile_image}/${imageSrc}`
               : `${environment.default}/default-avatar.jpg`
           "
+          :alt="userName"
         />
       </div>
       <div class="user__name" @click="redirectToUserProfile">
