@@ -100,7 +100,7 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
     -   [x] Change Profile Picture
     -   [x] Edit Profile
 
-### V1.5
+### V1.5 (Storage)
 
 -   [ ] <strike>Create crawler</strike>
 -   [x] Change to chunk upload
