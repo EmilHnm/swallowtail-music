@@ -405,7 +405,7 @@ export default defineComponent({
       this.isSearchBarOpen = !this.isSearchBarOpen;
     },
     scrollToSearch() {
-      (<HTMLDivElement>this.$refs.searchMore).scrollIntoView({
+      (this.$refs.searchMore as HTMLDivElement).scrollIntoView({
         behavior: "smooth",
         block: "end",
         inline: "nearest",

@@ -20,10 +20,11 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
 import BaseCard from "./BaseCard.vue";
 import IconPlay from "@/components/icons/IconPlay.vue";
 
-export default {
+export default defineComponent({
   components: { BaseCard, IconPlay },
   props: {
     title: {
@@ -80,7 +81,7 @@ export default {
     },
   },
   emits: ["playPlaylist", "playAlbum"],
-};
+});
 </script>
 
 <style lang="scss" scoped>

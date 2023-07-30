@@ -12,7 +12,8 @@
   </label>
 </template>
 <script lang="ts">
-export default {
+import { defineComponent } from "vue";
+export default defineComponent({
   emits: ["update:modelValue"],
   props: {
     name: {
@@ -42,7 +43,7 @@ export default {
       this.$emit("update:modelValue", this.value);
     },
   },
-};
+});
 </script>
 <style lang="scss" scoped>
 label {

@@ -154,6 +154,7 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
 import type { artist } from "@/model/artistModel";
 import type { genre } from "@/model/genreModel";
 import type { LocationQueryValue } from "vue-router";
@@ -164,7 +165,7 @@ import BaseTag from "@/components/UI/BaseTag.vue";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
-export default {
+export default defineComponent({
   data() {
     return {
       func: _function,
@@ -347,7 +348,7 @@ export default {
         this.templateArtistArray = res;
       });
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

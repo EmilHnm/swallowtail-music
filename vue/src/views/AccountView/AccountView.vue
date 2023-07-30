@@ -13,9 +13,10 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
 import AccountViewHeader from "@/components/AccountView/AccountViewHeader.vue";
 import AccountViewSideBar from "@/components/AccountView/AccountViewSideBar.vue";
-export default {
+export default defineComponent({
   name: "AccountView",
   components: { AccountViewHeader, AccountViewSideBar },
   data() {
@@ -30,7 +31,7 @@ export default {
   },
   computed: {},
   mounted() {},
-};
+});
 </script>
 
 <style lang="scss" scoped>

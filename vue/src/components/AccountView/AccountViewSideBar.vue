@@ -51,8 +51,8 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
-
 import IconHome from "@/components/icons/IconHome.vue";
 import IconBallPen from "@/components/icons/IconBallPen.vue";
 import IconAvatarProfile from "@/components/icons/IconAvatarProfile.vue";
@@ -60,7 +60,7 @@ import IconSecurity from "@/components/icons/IconSecurity.vue";
 import IconDisk from "@/components/icons/IconDisk.vue";
 import { mapGetters } from "vuex";
 import IconMenuBlock from "@/components/icons/IconMenuBlock.vue";
-export default {
+export default defineComponent({
   props: {
     isSideBarActive: Boolean,
   },
@@ -87,7 +87,7 @@ export default {
     IconDisk,
     IconMenuBlock,
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -98,7 +98,7 @@ export default defineComponent({
         cy: 0.5,
         r: 0.65,
       },
-      gradientAnimation: null as number | null,
+      gradientAnimation: null as ReturnType<typeof setTimeout> | null,
       currentAngle: 0,
       strokeDashoffset: 0,
     };

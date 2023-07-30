@@ -1,5 +1,5 @@
 <script lang="ts">
-import { computed } from "vue";
+import { computed, defineComponent } from "vue";
 import { _function } from "@/mixins";
 import { Timer } from "@/mixins/Timer";
 import { mapActions, mapGetters } from "vuex";
@@ -45,7 +45,7 @@ declare module "@vue/runtime-core" {
   }
 }
 
-export default {
+export default defineComponent({
   name: "HomeView",
   components: {
     HomeViewLeftSideBar,
@@ -679,7 +679,7 @@ export default {
             this.audioSource.connect(this.ctx.destination);
             this.frequencyData = new Uint8Array(
               this.analayzer.frequencyBinCount
-            );
+            ) as any;
             if (this.frequencyData)
               this.analayzer.getByteFrequencyData(
                 this.frequencyData as Uint8Array
@@ -799,7 +799,7 @@ export default {
   unmounted() {
     if (this.audio.src) this.audio.src = "";
   },
-};
+});
 </script>
 
 <template>

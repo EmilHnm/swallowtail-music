@@ -7,7 +7,8 @@
 </template>
 
 <scrip lang="ts">
-export default {};
+import { defineComponent } from "vue";
+export default defineComponent({});
 </scrip>
 
 <style lang="scss" scoped>

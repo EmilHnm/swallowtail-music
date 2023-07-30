@@ -11,10 +11,10 @@
 
 <script lang="ts">
 import BaseCard from "./BaseCard.vue";
-
-export default {
+import { defineComponent } from "vue";
+export default defineComponent({
   components: { BaseCard },
-};
+});
 </script>
 
 <style lang="scss" scoped>

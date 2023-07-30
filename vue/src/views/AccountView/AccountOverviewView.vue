@@ -71,11 +71,12 @@
 
 <script lang="ts">
 import type { user } from "@/model/userModel";
+import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
-export default {
+export default defineComponent({
   data() {
     return {
       user: {} as user,
@@ -140,7 +141,7 @@ export default {
     }),
   },
   components: { BaseFlatDialog, BaseCircleLoad, BaseButton },
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -12,7 +12,8 @@
 
 <script lang="ts">
 import { mapActions, mapGetters } from "vuex";
-export default {
+import { defineComponent } from "vue";
+export default defineComponent({
   data() {
     return {
       file: null as File | null,
@@ -85,7 +86,7 @@ export default {
       return this.file ? Math.floor((this.uploaded * 100) / this.file.size) : 0;
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -147,7 +147,7 @@ export default defineComponent({
       this.dialogWaring.show = false;
     },
     cropImage() {
-      this.imgDataUrl = (<VueCropperMethods>this.$refs.cropper)
+      this.imgDataUrl = (this.$refs.cropper as VueCropperMethods)
         .getCroppedCanvas(this.cropOptions)
         .toDataURL("image/jpeg", 1.0);
     },

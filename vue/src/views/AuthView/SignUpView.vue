@@ -68,10 +68,17 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import type Store from "@/store/index";
 import { useMeta } from "vue-meta";
 import BaseInput from "@/components/UI/BaseInput.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    $store: typeof Store;
+  }
+}
 
 export default defineComponent({
   name: "SignUpView",
