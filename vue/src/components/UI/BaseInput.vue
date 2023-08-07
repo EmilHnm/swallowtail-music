@@ -8,12 +8,10 @@
         class="base-input__input"
         :id="id"
         :type="type"
-        v-model="modelValue"
+        v-model="value"
         :required="required"
         :placeholder="placeholder"
-        @input="onInput"
       />
-      <span></span>
     </div>
   </div>
 </template>
@@ -50,10 +48,14 @@ export default defineComponent({
       default: "",
     },
   },
-  computed: {},
-  methods: {
-    onInput() {
-      this.$emit("update:modelValue", this.modelValue);
+  data() {
+    return {
+      value: this.$props.modelValue,
+    };
+  },
+  watch: {
+    value(newValue) {
+      this.$emit("update:modelValue", newValue);
     },
   },
 });
@@ -79,25 +81,11 @@ export default defineComponent({
   &__inputBox {
     position: relative;
     width: 100%;
-    border-radius: 30px;
+    border-radius: 10px;
     overflow: hidden;
     box-shadow: 5px 2px 5px 0px var(--color-primary-blur);
-    & span {
-      position: absolute;
-      top: -300%;
-      left: 100%;
-      width: 50%;
-      height: 300%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        var(--color-primary),
-        transparent
-      );
-      z-index: -1;
-      transform: skewX(45deg);
-      transition: 0.5s;
-    }
+    backdrop-filter: blur(10px);
+    background: var();
   }
   &__input {
     display: block;
@@ -107,9 +95,9 @@ export default defineComponent({
     border: none;
     border-left: solid 1px var(--text-primary-color);
     border-top: solid 2px var(--text-primary-color);
-    border-radius: 30px;
-    background: transparent;
-    color: var(--text-primary-color);
+    border-radius: 10px;
+    background: var(--background-glass-color-primary);
+    color: white;
     font-family: Consolas;
     font-size: 1rem;
     transition: 0.3s;
@@ -119,10 +107,6 @@ export default defineComponent({
       border-left: solid 1px var(--color-primary);
       border-top: solid 2px var(--color-primary);
     }
-  }
-  &__input:focus + span {
-    top: 90%;
-    left: -50%;
   }
 }
 </style>

@@ -30,7 +30,7 @@ $tablet-width: 768px;
 .base-button {
   position: relative;
   width: 100%;
-  border-radius: 30px;
+  border-radius: 10px;
   overflow: hidden;
   text-align: center;
   &__background {
@@ -39,7 +39,7 @@ $tablet-width: 768px;
     left: 50%;
     width: 100%;
     height: 100%;
-    border-radius: 30px;
+    border-radius: 10px;
     z-index: -2;
     translate: -50%;
     background: var(--color-primary);

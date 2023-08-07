@@ -1,6 +1,6 @@
 :root {
   --background-url: url("/src/assets/bg-light.jpg");
-  --background-filter: blur(10px) brightness(0.7);
+  --background-filter: blur(10px);
   --background-color-primary: #ebebeb;
   --background-color-secondary: #fafafa;
   --background-glass-color-primary: #ffffff29;
