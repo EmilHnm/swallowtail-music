@@ -5,7 +5,6 @@ export default {
   ) {
     el.clickOutsideEvent = function (event: Event) {
       if (!(el === event.target || el.contains(event.target as Node))) {
-        event.preventDefault();
         binding.value(event, el);
       }
     };
