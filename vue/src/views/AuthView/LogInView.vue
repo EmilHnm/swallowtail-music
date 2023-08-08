@@ -117,6 +117,8 @@ $tablet-width: 768px;
 
 .login {
   position: relative;
+  width: 100%;
+  height: 100%;
   border: none;
   border-top: 1px solid var(--color-primary);
   border-left: 1px solid var(--color-primary);
@@ -124,7 +126,6 @@ $tablet-width: 768px;
   box-shadow: 1px 1px 3px 0px var(--text-primary-color);
   padding: 30px;
   background: transparent;
-
   overflow: hidden;
   &::after {
     content: "";
