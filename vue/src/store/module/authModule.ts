@@ -19,13 +19,6 @@ export const authModule = {
   getters: {
     userData: (state: any) => state.user.data,
     userToken: (state: any) => state.user.token,
-    checkLocalToken: () => {
-      const token = localStorage.getItem("TOKEN");
-      if (token) {
-        return true;
-      }
-      return false;
-    },
   },
   mutations: {
     setUser(state: any, payload: any) {

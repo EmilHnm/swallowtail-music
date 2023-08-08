@@ -354,7 +354,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (store.getters["auth/checkLocalToken"]) {
+  if (localStorage.getItem("TOKEN")) {
     if (!store.getters["auth/userToken"]) {
       store.commit("auth/checkToken");
       store
