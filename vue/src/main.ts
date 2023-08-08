@@ -32,4 +32,4 @@ app.use(metaManager);
 app.directive("lazyload", LazyLoadDirective);
 app.directive("click-outside", ClickOutsideDirective);
 app.mount("#app");
-app.config.unwrapInjectedRef = true;
+// app.config.unwrapInjectedRef = true;
