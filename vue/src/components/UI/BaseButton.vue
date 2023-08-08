@@ -3,8 +3,6 @@
     <button :type="type">
       <slot></slot>
     </button>
-    <span class="base-button_light"></span>
-    <span class="base-button__background"></span>
   </div>
 </template>
 <script lang="ts">
@@ -33,57 +31,32 @@ $tablet-width: 768px;
   border-radius: 10px;
   overflow: hidden;
   text-align: center;
-  &__background {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-    z-index: -2;
-    translate: -50%;
-    background: var(--color-primary);
-    transition: 0.5s;
-  }
-  &_light {
-    position: absolute;
-    top: -120%;
-    left: 130%;
-    width: 50%;
-    height: 200%;
-    z-index: 0;
-    translate: -50%;
-    background: var(--color-primary);
-    transform: skewX(45deg);
-    transition: 0.5s;
-    background: #fff;
-  }
   & button {
     width: 100%;
+    background: var(--color-primary);
     padding: 0.75rem 1.5rem;
-    background: transparent;
     backdrop-filter: blur(10px);
     color: var(--text-primary-color);
     cursor: pointer;
-    border-radius: 30px;
-    display: block;
+    border-radius: 10px;
     font-weight: bolder;
+    font-size: 16px;
     position: relative;
     overflow: hidden;
     border: none;
     z-index: 1;
   }
 
-  &.warning > .base-button__background {
+  &.warning > button {
     background: var(--color-warning);
   }
-  &.announcement .base-button__background {
+  &.announcement button {
     background: var(--color-announcement);
   }
-  &.danger > .base-button__background {
+  &.danger > button {
     background: var(--color-negative);
   }
-  &.warning .base-button__background {
+  &.warning button {
     background: var(--color-danger);
   }
   & button:hover {

@@ -97,8 +97,8 @@ export default defineComponent({
     border-top: solid 2px var(--text-primary-color);
     border-radius: 10px;
     background: var(--background-glass-color-primary);
-    color: white;
     font-family: Consolas;
+    color: var(--text-primary-color);
     font-size: 1rem;
     transition: 0.3s;
 
