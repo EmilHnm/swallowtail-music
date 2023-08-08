@@ -41,7 +41,11 @@
       <div class="header__right--darkmodeBtn">
         <darkmode-button />
       </div>
-      <div class="header__right--account" @click="toggleAccountMenu">
+      <div
+        class="header__right--account"
+        @click="toggleAccountMenu"
+        v-click-outside="() => (isAccountMenuActive = false)"
+      >
         <div class="header__right--account--username">
           {{ userData.username }}
         </div>
