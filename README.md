@@ -102,7 +102,7 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 
 ### V1.5 (Storage)
 
--   [ ] <strike>Create crawler</strike>
+-   [x] Create crawler
 -   [x] Change to chunk upload
 -   [x] Change music storage from public storage to minio storage
 -   [x] Stream file instead of download
