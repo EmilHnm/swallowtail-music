@@ -35,7 +35,7 @@ class PlaylistController extends Controller
     public function deletePlaylist($id)
     {
         $playlist = Playlist::where("playlist_id", $id)->first();
-        if (Auth::user()->user_id === $playlist->user_id) {
+        if (Auth::user()->user_id == $playlist->user_id) {
             @unlink(
                 public_path("storage/upload/playlist_cover") .
                     "/" .
