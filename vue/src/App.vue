@@ -17,6 +17,10 @@ export default {
 <template>
   <metainfo>
     <template v-slot:title="{ content }">{{ content }}</template>
+    <meta
+      name="description"
+      content="Swallowtail Music - Your Gateway to Musical Bliss"
+    />
   </metainfo>
   <RouterView />
 </template>

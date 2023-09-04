@@ -474,8 +474,8 @@ $tablet-width: 768px;
 
         svg {
           fill: #fff;
-          width: 20px;
-          height: 20px;
+          width: 15px;
+          height: 15px;
         }
       }
 

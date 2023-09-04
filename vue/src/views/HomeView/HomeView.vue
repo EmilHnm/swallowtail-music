@@ -10,7 +10,7 @@ import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
 import HomeViewLeftSideBar from "@/components/HomeView/HomeViewLeftSideBar.vue";
-import HomeViewRightSideBar from "@/components/HomeView/HomeViewRightSideBar.vue";
+import HomeViewRightSideBar from "@/components/HomeView/RightSideBar/HomeViewRightSideBar.vue";
 import HomeViewPlayer from "@/components/HomeView/HomeViewPlayer.vue";
 import HomeViewHeader from "@/components/HomeView/HomeViewHeader.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";

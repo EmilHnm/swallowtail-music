@@ -25,7 +25,6 @@ export default defineComponent({});
   align-items: center;
   margin: 40px 30px;
   transition: 0.5s;
-  box-shadow: #000;
   &::before {
     content: "";
     position: absolute;

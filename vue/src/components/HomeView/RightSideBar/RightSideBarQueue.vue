@@ -1,5 +1,5 @@
 <template>
-  <div class="playing-list" :class="{ active: isActive }">
+  <div class="playing-list">
     <div class="playing-list__playing">
       <div class="playing-list--title"><h3>Playing</h3></div>
       <base-list-item :selected="true">
@@ -64,6 +64,7 @@
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
@@ -140,13 +141,7 @@ export default defineComponent({
 $mobile-width: 480px;
 $tablet-width: 768px;
 .playing-list {
-  width: 0px;
-  max-width: 350px;
-  transition: 0.5s;
-  background: var(--background-color-primary);
-  border-radius: 10px;
-  height: 100%;
-  overflow: auto;
+  width: 100%;
   .playing-list--title {
     width: 100%;
     h3 {
