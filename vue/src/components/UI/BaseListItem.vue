@@ -74,48 +74,45 @@ export default defineComponent({
   &:after {
     background: linear-gradient(315deg, #5f5ddb, #49b9f9);
   }
-  & span {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    z-index: 2;
-    pointer-events: none;
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 3px;
-      background: var(--background-glass-color-primary);
-      backdrop-filter: blur(10px);
-      opacity: 0;
-      transition: 0.5s;
-      animation: animate 2s ease-in-out infinite;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    }
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 3px;
-      background: var(--background-glass-color-primary);
-      backdrop-filter: blur(10px);
-      opacity: 0;
-      transition: 0.5s;
-      animation: animate 2s ease-in-out infinite;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-      animation-delay: -1s;
-    }
-  }
+  // & span {
+  //   display: block;
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   right: 0;
+  //   bottom: 0;
+  //   width: 100%;
+  //   z-index: 2;
+  //   pointer-events: none;
+  //   &::before {
+  //     content: "";
+  //     position: absolute;
+  //     top: 0;
+  //     left: 0;
+  //     width: 100%;
+  //     height: 100%;
+  //     border-radius: 3px;
+  //     background: var(--background-glass-color-primary);
+  //     backdrop-filter: blur(10px);
+  //     opacity: 0;
+  //     transition: 0.5s;
+  //     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  //   }
+  //   &::after {
+  //     content: "";
+  //     position: absolute;
+  //     bottom: 0;
+  //     right: 0;
+  //     width: 100%;
+  //     height: 100%;
+  //     border-radius: 3px;
+  //     background: var(--background-glass-color-primary);
+  //     backdrop-filter: blur(10px);
+  //     opacity: 0;
+  //     transition: 0.5s;
+  //     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  //   }
+  // }
   &:hover {
     &:before,
     &:after {

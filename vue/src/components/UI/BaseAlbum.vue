@@ -290,12 +290,12 @@ export default defineComponent({
           background-color: var(--color-primary);
           display: flex;
           align-items: center;
-          padding: 4px;
+          padding: 10px;
           cursor: pointer;
           transition: transform 0.2s ease-in-out;
           & svg {
-            width: 25px;
-            height: 25px;
+            width: 15px;
+            height: 15px;
             fill: #fff;
           }
           &:hover {

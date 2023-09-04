@@ -25,6 +25,7 @@ export default defineComponent({});
   align-items: center;
   margin: 40px 30px;
   transition: 0.5s;
+  box-shadow: #000;
   &::before {
     content: "";
     position: absolute;
@@ -73,7 +74,7 @@ export default defineComponent({});
     position: relative;
     left: 0;
     background: var(--background-glass-color-primary);
-    box-shadow: rgba(0, 0, 0, 0.05);
+    box-shadow: 0px 0px 20px 0px #000;
     border-radius: 8px;
     backdrop-filter: blur(10px);
     z-index: 1;

@@ -131,7 +131,7 @@ export default defineComponent({
     });
     if (container) this.observer.observe(container);
     useMeta({
-      title: `Now Playing - ${this.playingAudio.title}`,
+      title: `Now Playing - ${this.playingAudio?.title ?? "No Song Playing"}`,
       meta: [
         {
           name: "description",
