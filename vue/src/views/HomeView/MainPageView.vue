@@ -1,7 +1,10 @@
 <template>
   <div class="wrapper">
     <div class="news" ref="news">
-      <div class="latest-songs">
+      <div
+        class="latest-songs"
+        v-if="Array.from(latestSongs).length > 0 || !latestSongs"
+      >
         <h2>Latest Songs Update</h2>
         <BaseCircleLoad v-if="isLatestSongLoading" />
         <div
@@ -45,7 +48,7 @@
       </div>
       <div
         class="latest-album"
-        v-if="!isLatestAlbumLoading && latestAlbums.length > 0"
+        v-if="!isLatestAlbumLoading || latestAlbums.length > 0"
       >
         <h2>Latest Album Update</h2>
         <BaseHorizontalScroll v-if="isLatestAlbumLoading">
@@ -66,10 +69,7 @@
       </div>
     </div>
     <div class="top">
-      <div
-        class="top__album"
-        v-if="!isTopAlbumLoading && topAlbums.length != 0"
-      >
+      <div class="top__album" v-if="!isTopAlbumLoading || topAlbums.length > 0">
         <h2>Top Album All Time</h2>
         <BaseHorizontalScroll v-if="isTopAlbumLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
@@ -89,7 +89,7 @@
         </BaseHorizontalScroll>
       </div>
       <div class="top__artist">
-        <h2>Top Artist All Time</h2>
+        <h2 v-if="!topArtist || topArtist.length != 0">Top Artist All Time</h2>
         <BaseHorizontalScroll v-if="isTopArtistLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
         /></BaseHorizontalScroll>

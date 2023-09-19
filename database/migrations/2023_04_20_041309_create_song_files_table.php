@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string("file_path")->nullable();
             $table->string("driver")->nullable();
             $table->string("status")->nullable();
-            $table->bson("lyrics")->nullable();
+            $table->json("lyrics")->nullable();
         });
     }
 
