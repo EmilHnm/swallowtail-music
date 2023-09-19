@@ -795,6 +795,20 @@ export default defineComponent({
     this.audio.onloadeddata = () => {
       this.loadeddata();
     };
+
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) {
+        return;
+      }
+      e.preventDefault();
+      if (e.key === " " && this.playingAudio) {
+        if (this.isPlaying) {
+          this.pauseAudio();
+          return;
+        }
+        this.playAudio();
+      }
+    });
   },
   unmounted() {
     if (this.audio.src) this.audio.src = "";

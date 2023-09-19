@@ -8,11 +8,15 @@
     >
       <IconLeftArrow></IconLeftArrow>
     </button>
-    <button class="upload-box__close" @click="close()">
+    <button
+      class="upload-box__close"
+      aria-label="close-upload-box-btn"
+      @click="close()"
+    >
       <IconRightArrowVue></IconRightArrowVue>
     </button>
     <div class="upload-box__title">
-      <h4>Uploading Queue ({{ pendingUpload.length }})</h4>
+      <p>Uploading Queue ({{ pendingUpload.length }})</p>
     </div>
     <div class="upload-box__body" :class="{ active: isActive }">
       <HomeUploadBoxItem
@@ -132,7 +136,7 @@ export default defineComponent({
     background-color: var(--background-color-secondary);
     padding: 12px;
     position: relative;
-    h4 {
+    p {
       margin: 0;
       text-align: center;
     }

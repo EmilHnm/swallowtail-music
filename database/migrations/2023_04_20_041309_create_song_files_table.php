@@ -14,15 +14,15 @@ return new class extends Migration
     public function up()
     {
         Schema::create('song_files', function (Blueprint $table) {
-            $table->id();
-            $table
-                ->string("song_id")
+            $table->id()->startingValue(1000000000);
+            $table->string("song_id")
                 ->nullable()
                 ->unique();
             $table->timestamps();
             $table->string("file_path")->nullable();
             $table->string("driver")->nullable();
             $table->string("status")->nullable();
+            $table->bson("lyrics")->nullable();
         });
     }
 

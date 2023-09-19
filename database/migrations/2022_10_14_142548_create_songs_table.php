@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create("songs", function (Blueprint $table) {
-            $table->id();
+            $table->id()->from(1000000000);
             $table
                 ->string("song_id")
                 ->nullable()
