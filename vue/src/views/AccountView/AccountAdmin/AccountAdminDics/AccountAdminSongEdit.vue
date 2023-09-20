@@ -319,6 +319,7 @@ export default defineComponent({
                 name: artist.name,
                 image_path: artist.image_path,
                 created_at: artist.created_at,
+                listens: artist.listens,
                 updated_at: artist.updated_at,
               });
             }
