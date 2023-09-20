@@ -17,7 +17,10 @@ return new class extends Migration
             $table->id()->from(1000000000);
             $table->string("artist_id");
             $table->string("name");
-            $table->string("image_path");
+            $table->longText("description")->nullable();
+            $table->string("image_path")->nullable();
+            $table->string("banner_path")->nullable();
+            $table->integer("listens")->default(0);
             $table->timestamps();
         });
     }

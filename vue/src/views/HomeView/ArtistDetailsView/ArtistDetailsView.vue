@@ -6,11 +6,20 @@
     <template #action><div></div></template>
   </BaseDialog>
   <div class="artist-header">
-    <div class="header__background"></div>
+    <div class="header__background">
+      <img
+        class="header__background--image"
+        :style="{
+          filter: artist.banner_path ? 'brightness(50%)' : 'blur(6px)',
+        }"
+        v-if="artist.banner_path"
+        :src="`${environment.artist_image}/${artist.banner_path}`"
+        alt=""
+      />
+    </div>
     <div class="header__image">
       <img
-        v-lazyload
-        :data-url="
+        :src="
           artist.image_path
             ? `${environment.artist_image}/${artist.image_path}`
             : `${environment.default}/no_image.jpg`
@@ -24,10 +33,11 @@
       <div class="info__title">{{ artist.name }}</div>
       <div class="info__other">
         <div class="info__other--monthlyListeners">
-          {{ artist.total_listens }} listeners
+          {{ artist.listens }} listeners
         </div>
         <div class="info__other--albumCount">
-          - {{ artist.total_album }} Album(s)
+          - {{ artist.total_album }} Album
+          {{ artist.total_album > 1 ? "s" : "" }}
         </div>
       </div>
     </div>
@@ -79,7 +89,6 @@ import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 
 type artistData = artist & {
-  total_listens: number;
   total_album: number;
 };
 
@@ -188,7 +197,12 @@ export default defineComponent({
     height: 100%;
     background: linear-gradient(60deg, var(--color-primary), transparent);
     z-index: -1;
-    filter: blur(6px);
+
+    &--image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   }
   & .header__image {
     width: 190px;
@@ -213,26 +227,31 @@ export default defineComponent({
       font-size: 14px;
       color: #fff;
       font-weight: 700;
+      text-shadow: 0px 0px 10px var(--color-primary);
     }
     &__title {
       font-size: 42px;
       color: #fff;
       font-weight: 900;
+      text-shadow: 0px 0px 10px var(--color-primary);
     }
     &__other {
       display: flex;
       color: #fff;
       font-size: 16px;
+      text-shadow: 0px 0px 10px var(--color-primary);
       &--monthlyListeners {
         font-weight: 700;
       }
       &--songUploaded {
         margin: 0 10px;
         font-weight: 400;
+        text-shadow: 0px 0px 10px var(--color-primary);
       }
       &--albumCount {
         margin: 0 10px;
         font-weight: 400;
+        text-shadow: 0px 0px 10px var(--color-primary);
       }
     }
   }

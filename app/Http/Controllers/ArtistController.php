@@ -31,7 +31,6 @@ class ArtistController extends Controller
             ->leftJoin("songs", "song_artists.song_id", "=", "songs.song_id")
             ->select(
                 "artists.*",
-                DB::raw("sum(songs.listens) as total_listens"),
                 DB::raw("count(distinct songs.album_id) as total_album")
             )
             ->where("artists.artist_id", $id)
