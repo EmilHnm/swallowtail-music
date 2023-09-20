@@ -48,9 +48,11 @@
       </div>
       <div
         class="latest-album"
-        v-if="!isLatestAlbumLoading || latestAlbums.length > 0"
+        v-if="!isLatestAlbumLoading && latestAlbums.length > 0"
       >
-        <h2>Latest Album Update</h2>
+        <h2 v-if="!isLatestAlbumLoading || latestAlbums.length > 0">
+          Latest Album Update
+        </h2>
         <BaseHorizontalScroll v-if="isLatestAlbumLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
         /></BaseHorizontalScroll>
@@ -69,7 +71,7 @@
       </div>
     </div>
     <div class="top">
-      <div class="top__album" v-if="!isTopAlbumLoading || topAlbums.length > 0">
+      <div class="top__album" v-if="!isTopAlbumLoading && topAlbums.length > 0">
         <h2>Top Album All Time</h2>
         <BaseHorizontalScroll v-if="isTopAlbumLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"

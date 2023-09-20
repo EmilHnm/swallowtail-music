@@ -800,8 +800,8 @@ export default defineComponent({
       if (e.target instanceof HTMLInputElement) {
         return;
       }
-      e.preventDefault();
       if (e.key === " " && this.playingAudio) {
+        e.preventDefault();
         if (this.isPlaying) {
           this.pauseAudio();
           return;

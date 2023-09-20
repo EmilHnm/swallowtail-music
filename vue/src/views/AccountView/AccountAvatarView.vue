@@ -46,8 +46,7 @@
       <div class="cropArea" :class="{ tab: tab }">
         <VueCropper
           ref="cropper"
-          v-lazyload
-          :data-url="options.img"
+          :src="options.img"
           :cropBoxResizable="options.cropBoxResizable"
           :aspectRatio="options.aspectRatio"
           :background="options.background"
@@ -58,8 +57,8 @@
         ></VueCropper>
       </div>
       <div class="preview" :class="{ tab: tab }">
-        <img class="previewSquare" v-lazyload :data-url="imgDataUrl" />
-        <img class="previewCircle" v-lazyload :data-url="imgDataUrl" />
+        <img class="previewSquare" :src="imgDataUrl" />
+        <img class="previewCircle" :src="imgDataUrl" />
       </div>
     </div>
     <div class="control" v-if="options.img">
