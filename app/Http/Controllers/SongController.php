@@ -278,8 +278,8 @@ class SongController extends Controller
     public function increaseSongListens($id, Request $request)
     {
         $song = Song::find($id);
-        $song->listens = $song->listens + 1;
-        $song->save();
+        $song->increment('listen');
+        event(new \App\Events\ListenIncrease($song));
         return response()->json([
             "status" => "success",
             "message" => "Song listens increased",
