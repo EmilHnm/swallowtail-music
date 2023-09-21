@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Song;
 use App\Models\Genre;
 use App\Models\Artist;
+use App\Models\SongFile;
 use App\Models\LikedSong;
 use App\Models\SongGenre;
 use App\Models\SongArtist;
@@ -12,6 +13,7 @@ use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
 use Illuminate\Http\Request;
 use App\Services\SongManager;
+use App\Jobs\ProcessSongConvert;
 use App\Services\StorageManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -118,15 +120,9 @@ class SongController extends Controller
                 Storage::disk($disk)->delete($name_final);
             }
             Storage::disk($disk)->move("chunks/$id/{$file->getClientOriginalName()}", $name_final);
-            try {
-                return response()->json(['uploaded' => true]);
-            } finally {
-                $song_mananger = new SongManager(Song::find($id));
-                $song_mananger->convert($name_final);
-                $song_mananger->save();
-                Storage::disk($disk)->delete($name_final);
-                Storage::disk($disk)->delete("chunks/$id");
-            }
+
+            dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
+            return response()->json(['uploaded' => true]);
         }
     }
 
@@ -278,7 +274,7 @@ class SongController extends Controller
     public function increaseSongListens($id, Request $request)
     {
         $song = Song::find($id);
-        $song->increment('listen');
+        $song->increment('listens');
         event(new \App\Events\ListenIncrease($song));
         return response()->json([
             "status" => "success",
@@ -382,6 +378,11 @@ class SongController extends Controller
             "status" => "success",
             "songs" => $songs,
         ]);
+    }
+
+    public function songLyrics($id)
+    {
+        $lyrics = SongFile::where("song_id", $id)->first();
     }
 
     public function searchSong(Request $request)

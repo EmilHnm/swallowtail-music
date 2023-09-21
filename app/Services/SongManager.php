@@ -5,6 +5,7 @@ namespace app\Services;
 use App\Models\Song;
 use App\Models\SongFile;
 use App\Services\StorageManager;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
@@ -79,7 +80,7 @@ class SongManager
         } catch (EncodingException $exception) {
             $command = $exception->getCommand();
             $errorLog = $exception->getErrorOutput();
-            dd($command, $errorLog);
+            Log::error($command . ' meet error: ' . '$errorLog',);
         }
     }
 

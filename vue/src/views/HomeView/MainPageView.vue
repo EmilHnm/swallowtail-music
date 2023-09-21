@@ -5,7 +5,7 @@
         class="latest-songs"
         v-if="Array.from(latestSongs).length > 0 || !latestSongs"
       >
-        <h2>Latest Songs Update</h2>
+        <h1>Latest Songs Update</h1>
         <BaseCircleLoad v-if="isLatestSongLoading" />
         <div
           class="latest-song__container"
@@ -15,8 +15,8 @@
           <base-list-item v-for="(song, index) in latestSongs" :key="index">
             <div class="latest-song__song">
               <div class="latest-song__song--title">
-                <h3>{{ song.title }}</h3>
-                <h4>
+                <h2>{{ song.title }}</h2>
+                <p>
                   <router-link
                     v-for="(artist, i) in song.artist"
                     :key="artist.artist_id"
@@ -28,7 +28,7 @@
                     {{ artist.name
                     }}<span v-if="i != song.artist.length - 1">, </span>
                   </router-link>
-                </h4>
+                </p>
               </div>
               <div class="latest-song__song--duration">
                 {{
@@ -50,9 +50,9 @@
         class="latest-album"
         v-if="!isLatestAlbumLoading && latestAlbums.length > 0"
       >
-        <h2 v-if="!isLatestAlbumLoading || latestAlbums.length > 0">
+        <h1 v-if="!isLatestAlbumLoading || latestAlbums.length > 0">
           Latest Album Update
-        </h2>
+        </h1>
         <BaseHorizontalScroll v-if="isLatestAlbumLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
         /></BaseHorizontalScroll>
@@ -61,18 +61,18 @@
             v-for="album in latestAlbums"
             :key="album.album_id"
             :title="album.name"
-            :uploader="album.user_name"
+            :uploader="album.user.name"
             :id="album.album_id"
             :img="`${environment.album_cover}/${album.image_path}`"
             :type="'album'"
-            :songCount="album.songCount"
+            :songCount="album.song_count"
             @playAlbum="playAlbum"
         /></BaseHorizontalScroll>
       </div>
     </div>
     <div class="top">
       <div class="top__album" v-if="!isTopAlbumLoading && topAlbums.length > 0">
-        <h2>Top Album All Time</h2>
+        <h1>Top Albums</h1>
         <BaseHorizontalScroll v-if="isTopAlbumLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
         /></BaseHorizontalScroll>
@@ -81,17 +81,17 @@
             v-for="album in topAlbums"
             :key="album.album_id"
             :title="album.name"
-            :uploader="album.user_name"
+            :uploader="album.user.name"
             :id="album.album_id"
             :img="`${environment.album_cover}/${album.image_path}`"
             :type="'album'"
-            :listens="+album.totalListen"
+            :listens="+album.song_sum_listens"
             @playAlbum="playAlbum"
           />
         </BaseHorizontalScroll>
       </div>
       <div class="top__artist">
-        <h2 v-if="!topArtist || topArtist.length != 0">Top Artist All Time</h2>
+        <h1 v-if="!topArtist || topArtist.length != 0">Top Artists</h1>
         <BaseHorizontalScroll v-if="isTopArtistLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
         /></BaseHorizontalScroll>
@@ -107,7 +107,7 @@
     </div>
     <div class="favorite">
       <div class="favorite__playlist" v-if="userPlaylist.length > 0">
-        <h2>Your Favorite List</h2>
+        <h1>Your Favorite List</h1>
         <div
           class="favorite__playlist--container"
           :class="{ min: min, medium: medium }"
@@ -145,6 +145,7 @@ import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { playlist } from "@/model/playlistModel";
 import type { song } from "@/model/songModel";
+import type { user } from "@/model/userModel";
 import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseHorizontalScroll from "@/components/UI/BaseHorizontalScroll.vue";
 import BaseSkeletonsLoadingCard from "@/components/UI/BaseSkeletonsLoadingCard.vue";
@@ -157,12 +158,12 @@ type LatestSong = song & {
 };
 
 type LatestAlbum = album & {
-  user_name: string;
-  songCount: number;
+  song_count: number;
+  user: user;
 };
 type TopAlbum = album & {
-  user_name: string;
-  totalListen: number;
+  user: user;
+  song_sum_listens: number;
 };
 
 type playlistData = playlist & {
@@ -317,7 +318,7 @@ export default defineComponent({
   height: 100%;
   overflow: auto;
   overflow-x: hidden;
-  h2 {
+  h1 {
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 1rem;
@@ -368,7 +369,7 @@ export default defineComponent({
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        & > h3 {
+        & > h2 {
           width: 100%;
           font-size: 1.2rem;
           overflow: hidden;
@@ -377,7 +378,7 @@ export default defineComponent({
           margin: 2px 0;
           user-select: none;
         }
-        & > h4 {
+        & > p {
           width: 100%;
           font-size: 0.8rem;
           white-space: nowrap;

@@ -7,10 +7,8 @@ use App\Models\Song;
 use App\Models\Album;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Services\SongManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
 
 class AlbumController extends Controller
 {
@@ -85,7 +83,7 @@ class AlbumController extends Controller
     public function getAlbumInfo($id)
     {
         $album = Album::where("album_id", $id)->first();
-        $songs = Song::where("album_id", $id)->count();
+        $songs = Song::where("album_id", $id)->where("display", "public")->count();
         $album->song_count = $songs;
         return response()->json([
             "status" => "success",
@@ -230,21 +228,13 @@ class AlbumController extends Controller
 
     public function getLatestAlbum()
     {
-        $album = DB::table("albums")
-            ->join("users", "users.user_id", "=", "albums.user_id")
-            ->leftJoin("songs", "songs.album_id", "=", "albums.album_id")
-            ->select(
-                "albums.*",
-                "users.name as user_name",
-                DB::raw("count(songs.song_id) as songCount")
-            )
-            ->orderBy("albums.created_at", "desc")
-            ->groupBy("albums.album_id")
+        $albums = Album::with(['user'])
+            ->withCount('song')
             ->take(8)
             ->get();
         return response()->json([
             "status" => "success",
-            "albums" => $album,
+            "albums" => $albums,
         ]);
     }
 
@@ -275,16 +265,10 @@ class AlbumController extends Controller
 
     public function getTopAlbum()
     {
-        $album = DB::table("albums")
-            ->join("users", "users.user_id", "=", "albums.user_id")
-            ->leftJoin("songs", "songs.album_id", "=", "albums.album_id")
-            ->select(
-                "albums.*",
-                "users.name as user_name",
-                DB::raw("sum(songs.listens) as totalListen")
-            )
-            ->orderBy("totalListen", "desc")
-            ->groupBy("albums.album_id")
+
+        $album = Album::with(['user'])
+            ->withSum('song', 'listens')
+            ->orderBy('song_sum_listens', 'desc')
             ->take(8)
             ->get();
         return response()->json([

@@ -65,15 +65,7 @@ class ArtistController extends Controller
     public function getTop()
     {
         $artist = DB::table("artists")
-            ->leftJoin(
-                "song_artists",
-                "artists.artist_id",
-                "=",
-                "song_artists.artist_id"
-            )
-            ->leftJoin("songs", "song_artists.song_id", "=", "songs.song_id")
-            ->select("artists.*", DB::raw("sum(songs.listens) as total"))
-            ->groupBy("artists.artist_id")
+            ->orderBy("listens", "desc")
             ->limit(8)
             ->get();
         return response()->json([
