@@ -382,7 +382,11 @@ class SongController extends Controller
 
     public function songLyrics($id)
     {
-        $lyrics = SongFile::where("song_id", $id)->first();
+        $lyrics = SongFile::where("song_id", $id)->first()?->getLyricData() ?? [];
+        return response()->json([
+            "status" => "success",
+            "lyrics" => $lyrics,
+        ]);
     }
 
     public function searchSong(Request $request)

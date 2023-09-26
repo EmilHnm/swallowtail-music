@@ -61,7 +61,7 @@
             v-for="album in latestAlbums"
             :key="album.album_id"
             :title="album.name"
-            :uploader="album.user.name"
+            :uploader="album.user?.name ?? 'Unknown'"
             :id="album.album_id"
             :img="`${environment.album_cover}/${album.image_path}`"
             :type="'album'"
@@ -71,7 +71,7 @@
       </div>
     </div>
     <div class="top">
-      <div class="top__album" v-if="!isTopAlbumLoading && topAlbums.length > 0">
+      <div class="top__album" v-if="!topArtist || topArtist.length != 0">
         <h1>Top Albums</h1>
         <BaseHorizontalScroll v-if="isTopAlbumLoading">
           <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
@@ -81,7 +81,7 @@
             v-for="album in topAlbums"
             :key="album.album_id"
             :title="album.name"
-            :uploader="album.user.name"
+            :uploader="album.user?.name || 'Unknown'"
             :id="album.album_id"
             :img="`${environment.album_cover}/${album.image_path}`"
             :type="'album'"
@@ -240,6 +240,7 @@ export default defineComponent({
       this.$emit("playSong", song_id);
     },
     onLoadLatestSong() {
+      this.isLatestSongLoading = true;
       this.getLatestSong(this.token)
         .then((res) => res.json())
         .then((res) => {
@@ -248,6 +249,7 @@ export default defineComponent({
         });
     },
     onLoadLatestAlbum() {
+      this.isLatestAlbumLoading = true;
       this.getLatestAlbums(this.token)
         .then((res) => res.json())
         .then((res) => {
@@ -256,6 +258,7 @@ export default defineComponent({
         });
     },
     onLoadTopAlbum() {
+      this.isTopAlbumLoading = true;
       this.getTopAlbums(this.token)
         .then((res) => res.json())
         .then((res) => {

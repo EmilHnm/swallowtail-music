@@ -114,4 +114,4 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 -   [ ] Integrate Nodejs for some realtime action
 -   [ ] Change admin dashboard
 -   [ ] Cross Authenticate
--   [ ] Create API for backup and sync
+-   [x] Create API for backup and sync

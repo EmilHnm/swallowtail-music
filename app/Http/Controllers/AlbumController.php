@@ -68,9 +68,7 @@ class AlbumController extends Controller
 
     public function getUploadedAlbum()
     {
-        $albumUploaded = DB::table("albums")
-            ->leftJoin("songs", "albums.album_id", "=", "songs.album_id")
-            ->select("albums.*", DB::raw("count(songs.song_id) as songCount"))
+        $albumUploaded = Album::withCount("song")
             ->where("albums.user_id", Auth::user()->user_id)
             ->groupBy("albums.id")
             ->get();
@@ -214,10 +212,10 @@ class AlbumController extends Controller
         @unlink(
             public_path("storage/upload/album_cover/") . "/" . $album->album_id
         );
-        $song = Song::where("album_id", $album->album_id)->get();
-        foreach ($song as $s) {
-            $s->album_id = null;
-            $s->save();
+        $songs = Song::where("album_id", $album->album_id)->get();
+        foreach ($songs as $song) {
+            $song->album_id = null;
+            $song->save();
         }
         $album->delete();
         return response()->json([
@@ -229,8 +227,10 @@ class AlbumController extends Controller
     public function getLatestAlbum()
     {
         $albums = Album::with(['user'])
-            ->withCount('song')
+            ->withCount(['song' => fn ($query) => $query->where('display', 'public')])
+            ->having('song_count', '>', 0)
             ->take(8)
+            ->orderBy('created_at', 'desc')
             ->get();
         return response()->json([
             "status" => "success",
@@ -242,13 +242,8 @@ class AlbumController extends Controller
     {
         if ($request->query->has("query")) {
             $query = $request->query->get("query");
-            $albums = DB::table("albums")
-                ->leftJoin("songs", "songs.album_id", "=", "albums.album_id")
-                ->select(
-                    "albums.*",
-                    DB::raw("count(songs.song_id) as song_count")
-                )
-                ->groupBy("albums.album_id")
+            $albums = Album::withCount("song")
+                ->where('song_count', '>', 0)
                 ->where("name", "like", "%" . $query . "%")
                 ->get();
             return response()->json([
@@ -267,6 +262,8 @@ class AlbumController extends Controller
     {
 
         $album = Album::with(['user'])
+            ->withCount(['song' => fn ($query) => $query->where('display', 'public')])
+            ->having('song_count', '>', 0)
             ->withSum('song', 'listens')
             ->orderBy('song_sum_listens', 'desc')
             ->take(8)

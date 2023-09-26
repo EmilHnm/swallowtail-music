@@ -250,8 +250,9 @@ export default defineComponent({
       height: 100%;
       width: auto;
       flex: 0 0 auto;
+      overflow: hidden;
       & img {
-        height: 100%;
+        width: 100%;
         height: 100%;
         object-fit: cover;
       }

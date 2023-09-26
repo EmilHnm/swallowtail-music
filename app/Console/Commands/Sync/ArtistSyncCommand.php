@@ -34,7 +34,7 @@ class ArtistSyncCommand extends Command
 
         $end_point = $domain . '/api/artists?from=' . $from . '&limit=' . $to;
 
-        $this->info('Start sync artist from ' . $end_point);
+        $this->info('Start sync artists from ' . $end_point);
 
         $client = new \GuzzleHttp\Client([
             'timeout' => 60,

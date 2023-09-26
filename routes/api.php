@@ -73,6 +73,7 @@ Route::middleware("auth:sanctum")->group(function () {
         Route::get("/search", [SongController::class, "searchSong"]);
         Route::get("/{id}", [SongController::class, "getSongInfo"]);
         Route::get("/{id}/play", [SongController::class, "getSongForPlay"]);
+        Route::get("/{id}/lyrics", [SongController::class, "songLyrics"]);
         Route::middleware("requestTimeDelay")->post("/{id}/listens", [
             SongController::class,
             "increaseSongListens",

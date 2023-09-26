@@ -30,6 +30,7 @@ class AdminAccount extends Command
         User::where('email', $this->argument('email'))->update([
             'user_id' => \Str::uuid(),
             'email_verified_at' => now(),
+            'role' => 'Admin',
         ]);
     }
 }

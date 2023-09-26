@@ -1,12 +1,13 @@
 <template>
   <div class="playing-details">
     <img
-      v-lazyload
-      :data-url="
+      :src="
         playingAudio.album
           ? `${environment.album_cover}/${playingAudio.album.image_path}`
           : `${environment.default}/no_image.jpg`
       "
+      crossorigin="anonymous"
+      ref="cover"
     />
     <div class="playing-details__title">
       <div class="playing-details__title--text">
@@ -35,41 +36,44 @@
       </div>
     </div>
     <div class="playing-details__artist"></div>
-    <div class="playing-details__lyric">
+    <div
+      class="playing-details__lyric"
+      :style="{
+        backgroundColor: album_cover_color,
+        color: lyricsColor,
+      }"
+    >
       <h3 class="playing-details__lyric--title">Lyrics</h3>
-      <p>
-        見上げた空の向こうへと<br />
-        鮮やかに伸びてくrainbow ときめきから紡いでく our stories 膨らんでく
-        どこまでだって 未来は果てしない 誰かの夢の鼓動が高鳴る
-        あふれる想いのバトン 繋いでいこう 新しい（勇気と）出会いと (harmonies)
-        生まれてく 一緒に行こう さぁ きみも！ はじまりの風 光る 瞬く明日へと
-        きみの（きみの）想い（想い） 咲くって信じてるの ひとりじゃないからね
-        どんなときも 描こうよ with you forever 夢の虹は いつも 胸の中
-        僕らを繋いでるから ふと振り返れば続く 刻んだ軌跡 夢色 どんな瞬間もきらり
-        true stories 笑顔 ナミダ 迷いも彩り 未来は無限大 僕らで創ろう
-        虹の咲く世界を ためらう心に今 送るエール
-        踏み出した（勇気の）一歩が（力に） 変わるんだ 一緒にいこう さぁ 僕ら
-        はじまりの風 そよぐ ほらね すぐそばで きみの（きみの）想い（想い）
-        羽ばたくの待ってるの 僕らがいるからね どんなときも 大丈夫 We're all
-        together きみの虹は いつも 胸の中 明日へと駆けていくんだ 出会いと 夢が
-        今 あぁ 輝くよ はじまりの風 光る 瞬く明日へと
-        きみの（きみの）想い（想い） 咲くって信じてるの ひとりじゃないからね
-        どんなときも 描こうよ with you forever 夢の虹は いつも 胸の中
-        僕らを繋いでるから 光 たどって きみと 僕らで進もう Go for dream 何度でも
-        夢を 夢を 追いかけていこう！
-      </p>
+      <div
+        class="playing-details__lyric--content"
+        v-if="lyrics.length > 0 && !lyrics_loading"
+      >
+        <p v-for="(lyric, index) in lyrics" :key="index">{{ lyric }}</p>
+      </div>
+      <div class="playing-details__lyric--loading" v-if="lyrics_loading">
+        <BaseDotLoading if="lyrics_loading" />
+      </div>
+      <div
+        class="playing-details__lyrics--error"
+        v-if="lyrics.length == 0 && !lyrics_loading"
+      >
+        No lyrics found for this song
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapActions, mapGetters } from "vuex";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
 import type { song } from "@/model/songModel";
 import { environment } from "@/environment/environment";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
+import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
+import { ImageColor } from "@/mixins/ImageColor";
 type songData = song & {
   album: album;
   artist: artist[];
@@ -105,9 +109,69 @@ export default defineComponent({
   data() {
     return {
       environment,
+      lyrics: [] as string[],
+      lyrics_loading: false,
+      album_cover_color: "var(--background-glass-color-primary)",
+      lyricsColor: "var(--text-primary-color)",
+      imgCover: null as HTMLImageElement | null,
+      imageColor: null as ImageColor | null,
     };
   },
-  components: { IconThreeDots },
+  methods: {
+    ...mapActions("song", ["getSongLyrics"]),
+    songChanged() {
+      this.lyrics_loading = true;
+      this.getSongLyrics({
+        song_id: this.playingAudio.song_id,
+        token: this.token,
+      })
+        .then((res: any) => res.json())
+        .then((data: any) => {
+          if (data.status == "success") {
+            this.lyrics = data.lyrics ?? [];
+            console.log(this.lyrics);
+          } else {
+            this.lyrics = [];
+          }
+          this.lyrics_loading = false;
+        })
+        .catch((err: any) => {
+          console.log(err);
+          this.lyrics = [];
+          this.lyrics_loading = false;
+        });
+    },
+  },
+  watch: {
+    playingAudio: {
+      handler() {
+        this.songChanged();
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+    }),
+  },
+  mounted() {
+    this.imgCover = this.$refs.cover as HTMLImageElement;
+    this.imageColor = new ImageColor(this.$refs.cover as HTMLImageElement);
+    this.imgCover.onload = () => {
+      if (this.imageColor) {
+        this.imageColor.getAverageRGB().then((res) => {
+          let Y = 0.2126 * res.r + 0.7152 * res.g + 0.0722 * res.b;
+          this.lyricsColor = Y < 128 ? "white" : "black";
+          this.album_cover_color = `rgb(${res.r},${res.g},${res.b})`;
+        });
+      } else {
+        this.album_cover_color = "var(--background-glass-color-primary)";
+      }
+    };
+  },
+  components: { IconThreeDots, BaseDotLoading },
 });
 </script>
 
@@ -196,11 +260,24 @@ export default defineComponent({
       font-weight: bold;
       margin-bottom: 10px;
     }
-    p {
+    &--content {
       font-size: 1rem;
       line-height: 1.5;
       white-space: pre-wrap;
-      word-break: break-all;
+      overflow-wrap: break-word;
+      p {
+        margin: 0;
+        min-height: 1em;
+      }
+    }
+    &--loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+    }
+    &--error {
+      text-align: center;
     }
   }
 }

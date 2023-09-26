@@ -130,6 +130,7 @@ export const albumModule = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Bearer ${userToken}`,
         },
       });
@@ -139,6 +140,7 @@ export const albumModule = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Bearer ${userToken}`,
         },
       });
