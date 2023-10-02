@@ -15,14 +15,13 @@ return new class extends Migration
     {
         Schema::create('song_files', function (Blueprint $table) {
             $table->id()->startingValue(1000000000);
-            $table->string("song_id")
-                ->nullable()
-                ->unique();
-            $table->timestamps();
+            $table->string("song_id")->unique();
             $table->string("file_path")->nullable();
             $table->string("driver")->nullable();
             $table->string("status")->nullable();
             $table->json("lyrics")->nullable();
+            $table->integer('referer')->default(0);
+            $table->timestamps();
         });
     }
 

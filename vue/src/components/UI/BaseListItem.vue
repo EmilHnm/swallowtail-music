@@ -150,6 +150,7 @@ export default defineComponent({
   & .content {
     display: flex;
     position: relative;
+    gap: 10px;
     left: 0;
     width: 100%;
     overflow: hidden;

@@ -95,6 +95,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+$mobile-width: 480px;
+$tablet-width: 768px;
 .sb-right {
   width: 0px;
   max-width: 400px;
@@ -102,11 +104,12 @@ export default defineComponent({
   background: var(--background-color-primary);
   border-radius: 10px;
   height: 100%;
-  padding: 20px 0;
+  // padding: 20px 0;
   overflow: auto;
   &__navigation {
     width: 80%;
     margin: auto;
+    margin-top: 20px;
     display: flex;
     gap: 4px;
   }
@@ -114,5 +117,17 @@ export default defineComponent({
 
 .sb-right.active {
   width: 100%;
+}
+
+@media (max-width: $tablet-width) {
+  .sb-right {
+    width: 0px;
+    position: absolute;
+    z-index: 90;
+  }
+  .sb-right.active {
+    width: 100%;
+    max-width: none;
+  }
 }
 </style>

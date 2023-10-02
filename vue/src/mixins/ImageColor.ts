@@ -60,7 +60,6 @@ export class ImageColor {
       image.onload = () => {
         context.drawImage(image, 0, 0, width, height);
         data = context.getImageData(0, 0, width, height);
-        console.log(data);
         resolve(data);
       };
       image.onerror = reject;

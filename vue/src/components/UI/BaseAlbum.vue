@@ -33,7 +33,7 @@
       </template>
     </BaseDialog>
   </teleport>
-  <div class="album-container">
+  <div class="album-container" ref="albumContainer">
     <div class="album__details">
       <div class="album__details--cover">
         <img
@@ -55,25 +55,38 @@
           <div class="album__details--prof--menu--heart">
             <IconHeartFilled />
           </div>
-          <div class="album__details--prof--menu--more">
+          <div
+            class="album__details--prof--menu--more"
+            v-click-outside="() => (isMenuOpen = false)"
+          >
             <IconHorizontalThreeDot @click="toggleMenu" />
-            <teleport to="body">
+            <!-- <teleport to="body">
               <div
                 class="bg"
                 :class="{ active: isMenuOpen }"
                 @click="toggleMenu"
               ></div>
-            </teleport>
+            </teleport> -->
             <transition name="playlist-menu">
               <div class="playlist-menu" v-if="isMenuOpen">
                 <BaseListItem @click="addAlbumToQueue"
-                  >Add to Queue</BaseListItem
+                  ><span class="playlist-menu__item"
+                    >Add to Queue</span
+                  ></BaseListItem
                 >
-                <BaseListItem>Add to Library</BaseListItem>
+                <BaseListItem
+                  ><span class="playlist-menu__item"
+                    >Add to Library</span
+                  ></BaseListItem
+                >
                 <BaseListItem @click="isPlaylistOpening = true"
-                  >Add to Playlist</BaseListItem
+                  ><span class="playlist-menu__item"
+                    >Add to Playlist</span
+                  ></BaseListItem
                 >
-                <BaseListItem>Report</BaseListItem>
+                <BaseListItem
+                  ><span class="playlist-menu__item">Report</span></BaseListItem
+                >
               </div>
             </transition>
           </div>
@@ -191,6 +204,21 @@ export default defineComponent({
           }
         });
     },
+    loadAlbumSong() {
+      this.getAlbumSongs({
+        userToken: this.token,
+        album_id: this.data.album_id,
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          if (res.status === "success") {
+            this.songs = res.songs;
+            this.isSongsLoading = false;
+          }
+        });
+    },
     playAlbum() {
       this.$emit("playAlbum", this.data.album_id);
     },
@@ -206,20 +234,30 @@ export default defineComponent({
       token: "auth/userToken",
     }),
   },
-  created() {
-    this.getAlbumSongs({
-      userToken: this.token,
-      album_id: this.data.album_id,
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((res) => {
-        if (res.status === "success") {
-          this.songs = res.songs;
-          this.isSongsLoading = false;
-        }
-      });
+  mounted() {
+    if (window.IntersectionObserver) {
+      const options: IntersectionObserverInit = {
+        root: null,
+        threshold: 0,
+      };
+      const observer = new IntersectionObserver(
+        (
+          entries: IntersectionObserverEntry[],
+          observer: IntersectionObserver
+        ) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              this.loadAlbumSong();
+              observer.unobserve(this.$refs.albumContainer as HTMLDivElement);
+            }
+          });
+        },
+        options
+      );
+      observer.observe(this.$refs.albumContainer as HTMLDivElement);
+    } else {
+      this.loadAlbumSong();
+    }
   },
   components: {
     IconHeartFilled,
@@ -327,35 +365,43 @@ export default defineComponent({
             width: 25px;
             height: 25px;
           }
-          & .bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease-in-out;
-            &.active {
-              opacity: 1;
-              visibility: visible;
-            }
-          }
+          // & .bg {
+          //   position: fixed;
+          //   top: 0;
+          //   left: 0;
+          //   width: 100vw;
+          //   height: 100vh;
+          //   background-color: rgba(0, 0, 0, 0.5);
+          //   z-index: 1;
+          //   opacity: 0;
+          //   visibility: hidden;
+          //   transition: all 0.3s ease-in-out;
+          //   &.active {
+          //     opacity: 1;
+          //     visibility: visible;
+          //   }
+          // }
           & .playlist-menu {
             position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             top: 105%;
             right: 0;
             width: 250px;
             z-index: 2;
-            padding: 10px 0px;
-            border-radius: 5px;
+            padding: 25px 0px;
+            border-radius: 25px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease-in-out;
-            & > * {
-              margin-bottom: 10px;
+            backdrop-filter: blur(15px);
+            &__item {
+              font-weight: 900;
+              text-shadow: 0 0 1px var(--color-primary);
             }
+            // & > * {
+            //   margin-bottom: 10px;
+            // }
           }
           & .playlist-menu-enter-from,
           .playlist-menu-leave-to {

@@ -4,6 +4,7 @@ namespace app\Services;
 
 use App\Models\Song;
 use App\Models\SongFile;
+use App\Enum\SongFileStatusEnum;
 use App\Services\StorageManager;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -32,7 +33,7 @@ class SongManager
         } else {
             $this->songFile = new SongFile();
             $this->songFile->song_id = $song->song_id;
-            $this->songFile->status = "pending";
+            $this->songFile->status = SongFileStatusEnum::PENDING;
             $this->songFile->save();
         }
         $this->disk = StorageManager::getDisk();
@@ -50,7 +51,7 @@ class SongManager
         }
 
         try {
-            $this->songFile->status = "processing";
+            $this->songFile->status = SongFileStatusEnum::PROCESSING;
             $savePath = StorageManager::saveFilePath($this->directory);
 
             $filename = $this->raw_directory . "/" . date("YmdHi");
@@ -72,7 +73,7 @@ class SongManager
                 ->open($final_filepath)
                 ->getDurationInSeconds();
             $this->song->duration = $duration;
-            $this->songFile->status = "done";
+            $this->songFile->status = SongFileStatusEnum::DONE;
             $this->songFile->file_path = $final_filepath;
             $this->songFile->driver = $this->disk;
             FFMpeg::cleanupTemporaryFiles();

@@ -364,7 +364,7 @@ $tablet-width: 768px;
   display: block;
   left: 50%;
   top: 50%;
-  width: 250px;
+  max-width: 320px;
   border-radius: 10px;
   z-index: 20;
   padding: 30px 20px;
@@ -451,7 +451,7 @@ $tablet-width: 768px;
 }
 @media (max-width: $mobile-width) {
   .menu {
-    width: 100%;
+    max-width: 100%;
     padding: 10px 0;
     height: 70%;
     overflow: auto;
@@ -487,9 +487,11 @@ $tablet-width: 768px;
   display: flex;
   margin: 10px auto;
   cursor: pointer;
+  gap: 10px;
   &__left {
     width: 40%;
     display: flex;
+    gap: 10px;
     overflow: hidden;
     flex: 0 0 auto;
     &.small {

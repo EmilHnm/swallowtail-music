@@ -74,24 +74,6 @@ class ArtistController extends Controller
         ]);
     }
 
-    public function getBySongByArtistId($id)
-    {
-        $artist = DB::table("artists")
-            ->join(
-                "song_artists",
-                "artists.artist_id",
-                "=",
-                "song_artists.artist_id"
-            )
-            ->join("songs", "song_artists.song_id", "=", "songs.song_id")
-            ->select("artists.*")
-            ->where("songs.song_id", $id)
-            ->get();
-        return response()->json([
-            "status" => "success",
-            "artists" => $artist,
-        ]);
-    }
 
     public function getTopSongByArtistId($id)
     {
@@ -105,16 +87,8 @@ class ArtistController extends Controller
                 },
             ])
             ->where("display", "public")
+            ->whereHas("artist", fn ($q) => $q->where('artists.artist_id', $id))
             ->get();
-
-        $songs = $songs->filter(function ($song) use ($id) {
-            return array_filter($song->artist->toArray(), function (
-                $artist
-            ) use ($id) {
-                return $artist["artist_id"] == $id;
-            });
-        });
-        $songs = array_values($songs->toArray());
         return response()->json([
             "status" => "success",
             "songs" => $songs,

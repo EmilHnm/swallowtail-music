@@ -129,7 +129,6 @@ export default defineComponent({
         .then((data: any) => {
           if (data.status == "success") {
             this.lyrics = data.lyrics ?? [];
-            console.log(this.lyrics);
           } else {
             this.lyrics = [];
           }
@@ -212,13 +211,16 @@ export default defineComponent({
     }
     &--artists {
       display: flex;
-      width: 100%;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
+      width: max-content;
+      // white-space: nowrap;
+      // text-overflow: ellipsis;
+      // overflow: scroll;
       gap: 8px;
       a {
         font-size: 1rem;
+        display: block;
+        width: max-content;
+        white-space: nowrap;
         color: var(--text-subdued);
         &:hover {
           color: var(--text-primary-color);
@@ -251,7 +253,7 @@ export default defineComponent({
   }
   &__lyric {
     width: 90%;
-    margin: 0 auto;
+    margin: 20px auto;
     padding: 10px;
     border-radius: 10px;
     background-color: var(--background-glass-color-primary);
@@ -267,6 +269,7 @@ export default defineComponent({
       overflow-wrap: break-word;
       p {
         margin: 0;
+        margin-bottom: 5px;
         min-height: 1em;
       }
     }

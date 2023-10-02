@@ -252,7 +252,7 @@ $tablet-width: 768px;
     }
   }
 }
-@media (max-width: $mobile-width) {
+@media (max-width: $tablet-width) {
   .header {
     &__menuToggle {
       display: flex;

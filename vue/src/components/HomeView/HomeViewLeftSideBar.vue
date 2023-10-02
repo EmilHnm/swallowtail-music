@@ -217,7 +217,7 @@ $tablet-width: 768px;
   }
   .nav.active {
     width: 100%;
-    max-width: 500px;
+    max-width: none;
   }
 }
 </style>

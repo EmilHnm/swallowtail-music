@@ -30,14 +30,15 @@
     </div>
     <div class="info">
       <div class="info__type">Artist</div>
-      <div class="info__title">{{ artist.name }}</div>
+      <h1 class="info__title" title="{{ artist.name }}">{{ artist.name }}</h1>
       <div class="info__other">
         <div class="info__other--monthlyListeners">
           {{ artist.listens }} listeners
         </div>
         <div class="info__other--albumCount">
-          - {{ artist.total_album }} Album
-          {{ artist.total_album > 1 ? "s" : "" }}
+          - {{ artist.total_album }} Album{{
+            artist.total_album > 1 ? "s" : ""
+          }}
         </div>
       </div>
     </div>
@@ -82,9 +83,9 @@ import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import type { artist } from "@/model/artistModel";
 import { environment } from "@/environment/environment";
-import BaseListItem from "../../../components/UI/BaseListItem.vue";
-import IconHorizontalThreeDot from "../../../components/icons/IconHorizontalThreeDot.vue";
-import IconPlay from "../../../components/icons/IconPlay.vue";
+import BaseListItem from "@/components/UI/BaseListItem.vue";
+import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vue";
+import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 
@@ -184,11 +185,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+$mobile-width: 480px;
+$tablet-width: 768px;
 .artist-header {
   display: flex;
   align-items: center;
   padding: 40px 20px;
   position: relative;
+  @media (max-width: $tablet-width) {
+    flex-direction: column;
+  }
   & .header__background {
     position: absolute;
     top: 0;
@@ -234,6 +240,10 @@ export default defineComponent({
       color: #fff;
       font-weight: 900;
       text-shadow: 0px 0px 10px var(--color-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
     }
     &__other {
       display: flex;

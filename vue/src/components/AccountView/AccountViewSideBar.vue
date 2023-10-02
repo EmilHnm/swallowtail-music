@@ -155,7 +155,7 @@ nav {
   }
 }
 
-@media (max-width: $mobile-width) {
+@media (max-width: $tablet-width) {
   nav {
     flex-basis: 100%;
     width: 100%;

@@ -31,8 +31,8 @@
           <tr>
             <td>#</td>
             <td>Title</td>
-            <td v-if="mainWidth > 550">Uploader</td>
-            <td v-if="mainWidth > 600">Song</td>
+            <td>Uploader</td>
+            <td>Song</td>
             <td>Upload date</td>
             <td>Control</td>
           </tr>
@@ -45,10 +45,12 @@
             <td>
               {{ item.name }}
             </td>
-            <td v-if="mainWidth > 550">
-              {{ item.user.name }}
+            <!-- <td v-if="mainWidth > 550"> -->
+            <td>
+              {{ item.user?.name ?? "Unknow" }}
             </td>
-            <td v-if="mainWidth > 600">
+            <!-- <td v-if="mainWidth > 600"> -->
+            <td>
               {{ item.song_count }}
             </td>
             <td>
@@ -94,7 +96,7 @@ import { mapActions, mapGetters } from "vuex";
 
 type albumData = album & {
   song_count: number;
-  user: user;
+  user: user | null;
 };
 
 export default defineComponent({

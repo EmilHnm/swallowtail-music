@@ -177,9 +177,10 @@ $tablet-width: 768px;
       color: var(--text-subdued);
     }
     & svg {
-      width: 30px;
-      height: 30px;
+      width: 20px;
+      height: 20px;
       fill: var(--text-primary-color);
+      padding: 5px;
     }
   }
   .playing-list__queue {

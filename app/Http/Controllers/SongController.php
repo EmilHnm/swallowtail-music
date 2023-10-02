@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
 use Illuminate\Http\Request;
 use App\Services\SongManager;
+use App\Enum\SongFileStatusEnum;
 use App\Jobs\ProcessSongConvert;
 use App\Services\StorageManager;
 use Illuminate\Support\Facades\DB;
@@ -109,8 +110,11 @@ class SongController extends Controller
         if (Storage::disk($disk)->exists("chunks/$id/{$file->getClientOriginalName()}")) {
             // Storage::disk($disk)->append("chunks/{$file->getClientOriginalName()}", $file->get());
             \File::append($path, $file->get());
+            Song::findOrFail($id)->songFile->status = SongFileStatusEnum::UPLOADING;
         } else {
             Storage::disk($disk)->put("chunks/$id/{$file->getClientOriginalName()}", $file->get());
+            Song::findOrFail($id)->songFile->status = SongFileStatusEnum::UPLOADED;
+
             // \File::put($path, $file->get());
         }
 

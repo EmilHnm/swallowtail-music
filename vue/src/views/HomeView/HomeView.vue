@@ -12,7 +12,7 @@ import type { like } from "@/model/likeModel";
 import HomeViewLeftSideBar from "@/components/HomeView/HomeViewLeftSideBar.vue";
 import HomeViewRightSideBar from "@/components/HomeView/RightSideBar/HomeViewRightSideBar.vue";
 import HomeViewPlayer from "@/components/HomeView/HomeViewPlayer.vue";
-import HomeViewHeader from "@/components/HomeView/HomeViewHeader.vue";
+import HomeViewHeader from "@/components/HomeView/Header/HomeViewHeader.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import HomeUploadBox from "@/components/HomeView/HomeUpload/HomeUploadBox.vue";
@@ -858,7 +858,11 @@ export default defineComponent({
         @addToQueue="addToQueue"
         @playSong="playSong"
         @uploadSong="uploadSong"
+        v-slot="{ Component }"
       >
+        <keep-alive include="mainPage">
+          <component :is="Component" />
+        </keep-alive>
       </router-view>
     </main>
 
