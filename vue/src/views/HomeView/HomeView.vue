@@ -594,6 +594,8 @@ export default defineComponent({
       const xhr = new XMLHttpRequest();
       xhr.open("POST", `${environment.api}/song/${file.song_id}/file`, true);
       xhr.setRequestHeader("Authorization", `Bearer ${this.token}`);
+      // xhr.setRequestHeader("Content-Type", "multipart/form-data");
+      xhr.setRequestHeader("Accept", "application/json");
       file.status = "uploading";
       let formData = new FormData();
       formData.append("is_last", JSON.stringify(file.blob.length === 1));

@@ -106,15 +106,18 @@ class SongController extends Controller
 
         $disk = StorageManager::getDisk();
 
-        $path = Storage::disk($disk)->path("chunks/$id/{$file->getClientOriginalName()}");
+        $path = Storage::disk($disk)->path("chunks/$id/{$request->file('file')->getClientOriginalName()}");
         if (Storage::disk($disk)->exists("chunks/$id/{$file->getClientOriginalName()}")) {
             // Storage::disk($disk)->append("chunks/{$file->getClientOriginalName()}", $file->get());
             \File::append($path, $file->get());
-            Song::findOrFail($id)->songFile->status = SongFileStatusEnum::UPLOADING;
+            if (!SongFile::where("song_id", $id)->exists()) {
+                $song_file = new SongFile();
+                $song_file->song_id = $id;
+                $song_file->status = SongFileStatusEnum::UPLOADING;
+                $song_file->save();
+            }
         } else {
             Storage::disk($disk)->put("chunks/$id/{$file->getClientOriginalName()}", $file->get());
-            Song::findOrFail($id)->songFile->status = SongFileStatusEnum::UPLOADED;
-
             // \File::put($path, $file->get());
         }
 
@@ -124,7 +127,8 @@ class SongController extends Controller
                 Storage::disk($disk)->delete($name_final);
             }
             Storage::disk($disk)->move("chunks/$id/{$file->getClientOriginalName()}", $name_final);
-
+            $song = Song::find($id);
+            $song->file->status = SongFileStatusEnum::UPLOADED;
             dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
             return response()->json(['uploaded' => true]);
         }
