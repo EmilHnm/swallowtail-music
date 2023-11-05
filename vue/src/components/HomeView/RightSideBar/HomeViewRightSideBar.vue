@@ -104,7 +104,6 @@ $tablet-width: 768px;
   background: var(--background-color-primary);
   border-radius: 10px;
   height: 100%;
-  // padding: 20px 0;
   overflow: auto;
   &__navigation {
     width: 80%;
@@ -112,6 +111,9 @@ $tablet-width: 768px;
     margin-top: 20px;
     display: flex;
     gap: 4px;
+    button {
+      flex: 1;
+    }
   }
 }
 
