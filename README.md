@@ -6,6 +6,12 @@ Just a simple music player for the terminal. It's not very good, but it's mine. 
 
 -   [FFmpeg](https://ffmpeg.org/)
 -   [vorbis](https://xiph.org/vorbis/)
+-   [Minio](https://min.io/)
+-   [Redis](https://redis.io/)
+-   [Laravel](https://laravel.com/)
+-   [Vue](https://vuejs.org/)
+-   [SCSS](https://sass-lang.com/)
+-   [Typescript](https://www.typescriptlang.org/)
 
 ### Installation
 
