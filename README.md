@@ -111,7 +111,6 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 
 -   [x] Change theme design
 -   [x] Add Lazyload for Image
--   [ ] Integrate Nodejs for some realtime action
 -   [ ] Change admin dashboard
 -   [ ] Cross Authenticate
 -   [x] Create API for backup and sync
