@@ -8,7 +8,9 @@ use App\Enum\SongFileStatusEnum;
 use App\Services\StorageManager;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Events\SongConvertedSuccessFull;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
+use App\Listeners\SendSongConvertedSuccessFullListener;
 use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
 
 
@@ -77,6 +79,7 @@ class SongManager
             $this->songFile->file_path = $final_filepath;
             $this->songFile->driver = $this->disk;
             FFMpeg::cleanupTemporaryFiles();
+            event(new SongConvertedSuccessFull($this->song->user, $this->song));
             return $this;
         } catch (EncodingException $exception) {
             $command = $exception->getCommand();

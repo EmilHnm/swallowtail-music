@@ -9,6 +9,7 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PlaylistController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\admin\SongAdminController;
 use App\Http\Controllers\admin\UserAdminController;
 use App\Http\Controllers\admin\AlbumAdminController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\admin\StatisticAdminController;
 
 Route::middleware("auth:sanctum")->group(function () {
     Route::prefix("auth")->group(function () {
+        Route::post("", [AuthController::class, "check"]);
         Route::post("/logout", [AuthController::class, "logout"]);
         Route::post("/logoutAll", [AuthController::class, "logoutAllDevice"]);
         Route::get("/user", [AuthController::class, "user"]);
@@ -177,11 +179,16 @@ Route::middleware("auth:sanctum")->group(function () {
         Route::prefix("song")->group(function () {
             Route::post("/update", [SongController::class, "updateSong"]);
             Route::get("/uploaded", [SongController::class, "uploadedSong"]);
-            Route::delete("/{id}/delete", [
-                SongController::class,
-                "deleteSong",
-            ]);
+            Route::delete("/{id}/delete", [SongController::class, "deleteSong"]);
         });
+    });
+
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::post('/delete', [NotificationController::class, 'delete']);
+        Route::get('/has-unread', [NotificationController::class, 'hasUnread']);
+        Route::post('/mark-as-read', [NotificationController::class, 'markAsRead']);
+        Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
     });
 
     Route::prefix("admin")

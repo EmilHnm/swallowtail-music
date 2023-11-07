@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import { createMetaManager } from "vue-meta";
+
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
@@ -29,6 +30,7 @@ app.component("icon-logo", IconLogo);
 app.use(router);
 app.use(store as any);
 app.use(metaManager);
+
 app.directive("lazyload", LazyLoadDirective);
 app.directive("click-outside", ClickOutsideDirective);
 app.mount("#app");

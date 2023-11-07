@@ -96,7 +96,7 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 
 -   Other
 
-    -   [ ] Notification
+    -   [x] Notification
     -   [x] Change Profile Picture
     -   [x] Edit Profile
 

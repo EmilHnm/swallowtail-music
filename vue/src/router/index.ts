@@ -26,6 +26,11 @@ const router = createRouter({
           component: () => import("../views/HomeView/MainPageView.vue"),
         },
         {
+          path: "/notification",
+          name: "notificationPage",
+          component: () => import("../views/HomeView/NotificationView.vue"),
+        },
+        {
           path: "/search",
           name: "searchPage",
           component: () => import("../views/HomeView/SearchPageView.vue"),

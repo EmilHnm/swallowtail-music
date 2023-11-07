@@ -108,6 +108,7 @@ class AuthController extends Controller
                 $message->to($request->email)->subject("Reset Password");
             }
         );
+
         return response()->json([
             "status" => "success",
             "message" => "Send message successfully!",
@@ -234,5 +235,10 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         return response()->json($user);
+    }
+
+    public function check()
+    {
+        return Auth::check();
     }
 }

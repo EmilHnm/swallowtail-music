@@ -1,4 +1,6 @@
 <script lang="ts">
+import io from "socket.io-client";
+import Echo from "laravel-echo";
 import { computed, defineComponent } from "vue";
 import { _function } from "@/mixins";
 import { Timer } from "@/mixins/Timer";
@@ -42,6 +44,13 @@ declare module "@vue/runtime-core" {
     playingAudio: songData;
     token: string;
     uploadingFile: songFileUpload | null;
+  }
+}
+
+declare global {
+  interface Window {
+    io: typeof io; // 👈️ turn off type checking
+    Echo: Echo; // 👈️ turn off type checking
   }
 }
 
@@ -775,6 +784,17 @@ export default defineComponent({
     },
   },
   created() {
+    window.io = io;
+
+    window.Echo = new Echo({
+      broadcaster: "socket.io",
+      host: environment.socket_url + ":6001",
+      auth: {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      },
+    });
     this.loadPlaylist();
     this.audio = new Audio();
     this.audio.crossOrigin = "anonymous";

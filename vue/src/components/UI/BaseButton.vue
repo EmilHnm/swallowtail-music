@@ -1,7 +1,4 @@
 <template>
-  <!-- <button :type="type">
-      <slot></slot>
-    </button> -->
   <button class="btn" :class="mode" :type="type">
     <slot></slot>
   </button>
@@ -36,10 +33,14 @@ export default defineComponent({
     background: var(--color-announcement);
   }
   &.danger {
-    background: var(--color-negative);
+    background: var(--color-danger);
   }
   &.negative {
-    background: var(--color-danger);
+    background: var(--color-negative);
+  }
+
+  &.accent {
+    background: var(--color-accent);
   }
 
   /* Material Design primary color */

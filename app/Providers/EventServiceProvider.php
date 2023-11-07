@@ -22,6 +22,10 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\ListenIncrease::class => [
             \App\Listeners\ArtistListenIncrease::class,
         ],
+
+        \App\Events\SongConvertedSuccessFull::class => [
+            \App\Listeners\SendSongConvertedSuccessFullListener::class,
+        ],
     ];
 
     /**

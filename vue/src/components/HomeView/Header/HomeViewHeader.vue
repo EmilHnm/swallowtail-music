@@ -41,6 +41,7 @@
       <div class="header__right--darkmodeBtn">
         <darkmode-button />
       </div>
+      <HeaderNotification v-if="$route.name != 'notificationPage'" />
       <div
         class="header__right--account"
         @click="toggleAccountMenu"
@@ -55,7 +56,7 @@
             :data-url="
               userData.profile_photo_url
                 ? `${environment.profile_image}/${userData.profile_photo_url}`
-                : `http://127.0.0.1:5173/src/assets/default/default-avatar.jpg`
+                : `${environment.site_url}/src/assets/default/default-avatar.jpg`
             "
             alt=""
             srcset=""
@@ -107,11 +108,13 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapMutations, mapActions } from "vuex";
 import { environment } from "@/environment/environment";
+import HeaderNotification from "@/components/HomeView/Header/HeaderNotification.vue";
 import IconMenu from "@/components/icons/IconMenu.vue";
 
 export default defineComponent({
   components: {
     IconMenu,
+    HeaderNotification,
   },
   name: "HomeViewHeader",
   data() {
@@ -229,6 +232,7 @@ $tablet-width: 768px;
     align-items: center;
     flex-grow: 1;
     flex-basis: 0;
+    gap: 10px;
     &--darkmodeBtn {
       margin-left: 10px;
       width: 25px;
@@ -240,7 +244,6 @@ $tablet-width: 768px;
       justify-content: flex-end;
       align-items: center;
       border-radius: 20px;
-      margin-left: 10px;
       width: auto;
       height: 40px;
       position: relative;
@@ -321,7 +324,7 @@ $tablet-width: 768px;
   }
 }
 
-@media (max-width: $mobile-width) {
+@media (max-width: $tablet-width) {
   .header {
     &__center {
       &--logo {
