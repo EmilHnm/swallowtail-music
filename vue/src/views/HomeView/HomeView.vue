@@ -788,7 +788,7 @@ export default defineComponent({
 
     window.Echo = new Echo({
       broadcaster: "socket.io",
-      host: environment.socket_url + ":6001",
+      host: `${environment.socket_url}:${environment.socket_port}`,
       auth: {
         headers: {
           Authorization: `Bearer ${this.token}`,

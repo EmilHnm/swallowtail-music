@@ -14,7 +14,7 @@
             "databasePath": "/database/laravel-echo-server.sqlite"
         }
     },
-    "devMode": true,
+    "devMode": false,
     "host": null,
     "port": "6001",
     "protocol": "http",
@@ -30,7 +30,7 @@
     },
     "apiOriginAllow": {
         "allowCors": true,
-        "allowOrigin": "*",
+        "allowOrigin": "http://localhost:5173/",
         "allowMethods": "GET, POST",
         "allowHeaders": "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
     }
