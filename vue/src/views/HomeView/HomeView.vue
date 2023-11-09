@@ -1,5 +1,5 @@
 <script lang="ts">
-const io = require("socket.io-client/dist/socket.io");
+import io from "socket.io-client";
 import Echo from "laravel-echo";
 import { computed, defineComponent } from "vue";
 import { _function } from "@/mixins";
