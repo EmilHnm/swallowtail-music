@@ -1,6 +1,10 @@
+import { cacheModule } from "./cacheModule";
 import { environment } from "@/environment/environment";
 export const artistModule = {
   namespaced: true,
+  module: {
+    cache: cacheModule,
+  },
   state() {
     return {};
   },
@@ -16,13 +20,32 @@ export const artistModule = {
         },
       });
     },
-    getTopArtists(context: any, token: string) {
-      return fetch(`${environment.api}/artist/top`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
+    async getTopArtists(context: any, token: string): Promise<any> {
+      const endpoint = `${environment.api}/artist/top`;
+      return new Promise((resolve: (data: any) => any) => {
+        const cached = context.rootGetters["cache/data"](endpoint);
+        if (cached) {
+          resolve(cached);
+        } else {
+          fetch(endpoint, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            },
+          }).then((res: Response) => {
+            const data = res.json();
+            context.commit(
+              "cache/set",
+              {
+                key: endpoint,
+                value: data,
+              },
+              { root: true }
+            );
+            resolve(data);
+          });
+        }
       });
     },
     getArtist(context: any, payload: { token: string; artist_id: string }) {

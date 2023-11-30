@@ -241,42 +241,37 @@ export default defineComponent({
     },
     onLoadLatestSong() {
       this.isLatestSongLoading = true;
-      this.getLatestSong(this.token)
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLatestSongLoading = false;
-          this.latestSongs = res.songs;
-        });
+      this.getLatestSong(this.token).then((res) => {
+        this.isLatestSongLoading = false;
+        this.latestSongs = res.songs;
+      });
     },
     onLoadLatestAlbum() {
       this.isLatestAlbumLoading = true;
-      this.getLatestAlbums(this.token)
-        .then((res) => res.json())
-        .then((res) => {
-          this.latestAlbums = [...res.albums];
-          this.isLatestAlbumLoading = false;
-        });
+      this.getLatestAlbums(this.token).then((res) => {
+        this.latestAlbums = [...res.albums];
+        this.isLatestAlbumLoading = false;
+      });
     },
     onLoadTopAlbum() {
       this.isTopAlbumLoading = true;
-      this.getTopAlbums(this.token)
-        .then((res) => res.json())
-        .then((res) => {
-          this.topAlbums = [...res.albums];
-          this.isTopAlbumLoading = false;
-        });
+      this.getTopAlbums(this.token).then((res) => {
+        this.topAlbums = [...res.albums];
+        this.isTopAlbumLoading = false;
+      });
     },
     onLoadTopArtist() {
-      this.getTopArtists(this.token)
-        .then((res) => res.json())
-        .then((res) => {
-          this.topArtist = [...res.artists];
-          this.isTopArtistLoading = false;
-        });
+      this.getTopArtists(this.token).then((res) => {
+        this.topArtist = [...res.artists];
+        this.isTopArtistLoading = false;
+      });
     },
   },
   computed: {
-    ...mapGetters({ token: "auth/userToken" }),
+    ...mapGetters({
+      token: "auth/userToken",
+      cached: "cache/data",
+    }),
   },
   created() {
     this.onLoadLatestSong();

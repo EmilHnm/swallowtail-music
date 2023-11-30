@@ -12,4 +12,7 @@ export const environment = {
   // broadcast
   socket_url: import.meta.env.VITE_SOCKET_URL,
   socket_port: import.meta.env.VITE_SOCKET_PORT,
+
+  //cache
+  cache_timeout: (import.meta.env.VITE_CACHE_TIMEOUT ?? 10) * 60 * 1000,
 };

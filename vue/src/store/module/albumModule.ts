@@ -125,24 +125,60 @@ export const albumModule = {
         }
       );
     },
-    getLatestAlbums(context: any, userToken: string): Promise<Response> {
-      return fetch(`${environment.api}/album/latest`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
+    getLatestAlbums(context: any, userToken: string): Promise<any> {
+      const endpoint = `${environment.api}/album/latest`;
+      return new Promise((resolve: (data: any) => any) => {
+        const cached = context.rootGetters["cache/data"](endpoint);
+        if (cached) {
+          resolve(cached);
+        } else {
+          fetch(endpoint, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+              Accept: "application/json",
+            },
+          }).then((res: Response) => {
+            const data = res.json();
+            context.commit(
+              "cache/set",
+              {
+                key: endpoint,
+                value: data,
+              },
+              { root: true }
+            );
+            resolve(data);
+          });
+        }
       });
     },
-    getTopAlbums(context: any, userToken: string): Promise<Response> {
-      return fetch(`${environment.api}/album/top`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
+    getTopAlbums(context: any, userToken: string): Promise<any> {
+      const endpoint = `${environment.api}/album/top`;
+      return new Promise((resolve: (data: any) => any) => {
+        const cached = context.rootGetters["cache/data"](endpoint);
+        if (cached) {
+          resolve(cached);
+        } else {
+          fetch(endpoint, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+              Accept: "application/json",
+            },
+          }).then((res: Response) => {
+            const data = res.json();
+            context.commit(
+              "cache/set",
+              {
+                key: endpoint,
+                value: data,
+              },
+              { root: true }
+            );
+            resolve(data);
+          });
+        }
       });
     },
     getAlbumById(

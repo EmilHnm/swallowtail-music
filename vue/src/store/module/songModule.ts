@@ -132,13 +132,32 @@ export const songModule = {
         },
       });
     },
-    getLatestSong(context: any, userToken: string): Promise<Response> {
-      return fetch(`${environment.api}/song/latest`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
+    getLatestSong(context: any, userToken: string): Promise<any> {
+      const endpoint = `${environment.api}/song/latest`;
+      return new Promise((resolve: (data: any) => any) => {
+        const cached = context.rootGetters["cache/data"](endpoint);
+        if (cached) {
+          resolve(cached);
+        } else {
+          fetch(endpoint, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+              Accept: "application/json",
+            },
+          }).then((res: Response) => {
+            const data = res.json();
+            context.commit(
+              "cache/set",
+              {
+                key: endpoint,
+                value: data,
+              },
+              { root: true }
+            );
+            resolve(data);
+          });
+        }
       });
     },
   },
