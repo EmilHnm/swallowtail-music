@@ -13,6 +13,8 @@ export const environment = {
   socket_url: import.meta.env.VITE_SOCKET_URL,
   socket_port: import.meta.env.VITE_SOCKET_PORT,
 
+  notification_channel: import.meta.env.VITE_NOTIFICATION_CHANNEL,
+
   //cache
   cache_timeout: (import.meta.env.VITE_CACHE_TIMEOUT ?? 10) * 60 * 1000,
 };

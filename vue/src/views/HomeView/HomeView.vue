@@ -831,6 +831,10 @@ export default defineComponent({
         this.playAudio();
       }
     });
+
+    document.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
   },
   unmounted() {
     if (this.audio.src) this.audio.src = "";

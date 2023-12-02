@@ -83,6 +83,7 @@ export default defineComponent({
     margin: 1rem 0;
     & > * {
       margin: 0 0.5rem;
+      flex: 1;
     }
   }
   &__noti {

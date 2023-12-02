@@ -59,6 +59,7 @@ import IconBell from "@/components/icons/IconBell.vue";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
 import { DateService } from "@/mixins/DateService";
 import BaseCircleLoadVue from "@/components/UI/BaseCircleLoad.vue";
+import { environment } from "@/environment/environment";
 import BaseNotificationItem from "@/components/UI/BaseNotificationItem.vue";
 export default defineComponent({
   data() {
@@ -151,9 +152,9 @@ export default defineComponent({
     const echo = window.Echo;
     echo
       .channel(
-        `swallowtail_music_database_private-notifications.${this.user.user_id}`
+        `swallowtail_music_database_private-${environment.notification_channel}.${this.user.user_id}`
       )
-      .listen(`.notifications`, () => {
+      .listen(`.${environment.notification_channel}`, () => {
         this.getNotification();
         this.hasUnreadMessage = true;
       });
@@ -164,7 +165,7 @@ export default defineComponent({
   unmounted() {
     const echo = window.Echo;
     echo.leave(
-      `swallowtail_music_database_private-notifications.${this.user.user_id}`
+      `swallowtail_music_database_private-${environment.notification_channel}.${this.user.user_id}`
     );
   },
   components: {
