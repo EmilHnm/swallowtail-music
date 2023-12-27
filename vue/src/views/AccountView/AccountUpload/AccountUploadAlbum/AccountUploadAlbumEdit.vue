@@ -35,14 +35,12 @@
               @change="imageFileChange"
             />
             <img
-              v-lazyload
-              :data-url="`${environment.album_cover}/${album.image_path}`"
+              :src="`${environment.album_cover}/${album.image_path}`"
               alt="album image"
               v-if="!imgPath"
             />
             <img
-              v-lazyload
-              :data-url="imgPath"
+              :src="imgPath"
               alt="album image"
               v-else-if="imgPath"
             />

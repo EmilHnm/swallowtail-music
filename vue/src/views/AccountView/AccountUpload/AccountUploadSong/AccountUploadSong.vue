@@ -10,16 +10,6 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseFlatDialog>
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseCircleLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
   </teleport>
   <div class="main" ref="main">
     <h3>Song Uploaded Management</h3>
@@ -33,97 +23,64 @@
           v-model="filterText"
         />
       </div>
-      <table v-if="!filterText">
+      <table>
         <thead>
           <tr>
-            <td class="index">#</td>
+            <td class="index" @click="sortList('id')">#</td>
             <td class="title" @click="sortList('title')">Title</td>
-            <td
-              class="artist"
-              @click="sortList('artist')"
-              v-if="mainWidth > 600"
-            >
-              Artist
-            </td>
-            <td class="uploadDate" @click="sortList('uploadDate')">Upload</td>
+            <td class="artist" v-if="mainWidth > 600">Artist</td>
+            <td class="uploadDate" @click="sortList('created_at')">Upload</td>
             <td class="control">Control</td>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="(song, index, i) in uploadedSongList" :key="index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ song[0].title }}</td>
-            <td v-if="song[0].artist_name && mainWidth > 600">
+        <tbody v-if="isLoading">
+          <tr>
+            <td colspan="5" style="min-height: 60vh">
+              <BaseCircleLoad />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else>
+          <tr v-for="(song, i) in uploadedSongList" :key="i">
+            <td>{{ i + 1 + paginate.currentPage * 15 }}</td>
+            <td>{{ song.title }}</td>
+            <td v-if="song.artist.length && mainWidth > 600">
               <router-link
-                v-for="(artist, index) in song"
+                v-for="(artist, index) in song.artist"
                 :key="artist.artist_id"
                 :to="{
                   name: 'artistOverviewPage',
                   params: { id: artist.artist_id },
                 }"
               >
-                {{ artist.artist_name
-                }}<span v-if="index !== song.length - 1">,</span>
+                {{ artist.name
+                }}<span v-if="index !== song.artist.length - 1">,</span>
               </router-link>
             </td>
-            <td v-if="!song[0].artist_name && mainWidth > 600">Unset</td>
-            <td>{{ new Date(song[0].created_at).toLocaleDateString() }}</td>
+            <td v-if="!song.artist.length && mainWidth > 600">Unset</td>
+            <td>{{ new Date(song.created_at).toLocaleDateString() }}</td>
             <td>
-              <button class="edit" @click="navigateToEdit(song[0].song_id)">
+              <button class="edit" @click="navigateToEdit(song.song_id)">
                 Edit
               </button>
-              <button class="delete" @click="deleteItem(song[0].song_id)">
+              <button class="delete" @click="deleteItem(song.song_id)">
                 Delete
               </button>
             </td>
           </tr>
         </tbody>
       </table>
-      <table v-else>
-        <thead>
-          <tr>
-            <td class="index">#</td>
-            <td class="title" @click="sortList('title')">Title</td>
-            <td
-              class="artist"
-              @click="sortList('artist')"
-              v-if="mainWidth > 600"
-            >
-              Artist
-            </td>
-            <td class="uploadDate" @click="sortList('uploadDate')">Upload</td>
-            <td class="control">Control</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(song, index, i) in filteredUploadedSongList" :key="index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ song[0].title }}</td>
-            <td v-if="song[0].artist_name && mainWidth > 600">
-              <router-link
-                v-for="artist in song"
-                :key="artist.artist_id"
-                :to="{
-                  name: 'artistOverviewPage',
-                  params: { id: artist.artist_id },
-                }"
-              >
-                {{ artist.artist_name }}
-              </router-link>
-            </td>
-            <td v-if="!song[0].artist_name && mainWidth > 600">Unset</td>
-            <td>{{ new Date(song[0].created_at).toLocaleDateString() }}</td>
-            <td>
-              <button class="edit" @click="navigateToEdit(song[0].song_id)">
-                Edit
-              </button>
-              <button class="delete" @click="deleteItem(song[0].song_id)">
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="pagination" v-if="!isLoading && uploadedSongList.length > 0">
+        <BaseTableBodyPagination
+          :totalPages="paginate.totalPages"
+          :currentPage="paginate.currentPage"
+          @onClickPage="onClickPage"
+          @onGoToFirstPage="onGoToFirstPage"
+          @onGoToPreviousPage="onGoToPreviousPage"
+          @onGoToNextPage="onGoToNextPage"
+          @onGoToLastPage="onGoToLastPage"
+        />
+      </div>
     </div>
     <div class="no-data" v-else>
       <h3>No Song Uploaded</h3>
@@ -134,36 +91,41 @@
 <script lang="ts">
 import IconSearch from "@/components/icons/IconSearch.vue";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
+import BaseTableBodyPagination from "@/components/UI/BaseTableBodyPagination.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import type { song } from "@/model/songModel";
+import type { artist } from "@/model/artistModel";
+import type { Pagination } from "@/model/mixin/PaginateDataModel";
 
-type songListData = {
-  [song_id: string]: songData;
+type songData = song & {
+  artist: artist[];
 };
 
-type songData = {
-  song_id: string;
-  title: string;
-  artist_name: string;
-  artist_id: string;
-  created_at: string;
-}[];
+type SongResData = Pagination & {
+  data: songData[];
+};
 
 export default defineComponent({
   data() {
     return {
-      uploadedSongList: {} as songListData,
-      filteredUploadedSongList: {} as songListData,
+      uploadedSongList: [] as songData[],
+      filteredUploadedSongList: [] as songData[],
       observer: null as ResizeObserver | null,
       mainWidth: 0,
       filterText: "",
-      isLoading: false,
-      sortMode: {
-        title: "asc",
-        artist: "asc",
-        uploadDate: "asc",
+      isLoading: true,
+      paginate: {
+        currentPage: 0,
+        totalPages: 0,
       },
+      sortMode: {
+        column: "id",
+        type: "asc",
+      },
+      abortController: new AbortController(),
+      abortSignal: null as AbortSignal | null,
       dialogWaring: {
         title: "Warning",
         mode: "warning",
@@ -175,84 +137,13 @@ export default defineComponent({
   methods: {
     ...mapActions("song", ["getUploadedSongs", "deleteSong"]),
     sortList(colname: string) {
-      if (colname === "title") {
-        if (this.sortMode.title == "asc") {
-          this.sortMode.title = "desc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
-              (a: [string, songData], b: [string, songData]) =>
-                -a[1][0].title.localeCompare(b[1][0].title)
-            )
-          );
-        } else {
-          this.sortMode.title = "asc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
-              (a: [string, songData], b: [string, songData]) =>
-                a[1][0].title.localeCompare(b[1][0].title)
-            )
-          );
-        }
-        return;
+      this.sortMode.column = colname;
+      if (this.sortMode.type === "asc") {
+        this.sortMode.type = "desc";
+      } else {
+        this.sortMode.type = "asc";
       }
-      if (colname === "artist") {
-        if (this.sortMode.artist === "asc") {
-          this.sortMode.artist = "desc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
-              (a: [string, songData], b: [string, songData]) => {
-                if (a[1][0].artist_name === null) {
-                  return -1;
-                }
-                if (b[1][0].artist_name === null) {
-                  return 1;
-                }
-                return -a[1][0].artist_name
-                  .toString()
-                  .localeCompare(b[1][0].artist_name.toString());
-              }
-            )
-          );
-        } else {
-          this.sortMode.artist = "asc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
-              (a: [string, songData], b: [string, songData]) => {
-                if (a[1][0].artist_name === null) {
-                  return 1;
-                }
-                if (b[1][0].artist_name === null) {
-                  return -1;
-                }
-                return a[1][0].artist_name
-                  .toString()
-                  .localeCompare(b[1][0].artist_name.toString());
-              }
-            )
-          );
-        }
-        return;
-      }
-      if (colname === "uploadDate") {
-        if (this.sortMode.uploadDate === "asc") {
-          this.sortMode.uploadDate = "desc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
-              (a: [string, songData], b: [string, songData]) =>
-                -a[1][0].created_at.localeCompare(b[1][0].created_at)
-            )
-          );
-        } else {
-          this.sortMode.uploadDate = "asc";
-          this.uploadedSongList = Object.fromEntries(
-            Object.entries(this.uploadedSongList).sort(
-              (a: [string, songData], b: [string, songData]) =>
-                a[1][0].created_at.localeCompare(b[1][0].created_at)
-            )
-          );
-        }
-        return;
-      }
+      this.loadData();
     },
     navigateToEdit(id: string | number) {
       this.$router.push({
@@ -266,15 +157,7 @@ export default defineComponent({
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
-            this.getUploadedSongs(this.token)
-              .then((res) => res.json())
-              .then((res) => {
-                this.uploadedSongList = res.songs.reduce((r: any, a: any) => {
-                  r[a.song_id] = r[a.song_id] || [];
-                  r[a.song_id].push(a);
-                  return r;
-                }, Object.create(null));
-              });
+            this.loadData();
             this.dialogWaring.mode = "announcement";
             this.dialogWaring.content = res.message;
             this.dialogWaring.title = "Success";
@@ -288,6 +171,41 @@ export default defineComponent({
           this.isLoading = false;
         });
     },
+    loadData() {
+      this.isLoading = true;
+      this.abortController.abort();
+      this.abortController = new AbortController();
+      this.abortSignal = this.abortController.signal;
+      this.getUploadedSongs({
+        userToken: this.token,
+        page: this.paginate.currentPage + 1,
+        query: this.filterText,
+        sort: this.sortMode,
+        signal: this.abortSignal,
+      })
+        .then((res) => res.json())
+        .then((res: { songs: SongResData; status: string }) => {
+          this.uploadedSongList = res.songs.data;
+          this.paginate.currentPage = res.songs.current_page - 1;
+          this.paginate.totalPages = res.songs.last_page;
+          this.isLoading = false;
+        });
+    },
+    onClickPage(index: number) {
+      this.paginate.currentPage = index;
+    },
+    onGoToFirstPage() {
+      this.paginate.currentPage = 0;
+    },
+    onGoToPreviousPage() {
+      this.paginate.currentPage = this.paginate.currentPage - 1;
+    },
+    onGoToNextPage() {
+      this.paginate.currentPage = this.paginate.currentPage + 1;
+    },
+    onGoToLastPage() {
+      this.paginate.currentPage = this.paginate.totalPages - 1;
+    },
     closeDialog() {
       this.dialogWaring.show = false;
     },
@@ -299,38 +217,18 @@ export default defineComponent({
   },
   watch: {
     filterText() {
-      if (this.filterText === "") {
-        this.filteredUploadedSongList = {};
-        return;
-      }
-      this.filteredUploadedSongList = Object.fromEntries(
-        Object.entries(this.uploadedSongList).filter(
-          (song: [string, songData]) => {
-            return (
-              song[1][0].title
-                .toLowerCase()
-                .includes(this.filterText.toLowerCase()) ||
-              song[1][0].artist_name
-                ?.toLowerCase()
-                .includes(this.filterText.toLowerCase())
-            );
-          }
-        )
-      );
+      this.paginate.currentPage = 0;
+      this.loadData();
+    },
+    paginate: {
+      handler() {
+        this.loadData();
+      },
+      deep: true,
     },
   },
   mounted() {
-    this.isLoading = true;
-    this.getUploadedSongs(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        this.uploadedSongList = res.songs.reduce((r: any, a: any) => {
-          r[a.song_id] = r[a.song_id] || [];
-          r[a.song_id].push(a);
-          return r;
-        }, Object.create(null));
-        this.isLoading = false;
-      });
+    this.loadData();
     const main = this.$refs.main as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
@@ -342,7 +240,12 @@ export default defineComponent({
   beforeUnmount() {
     if (this.observer) this.observer.disconnect();
   },
-  components: { IconSearch, BaseFlatDialog, BaseCircleLoad },
+  components: {
+    IconSearch,
+    BaseFlatDialog,
+    BaseCircleLoad,
+    BaseTableBodyPagination,
+  },
 });
 </script>
 

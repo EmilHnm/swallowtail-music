@@ -63,7 +63,7 @@ class AlbumsSyncCommand extends Command
 
                 $album->id = $raw_album['id'];
                 $album->album_id = "album_{$raw_album['browse_id']}";
-                $album->user_id = 1;
+                $album->user_id = User::first()->user_id;
                 $album->name = $raw_album['title'];
                 $album->release_year = $raw_album['release'];
 

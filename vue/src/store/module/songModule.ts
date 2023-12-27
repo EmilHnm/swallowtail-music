@@ -95,12 +95,22 @@ export const songModule = {
         },
       });
     },
-    getUploadedSongs(context: any, userToken: string): Promise<Response> {
-      return fetch(`${environment.api}/account/song/uploaded`, {
+    getUploadedSongs(
+      context: any,
+      data: {
+        userToken: string;
+        page: number;
+        query: string;
+        sort: { column: string; type: string };
+        signal: AbortSignal;
+      }
+    ): Promise<Response> {
+      const endpoint = `${environment.api}/account/song/uploaded?page=${data.page}&query=${data.query}&sort=${data.sort.column}&order=${data.sort.type}`;
+      return fetch(endpoint, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
+          Authorization: `Bearer ${data.userToken}`,
         },
       });
     },

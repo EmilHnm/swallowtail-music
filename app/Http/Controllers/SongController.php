@@ -213,20 +213,30 @@ class SongController extends Controller
         return  $url;
     }
 
-    public function uploadedSong()
+    public function uploadedSong(Request $request)
     {
-        $songsData = DB::select(
-            'SELECT songs.*,  artists.name AS artist_name,artists.artist_id AS artist_id
-                        FROM songs
-                        LEFT JOIN song_artists ON songs.song_id = song_artists.song_id
-                        LEFT JOIN artists ON song_artists.artist_id =artists.artist_id
-                        WHERE songs.user_id = ?',
-            [Auth::user()->user_id]
-        );
+        $songs = Song::with(['artist'])->where("user_id", Auth::user()->user_id);
+
+        if ($request->query->has("query")) {
+            $query = $request->query->get("query");
+            $songs = $songs->where("title", "like", "%" . $query . "%")
+                ->orWhere("sub_title", "like", "%" . $query . "%");
+        }
+
+        if ($request->query->has("sort") && $request->query->has("order")) {
+            $sort = $request->query->get("sort");
+            $order = $request->query->get("order");
+            if (
+                in_array($sort, ['title', 'sub_title', 'listens', 'created_at'])
+                && in_array($order, ['asc', 'desc'])
+            ) {
+                $songs = $songs->orderBy($sort, $order);
+            }
+        }
 
         return response()->json([
             "status" => "success",
-            "songs" => $songsData,
+            "songs" => $songs->paginate(),
         ]);
     }
 
@@ -379,6 +389,7 @@ class SongController extends Controller
     {
         $songs = Song::with("artist")
             ->where("display", "public")
+            ->whereHas("file", fn ($q) => $q->where("status", SongFileStatusEnum::DONE))
             ->orderBy("created_at", "DESC")
             ->limit(5)
             ->get();
@@ -402,8 +413,9 @@ class SongController extends Controller
         if ($request->query->has("query")) {
             $query = $request->query->get("query");
             $songs = Song::with(["artist", "album", "like"])
-                ->where("songs.title", "like", "%" . $query . "%")
-                ->orWhere("songs.sub_title", "like", "%" . $query . "%")
+                ->where("title", "like", "%" . $query . "%")
+                ->orWhere("sub_title", "like", "%" . $query . "%")
+                ->whereHas("file", fn ($q) => $q->where("status", SongFileStatusEnum::DONE))
                 ->get();
             return response()->json([
                 "status" => "success",

@@ -14,8 +14,8 @@ export interface Pagination {
   total: number;
 }
 
-export interface Link {
+export type Link = {
   url?: string;
   label: string;
   active: boolean;
-}
+};
