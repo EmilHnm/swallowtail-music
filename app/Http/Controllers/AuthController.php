@@ -27,7 +27,7 @@ class AuthController extends Controller
                 [
                     "error" => "The Provided credentials are not correct",
                 ],
-                422
+                Response::HTTP_UNAUTHORIZED
             );
         }
         $user = Auth::user();
@@ -72,7 +72,7 @@ class AuthController extends Controller
         $user = new User();
         $user->name = $validateData["name"];
         $user->email = $validateData["email"];
-        $user->user_id = Carbon::now()->timestamp;
+        $user->user_id = \Str::uuid();
         $user->password = bcrypt($validateData["password"]);
         $user->save();
 
