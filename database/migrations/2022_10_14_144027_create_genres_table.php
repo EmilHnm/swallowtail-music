@@ -17,7 +17,9 @@ return new class extends Migration
             $table->id();
             $table->string("genre_id")->nullable()->unique();
             $table->string("name");
+            $table->string('slug');
             $table->longText("description")->nullable();
+            $table->string("ref")->nullable();
             $table->timestamps();
         });
     }
