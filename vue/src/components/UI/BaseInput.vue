@@ -11,6 +11,7 @@
         v-model="value"
         :required="required"
         :placeholder="placeholder"
+        autocomplete="off"
       />
     </div>
   </div>
