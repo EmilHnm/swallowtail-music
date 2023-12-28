@@ -452,14 +452,14 @@ $tablet-width: 768px;
   cursor: pointer;
   gap: 10px;
   container-type: inline-size;
-  container: fluid;
+  container-name: song-item;
   &__left {
     width: 40%;
     display: flex;
     gap: 10px;
     overflow: hidden;
     flex: 0 0 auto;
-    @container (max-width: #{$mobile-width}) {
+    @container song-item  (max-width: #{$mobile-width}) {
       & {
         width: 70%;
       }
@@ -512,7 +512,7 @@ $tablet-width: 768px;
     justify-content: space-between;
     align-items: center;
     user-select: none;
-    @container (max-width: #{$mobile-width}) {
+    @container song-item  (max-width: #{$mobile-width}) {
       & {
         width: 100%;
       }
@@ -525,7 +525,7 @@ $tablet-width: 768px;
       &:hover {
         text-decoration: underline;
       }
-      @container (max-width: #{$mobile-width}) {
+      @container song-item  (max-width: #{$mobile-width}) {
         & {
           display: none;
         }
@@ -542,7 +542,7 @@ $tablet-width: 768px;
       overflow: hidden;
       text-overflow: ellipsis;
       text-align: center;
-      @container (max-width: #{$tablet-width}) {
+      @container song-item  (max-width: #{$tablet-width}) {
         & {
           display: none;
         }
@@ -559,7 +559,7 @@ $tablet-width: 768px;
       overflow: hidden;
       text-overflow: ellipsis;
       text-align: center;
-      @container (max-width: #{$tablet-width}) {
+      @container song-item  (max-width: #{$tablet-width}) {
         & {
           display: none;
         }
@@ -575,12 +575,12 @@ $tablet-width: 768px;
       width: 20%;
       overflow: hidden;
       text-align: center;
-      @container (max-width: #{$tablet-width}) {
+      @container song-item  (max-width: #{$tablet-width}) {
         & {
           width: 20%;
         }
       }
-      @container (max-width: #{$mobile-width}) {
+      @container song-item  (max-width: #{$mobile-width}) {
         & {
           width: 80%;
         }
