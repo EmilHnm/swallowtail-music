@@ -413,9 +413,12 @@ class SongController extends Controller
         if ($request->query->has("query")) {
             $query = $request->query->get("query");
             $songs = Song::with(["artist", "album", "like"])
+                ->withCount("artist")
                 ->where("title", "like", "%" . $query . "%")
                 ->orWhere("sub_title", "like", "%" . $query . "%")
-                ->whereHas("file", fn ($q) => $q->where("status", SongFileStatusEnum::DONE))
+                ->where("display", "public")
+                ->having("artist_count", '>=', '1')
+                ->limit(10)
                 ->get();
             return response()->json([
                 "status" => "success",
