@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands\Sync;
 
-use FFMpeg\FFProbe;
+use App\Enum\SongFileStatusEnum;
 use App\Models\Artist;
 use App\Models\SongFile;
+use App\Enum\SongReferer;
+use App\Enum\SongRefererEnum;
 use Illuminate\Console\Command;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 
@@ -55,7 +57,6 @@ class SongsSyncCommand extends Command
                 $response = $client->get($end_point . str_replace('song_', '', $song->song_id));
 
                 $data = json_decode($response->getBody()->getContents(), true);
-
                 if (isset($data['status']) && $data['status'] == 'success') {
                     $raw_data = $data['song'];
                     // dd($raw_data);
@@ -72,7 +73,8 @@ class SongsSyncCommand extends Command
                         'file_path' => $raw_data['storage'],
                         'driver' => $raw_data['storage_type'],
                         'lyrics' => $raw_data['lyric']['lyrics'],
-                        'status' => 'done'
+                        'status' => SongFileStatusEnum::DONE,
+                        'referer' => SongRefererEnum::CRAWLER,
                     ]);
 
                     $song->artist()->detach();
@@ -85,9 +87,17 @@ class SongsSyncCommand extends Command
                         }
                     }
 
+                    $song->genre()->detach();
+                    foreach ($raw_data['genres'] as $genre) {
+                        $genre_data = \App\Models\Genre::where('genre_id', 'genre_' . $genre['id'])
+                            ->orWhere('id', $genre['id'])->firstOrFail();
+                        if ($genre_data) {
+                            $song->genre()->attach($genre_data->genre_id);
+                        }
+                    }
+
                     SongFile::reguard();
                     $song->save();
-                    // dd();
                 }
             }
             sleep(5);
