@@ -9,7 +9,7 @@
   </teleport>
   <div class="song-item" ref="songItem">
     <BaseListItem :selected="selected">
-      <div class="song-item__left" :class="{ small: small }">
+      <div class="song-item__left">
         <div class="song-item__left--image" @click="selectSong">
           <img
             v-lazyload
@@ -41,8 +41,8 @@
           <span v-else><BaseLineLoad /></span>
         </div>
       </div>
-      <div class="song-item__right" :class="{ small: small }">
-        <div class="song-item__right--album" :class="{ small: small }">
+      <div class="song-item__right">
+        <div class="song-item__right--album">
           <span v-if="data.album" @click="redirectToAlbum(data.album_id)">{{
             data.album.name
           }}</span>
@@ -51,29 +51,21 @@
         <div
           class="song-item__right--addDate"
           v-if="data.playlist != null && data.playlist.length > 0"
-          :class="{ medium: medium }"
         >
           <span>{{
             new Date(data.playlist[0].pivot.created_at).toLocaleDateString()
           }}</span>
         </div>
-        <div class="song-item__right--hears" v-else :class="{ medium: medium }">
+        <div class="song-item__right--hears" v-else>
           <span>{{ data.listens }}</span>
         </div>
 
-        <div
-          class="song-item__right--duration"
-          :class="{ medium: medium, small: small }"
-        >
+        <div class="song-item__right--duration">
           <span>{{
             new Date(data.duration * 1000).toISOString().substring(14, 19)
           }}</span>
         </div>
-        <div
-          class="song-item__right--control"
-          :class="{ medium: medium, small: small }"
-          v-if="control"
-        >
+        <div class="song-item__right--control" v-if="control">
           <div class="song-item__right--control--button" @click="toggleMenu">
             <IconThreeDots />
           </div>
@@ -211,10 +203,6 @@ export default defineComponent({
   data() {
     return {
       environment: environment,
-      observer: null as ResizeObserver | null,
-      songItemWidth: 0,
-      small: false,
-      medium: false,
       isMenuOpen: false,
       menuMode: "default",
       isLoading: false,
@@ -309,34 +297,8 @@ export default defineComponent({
       }
     },
   },
-  mounted() {
-    const songItem = this.$refs.songItem as HTMLElement;
-    this.observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        this.songItemWidth = entry.contentRect.width;
-      }
-    });
-    if (this.observer && songItem) this.observer.observe(songItem);
-  },
   created() {
     this.liked = this.data.like.length > 0 ? 1 : 0;
-  },
-  beforeUnmount() {
-    if (this.observer) this.observer.disconnect();
-  },
-  watch: {
-    songItemWidth(o) {
-      if (o < 600) {
-        this.small = true;
-        this.medium = true;
-      } else if (o < 700 && o > 600) {
-        this.small = false;
-        this.medium = true;
-      } else {
-        this.small = false;
-        this.medium = false;
-      }
-    },
   },
   computed: {
     ...mapGetters({
@@ -481,6 +443,7 @@ $tablet-width: 768px;
     }
   }
 }
+
 .song-item {
   width: 100%;
   height: max-content;
@@ -488,14 +451,18 @@ $tablet-width: 768px;
   margin: 10px auto;
   cursor: pointer;
   gap: 10px;
+  container-type: inline-size;
+  container: fluid;
   &__left {
     width: 40%;
     display: flex;
     gap: 10px;
     overflow: hidden;
     flex: 0 0 auto;
-    &.small {
-      width: 70%;
+    @container (max-width: #{$mobile-width}) {
+      & {
+        width: 70%;
+      }
     }
     &--image {
       width: 50px;
@@ -545,8 +512,10 @@ $tablet-width: 768px;
     justify-content: space-between;
     align-items: center;
     user-select: none;
-    &.small {
-      width: 100%;
+    @container (max-width: #{$mobile-width}) {
+      & {
+        width: 100%;
+      }
     }
     &--album {
       width: 50%;
@@ -556,8 +525,10 @@ $tablet-width: 768px;
       &:hover {
         text-decoration: underline;
       }
-      &.small {
-        display: none;
+      @container (max-width: #{$mobile-width}) {
+        & {
+          display: none;
+        }
       }
       span {
         font-size: 1rem;
@@ -571,8 +542,10 @@ $tablet-width: 768px;
       overflow: hidden;
       text-overflow: ellipsis;
       text-align: center;
-      &.medium {
-        display: none;
+      @container (max-width: #{$tablet-width}) {
+        & {
+          display: none;
+        }
       }
       span {
         font-size: 1rem;
@@ -586,8 +559,10 @@ $tablet-width: 768px;
       overflow: hidden;
       text-overflow: ellipsis;
       text-align: center;
-      &.medium {
-        display: none;
+      @container (max-width: #{$tablet-width}) {
+        & {
+          display: none;
+        }
       }
       span {
         font-size: 1rem;
@@ -600,9 +575,13 @@ $tablet-width: 768px;
       width: 20%;
       overflow: hidden;
       text-align: center;
-      &.medium {
-        width: 20%;
-        &.small {
+      @container (max-width: #{$tablet-width}) {
+        & {
+          width: 20%;
+        }
+      }
+      @container (max-width: #{$mobile-width}) {
+        & {
           width: 80%;
         }
       }
