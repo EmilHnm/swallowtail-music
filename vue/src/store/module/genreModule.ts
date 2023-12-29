@@ -1,25 +1,25 @@
 import type { GetterTree, MutationTree, ActionTree } from "vuex";
 import { environment } from "@/environment/environment";
 
-export const state = () => ({
+const state = () => ({
   genres: [],
 });
 
-export type RootState = ReturnType<typeof state>;
+type RootState = ReturnType<typeof state>;
 
-export const getters: GetterTree<RootState, RootState> = {
+const getters: GetterTree<RootState, RootState> = {
   getGenres(state) {
     return state.genres;
   },
 };
 
-export const mutations: MutationTree<RootState> = {
+const mutations: MutationTree<RootState> = {
   setGenres(state, genres) {
     state.genres = genres;
   },
 };
 
-export const actions: ActionTree<RootState, RootState> = {
+const actions: ActionTree<RootState, RootState> = {
   async fetchGenres({ commit }, token: string) {
     await fetch(`${environment.api}/genre/`, {
       headers: {
