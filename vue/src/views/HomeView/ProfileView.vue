@@ -44,9 +44,9 @@
   <div class="control" v-if="userData.user_id == user.user_id">
     <BaseButton>Edit Profile</BaseButton>
   </div>
-  <div class="detail" ref="detail">
+  <div class="detail" v-if="topArtist.length > 0" ref="detail">
     <div class="topArtist">
-      <h2>Top artists</h2>
+      <h2>Top Artists</h2>
       <BaseHorizontalScroll>
         <BaseCardArtist
           v-for="artist in topArtist"
@@ -55,17 +55,22 @@
         />
       </BaseHorizontalScroll>
     </div>
-    <div class="topTracks">
-      <h2>Top tracks</h2>
-      <span>This only visible to you</span>
+    <div class="topTracks" v-if="topTracks.length > 0">
+      <h2>Top Uploaded Tracks</h2>
       <BaseSongItem
         v-for="song in topTracks"
         :key="song.song_id"
         :data="song"
       />
     </div>
-    <div class="publicPlaylist">
-      <h2>Public Playlist</h2>
+    <div class="publicPlaylist" v-if="userPlaylist.length > 0">
+      <h2>
+        {{
+          $route.params.id === userData.user_id
+            ? "Your Playlist"
+            : "Public Playlist"
+        }}
+      </h2>
       <BaseHorizontalScroll>
         <BaseCardAlbum
           v-for="playlist in userPlaylist"
@@ -78,7 +83,7 @@
               : `${environment.default}/no_image.jpg`
           "
           :type="'playlist'"
-          :songCount="playlist.songCount"
+          :songCount="playlist.song_count"
         />
       </BaseHorizontalScroll>
     </div>
@@ -86,11 +91,11 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import BaseButton from "../../components/UI/BaseButton.vue";
-import BaseHorizontalScroll from "../../components/UI/BaseHorizontalScroll.vue";
-import BaseCardArtist from "../../components/UI/BaseCardArtist.vue";
-import BaseSongItem from "../../components/UI/BaseSongItem.vue";
-import BaseCardAlbum from "../../components/UI/BaseCardAlbum.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
+import BaseHorizontalScroll from "@/components/UI/BaseHorizontalScroll.vue";
+import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
+import BaseSongItem from "@/components/UI/BaseSongItem.vue";
+import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import { mapActions, mapGetters } from "vuex";
 import type { user } from "@/model/userModel";
 import type { artist } from "@/model/artistModel";
@@ -109,7 +114,7 @@ type userProfileData = user & {
 };
 
 type playlistData = playlist & {
-  songCount: number;
+  song_count: number;
 };
 
 type songData = song & {
@@ -128,7 +133,6 @@ export default defineComponent({
     BaseDialog,
     BaseLineLoad,
   },
-  inject: ["userPlaylist"],
   data() {
     return {
       environment: environment,
@@ -142,7 +146,7 @@ export default defineComponent({
       user: {} as userProfileData,
       topArtist: [] as artist[],
       topTracks: {} as songData[],
-      playlists: [] as playlistData[],
+      userPlaylist: [] as playlistData[],
     };
   },
   methods: {
@@ -192,7 +196,7 @@ export default defineComponent({
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
-            this.playlists = res.playlists;
+            this.userPlaylist = res.playlists;
           } else {
             this.$router.push({ name: "mainPage" });
           }
@@ -243,6 +247,11 @@ export default defineComponent({
           this.onLoadUser(this.$route.params.id as string);
           this.onLoadTopArtist(this.$route.params.id as string);
           this.onGetTopTracks(this.$route.params.id as string);
+          if (this.userData.user_id === this.$route.params.id) {
+            this.userPlaylist = this.playlists;
+          } else {
+            this.onGetPublicPlaylist(this.$route.params.id as string);
+          }
         }
       },
     },
@@ -251,6 +260,7 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
       userData: "auth/userData",
+      playlists: "playlist/getPlaylists",
     }),
   },
   emits: [

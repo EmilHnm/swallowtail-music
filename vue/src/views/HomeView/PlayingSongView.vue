@@ -94,7 +94,7 @@ declare module "@vue/runtime-core" {
 export default defineComponent({
   emits: [
     "updatePlaylist",
-    "deletePlaylist",
+
     "playPlaylist",
     "playSongInPlaylist",
     "addPlaylistToQueue",

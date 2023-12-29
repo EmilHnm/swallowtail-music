@@ -105,7 +105,7 @@ type songData = song & {
 export default defineComponent({
   emits: [
     "updatePlaylist",
-    "deletePlaylist",
+
     "playPlaylist",
     "playSongInPlaylist",
     "addPlaylistToQueue",

@@ -141,7 +141,7 @@
         </div>
         <div class="" v-if="menuMode === 'playlist'">
           <BaseListItem
-            v-for="playlist in userPlaylist"
+            v-for="playlist in playlists"
             :key="playlist.playlist_id"
             @click="onAddSongToPlaylistlist(playlist.playlist_id)"
             >{{ playlist.title }}</BaseListItem
@@ -181,16 +181,6 @@ type songData = song & {
     }[];
 };
 
-type playlistData = playlist & {
-  songCount: number;
-};
-
-declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
-    userPlaylist: playlistData[];
-  }
-}
-
 export default defineComponent({
   emits: [
     "deleteFromQueue",
@@ -199,7 +189,6 @@ export default defineComponent({
     "likeSong",
     "addToQueue",
   ],
-  inject: ["userPlaylist"],
   data() {
     return {
       environment: environment,
@@ -303,6 +292,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       token: "auth/userToken",
+      playlists: "playlist/getPlaylists",
     }),
   },
   components: { BaseListItem, IconThreeDots, BaseLineLoad, BaseDialog },

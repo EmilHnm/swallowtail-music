@@ -45,7 +45,7 @@
     </div>
     <div class="nav__playlist">
       <router-link
-        v-for="playlist in userPlaylist"
+        v-for="playlist in playlists"
         :key="playlist.playlist_id"
         :to="{
           name: 'playlistViewPage',
@@ -72,16 +72,6 @@ import IconUpload from "@/components/icons/IconUpload.vue";
 import type { playlist } from "@/model/playlistModel";
 import { mapGetters } from "vuex";
 
-type playlistData = playlist & {
-  songCount: number;
-};
-
-declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
-    userPlaylist: playlistData[];
-  }
-}
-
 export default defineComponent({
   components: {
     IconHome,
@@ -97,12 +87,6 @@ export default defineComponent({
       default: false,
     },
   },
-  inject: {
-    userPlaylist: {
-      from: "userPlaylist",
-      default: [] as playlistData[],
-    },
-  },
   data() {
     return {};
   },
@@ -110,6 +94,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       user: "auth/userData",
+      playlists: "playlist/getPlaylists",
     }),
   },
 });

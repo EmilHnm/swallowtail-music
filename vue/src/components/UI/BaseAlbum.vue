@@ -14,7 +14,7 @@
     >
       <template #default>
         <BaseListItem
-          v-for="playlist in userPlaylist"
+          v-for="playlist in playlists"
           :key="playlist.playlist_id"
           @click="onAddAlbumToPlaylist(playlist.playlist_id)"
           >{{ playlist.title }}</BaseListItem
@@ -136,16 +136,6 @@ type songData = song & {
   like: like[];
 };
 
-type playlistData = playlist & {
-  songCount: number;
-};
-
-declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
-    userPlaylist: playlistData[];
-  }
-}
-
 export default defineComponent({
   props: {
     data: {
@@ -153,7 +143,6 @@ export default defineComponent({
       required: true,
     },
   },
-  inject: ["userPlaylist"],
   emits: ["playAlbum", "addAlbumToQueue", "playSongInAlbum"],
   data() {
     return {
@@ -232,6 +221,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       token: "auth/userToken",
+      playlists: "playlist/getPlaylists",
     }),
   },
   mounted() {

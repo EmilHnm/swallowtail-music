@@ -29,12 +29,18 @@ class PlaylistController extends Controller
         $playlist->save();
         return response()->json([
             "status" => "success",
-            "playlist_id" => $playlist->playlist_id,
+            "playlist" => $playlist,
         ]);
     }
     public function deletePlaylist($id)
     {
         $playlist = Playlist::where("playlist_id", $id)->first();
+        if (!$playlist) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Cannot find this playlist!",
+            ]);
+        }
         if (Auth::user()->user_id == $playlist->user_id) {
             @unlink(
                 public_path("storage/upload/playlist_cover") .
@@ -121,21 +127,7 @@ class PlaylistController extends Controller
     }
     public function authPlaylist()
     {
-        //$playlist = Playlist::where('user_id', Auth::user()->user_id)->get();
-        $playlist = DB::table("playlists")
-            ->leftJoin(
-                "playlist_songs",
-                "playlists.playlist_id",
-                "=",
-                "playlist_songs.playlist_id"
-            )
-            ->select(
-                "playlists.*",
-                DB::raw("count(playlist_songs.song_id) as songCount")
-            )
-            ->where("playlists.user_id", Auth::user()->user_id)
-            ->groupBy("playlists.playlist_id")
-            ->get();
+        $playlist = Playlist::withCount('song')->where('user_id', Auth::user()->user_id)->get();
         return response()->json(["playlist" => $playlist]);
     }
     public function authLikedList()

@@ -24,7 +24,7 @@ type albumData = album & {
 export default defineComponent({
   emits: [
     "updatePlaylist",
-    "deletePlaylist",
+
     "playPlaylist",
     "playSongInPlaylist",
     "addPlaylistToQueue",

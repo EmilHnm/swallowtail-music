@@ -34,16 +34,12 @@ export default defineComponent({
     ...mapActions("playlist", ["createPlaylist"]),
   },
   mounted() {
-    this.createPlaylist(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.status == "success") {
-          this.$router.push({
-            name: "playlistViewPage",
-            params: { id: res.playlist_id },
-          });
-        }
+    this.createPlaylist(this.token).then((playlist_id) => {
+      this.$router.push({
+        name: "playlistViewPage",
+        params: { id: playlist_id },
       });
+    });
   },
   components: {
     Loading,
@@ -55,7 +51,7 @@ export default defineComponent({
   },
   emits: [
     "updatePlaylist",
-    "deletePlaylist",
+
     "playPlaylist",
     "playSongInPlaylist",
     "addPlaylistToQueue",

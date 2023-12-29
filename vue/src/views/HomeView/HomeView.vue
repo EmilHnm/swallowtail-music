@@ -19,10 +19,6 @@ import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import HomeUploadBox from "@/components/HomeView/HomeUpload/HomeUploadBox.vue";
 
-type playlistData = playlist & {
-  songCount: number;
-};
-
 type songData = song & {
   album: album;
   artist: artist[];
@@ -86,8 +82,6 @@ export default defineComponent({
       audioSource: null as MediaElementAudioSourceNode | null,
       analayzer: null as AnalyserNode | null,
       frequencyData: null as Uint8Array | null,
-      // playlist
-      userPlaylist: [] as playlistData[],
       // upload queue
       uploadQueue: [] as songFileUpload[],
       uploadingIndex: -1,
@@ -109,13 +103,11 @@ export default defineComponent({
       isPlaying: computed(() => this.isPlaying),
       audio: computed(() => this.audio),
       frequencyData: computed(() => this.frequencyData),
-      userPlaylist: computed(() => this.userPlaylist),
     };
   },
   methods: {
     ...mapActions("playlist", [
       "getAccountPlaylist",
-      "deletePlaylist",
       "getPlaylistSongs",
       "getLikedSongList",
     ]),
@@ -242,35 +234,7 @@ export default defineComponent({
     },
     // NOTE:playlist
     loadPlaylist() {
-      this.getAccountPlaylist(this.token)
-        .then((res) => res.json())
-        .then((res) => {
-          this.userPlaylist = res.playlist;
-        });
-    },
-    removePlaylist(id: string) {
-      this.isLoading = true;
-      this.deletePlaylist({ playlist_id: id, token: this.token })
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          if (res.status === "success") {
-            this.loadPlaylist();
-            this.dialogWaring = {
-              title: "Success",
-              mode: "announcement",
-              content: res.message,
-              show: true,
-            };
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
+      this.getAccountPlaylist(this.token);
     },
     playPlaylist(id: string) {
       this.isLoading = true;
@@ -869,7 +833,6 @@ export default defineComponent({
     <main>
       <router-view
         @updatePlaylist="loadPlaylist"
-        @deletePlaylist="removePlaylist"
         @playPlaylist="playPlaylist"
         @playSongInPlaylist="playSongInPlaylist"
         @addPlaylistToQueue="addPlaylistToQueue"

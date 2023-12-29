@@ -1,7 +1,7 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="playlists.length > 0">
     <BaseCardAlbum
-      v-for="playlist in userPlaylist"
+      v-for="playlist in playlists"
       :key="playlist.playlist_id"
       :title="playlist.title"
       :id="playlist.playlist_id"
@@ -11,35 +11,29 @@
           : `${environment.default}/no_image.jpg`
       "
       :type="'playlist'"
-      :songCount="playlist.songCount"
+      :songCount="playlist.song_count ?? 0"
       @playPlaylist="playPlaylist"
     />
+  </div>
+
+  <div class="container" v-else>
+    <h1>You have no playlists</h1>
   </div>
 </template>
 <script lang="ts">
 import type { playlist } from "@/model/playlistModel";
 import { defineComponent } from "vue";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import { environment } from "@/environment/environment";
 import { useMeta } from "vue-meta";
-
-type playlistData = playlist & {
-  songCount: number;
-};
 
 export default defineComponent({
   components: { BaseCardAlbum },
   computed: {
     ...mapGetters({
-      playlist: "playlist/getPlaylist",
+      playlists: "playlist/getPlaylists",
     }),
-  },
-  inject: {
-    userPlaylist: {
-      from: "userPlaylist",
-      default: [] as playlistData[],
-    },
   },
   methods: {
     playPlaylist(id: string) {
@@ -48,7 +42,7 @@ export default defineComponent({
   },
   emits: [
     "updatePlaylist",
-    "deletePlaylist",
+
     "playPlaylist",
     "playSongInPlaylist",
     "addPlaylistToQueue",

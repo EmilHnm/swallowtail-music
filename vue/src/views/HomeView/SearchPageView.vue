@@ -101,7 +101,7 @@ type albumData = album & { song_count: number };
 export default defineComponent({
   emits: [
     "updatePlaylist",
-    "deletePlaylist",
+
     "playPlaylist",
     "playSongInPlaylist",
     "addPlaylistToQueue",

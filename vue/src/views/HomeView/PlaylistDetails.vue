@@ -557,8 +557,20 @@ export default defineComponent({
         });
     },
     onDeletePlaylist() {
-      this.$emit("deletePlaylist", this.playlistDetail.playlist_id);
-      this.$router.push({ name: "libraryPage", replace: true });
+      this.deletePlaylist({
+        playlist_id: this.playlistDetail.playlist_id,
+        token: this.token,
+      })
+        .then(() => {
+          this.dialogWaring.mode = "announcement";
+          this.dialogWaring.content = "Playlist has been deleted";
+          this.dialogWaring.show = true;
+          this.$router.push({ name: "libraryPage", replace: true });
+        })
+        .catch((message) => {
+          this.dialogWaring.content = message;
+          this.dialogWaring.show = true;
+        });
     },
     onAddSongToList(id: string) {
       this.isLoading = true;
@@ -566,15 +578,11 @@ export default defineComponent({
         token: this.token,
         song_id: id,
         playlist_id: this.playlistDetail.playlist_id,
-      })
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          if (res.status === "success") {
-            this.loadPlaylistSong();
-            this.loadSearchResult(this.searchText);
-          }
-        });
+      }).then((res) => {
+        this.isLoading = false;
+        this.loadPlaylistSong();
+        this.loadSearchResult(this.searchText);
+      });
     },
     onSortSong(e: Event): void {
       const target = e.target as HTMLSelectElement;
@@ -637,6 +645,7 @@ export default defineComponent({
       "getAddableSongs",
       "addSongToPlaylist",
       "addToPlaylist",
+      "deletePlaylist",
     ]),
   },
   mounted() {

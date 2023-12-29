@@ -106,14 +106,14 @@
       </div>
     </div>
     <div class="favorite">
-      <div class="favorite__playlist" v-if="userPlaylist.length > 0">
+      <div class="favorite__playlist" v-if="playlists.length > 0">
         <h1>Your Favorite List</h1>
         <div
           class="favorite__playlist--container"
           :class="{ min: min, medium: medium }"
         >
           <base-list-item
-            v-for="playlist in userPlaylist"
+            v-for="playlist in playlists"
             :key="playlist.playlist_id"
           >
             <div class="favorite__playlist__item">
@@ -124,7 +124,7 @@
                 {{ playlist.title }}
               </div>
               <div class="favorite__playlist__item--songCount">
-                {{ playlist.songCount }} songs
+                {{ playlist.song_count ?? 0 }} songs
               </div>
               <div class="favorite__playlist__item--play">
                 <IconPlay @click="playPlaylist(playlist.playlist_id)" />
@@ -166,10 +166,6 @@ type TopAlbum = album & {
   song_sum_listens: number;
 };
 
-type playlistData = playlist & {
-  songCount: number;
-};
-
 export default defineComponent({
   components: {
     IconPlay,
@@ -179,15 +175,8 @@ export default defineComponent({
     BaseCircleLoad,
     BaseSkeletonsLoadingCard,
   },
-  inject: {
-    userPlaylist: {
-      from: "userPlaylist",
-      default: [] as playlistData[],
-    },
-  },
   emits: [
     "updatePlaylist",
-    "deletePlaylist",
     "playPlaylist",
     "playSongInPlaylist",
     "addPlaylistToQueue",
@@ -271,6 +260,7 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
       cached: "cache/data",
+      playlists: "playlist/getPlaylists",
     }),
   },
   created() {
