@@ -7,9 +7,8 @@
       :placeholder="'Enter your key word!'"
       v-model="searchText"
     />
-    <BaseButton :type="'submit'">Search</BaseButton>
   </div>
-  <div class="search-result">
+  <div v-if="searchText.length > 0" class="search-result">
     <div class="search-result__tag" ref="container" @wheel="searchFilterScroll">
       <div class="search-result__tag--all">
         <BaseButton @click="changeComponent('AllSearchPage')">
@@ -64,6 +63,13 @@
       <h3>No result</h3>
     </div>
   </div>
+  <div class="genres-container" v-else>
+    <div v-for="genre in genres" :key="genre.id" class="genre-card">
+      <span class="genre-card__name">
+        {{ genre.name }}
+      </span>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -82,6 +88,7 @@ import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
 import type { song } from "@/model/songModel";
 import type { like } from "@/model/likeModel";
 import { useMeta } from "vue-meta";
+import BaseCardVue from "@/components/UI/BaseCard.vue";
 
 type songData = song & {
   album: album;
@@ -153,12 +160,14 @@ export default defineComponent({
     UserSearchPage,
     SongSearchPage,
     BaseDotLoading,
+    BaseCardVue,
   },
   methods: {
     ...mapActions("song", ["searchSong"]),
     ...mapActions("album", ["searchAlbums"]),
     ...mapActions("artist", ["searchArtist"]),
     ...mapActions("user", ["searchUser"]),
+    ...mapActions("genre", ["fetchGenres"]),
     changeComponent(componentName: string) {
       if (this.isSearching) return;
       this.selectedSearchFilter = componentName;
@@ -303,6 +312,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       token: "auth/userToken",
+      genres: "genre/getGenres",
     }),
     hasResult() {
       return (
@@ -344,6 +354,7 @@ export default defineComponent({
   mounted() {
     this.container = this.$refs.container as HTMLElement;
     this.searchText = (this.$route.query.q as string) ?? "";
+    this.fetchGenres(this.token);
     useMeta({
       title: "Search",
     });
@@ -352,6 +363,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+$mobile-width: 480px;
+$tablet-width: 768px;
+$desktop-width: 1024px;
+$large-desktop-width: 1280px;
+$widescreen-width: 1536px;
+
 .search-form {
   margin: 0 auto;
   width: 80%;
@@ -379,6 +396,50 @@ export default defineComponent({
   }
   &__container {
     margin: 20px 0;
+  }
+}
+
+.genres-container {
+  width: 90%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-gap: 40px;
+  padding: 40px 0;
+  margin: auto;
+
+  @container main (max-width: #{$large-desktop-width}) {
+    & {
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 10px;
+    }
+  }
+  @container main (max-width: #{$tablet-width}) {
+    & {
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 20px;
+    }
+  }
+  & .genre-card {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1/1;
+    cursor: pointer;
+    background-color: var(--background-glass-color-primary);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &:hover {
+      transform: scale(1.01);
+      transition: 0.2s;
+    }
+    &__name {
+      padding: 10px;
+      font-size: 24px;
+      font-weight: 600;
+      text-align: center;
+    }
   }
 }
 </style>

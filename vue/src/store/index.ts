@@ -10,6 +10,7 @@ import { adminModule } from "./module/adminModule";
 import { testModule } from "./module/testModule";
 import { notificationModule } from "./module/notificationModule";
 import { cacheModule } from "./module/cacheModule";
+import { genreModule } from "./module/genreModule";
 export default createStore({
   modules: {
     auth: authModule,
@@ -23,5 +24,6 @@ export default createStore({
     test: testModule,
     notification: notificationModule,
     cache: cacheModule,
+    genre: genreModule,
   },
 });

@@ -945,6 +945,8 @@ export default defineComponent({
     border-radius: 10px;
     overflow-y: auto;
     user-select: none;
+    container-name: main;
+    container-type: inline-size;
   }
 }
 </style>

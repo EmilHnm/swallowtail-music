@@ -20,4 +20,14 @@ class GenreController extends Controller
         $genre = Genre::where('genre_id', $id)->first();
         return response()->json($genre, Response::HTTP_OK);
     }
+
+    public function getSongByGenre($id)
+    {
+        $genre = Genre::where('genre_id', $id)->first();
+        $songs = $genre->songs;
+        return response()->json([
+            'status' => 'success',
+            'song' => $songs
+        ], Response::HTTP_OK);
+    }
 }
