@@ -11,9 +11,7 @@
         v-model="value"
         :required="required"
         :placeholder="placeholder"
-        autocomplete="false"
-        autocorrect="off"
-        spellcheck="false"
+        :autocomplete="autocomplete ? 'on' : 'off'"
       />
     </div>
   </div>
@@ -49,6 +47,10 @@ export default defineComponent({
     },
     modelValue: {
       default: "",
+    },
+    autocomplete: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
