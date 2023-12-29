@@ -79,6 +79,7 @@ export default defineComponent({});
     z-index: 1;
     transition: 0.5s;
     width: 100%;
+    height: 100%;
     color: var(--text-primary-color);
   }
 
