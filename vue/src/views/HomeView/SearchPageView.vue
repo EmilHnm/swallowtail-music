@@ -1,5 +1,5 @@
 <template>
-  <div class="search-form">
+  <form class="search-form" autocomplete="off" @submit.prevent="">
     <BaseInput
       :id="'search'"
       :label="'Search'"
@@ -7,7 +7,7 @@
       :placeholder="'Enter your key word!'"
       v-model="searchText"
     />
-  </div>
+  </form>
   <div v-if="searchText.length > 0" class="search-result">
     <div class="search-result__tag" ref="container" @wheel="searchFilterScroll">
       <div class="search-result__tag--all">
