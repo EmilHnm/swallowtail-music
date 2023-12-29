@@ -338,7 +338,6 @@ export default defineComponent({
     BaseLineLoad,
     BaseCircleLoad,
   },
-  inject: ["userPlaylist"],
   data() {
     return {
       environment: environment,
