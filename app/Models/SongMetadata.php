@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-// @deprecated
-class SongFile extends Model
+
+class SongMetadata extends Model
 {
     use HasFactory;
 

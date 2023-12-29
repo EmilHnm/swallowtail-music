@@ -63,6 +63,6 @@ class Song extends Model
 
     public function file()
     {
-        return $this->hasOne(SongFile::class, "song_id", "song_id");
+        return $this->hasOne(SongMetadata::class, "song_id", "song_id");
     }
 }

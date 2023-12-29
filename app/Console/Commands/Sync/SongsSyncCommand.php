@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands\Sync;
 
-use App\Enum\SongFileStatusEnum;
+use App\Enum\SongMetadataStatusEnum;
 use App\Models\Artist;
-use App\Models\SongFile;
+use App\Models\SongMetadata;
 use App\Enum\SongReferer;
 use App\Enum\SongRefererEnum;
 use Illuminate\Console\Command;
@@ -66,14 +66,14 @@ class SongsSyncCommand extends Command
                         ->getDurationInSeconds();
                     $song->listens = 0;
                     $song->display = 'public';
-                    SongFile::unguard();
-                    $file = SongFile::updateOrCreate([
+                    SongMetadata::unguard();
+                    $file = SongMetadata::updateOrCreate([
                         'song_id' => $song->song_id
                     ], [
                         'file_path' => $raw_data['storage'],
                         'driver' => $raw_data['storage_type'],
                         'lyrics' => $raw_data['lyric']['lyrics'],
-                        'status' => SongFileStatusEnum::DONE,
+                        'status' => SongMetadataStatusEnum::DONE,
                         'referer' => SongRefererEnum::CRAWLER,
                     ]);
 
@@ -96,7 +96,7 @@ class SongsSyncCommand extends Command
                         }
                     }
 
-                    SongFile::reguard();
+                    SongMetadata::reguard();
                     $song->save();
                 }
             }

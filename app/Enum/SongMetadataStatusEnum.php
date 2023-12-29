@@ -4,7 +4,7 @@ namespace App\Enum;
 
 use MyCLabs\Enum\Enum;
 
-class SongFileStatusEnum extends Enum
+class SongMetadataStatusEnum extends Enum
 {
     const UPLOADING = "uploading";
     const UPLOADED = "uploaded";

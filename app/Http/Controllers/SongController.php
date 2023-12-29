@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Song;
 use App\Models\Genre;
 use App\Models\Artist;
-use App\Models\SongFile;
+use App\Models\SongMetadata;
 use App\Models\LikedSong;
 use App\Models\SongGenre;
 use App\Models\SongArtist;
@@ -13,7 +13,8 @@ use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
 use Illuminate\Http\Request;
 use App\Services\SongManager;
-use App\Enum\SongFileStatusEnum;
+use App\Enum\SongMetadataStatusEnum;
+use App\Enum\SongRefererEnum;
 use App\Jobs\ProcessSongConvert;
 use App\Services\StorageManager;
 use Illuminate\Support\Facades\DB;
@@ -100,7 +101,7 @@ class SongController extends Controller
             ]);
     }
 
-    public function uploadSongFile(Request $request, $id)
+    public function uploadSongMetadata(Request $request, $id)
     {
         $file = $request->file('file');
 
@@ -110,10 +111,11 @@ class SongController extends Controller
         if (Storage::disk($disk)->exists("chunks/$id/{$file->getClientOriginalName()}")) {
             // Storage::disk($disk)->append("chunks/{$file->getClientOriginalName()}", $file->get());
             \File::append($path, $file->get());
-            if (!SongFile::where("song_id", $id)->exists()) {
-                $song_file = new SongFile();
+            if (!SongMetadata::where("song_id", $id)->exists()) {
+                $song_file = new SongMetadata();
                 $song_file->song_id = $id;
-                $song_file->status = SongFileStatusEnum::UPLOADING;
+                $song_file->status = SongMetadataStatusEnum::UPLOADING;
+                $song_file->referer = SongRefererEnum::USER;
                 $song_file->save();
             }
         } else {
@@ -128,7 +130,7 @@ class SongController extends Controller
             }
             Storage::disk($disk)->move("chunks/$id/{$file->getClientOriginalName()}", $name_final);
             $song = Song::find($id);
-            $song->file->status = SongFileStatusEnum::UPLOADED;
+            $song->file->status = SongMetadataStatusEnum::UPLOADED;
             dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
             return response()->json(['uploaded' => true]);
         }
@@ -389,7 +391,7 @@ class SongController extends Controller
     {
         $songs = Song::with("artist")
             ->where("display", "public")
-            ->whereHas("file", fn ($q) => $q->where("status", SongFileStatusEnum::DONE))
+            ->whereHas("file", fn ($q) => $q->where("status", SongMetadataStatusEnum::DONE))
             ->orderBy("created_at", "DESC")
             ->limit(5)
             ->get();
@@ -401,7 +403,7 @@ class SongController extends Controller
 
     public function songLyrics($id)
     {
-        $lyrics = SongFile::where("song_id", $id)->first()?->getLyricData() ?? [];
+        $lyrics = SongMetadata::where("song_id", $id)->first()?->getLyricData() ?? [];
         return response()->json([
             "status" => "success",
             "lyrics" => $lyrics,

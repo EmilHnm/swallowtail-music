@@ -3,8 +3,8 @@
 namespace app\Services;
 
 use App\Models\Song;
-use App\Models\SongFile;
-use App\Enum\SongFileStatusEnum;
+use App\Models\SongMetadata;
+use App\Enum\SongMetadataStatusEnum;
 use App\Services\StorageManager;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,7 +19,7 @@ class SongManager
 {
     private ?Song $song = null;
 
-    private ?SongFile $songFile = null;
+    private ?SongMetadata $SongMetadata = null;
 
     private $disk;
 
@@ -30,13 +30,13 @@ class SongManager
     public function __construct(Song $song)
     {
         $this->song = $song;
-        if ($song_file = SongFile::where("song_id", $song->song_id)->first()) {
-            $this->songFile = $song_file;
+        if ($song_file = SongMetadata::where("song_id", $song->song_id)->first()) {
+            $this->SongMetadata = $song_file;
         } else {
-            $this->songFile = new SongFile();
-            $this->songFile->song_id = $song->song_id;
-            $this->songFile->status = SongFileStatusEnum::PENDING;
-            $this->songFile->save();
+            $this->SongMetadata = new SongMetadata();
+            $this->SongMetadata->song_id = $song->song_id;
+            $this->SongMetadata->status = SongMetadataStatusEnum::PENDING;
+            $this->SongMetadata->save();
         }
         $this->disk = StorageManager::getDisk();
     }
@@ -53,7 +53,7 @@ class SongManager
         }
 
         try {
-            $this->songFile->status = SongFileStatusEnum::PROCESSING;
+            $this->SongMetadata->status = SongMetadataStatusEnum::PROCESSING;
             $savePath = StorageManager::saveFilePath($this->directory);
 
             $filename = $this->raw_directory . "/" . date("YmdHi");
@@ -75,9 +75,9 @@ class SongManager
                 ->open($final_filepath)
                 ->getDurationInSeconds();
             $this->song->duration = $duration;
-            $this->songFile->status = SongFileStatusEnum::DONE;
-            $this->songFile->file_path = $final_filepath;
-            $this->songFile->driver = $this->disk;
+            $this->SongMetadata->status = SongMetadataStatusEnum::DONE;
+            $this->SongMetadata->file_path = $final_filepath;
+            $this->SongMetadata->driver = $this->disk;
             FFMpeg::cleanupTemporaryFiles();
             event(new SongConvertedSuccessFull($this->song->user, $this->song));
             return $this;
@@ -95,10 +95,10 @@ class SongManager
             throw new \Exception("Song is null");
         }
 
-        $path = $this->songFile->file_path;
+        $path = $this->SongMetadata->file_path;
         $file_name = $this->song->title . ".ogg";
 
-        $storage = \Storage::disk($this->songFile->driver);
+        $storage = \Storage::disk($this->SongMetadata->driver);
         $fs = $storage->getDriver();
         return $storage->response($path, $file_name, [
             'Content-Type' => $fs->mimeType($path),
@@ -113,15 +113,15 @@ class SongManager
             throw new \Exception("Song is null");
         }
         $this->song->save();
-        $this->songFile->save();
+        $this->SongMetadata->save();
         return $this;
     }
 
     public function removeFile($filepath = null)
     {
         if ($filepath == null) {
-            $filepath = $this->songFile->file_path;
-            $this->songFile->delete();
+            $filepath = $this->SongMetadata->file_path;
+            $this->SongMetadata->delete();
         }
         if (StorageManager::getDisk() == "local") {
             Storage::disk("local")->delete($filepath);
