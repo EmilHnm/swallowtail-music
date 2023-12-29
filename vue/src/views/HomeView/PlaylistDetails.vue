@@ -74,7 +74,7 @@
       @close="closeAddToPlaylist"
     >
       <template #default>
-        <div v-for="playlist in userPlaylist" :key="playlist.playlist_id">
+        <div v-for="playlist in playlists" :key="playlist.playlist_id">
           <BaseListItem
             v-if="playlist.playlist_id != playlistDetail.playlist_id"
             @click="onAddToPlaylist(playlist.playlist_id)"
@@ -666,6 +666,7 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
       user: "auth/userData",
+      playlists: "playlist/getPlaylists",
     }),
     songFilterResuilt() {
       if (this.filterText === "") return this.songList;
