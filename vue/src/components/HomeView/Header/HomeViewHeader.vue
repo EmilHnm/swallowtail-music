@@ -304,7 +304,7 @@ $tablet-width: 768px;
         border-radius: 10px;
         z-index: 20;
         padding: 10px 0px;
-        background: var(--background-glass-color-primary);
+        background: var(--background-blur-color-primary);
         a {
           color: var(--text-primary-color);
         }
