@@ -75,6 +75,10 @@ export default defineComponent({
   methods: {
     ...mapActions("notification", ["index", "hasUnread", "markAllAsRead"]),
     toggle() {
+      if (window.innerWidth < 480) {
+        this.isMenuActive = false;
+        this.$router.push({ name: "notificationPage" });
+      }
       this.isActive = !this.isActive;
     },
     toggleMenu() {
@@ -178,6 +182,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+$mobile-width: 480px;
+$tablet-width: 768px;
 .header_notification {
   position: relative;
   height: max-content;
@@ -224,6 +230,11 @@ export default defineComponent({
     border-radius: 10px;
     box-shadow: 0px 0px 10px var(--color-primary);
     padding: 10px;
+    @media screen and (max-width: $mobile-width) {
+      & {
+        display: none;
+      }
+    }
     .board__header {
       background-color: var(--background-blur-color-primary);
       border-radius: 5px;
