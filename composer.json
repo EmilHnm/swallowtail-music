@@ -9,9 +9,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "babenkoivan/elastic-scout-driver": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
+        "laravel/scout": "^10.6",
         "laravel/tinker": "^2.7",
         "league/flysystem-aws-s3-v3": "^3.16",
         "league/flysystem-sftp-v3": "^3.6.0",
@@ -70,7 +72,8 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "pestphp/pest-plugin": true
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
         }
     },
     "minimum-stability": "dev",

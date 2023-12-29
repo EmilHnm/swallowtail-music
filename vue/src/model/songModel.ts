@@ -11,3 +11,12 @@ export interface song {
   created_at: string;
   updated_at: string;
 }
+
+export type songFileUpload = {
+  blob: Blob[];
+  file: File;
+  chunk_count: number;
+  progress: number;
+  song_id: string;
+  status: "waiting" | "uploading" | "finish" | "error";
+};

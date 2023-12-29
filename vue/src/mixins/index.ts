@@ -1,3 +1,5 @@
+import type { songFileUpload } from "@/model/songModel";
+
 export const _function = {
   // validate
   validateSongFileType(file: File): boolean {
@@ -133,5 +135,20 @@ export const _function = {
         return obj;
       }, {});
     return newObj;
+  },
+  // chunk song file
+  createChunks(file: songFileUpload, chunk_size: number) {
+    let chunks = Math.ceil(file.file.size / chunk_size);
+    for (let i = 0; i < chunks; i++) {
+      file.blob.push(
+        file.file.slice(
+          i * chunk_size,
+          Math.min(i * chunk_size + chunk_size, file.file.size),
+          file.file.type
+        )
+      );
+    }
+    file.chunk_count = file.blob.length;
+    return file;
   },
 };
