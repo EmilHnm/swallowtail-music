@@ -97,6 +97,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 $mobile-width: 480px;
 $tablet-width: 768px;
+$desktop-width: 1024px;
+
 .sb-right {
   width: 0px;
   max-width: 400px;
@@ -121,7 +123,7 @@ $tablet-width: 768px;
   width: 100%;
 }
 
-@media (max-width: $tablet-width) {
+@media (max-width: $desktop-width) {
   .sb-right {
     width: 0px;
     position: absolute;
