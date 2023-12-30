@@ -6,7 +6,6 @@ import { _function } from "@/mixins";
 import { Timer } from "@/mixins/Timer";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
-import type { playlist } from "@/model/playlistModel";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
@@ -25,21 +24,11 @@ type songData = song & {
   like: like[];
 };
 
-type songFileUpload = {
-  blob: Blob[];
-  file: File;
-  chunk_count: number;
-  progress: number;
-  song_id: string;
-  status: "waiting" | "uploading" | "finish" | "error";
-};
-
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
     playingAudioSrc: string;
     playingAudio: songData;
     token: string;
-    uploadingFile: songFileUpload | null;
   }
 }
 
@@ -82,10 +71,6 @@ export default defineComponent({
       audioSource: null as MediaElementAudioSourceNode | null,
       analayzer: null as AnalyserNode | null,
       frequencyData: null as Uint8Array | null,
-      // upload queue
-      uploadQueue: [] as songFileUpload[],
-      uploadingIndex: -1,
-      chunk_size: 2 * 1024 * 1024,
       //dialog
       dialogWaring: {
         title: "Warning",
@@ -549,69 +534,6 @@ export default defineComponent({
     getAudio() {
       this.audio = this.$refs.audio as HTMLAudioElement;
     },
-    // NOTE: upload
-    createChunks(file: songFileUpload) {
-      let chunks = Math.ceil(file.file.size / this.chunk_size);
-      for (let i = 0; i < chunks; i++) {
-        file.blob.push(
-          file.file.slice(
-            i * this.chunk_size,
-            Math.min(i * this.chunk_size + this.chunk_size, file.file.size),
-            file.file.type
-          )
-        );
-      }
-      file.chunk_count = file.blob.length;
-    },
-    uploadChunk(file: songFileUpload) {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `${environment.api}/song/${file.song_id}/file`, true);
-      xhr.setRequestHeader("Authorization", `Bearer ${this.token}`);
-      // xhr.setRequestHeader("Content-Type", "multipart/form-data");
-      xhr.setRequestHeader("Accept", "application/json");
-      file.status = "uploading";
-      let formData = new FormData();
-      formData.append("is_last", JSON.stringify(file.blob.length === 1));
-      formData.append("song_id", file.song_id);
-      formData.set("file", file.blob[0], `${file.file.name}.part`);
-      xhr.setRequestHeader("Accept", "multipart/form-data");
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const percentComplete = (e.loaded / e.total / file.chunk_count) * 100;
-          file.progress += percentComplete;
-        }
-      };
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          file.blob.shift();
-          if (file.blob.length > 0) this.uploadChunk(file);
-          else {
-            file.progress = 100;
-            file.status = "finish";
-          }
-        } else {
-          file.status = "error";
-        }
-      };
-      xhr.send(formData);
-    },
-    addFileToQueue(file: File | null, song_id: string) {
-      if (file === null) return;
-      let songFile: songFileUpload = {
-        file: file,
-        blob: [],
-        chunk_count: 0,
-        progress: 0,
-        song_id: song_id,
-        status: "waiting",
-      };
-      this.createChunks(songFile);
-      this.uploadQueue.push(songFile);
-      if (this.uploadingIndex === -1) this.uploadingIndex = 0;
-    },
-    uploadSong(args: [File, string]) {
-      this.addFileToQueue(args[0], args[1]);
-    },
   },
   watch: {
     repeat(n) {
@@ -700,29 +622,13 @@ export default defineComponent({
           });
       }
     },
-    uploadingFile: {
-      handler() {
-        if (this.uploadingFile && this.uploadingFile.status === "finish") {
-          if (this.uploadingIndex < this.uploadQueue.length - 1) {
-            this.uploadingIndex++;
-            this.uploadChunk(this.uploadingFile);
-          } else {
-            this.uploadingIndex = -1;
-            window.removeEventListener("beforeunload", () => {});
-          }
-        }
-        if (
-          this.uploadingFile &&
-          this.uploadingFile.status === "waiting" &&
-          this.uploadingFile.progress === 0
-        ) {
-          this.uploadChunk(this.uploadingFile);
-          window.addEventListener("beforeunload", (e) => {
-            let confirmationMessage =
-              "You have uploading file, are you sure to leave?";
-            (e || window.event).returnValue = confirmationMessage;
-            return confirmationMessage;
-          });
+    "$store.state.uploadQueue.getUploadingFile": {
+      handler(n) {
+        if (n) {
+          window.onbeforeunload = () =>
+            "Some files are uploading. Are you sure you want to leave?";
+        } else {
+          window.onbeforeunload = () => {};
         }
       },
       immediate: true,
@@ -740,11 +646,6 @@ export default defineComponent({
         return this.shuffledList[this.audioIndex];
       }
       return this.audioList[this.audioIndex];
-    },
-    uploadingFile(): songFileUpload | null {
-      return this.uploadQueue[this.uploadingIndex]
-        ? this.uploadQueue[this.uploadingIndex]
-        : null;
     },
   },
   created() {
@@ -846,7 +747,6 @@ export default defineComponent({
         @addLikedSongToQueue="addLikedSongToQueue"
         @addToQueue="addToQueue"
         @playSong="playSong"
-        @uploadSong="uploadSong"
         v-slot="{ Component }"
       >
         <keep-alive include="mainPage">
@@ -856,7 +756,7 @@ export default defineComponent({
     </main>
 
     <HomeViewRightSideBar
-      v-if="Object.keys(audioList).length > 0"
+      v-if="audioList.length > 0"
       :isActive="isRightSideBarActive"
       :playlist="audioList"
       :playingAudio="playingAudio"
@@ -867,13 +767,10 @@ export default defineComponent({
       @setPlaySong="setPlaySong"
       @deleteFromQueue="deleteFromQueue"
     />
-    <HomeUploadBox
-      :isPlaying="playingAudio ? true : false"
-      :uploadQueue="uploadQueue"
-    ></HomeUploadBox>
+    <HomeUploadBox :isPlaying="playingAudio ? true : false"></HomeUploadBox>
   </div>
   <HomeViewPlayer
-    v-if="Object.keys(audioList).length > 0"
+    v-if="audioList.length > 0"
     :playingAudio="playingAudio"
     :progress="progress"
     :volume="volume"
