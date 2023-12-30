@@ -9,7 +9,7 @@ class SongMetadataStatusEnum extends Enum
     const UPLOADING = "uploading";
     const UPLOADED = "uploaded";
     const PENDING = "pending";
-    const PROCESSING = "prcessing";
+    const PROCESSING = "processing";
     const DONE = "done";
     const ERROR = "error";
 }

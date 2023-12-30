@@ -101,7 +101,7 @@ class SongController extends Controller
             ]);
     }
 
-    public function uploadSongMetadata(Request $request, $id)
+    public function uploadSongFile(Request $request, $id)
     {
         $file = $request->file('file');
 
@@ -124,6 +124,7 @@ class SongController extends Controller
         }
 
         if ($request->has('is_last') && $request->boolean('is_last')) {
+            \Log::info("Last chunk" . $id);
             $name_final = str_replace(".part", "", $file->getClientOriginalName());
             if (Storage::disk($disk)->exists($name_final)) {
                 Storage::disk($disk)->delete($name_final);
@@ -131,6 +132,7 @@ class SongController extends Controller
             Storage::disk($disk)->move("chunks/$id/{$file->getClientOriginalName()}", $name_final);
             $song = Song::find($id);
             $song->file->status = SongMetadataStatusEnum::UPLOADED;
+            $song->save();
             dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
             return response()->json(['uploaded' => true]);
         }

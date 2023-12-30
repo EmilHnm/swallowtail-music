@@ -58,18 +58,29 @@ class SongManager
 
             $filename = $this->raw_directory . "/" . date("YmdHi");
             $final_filepath = $savePath . $this->song->song_id . ".ogg";
-            FFMpeg::fromDisk($this->disk)
+
+            $codec = FFMpeg::fromDisk($this->disk)
                 ->open($file_path)
-                ->export()
-                ->addFilter([
-                    "-strict",
-                    "-2",
-                    "-acodec",
-                    "vorbis",
-                    "-b:a",
-                    "320k",
-                ])
-                ->save($final_filepath);
+                ->getVideoStream()
+                ->get('codec_name');
+            if ($codec == "vorbis") {
+                Storage::disk($this->disk)->move($file_path, $final_filepath);
+                $this->removeFile($filename);
+            } else {
+                FFMpeg::fromDisk($this->disk)
+                    ->open($file_path)
+                    ->export()
+                    ->addFilter([
+                        "-strict",
+                        "-2",
+                        "-acodec",
+                        "vorbis",
+                        "-b:a",
+                        "320k",
+                    ])
+                    ->save($final_filepath);
+            }
+
             $this->removeFile($filename);
             $duration = FFMpeg::fromDisk($this->disk)
                 ->open($final_filepath)
@@ -84,7 +95,10 @@ class SongManager
         } catch (EncodingException $exception) {
             $command = $exception->getCommand();
             $errorLog = $exception->getErrorOutput();
+            $this->SongMetadata->status = SongMetadataStatusEnum::ERROR;
+            $this->SongMetadata->save();
             Log::error($command . ' meet error: ' . '$errorLog',);
+            throw new \Exception($exception->getMessage());
         }
     }
 
