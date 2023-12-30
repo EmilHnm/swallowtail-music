@@ -15,6 +15,20 @@ import BaseDialog from "./components/UI/BaseDialog.vue";
 import IconLogo from "./components/icons/IconLogo.vue";
 import LazyLoadDirective from "./shared/LazyLoadDirective";
 import ClickOutsideDirective from "./shared/ClickOutsideDirective";
+import type Echo from "laravel-echo";
+
+declare global {
+  interface ObjectConstructor {
+    groupBy<T>(
+      items: Iterable<T>,
+      callbackfn: (value: T, index: number) => string
+    ): Record<string, T[]>;
+  }
+  interface Window {
+    io: typeof io; // 👈️ turn off type checking
+    Echo: Echo; // 👈️ turn off type checking
+  }
+}
 
 const app = createApp(App);
 
