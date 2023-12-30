@@ -47,14 +47,24 @@ const actions: ActionTree<RootState, RootState> = {
     songFile = _function.createChunks(songFile, state.chunk_size);
     state.queues.push(songFile);
     if (state.uploadingIndex === -1) {
-      state.uploadingIndex = 0;
-      dispatch("uploadChunk", {
-        file: state.queues[state.uploadingIndex],
-        token: payload.token,
-      });
+      if (state.queues.length > 1) {
+        if (state.queues[state.queues.length - 2].blob.length == 0) {
+          state.uploadingIndex = state.queues.length - 1;
+          dispatch("uploadChunk", {
+            file: state.queues[state.uploadingIndex],
+            token: payload.token,
+          });
+        }
+      } else {
+        state.uploadingIndex = 0;
+        dispatch("uploadChunk", {
+          file: state.queues[state.uploadingIndex],
+          token: payload.token,
+        });
+      }
     }
   },
-  uploadChunk(
+  async uploadChunk(
     { commit, dispatch, state },
     payload: { file: songFileUpload; token: string }
   ) {
@@ -84,16 +94,17 @@ const actions: ActionTree<RootState, RootState> = {
         payload.file.progress += percentComplete;
       }
     };
-    xhr.onload = () => {
+    xhr.onload = async () => {
       if (xhr.status === 200) {
         payload.file.blob.shift();
         if (payload.file.blob.length > 0) {
+          await new Promise((r) => setTimeout(r, 1000));
           dispatch("uploadChunk", { file: payload.file, token: payload.token });
         } else {
           payload.file.progress = 100;
           payload.file.status = "finish";
           commit("setUploadIndex", state.uploadingIndex + 1);
-          if (state.uploadingIndex < state.queues.length - 1) {
+          if (state.uploadingIndex <= state.queues.length - 1) {
             dispatch("uploadChunk", {
               file: state.queues[state.uploadingIndex],
               token: payload.token,

@@ -35,6 +35,7 @@ import { defineComponent } from "vue";
 import HomeUploadBoxItem from "@/components/HomeView/HomeUpload/HomeUploadBoxItem.vue";
 import IconRightArrowVue from "@/components/icons/IconRightArrow.vue";
 import IconLeftArrow from "@/components/icons/IconLeftArrow.vue";
+import { mapGetters } from "vuex";
 
 type songFileUpload = {
   blob: Blob[];
@@ -56,10 +57,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    uploadQueue: {
-      type: Array as () => songFileUpload[],
-      default: () => [],
-    },
+    // uploadQueue: {
+    //   type: Array as () => songFileUpload[],
+    //   default: () => [],
+    // },
   },
   methods: {
     close() {
@@ -70,8 +71,13 @@ export default defineComponent({
     },
   },
   computed: {
+    ...mapGetters({
+      uploadQueue: "uploadQueue/getQueues",
+    }),
     pendingUpload() {
-      return this.uploadQueue.filter((item) => item.status !== "finish");
+      return this.uploadQueue.filter(
+        (item: songFileUpload) => item.status !== "finish"
+      );
     },
   },
   components: { IconRightArrowVue, IconLeftArrow, HomeUploadBoxItem },

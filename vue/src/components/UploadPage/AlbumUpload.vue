@@ -131,7 +131,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import { environment } from "@/environment/environment";
 import { _function } from "@/mixins/index";
 import BaseInput from "../UI/BaseInput.vue";
@@ -183,6 +183,7 @@ export default defineComponent({
     if (wrapper) this.observer.observe(wrapper);
   },
   methods: {
+    ...mapActions("uploadQueue", ["addFileToQueue"]),
     albumImageChange(e: any) {
       if (e.target.files.length > 0) {
         if (!_function.validateImageFileType(e.target.files[0])) {
@@ -280,10 +281,15 @@ export default defineComponent({
             this.dialogWaring.mode = "anouncement";
             response.songs.forEach(
               (element: { song_id: string; index: number }) => {
-                this.$emit("uploadSong", [
-                  this.songForm[element.index].songFile,
-                  element.song_id,
-                ]);
+                // this.$emit("uploadSong", [
+                //   this.songForm[element.index].songFile,
+                //   element.song_id,
+                // ]);
+                this.addFileToQueue({
+                  file: this.songForm[element.index].songFile,
+                  song_id: element.song_id,
+                  token: this.userToken,
+                });
               }
             );
             this.albumImage = null;

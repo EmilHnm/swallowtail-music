@@ -192,6 +192,7 @@ export default defineComponent({
   methods: {
     ...mapActions("song", ["getGenreList", "uploadSong"]),
     ...mapActions("artist", ["getArtistList"]),
+    ...mapActions("uploadQueue", ["addFileToQueue"]),
     previewFile(event: Event) {
       let target = event.target as HTMLInputElement;
       if (target) if (target.files) this.songFile = target.files[0];
@@ -276,7 +277,11 @@ export default defineComponent({
             this.songName = "";
             this.artistName = "";
             this.genreName = "";
-            this.$emit("uploadSong", [this.songFile, res.song_id]);
+            this.addFileToQueue({
+              file: this.songFile,
+              song_id: res.song_id,
+              token: this.userToken,
+            });
             this.songFile = null;
             this.artistArray = [];
             this.genreArray = [];
