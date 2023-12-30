@@ -186,6 +186,7 @@ export default defineComponent({
   img {
     width: 90%;
     border-radius: 10px;
+    max-width: 300px;
   }
   &__title {
     display: flex;
