@@ -7,11 +7,7 @@
       >
         <h1>Latest Songs Update</h1>
         <BaseCircleLoad v-if="isLatestSongLoading" />
-        <div
-          class="latest-song__container"
-          :class="{ min: min, medium: medium }"
-          v-else
-        >
+        <div class="latest-song__container" v-else>
           <base-list-item v-for="(song, index) in latestSongs" :key="index">
             <div class="latest-song__song">
               <div class="latest-song__song--title">
@@ -108,10 +104,7 @@
     <div class="favorite">
       <div class="favorite__playlist" v-if="playlists.length > 0">
         <h1>Your Favorite List</h1>
-        <div
-          class="favorite__playlist--container"
-          :class="{ min: min, medium: medium }"
-        >
+        <div class="favorite__playlist--container">
           <base-list-item
             v-for="playlist in playlists"
             :key="playlist.playlist_id"
@@ -193,11 +186,7 @@ export default defineComponent({
   ],
   data() {
     return {
-      news: 0,
-      observer: null as ResizeObserver | null,
       environment: environment,
-      min: false,
-      medium: false,
       latestSongs: [] as LatestSong[],
       latestAlbums: [] as LatestAlbum[],
       topAlbums: [] as TopAlbum[],
@@ -270,37 +259,15 @@ export default defineComponent({
     this.onLoadTopArtist();
   },
   mounted() {
-    const newsEle = this.$refs.news as HTMLElement;
-    this.observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        this.news = entry.contentRect.width;
-      }
-    });
-    this.observer.observe(newsEle);
     useMeta({
       title: environment.site_name,
     });
   },
-  beforeUnmount() {
-    if (this.observer) this.observer.disconnect();
-  },
-  watch: {
-    news(o: number) {
-      if (550 < o && o <= 900) {
-        this.medium = true;
-        this.min = false;
-      } else if (o <= 550) {
-        this.min = true;
-        this.medium = false;
-      } else {
-        this.min = false;
-        this.medium = false;
-      }
-    },
-  },
 });
 </script>
 <style lang="scss" scoped>
+$mobile-width: 480px;
+$tablet-width: 768px;
 .wrapper {
   width: 100%;
   height: 100%;
@@ -326,22 +293,22 @@ export default defineComponent({
       & > * {
         cursor: pointer;
         width: 25%;
+        @container main (max-width: #{$tablet-width}) {
+          & {
+            width: 35%;
+          }
+        }
+        @container main (max-width: #{$mobile-width}) {
+          & {
+            width: 90%;
+          }
+        }
         &:hover .latest-song__song--add-queue {
           opacity: 1;
         }
         &:hover .latest-song__song--duration {
           opacity: 0;
         }
-      }
-    }
-    & .latest-song__container.min {
-      & > * {
-        width: 90%;
-      }
-    }
-    & .latest-song__container.medium {
-      & > * {
-        width: 35%;
       }
     }
     & .latest-song__song {
@@ -437,22 +404,22 @@ export default defineComponent({
       & > * {
         cursor: pointer;
         width: 30%;
+        @container main (max-width: #{$tablet-width}) {
+          & {
+            width: 35%;
+          }
+        }
+        @container main (max-width: #{$mobile-width}) {
+          & {
+            width: 90%;
+          }
+        }
         &:hover .favorite__playlist__item--play {
           opacity: 1;
         }
         &:hover .favorite__playlist__item--songCount {
           opacity: 0;
         }
-      }
-    }
-    & .favorite__playlist--container.min {
-      & > * {
-        width: 90%;
-      }
-    }
-    & .favorite__playlist--container.medium {
-      & > * {
-        width: 40%;
       }
     }
     & .favorite__playlist__item {
