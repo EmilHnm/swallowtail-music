@@ -32,13 +32,6 @@ declare module "@vue/runtime-core" {
   }
 }
 
-declare global {
-  interface Window {
-    io: typeof io; // 👈️ turn off type checking
-    Echo: Echo; // 👈️ turn off type checking
-  }
-}
-
 export default defineComponent({
   name: "HomeView",
   components: {
@@ -328,9 +321,15 @@ export default defineComponent({
           this.isLoading = false;
           if (res.status === "success") {
             const newSongList = res.songs;
-            this.audioList = [...this.audioList, ...newSongList];
+            this.audioList = [...this.audioList, ...newSongList].filter(
+              (song: songData, index: number, self: songData[]) =>
+                index === self.findIndex((t) => t.song_id === song.song_id)
+            );
             if (this.isOnShuffle)
-              this.shuffledList = [...this.shuffledList, ...newSongList];
+              this.shuffledList = [...this.shuffledList, ...newSongList].filter(
+                (song: songData, index: number, self: songData[]) =>
+                  index === self.findIndex((t) => t.song_id === song.song_id)
+              );
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -411,7 +410,10 @@ export default defineComponent({
           this.shuffledList = [];
           if (res.status === "success") {
             const newSongList: songData[] = res.songs;
-            this.audioList = [...this.audioList, ...newSongList];
+            this.audioList = [...this.audioList, ...newSongList].filter(
+              (song: songData, index: number, self: songData[]) =>
+                index === self.findIndex((t) => t.song_id === song.song_id)
+            );
           } else {
             this.dialogWaring = {
               title: "Error",
@@ -486,7 +488,10 @@ export default defineComponent({
           this.isOnShuffle = false;
           this.shuffledList = [];
           if (res.status === "success") {
-            this.audioList = [...this.audioList, res.likedList];
+            this.audioList = [...this.audioList, res.likedList].filter(
+              (song: songData, index: number, self: songData[]) =>
+                index === self.findIndex((t) => t.song_id === song.song_id)
+            );
           } else {
             this.dialogWaring = {
               title: "Error",

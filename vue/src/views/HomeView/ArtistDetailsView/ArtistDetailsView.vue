@@ -30,13 +30,21 @@
     </div>
     <div class="info">
       <div class="info__type">Artist</div>
-      <h1 class="info__title" title="{{ artist.name }}">{{ artist.name }}</h1>
+      <h1 class="info__title" :title="artist.name">{{ artist.name }}</h1>
       <div class="info__other">
-        <div class="info__other--monthlyListeners">
-          {{ artist.listens }} listeners
+        <div
+          class="info__other--monthlyListeners"
+          :title="`${artist.listens} listener${artist.listens > 1 ? 's' : ''}`"
+        >
+          {{ artist.listens }} listener{{ artist.listens > 1 ? "s" : "" }}
         </div>
-        <div class="info__other--albumCount">
-          - {{ artist.total_album }} Album{{
+        <div
+          class="info__other--albumCount"
+          :title="`${artist.total_album} album${
+            artist.total_album > 1 ? 's' : ''
+          }`"
+        >
+          - {{ artist.total_album }} album{{
             artist.total_album > 1 ? "s" : ""
           }}
         </div>
@@ -192,8 +200,11 @@ $tablet-width: 768px;
   align-items: center;
   padding: 40px 20px;
   position: relative;
-  @media (max-width: $tablet-width) {
-    flex-direction: column;
+  @container main (max-width: #{$tablet-width}) {
+    & {
+      flex-direction: column;
+      justify-content: center;
+    }
   }
   & .header__background {
     position: absolute;
@@ -234,6 +245,11 @@ $tablet-width: 768px;
       color: #fff;
       font-weight: 700;
       text-shadow: 0px 0px 10px var(--color-primary);
+      @container main (max-width: #{$tablet-width}) {
+        & {
+          text-align: center;
+        }
+      }
     }
     &__title {
       font-size: 42px;
@@ -244,12 +260,23 @@ $tablet-width: 768px;
       overflow: hidden;
       text-overflow: ellipsis;
       margin: 0;
+      @container main (max-width: #{$tablet-width}) {
+        & {
+          text-align: center;
+          font-size: 32px;
+        }
+      }
     }
     &__other {
       display: flex;
       color: #fff;
       font-size: 16px;
       text-shadow: 0px 0px 10px var(--color-primary);
+      @container main (max-width: #{$tablet-width}) {
+        & {
+          justify-content: center;
+        }
+      }
       &--monthlyListeners {
         font-weight: 700;
       }

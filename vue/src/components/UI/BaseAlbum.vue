@@ -42,9 +42,9 @@
         />
       </div>
       <div class="album__details--prof">
-        <div class="album__details--prof--title">
-          <h3>{{ data.name }}</h3>
-        </div>
+        <h3 class="album__details--prof--title" :title="data.name">
+          {{ data.name }}
+        </h3>
         <div class="album__details--prof--sub">
           <span> {{ data.release_year }} - {{ data.song_count }} Songs</span>
         </div>
@@ -121,7 +121,6 @@ import BaseDialog from "./BaseDialog.vue";
 import BaseLineLoad from "./BaseLineLoad.vue";
 import BaseCircleLoad from "./BaseCircleLoad.vue";
 import BaseListItem from "./BaseListItem.vue";
-import type { playlist } from "@/model/playlistModel";
 import type { song } from "@/model/songModel";
 import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
@@ -263,22 +262,41 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+$mobile-width: 480px;
+$tablet-width: 768px;
 .album-container {
   width: 90%;
   margin: 20px auto;
   box-shadow: 0 2px 10px var(--background-glass-color-primary);
   padding-bottom: 20px;
+  container-name: album-container;
+  container-type: inline-size;
   & .album__details {
     display: flex;
     height: 150px;
     margin-bottom: 30px;
     background-color: var(--background-glass-color-primary);
+    @container album-container (max-width: #{$mobile-width}) {
+      & {
+        flex-direction: column;
+        height: max-content;
+        justify-content: center;
+        align-items: center;
+      }
+    }
     &--cover {
       aspect-ratio: 1/1;
       height: 100%;
       width: auto;
       flex: 0 0 auto;
       overflow: hidden;
+      max-width: 150px;
+      @container album-container (max-width: #{$mobile-width}) {
+        & {
+          height: 90%;
+          width: auto;
+        }
+      }
       & img {
         width: 100%;
         height: 100%;
@@ -291,28 +309,50 @@ export default defineComponent({
       display: flex;
       flex-direction: column;
       padding-left: 20px;
+      flex: 1;
+      @container album-container (max-width: #{$mobile-width}) {
+        & {
+          padding-left: 0px;
+          padding: 0 10px;
+        }
+      }
       &--title {
-        cursor: pointer;
+        display: block;
+        width: 100%;
+        height: max-content;
         user-select: none;
-        flex: 0 0 auto;
-        & h3 {
-          font-size: 2rem;
-          font-weight: 700;
-          margin: 2px;
-          width: 80%;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        @container album-container (max-width: #{$tablet-width}) {
+          & {
+            font-size: 1.7rem;
+            font-weight: 600;
+            text-align: center;
+          }
         }
       }
       &--sub {
-        flex: 0 0 auto;
+        @container album-container (max-width: #{$mobile-width}) {
+          & {
+            text-align: center;
+          }
+        }
       }
       &--menu {
         display: flex;
         align-items: center;
         margin-top: auto;
-        height: 100%;
+        flex: 1;
+        @container album-container (max-width: #{$mobile-width}) {
+          & {
+            justify-content: center;
+            padding-bottom: 10px;
+          }
+        }
         &--play {
           margin-right: 10px;
           border-radius: 50%;
@@ -342,6 +382,9 @@ export default defineComponent({
             width: 25px;
             height: 25px;
           }
+          &:hover {
+            transform: scale(1.05);
+          }
         }
         &--more {
           position: relative;
@@ -355,22 +398,6 @@ export default defineComponent({
             width: 25px;
             height: 25px;
           }
-          // & .bg {
-          //   position: fixed;
-          //   top: 0;
-          //   left: 0;
-          //   width: 100vw;
-          //   height: 100vh;
-          //   background-color: rgba(0, 0, 0, 0.5);
-          //   z-index: 1;
-          //   opacity: 0;
-          //   visibility: hidden;
-          //   transition: all 0.3s ease-in-out;
-          //   &.active {
-          //     opacity: 1;
-          //     visibility: visible;
-          //   }
-          // }
           & .playlist-menu {
             position: absolute;
             display: flex;
@@ -385,23 +412,22 @@ export default defineComponent({
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease-in-out;
             backdrop-filter: blur(15px);
+            background-color: var(--background-blur-color-primary);
             &__item {
               font-weight: 900;
               text-shadow: 0 0 1px var(--color-primary);
             }
-            // & > * {
-            //   margin-bottom: 10px;
-            // }
-          }
-          & .playlist-menu-enter-from,
-          .playlist-menu-leave-to {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          & .playlist-menu-enter-to,
-          .playlist-menu-leave-from {
-            opacity: 1;
-            transform: translateY(0);
+            @container album-container (max-width: #{$mobile-width}) {
+              & {
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 25px 0px;
+                &__item {
+                  font-weight: 400;
+                }
+              }
+            }
           }
         }
       }
