@@ -136,6 +136,15 @@ export const _function = {
       }, {});
     return newObj;
   },
+  //sort Object
+  sortObject(object: any, sort: (a: any, b: any) => number = (a, b) => a - b) {
+    return Object.keys(object)
+      .sort(sort)
+      .reduce((obj: any, key: string | number) => {
+        obj[" " + key] = object[key];
+        return obj;
+      }, {});
+  },
   // chunk song file
   createChunks(file: songFileUpload, chunk_size: number) {
     let chunks = Math.ceil(file.file.size / chunk_size);
