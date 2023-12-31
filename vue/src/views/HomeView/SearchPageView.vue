@@ -439,6 +439,12 @@ $widescreen-width: 1536px;
       font-size: 24px;
       font-weight: 600;
       text-align: center;
+      @container main (max-width: #{$mobile-width}) {
+        & {
+          padding: 5px;
+          font-size: 18px;
+        }
+      }
     }
   }
 }
