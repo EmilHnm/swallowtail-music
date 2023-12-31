@@ -96,29 +96,14 @@ import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vu
 import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import globalEmitListener from "@/shared/globalEmitListener";
 
 type artistData = artist & {
   total_album: number;
 };
 
 export default defineComponent({
-  emits: [
-    "updatePlaylist",
-
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-  ],
+  emits: [...globalEmitListener],
   data() {
     return {
       environment: environment,

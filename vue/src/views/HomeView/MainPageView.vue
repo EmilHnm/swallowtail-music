@@ -145,7 +145,7 @@ import BaseSkeletonsLoadingCard from "@/components/UI/BaseSkeletonsLoadingCard.v
 import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
-
+import globalEmitListener from "@/shared/globalEmitListener";
 type LatestSong = song & {
   artist: artist[];
 };
@@ -168,22 +168,7 @@ export default defineComponent({
     BaseCircleLoad,
     BaseSkeletonsLoadingCard,
   },
-  emits: [
-    "updatePlaylist",
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-  ],
+  emits: [...globalEmitListener],
   data() {
     return {
       environment: environment,

@@ -86,6 +86,7 @@ import IconPlay from "@/components/icons/IconPlay.vue";
 import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vue";
 import BaseListItem from "@/components/UI/BaseListItem.vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
+import globalEmitListener from "@/shared/globalEmitListener";
 import IconHeartFilled from "@/components/icons/IconHeartFilled.vue";
 import { mapActions, mapGetters } from "vuex";
 import { useMeta } from "vue-meta";
@@ -103,24 +104,7 @@ type songData = song & {
 };
 
 export default defineComponent({
-  emits: [
-    "updatePlaylist",
-
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-    "uploadSong",
-  ],
+  emits: [...globalEmitListener],
   components: {
     IconPlay,
     IconHorizontalThreeDot,

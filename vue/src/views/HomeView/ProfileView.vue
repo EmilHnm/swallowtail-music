@@ -106,6 +106,7 @@ import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { like } from "@/model/likeModel";
+import globalEmitListener from "@/shared/globalEmitListener";
 
 type userProfileData = user & {
   publicPlaylist_count: number;
@@ -263,23 +264,7 @@ export default defineComponent({
       playlists: "playlist/getPlaylists",
     }),
   },
-  emits: [
-    "updatePlaylist",
-    "deletePlaylist",
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-  ],
+  emits: [...globalEmitListener],
 });
 </script>
 <style lang="scss" scoped>

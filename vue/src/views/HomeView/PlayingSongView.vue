@@ -75,7 +75,7 @@ import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
 import type { song } from "@/model/songModel";
-
+import globalEmitListener from "@/shared/globalEmitListener";
 type songData = song & {
   album: album;
   artist: artist[];
@@ -92,23 +92,7 @@ declare module "@vue/runtime-core" {
   }
 }
 export default defineComponent({
-  emits: [
-    "updatePlaylist",
-
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-  ],
+  emits: [...globalEmitListener],
   data() {
     return {
       environment: environment,

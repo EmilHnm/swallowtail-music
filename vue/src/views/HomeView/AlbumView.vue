@@ -18,28 +18,12 @@ import type { album } from "@/model/albumModel";
 import { mapActions, mapGetters } from "vuex";
 import { defineComponent } from "vue";
 import { useMeta, createMetaManager } from "vue-meta";
+import globalEmitListener from "@/shared/globalEmitListener";
 type albumData = album & {
   song_count: number;
 };
 export default defineComponent({
-  emits: [
-    "updatePlaylist",
-
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-    "uploadSong",
-  ],
+  emits: [...globalEmitListener],
   data() {
     return {
       album: {} as albumData,

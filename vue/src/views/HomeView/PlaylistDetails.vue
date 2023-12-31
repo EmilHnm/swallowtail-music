@@ -291,7 +291,7 @@ import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 import IconBallPen from "@/components/icons/IconBallPen.vue";
-
+import globalEmitListener from "@/shared/globalEmitListener";
 type songData = song & {
   album: album;
   artist: artist[];
@@ -308,24 +308,7 @@ type songData = song & {
 };
 
 export default defineComponent({
-  emits: [
-    "updatePlaylist",
-    "deletePlaylist",
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-    "uploadSong",
-  ],
+  emits: [...globalEmitListener],
   components: {
     IconPlay,
     IconSearch,

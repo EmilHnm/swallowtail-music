@@ -27,6 +27,7 @@ import { mapGetters, mapActions } from "vuex";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import { environment } from "@/environment/environment";
 import { useMeta } from "vue-meta";
+import globalEmitListener from "@/shared/globalEmitListener";
 
 export default defineComponent({
   components: { BaseCardAlbum },
@@ -40,24 +41,7 @@ export default defineComponent({
       this.$emit("playPlaylist", id);
     },
   },
-  emits: [
-    "updatePlaylist",
-
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-    "uploadSong",
-  ],
+  emits: [...globalEmitListener],
   data() {
     return {
       environment: environment,

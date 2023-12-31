@@ -24,6 +24,7 @@ import SongUpload from "@/components/UploadPage/SongUpload.vue";
 import AlbumUpload from "@/components/UploadPage/AlbumUpload.vue";
 import { mapGetters } from "vuex";
 import { useMeta } from "vue-meta";
+import globalEmitListener from "@/shared/globalEmitListener";
 export default defineComponent({
   data() {
     return { componentName: "SongUpload" };
@@ -42,24 +43,7 @@ export default defineComponent({
     }),
   },
   components: { BaseButton, SongUpload, AlbumUpload },
-  emits: [
-    "updatePlaylist",
-
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-    "uploadSong",
-  ],
+  emits: [...globalEmitListener],
   mounted() {
     useMeta({
       title: "Upload",

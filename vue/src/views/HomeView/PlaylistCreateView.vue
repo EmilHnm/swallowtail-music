@@ -24,6 +24,7 @@ import { defineComponent } from "vue";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import { mapActions, mapGetters } from "vuex";
+import globalEmitListener from "@/shared/globalEmitListener";
 export default defineComponent({
   data() {
     return {
@@ -49,23 +50,7 @@ export default defineComponent({
       token: "auth/userToken",
     }),
   },
-  emits: [
-    "updatePlaylist",
-
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-  ],
+  emits: [...globalEmitListener],
 });
 </script>
 <style lang="scss" scoped>

@@ -64,11 +64,16 @@
     </div>
   </div>
   <div class="genres-container" v-else>
-    <div v-for="genre in genres" :key="genre.id" class="genre-card">
+    <router-link
+      :to="{ name: 'genrePage', params: { id: genre.genre_id } }"
+      v-for="genre in genres"
+      :key="genre.id"
+      class="genre-card"
+    >
       <span class="genre-card__name">
         {{ genre.name }}
       </span>
-    </div>
+    </router-link>
   </div>
 </template>
 
@@ -89,7 +94,7 @@ import type { song } from "@/model/songModel";
 import type { like } from "@/model/likeModel";
 import { useMeta } from "vue-meta";
 import BaseCardVue from "@/components/UI/BaseCard.vue";
-
+import globalEmitListener from "@/shared/globalEmitListener";
 type songData = song & {
   album: album;
   artist: artist[];
@@ -99,24 +104,7 @@ type songData = song & {
 type albumData = album & { song_count: number };
 
 export default defineComponent({
-  emits: [
-    "updatePlaylist",
-
-    "playPlaylist",
-    "playSongInPlaylist",
-    "addPlaylistToQueue",
-    "playAlbum",
-    "addAlbumToQueue",
-    "playSongInAlbum",
-    "playArtistSong",
-    "playSongOfArtist",
-    "addArtistSongToQueue",
-    "playLikedSong",
-    "addLikedSongToQueue",
-    "addToQueue",
-    "playSong",
-    "uploadSong",
-  ],
+  emits: [...globalEmitListener],
   data() {
     return {
       songResult: [] as songData[],
@@ -439,6 +427,7 @@ $widescreen-width: 1536px;
       font-size: 24px;
       font-weight: 600;
       text-align: center;
+      color: var(--text-primary-color);
       @container main (max-width: #{$mobile-width}) {
         & {
           padding: 5px;
