@@ -6,7 +6,7 @@
         v-if="Array.from(latestSongs).length > 0 || !latestSongs"
       >
         <h1>Latest Songs Update</h1>
-        <BaseCircleLoad v-if="isLatestSongLoading" />
+        <BaseCircleLoad v-if="!latestSongs" />
         <div class="latest-song__container" v-else>
           <base-list-item v-for="(song, index) in latestSongs" :key="index">
             <div class="latest-song__song">
@@ -42,68 +42,99 @@
           </base-list-item>
         </div>
       </div>
-      <div
-        class="latest-album"
-        v-if="!isLatestAlbumLoading && latestAlbums.length > 0"
-      >
-        <h1 v-if="!isLatestAlbumLoading || latestAlbums.length > 0">
-          Latest Album Update
-        </h1>
-        <BaseHorizontalScroll v-if="isLatestAlbumLoading">
-          <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
-        /></BaseHorizontalScroll>
-        <BaseHorizontalScroll v-else>
-          <BaseCardAlbum
-            v-for="album in latestAlbums"
-            :key="album.album_id"
-            :title="album.name"
-            :uploader="album.user?.name ?? 'Unknown'"
-            :id="album.album_id"
-            :img="`${environment.album_cover}/${album.image_path}`"
-            :type="'album'"
-            :songCount="album.song_count"
-            @playAlbum="playAlbum"
-        /></BaseHorizontalScroll>
+      <div class="latest-album">
+        <h2>Latest Album Update</h2>
+        <swiper
+          v-if="latestAlbums.length > 0"
+          :slides-per-view="itemPerSlide"
+          :space-between="10"
+          navigation
+        >
+          <swiper-slide v-for="album in latestAlbums">
+            <BaseCardAlbum
+              :key="album.album_id"
+              :title="album.name"
+              :uploader="album.user?.name ?? 'Unknown'"
+              :id="album.album_id"
+              :img="`${environment.album_cover}/${album.image_path}`"
+              :type="'album'"
+              :songCount="album.song_count"
+              @playAlbum="playAlbum"
+            />
+          </swiper-slide>
+        </swiper>
+        <swiper
+          v-else
+          :slides-per-view="itemPerSlide"
+          :space-between="10"
+          navigation
+        >
+          <swiper-slide v-for="i in 8">
+            <BaseSkeletonsLoadingCard />
+          </swiper-slide>
+        </swiper>
       </div>
     </div>
     <div class="top">
-      <div class="top__album" v-if="!topArtist || topArtist.length != 0">
-        <h1>Top Albums</h1>
-        <BaseHorizontalScroll v-if="isTopAlbumLoading">
-          <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
-        /></BaseHorizontalScroll>
-        <BaseHorizontalScroll v-else>
-          <BaseCardAlbum
-            v-for="album in topAlbums"
-            :key="album.album_id"
-            :title="album.name"
-            :uploader="album.user?.name || 'Unknown'"
-            :id="album.album_id"
-            :img="`${environment.album_cover}/${album.image_path}`"
-            :type="'album'"
-            :listens="+album.song_sum_listens"
-            @playAlbum="playAlbum"
-          />
-        </BaseHorizontalScroll>
+      <div class="top__album">
+        <h2>Top Albums</h2>
+        <swiper
+          v-if="topAlbums.length > 0"
+          :slides-per-view="itemPerSlide"
+          :space-between="10"
+          navigation
+        >
+          <swiper-slide v-for="album in topAlbums">
+            <BaseCardAlbum
+              :key="album.album_id"
+              :title="album.name"
+              :id="album.album_id"
+              :uploader="album.user?.name || 'Unknown'"
+              :img="`${environment.album_cover}/${album.image_path}`"
+              :type="'album'"
+              :listens="+album.song_sum_listens"
+              @playAlbum="playAlbum"
+            />
+          </swiper-slide>
+        </swiper>
+        <swiper
+          v-else
+          :slides-per-view="itemPerSlide"
+          :space-between="10"
+          navigation
+        >
+          <swiper-slide v-for="i in 8">
+            <BaseSkeletonsLoadingCard />
+          </swiper-slide>
+        </swiper>
       </div>
       <div class="top__artist">
-        <h1 v-if="!topArtist || topArtist.length != 0">Top Artists</h1>
-        <BaseHorizontalScroll v-if="isTopArtistLoading">
-          <BaseSkeletonsLoadingCard v-for="index in 8" :key="index"
-        /></BaseHorizontalScroll>
-        <BaseHorizontalScroll>
-          <BaseCardArtist
-            v-for="artist in topArtist"
-            :key="artist.artist_id"
-            :data="artist"
-            @playArtistSong="playArtistSong"
-          />
-        </BaseHorizontalScroll>
+        <h2>Top Artists</h2>
+        <swiper
+          v-if="topArtist.length > 0"
+          :slides-per-view="itemPerSlide"
+          :space-between="10"
+          navigation
+        >
+          <swiper-slide v-for="artist in topArtist">
+            <BaseCardArtist :data="artist" @playArtistSong="playArtistSong" />
+          </swiper-slide>
+        </swiper>
+        <swiper
+          v-else
+          :slides-per-view="itemPerSlide"
+          :space-between="10"
+          navigation
+        >
+          <swiper-slide v-for="i in 8">
+            <BaseSkeletonsLoadingCard />
+          </swiper-slide>
+        </swiper>
       </div>
     </div>
     <div class="favorite">
       <div class="favorite__playlist" v-if="playlists.length > 0">
-        <h1>Your Favorite List</h1>
+        <h2>Your Favorite List</h2>
         <div class="favorite__playlist--container">
           <base-list-item
             v-for="playlist in playlists"
@@ -130,17 +161,19 @@
   </div>
 </template>
 <script lang="ts">
+import "swiper/css";
+import "swiper/css/navigation";
+import { Swiper, SwiperSlide } from "swiper/vue";
+
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
 import { useMeta } from "vue-meta";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
-import type { playlist } from "@/model/playlistModel";
 import type { song } from "@/model/songModel";
 import type { user } from "@/model/userModel";
 import IconPlay from "@/components/icons/IconPlay.vue";
-import BaseHorizontalScroll from "@/components/UI/BaseHorizontalScroll.vue";
 import BaseSkeletonsLoadingCard from "@/components/UI/BaseSkeletonsLoadingCard.vue";
 import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
@@ -162,11 +195,12 @@ type TopAlbum = album & {
 export default defineComponent({
   components: {
     IconPlay,
-    BaseHorizontalScroll,
     BaseCardArtist,
     BaseCardAlbum,
     BaseCircleLoad,
     BaseSkeletonsLoadingCard,
+    Swiper,
+    SwiperSlide,
   },
   emits: [...globalEmitListener],
   data() {
@@ -177,10 +211,9 @@ export default defineComponent({
       topAlbums: [] as TopAlbum[],
       topArtist: [] as artist[],
       //loading
-      isLatestSongLoading: true,
-      isLatestAlbumLoading: true,
-      isTopAlbumLoading: true,
-      isTopArtistLoading: true,
+
+      itemPerSlide: 6,
+      containerWidthObserver: null as ResizeObserver | null,
     };
   },
   methods: {
@@ -203,30 +236,23 @@ export default defineComponent({
       this.$emit("playSong", song_id);
     },
     onLoadLatestSong() {
-      this.isLatestSongLoading = true;
       this.getLatestSong(this.token).then((res) => {
-        this.isLatestSongLoading = false;
         this.latestSongs = res.songs;
       });
     },
     onLoadLatestAlbum() {
-      this.isLatestAlbumLoading = true;
       this.getLatestAlbums(this.token).then((res) => {
         this.latestAlbums = [...res.albums];
-        this.isLatestAlbumLoading = false;
       });
     },
     onLoadTopAlbum() {
-      this.isTopAlbumLoading = true;
       this.getTopAlbums(this.token).then((res) => {
         this.topAlbums = [...res.albums];
-        this.isTopAlbumLoading = false;
       });
     },
     onLoadTopArtist() {
       this.getTopArtists(this.token).then((res) => {
         this.topArtist = [...res.artists];
-        this.isTopArtistLoading = false;
       });
     },
   },
@@ -247,6 +273,13 @@ export default defineComponent({
     useMeta({
       title: environment.site_name,
     });
+    const container: HTMLDivElement = this.$refs.news as HTMLDivElement;
+    this.containerWidthObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        this.itemPerSlide = Math.floor(entry.contentRect.width / 280);
+      }
+    });
+    if (container) this.containerWidthObserver.observe(container);
   },
 });
 </script>

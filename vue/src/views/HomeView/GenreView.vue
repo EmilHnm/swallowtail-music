@@ -158,7 +158,7 @@ export default defineComponent({
     const container: HTMLDivElement = this.$refs.genreBody as HTMLDivElement;
     this.containerWidthObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
-        this.itemPerSlide = Math.floor(entry.contentRect.width / 250);
+        this.itemPerSlide = Math.floor(entry.contentRect.width / 280);
       }
     });
     if (container) this.containerWidthObserver.observe(container);

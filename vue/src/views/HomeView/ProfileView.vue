@@ -21,8 +21,7 @@
             ? `${environment.profile_image}/${user.profile_photo_url}`
             : `${environment.default}/default-avatar.jpg`
         "
-        alt=""
-        srcset=""
+        alt="avatar"
       />
     </div>
     <div class="info">
@@ -44,16 +43,19 @@
   <div class="control" v-if="userData.user_id == user.user_id">
     <BaseButton>Edit Profile</BaseButton>
   </div>
-  <div class="detail" v-if="topArtist.length > 0" ref="detail">
+  <div class="detail" ref="detail">
     <div class="topArtist">
       <h2>Top Artists</h2>
-      <BaseHorizontalScroll>
-        <BaseCardArtist
-          v-for="artist in topArtist"
-          :key="artist.artist_id"
-          :data="artist"
-        />
-      </BaseHorizontalScroll>
+      <swiper
+        v-if="topArtist.length > 0"
+        :slides-per-view="itemPerSlide"
+        :space-between="10"
+        navigation
+      >
+        <swiper-slide v-for="artist in topArtist">
+          <BaseCardArtist :data="artist" @playArtistSong="playArtistSong" />
+        </swiper-slide>
+      </swiper>
     </div>
     <div class="topTracks" v-if="topTracks.length > 0">
       <h2>Top Uploaded Tracks</h2>
@@ -61,6 +63,8 @@
         v-for="song in topTracks"
         :key="song.song_id"
         :data="song"
+        @select-song="playSong(song)"
+        @addToQueue="addToQueue(song)"
       />
     </div>
     <div class="publicPlaylist" v-if="userPlaylist.length > 0">
@@ -71,28 +75,37 @@
             : "Public Playlist"
         }}
       </h2>
-      <BaseHorizontalScroll>
-        <BaseCardAlbum
-          v-for="playlist in userPlaylist"
-          :key="playlist.playlist_id"
-          :title="playlist.title"
-          :id="playlist.playlist_id"
-          :img="
-            playlist.image_path
-              ? `${environment.playlist_cover}/${playlist.image_path}`
-              : `${environment.default}/no_image.jpg`
-          "
-          :type="'playlist'"
-          :songCount="playlist.song_count"
-        />
-      </BaseHorizontalScroll>
+      <swiper
+        v-if="userPlaylist.length > 0"
+        :slides-per-view="itemPerSlide"
+        :space-between="10"
+        navigation
+      >
+        <swiper-slide v-for="playlist in userPlaylist">
+          <BaseCardAlbum
+            :key="playlist.playlist_id"
+            :title="playlist.title"
+            :id="playlist.playlist_id"
+            :img="
+              playlist.image_path
+                ? `${environment.playlist_cover}/${playlist.image_path}`
+                : `${environment.default}/no_image.jpg`
+            "
+            :type="'playlist'"
+            :songCount="playlist.song_count"
+            @play-playlist="playPlaylist(playlist)"
+          />
+        </swiper-slide>
+      </swiper>
     </div>
   </div>
 </template>
 <script lang="ts">
+import "swiper/css";
+import "swiper/css/navigation";
+import { Swiper, SwiperSlide } from "swiper/vue";
 import { defineComponent } from "vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
-import BaseHorizontalScroll from "@/components/UI/BaseHorizontalScroll.vue";
 import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
@@ -127,12 +140,13 @@ type songData = song & {
 export default defineComponent({
   components: {
     BaseButton,
-    BaseHorizontalScroll,
     BaseCardArtist,
     BaseSongItem,
     BaseCardAlbum,
     BaseDialog,
     BaseLineLoad,
+    Swiper,
+    SwiperSlide,
   },
   data() {
     return {
@@ -140,10 +154,8 @@ export default defineComponent({
       isMenuOpen: false,
       isLoading: true,
       filterText: "",
-      detailWidth: 0,
       observer: null as ResizeObserver | null,
-      small: false,
-      medium: false,
+      itemPerSlide: 6,
       user: {} as userProfileData,
       topArtist: [] as artist[],
       topTracks: {} as songData[],
@@ -217,29 +229,29 @@ export default defineComponent({
           }
         });
     },
+    playArtistSong(artist: artist) {
+      this.$emit("playArtistSong", artist);
+    },
+    playSong(song: song) {
+      this.$emit("playSong", song.song_id);
+    },
+    addToQueue(song: any) {
+      this.$emit("addToQueue", song);
+    },
+    playPlaylist(playlist: playlist) {
+      this.$emit("playPlaylist", playlist.playlist_id);
+    },
   },
   mounted() {
     const detail = this.$refs.detail as HTMLElement;
     this.observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
-        this.detailWidth = entry.contentRect.width;
+        this.itemPerSlide = Math.floor(entry.contentRect.width / 280);
       }
     });
     if (this.observer && detail) this.observer.observe(detail);
   },
   watch: {
-    detailWidth(o) {
-      if (o < 600) {
-        this.small = true;
-        this.medium = true;
-      } else if (o < 700 && o > 600) {
-        this.small = false;
-        this.medium = true;
-      } else {
-        this.small = false;
-        this.medium = false;
-      }
-    },
     "$route.params.id": {
       immediate: true,
       deep: true,
@@ -275,6 +287,10 @@ $tablet-width: 768px;
   align-items: center;
   padding: 40px 20px;
   position: relative;
+  @container main (max-width: #{$tablet-width}) {
+    flex-direction: column;
+    jusify-content: center;
+  }
   & .header__background {
     position: absolute;
     top: 0;
@@ -282,6 +298,9 @@ $tablet-width: 768px;
     width: 100%;
     height: 100%;
     background: linear-gradient(60deg, var(--color-primary), transparent);
+    @container main (max-width: #{$tablet-width}) {
+      background: linear-gradient(180deg, var(--color-primary), transparent);
+    }
     z-index: -1;
     filter: blur(6px);
   }
@@ -291,6 +310,10 @@ $tablet-width: 768px;
     overflow: hidden;
     flex: 0 0 auto;
     border-radius: 50%;
+    @container main (max-width: #{$tablet-width}) {
+      width: 150px;
+      height: 150px;
+    }
     & img {
       width: 100%;
       height: 100%;
@@ -308,16 +331,31 @@ $tablet-width: 768px;
       font-size: 14px;
       color: #fff;
       font-weight: 700;
+      @container main (max-width: #{$tablet-width}) {
+        padding-top: 10px;
+        text-align: center;
+      }
     }
     &__title {
       font-size: 42px;
       color: #fff;
       font-weight: 900;
+      @container main (max-width: #{$tablet-width}) {
+        text-align: center;
+        font-size: 32px;
+      }
     }
     &__other {
       display: flex;
       color: #fff;
       font-size: 16px;
+      @container main (max-width: #{$tablet-width}) {
+        justify-content: center;
+      }
+      @container main (max-width: #{$mobile-width}) {
+        flex-direction: column;
+        align-items: center;
+      }
       &--playlistCount {
         font-weight: 700;
       }
@@ -339,17 +377,15 @@ $tablet-width: 768px;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
+  @container main (max-width: #{$tablet-width}) {
+    width: 100%;
+  }
 }
 .detail {
   width: 100%;
-  padding: 20px;
-}
-
-@media (max-width: $mobile-width) {
-  .user-header {
-    & .header__image {
-      display: none;
-    }
+  padding: 20px 0px;
+  h2 {
+    padding: 0 20px;
   }
 }
 

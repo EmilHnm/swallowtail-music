@@ -1,5 +1,5 @@
 <template>
-  <div class="search-result__container">
+  <div class="search-result__container" ref="container">
     <div class="search-result__container--song" v-if="songResult.length > 0">
       <h3>Song</h3>
       <div v-for="index in 5" :key="index">
@@ -13,8 +13,8 @@
     </div>
     <div class="search-result__container--album" v-if="albumResult.length > 0">
       <h3>Album</h3>
-      <BaseHorizontalScroll>
-        <div v-for="index in 5" :key="index">
+      <swiper :slides-per-view="itemPerSlide" :space-between="10" navigation>
+        <swiper-slide v-for="index in 5" :key="index">
           <BaseCardAlbum
             v-if="index <= albumResult.length"
             :img="`${environment.album_cover}/${
@@ -25,8 +25,8 @@
             :songCount="albumResult[index - 1].song_count"
             @playAlbum="playAlbum"
           />
-        </div>
-      </BaseHorizontalScroll>
+        </swiper-slide>
+      </swiper>
       <span @click="changeSearchPage('AlbumSearchPage')">See more</span>
     </div>
     <div
@@ -34,22 +34,22 @@
       v-if="artistResult.length > 0"
     >
       <h3>Artist</h3>
-      <BaseHorizontalScroll>
-        <div v-for="index in 5" :key="index">
+      <swiper :slides-per-view="itemPerSlide" :space-between="10" navigation>
+        <swiper-slide v-for="index in 5" :key="index">
           <BaseCardArtist
             v-if="index <= artistResult.length"
             :key="artistResult[index - 1].artist_id"
             :data="artistResult[index - 1]"
             @playArtistSong="playArtistSong"
           />
-        </div>
-      </BaseHorizontalScroll>
+        </swiper-slide>
+      </swiper>
       <span @click="changeSearchPage('ArtistSearchPage')">See more</span>
     </div>
     <div class="search-result__container--user" v-if="userResult.length > 0">
       <h3>User</h3>
-      <BaseHorizontalScroll>
-        <div v-for="index in 5" :key="index">
+      <swiper :slides-per-view="itemPerSlide" :space-between="10" navigation>
+        <swiper-slide v-for="index in 5" :key="index">
           <BaseCardUser
             v-if="index <= userResult.length"
             :id="userResult[index - 1].user_id"
@@ -57,16 +57,19 @@
             :imageSrc="userResult[index - 1].profile_photo_url"
             :songCount="userResult[index - 1].song_count"
           />
-        </div>
-      </BaseHorizontalScroll>
+        </swiper-slide>
+      </swiper>
       <span @click="changeSearchPage('UserSearchPage')">See more</span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import "swiper/css";
+import "swiper/css/navigation";
+import { Swiper, SwiperSlide } from "swiper/vue";
+
 import { defineComponent } from "vue";
-import BaseHorizontalScroll from "@/components/UI/BaseHorizontalScroll.vue";
 import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import BaseCardUser from "@/components/UI/BaseCardUser.vue";
@@ -101,6 +104,8 @@ export default defineComponent({
   data() {
     return {
       environment: environment,
+      itemPerSlide: 6,
+      containerWidthObserver: null as ResizeObserver | null,
     };
   },
   methods: {
@@ -119,11 +124,21 @@ export default defineComponent({
   },
   inject: ["songResult", "albumResult", "artistResult", "userResult"],
   components: {
-    BaseHorizontalScroll,
     BaseCardArtist,
     BaseCardAlbum,
     BaseCardUser,
     BaseSongItem,
+    Swiper,
+    SwiperSlide,
+  },
+  mounted() {
+    const container: HTMLDivElement = this.$refs.container as HTMLDivElement;
+    this.containerWidthObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        this.itemPerSlide = Math.floor(entry.contentRect.width / 280);
+      }
+    });
+    if (container) this.containerWidthObserver.observe(container);
   },
 });
 </script>
