@@ -57,10 +57,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    // uploadQueue: {
-    //   type: Array as () => songFileUpload[],
-    //   default: () => [],
-    // },
   },
   methods: {
     close() {
