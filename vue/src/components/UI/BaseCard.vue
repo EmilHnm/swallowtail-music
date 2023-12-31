@@ -25,6 +25,7 @@ export default defineComponent({});
   align-items: center;
   margin: 40px 30px;
   transition: 0.5s;
+  max-width: 200px;
   &::before {
     content: "";
     position: absolute;

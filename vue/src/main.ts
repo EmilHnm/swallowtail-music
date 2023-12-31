@@ -16,6 +16,8 @@ import IconLogo from "./components/icons/IconLogo.vue";
 import LazyLoadDirective from "./shared/LazyLoadDirective";
 import ClickOutsideDirective from "./shared/ClickOutsideDirective";
 import type Echo from "laravel-echo";
+import SwiperCore from "swiper";
+import { Navigation } from "swiper/modules";
 
 declare global {
   interface ObjectConstructor {
@@ -47,4 +49,7 @@ app.use(metaManager);
 
 app.directive("lazyload", LazyLoadDirective);
 app.directive("click-outside", ClickOutsideDirective);
+
+SwiperCore.use([Navigation]);
+
 app.mount("#app");

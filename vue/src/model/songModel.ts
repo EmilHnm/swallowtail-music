@@ -1,3 +1,7 @@
+import type { album } from "./albumModel";
+import type { artist } from "./artistModel";
+import type { like } from "./likeModel";
+
 export interface song {
   id?: number;
   song_id: string;
@@ -19,4 +23,10 @@ export type songFileUpload = {
   progress: number;
   song_id: string;
   status: "waiting" | "uploading" | "finish" | "error";
+};
+
+export type songData = song & {
+  album?: album;
+  artist: artist[];
+  like: like[];
 };

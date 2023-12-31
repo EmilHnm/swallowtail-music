@@ -57,6 +57,11 @@ export const mainPageRoute = [
     component: () => import("@/views/HomeView/ProfileView.vue"),
   },
   {
+    path: "genres/:id",
+    name: "genrePage",
+    component: () => import("@/views/HomeView/GenreView.vue"),
+  },
+  {
     path: "artist/:id",
     name: "artistPage",
     redirect: (to: RouteLocationNormalized) => ({
