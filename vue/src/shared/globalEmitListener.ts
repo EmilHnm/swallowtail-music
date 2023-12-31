@@ -1,6 +1,5 @@
 export default [
   "updatePlaylist",
-
   "playPlaylist",
   "playSongInPlaylist",
   "addPlaylistToQueue",
