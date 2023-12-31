@@ -49,22 +49,10 @@
         <div class="songList__header--left--title">Title</div>
       </div>
       <div class="songList__header--right">
-        <div class="songList__header--right--album" :class="{ small: small }">
-          Album
-        </div>
-        <div class="songList__header--right--hears" :class="{ medium: medium }">
-          Hears
-        </div>
-        <div
-          class="songList__header--right--duration"
-          :class="{ medium: medium, small: small }"
-        >
-          Duration
-        </div>
-        <div
-          class="songList__header--right--control"
-          :class="{ medium: medium, small: small }"
-        ></div>
+        <div class="songList__header--right--album">Album</div>
+        <div class="songList__header--right--hears">Hears</div>
+        <div class="songList__header--right--duration">Duration</div>
+        <div class="songList__header--right--control"></div>
       </div>
     </div>
     <div class="songList__empty" v-else>
@@ -119,10 +107,6 @@ export default defineComponent({
       isMenuOpen: false,
       isSearchBarOpen: false,
       filterText: "",
-      songListWidth: 0,
-      observer: null as ResizeObserver | null,
-      small: false,
-      medium: false,
       likedList: [] as songData[],
       songCount: 0,
       totalDuration: "",
@@ -168,15 +152,8 @@ export default defineComponent({
     },
   },
   mounted() {
-    const songList = this.$refs.songList as HTMLElement;
-    this.observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        this.songListWidth = entry.contentRect.width;
-      }
-    });
-    if (this.observer && songList) this.observer.observe(songList);
     useMeta({
-      title: `${this.user.username}'s' Collection`,
+      title: `${this.user.username}'s Collection`,
     });
   },
   created() {
@@ -188,20 +165,7 @@ export default defineComponent({
       user: "auth/userData",
     }),
   },
-  watch: {
-    songListWidth(o) {
-      if (o < 600) {
-        this.small = true;
-        this.medium = true;
-      } else if (o < 700 && o > 600) {
-        this.small = false;
-        this.medium = true;
-      } else {
-        this.small = false;
-        this.medium = false;
-      }
-    },
-  },
+  watch: {},
 });
 </script>
 <style lang="scss" scoped>
@@ -212,6 +176,12 @@ $tablet-width: 768px;
   align-items: center;
   padding: 40px 20px;
   position: relative;
+  @container main  (max-width: #{$tablet-width}) {
+    & {
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
   & .header__background {
     position: absolute;
     top: 0;
@@ -219,6 +189,12 @@ $tablet-width: 768px;
     width: 100%;
     height: 100%;
     background: linear-gradient(60deg, var(--color-primary), transparent);
+    @container main  (max-width: #{$tablet-width}) {
+      & {
+        background: linear-gradient(180deg, var(--color-primary), transparent);
+      }
+    }
+
     z-index: -1;
     filter: blur(6px);
   }
@@ -228,6 +204,12 @@ $tablet-width: 768px;
     overflow: hidden;
     flex: 0 0 auto;
     position: relative;
+    @container main  (max-width: #{$tablet-width}) {
+      & {
+        width: 150px;
+        height: 150px;
+      }
+    }
     & svg {
       position: absolute;
       top: 50%;
@@ -244,6 +226,11 @@ $tablet-width: 768px;
     padding: 0 20px;
     display: flex;
     flex-direction: column;
+    @container main  (max-width: #{$tablet-width}) {
+      & {
+        text-align: center;
+      }
+    }
 
     &__type {
       font-size: 14px;
@@ -259,6 +246,17 @@ $tablet-width: 768px;
       display: flex;
       color: #fff;
       font-size: 16px;
+      @container main  (max-width: #{$tablet-width}) {
+        & {
+          justify-content: center;
+        }
+      }
+      @container main  (max-width: #{$mobile-width}) {
+        & {
+          flex-direction: column;
+          justify-content: center;
+        }
+      }
       &--owner {
         font-weight: 700;
       }
@@ -294,6 +292,9 @@ $tablet-width: 768px;
         width: 25px;
         height: 25px;
         fill: #fff;
+      }
+      &:hover {
+        transform: scale(1.05);
       }
     }
     &--menu {
@@ -376,17 +377,20 @@ $tablet-width: 768px;
         overflow: hidden;
         text-align: center;
 
-        &.small {
-          display: none;
+        @container main  (max-width: #{$mobile-width}) {
+          & {
+            display: none;
+          }
         }
       }
       &--hears {
         width: 20%;
         overflow: hidden;
-        text-align: center;
 
-        &.medium {
-          display: none;
+        @container main  (max-width: #{$tablet-width}) {
+          & {
+            display: none;
+          }
         }
       }
       &--duration {
@@ -394,9 +398,13 @@ $tablet-width: 768px;
         overflow: hidden;
         text-align: center;
 
-        &.medium {
-          width: 20%;
-          &.small {
+        @container main  (max-width: #{$tablet-width}) {
+          & {
+            width: 20%;
+          }
+        }
+        @container main  (max-width: #{$mobile-width}) {
+          & {
             width: 80%;
           }
         }
@@ -412,14 +420,6 @@ $tablet-width: 768px;
       width: 100%;
       text-align: center;
       user-select: none;
-    }
-  }
-}
-
-@media (max-width: $mobile-width) {
-  .collection-header {
-    & .header__image {
-      display: none;
     }
   }
 }
