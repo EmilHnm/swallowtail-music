@@ -18,7 +18,7 @@ class Song extends Model
     {
         return $this->belongsToMany(
             Genre::class,
-            "song_genres",
+            SongGenre::class,
             "song_id",
             "genre_id"
         )->withTimestamps();

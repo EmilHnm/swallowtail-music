@@ -22,4 +22,24 @@ class Genre extends Model
             "song_id"
         )->withTimestamps();
     }
+
+    public function artist()
+    {
+        return $this->belongsToMany(
+            Artist::class,
+            "artist_genres",
+            "genre_id",
+            "artist_id"
+        )->withTimestamps();
+    }
+
+    public function album()
+    {
+        return $this->belongsToMany(
+            Album::class,
+            AlbumGenre::class,
+            "genre_id",
+            "album_id"
+        )->withTimestamps();
+    }
 }

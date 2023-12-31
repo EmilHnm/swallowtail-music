@@ -63,7 +63,9 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::prefix("genre")->group(function () {
         Route::get("/", [GenreController::class, "getAll"]);
         Route::get("/{id}", [GenreController::class, "show"]);
-        Route::get("/{id}/song", [GenreController::class, "getSongByGenre"]);
+        Route::get("/{id}/top-song", [GenreController::class, "getTopSongByGenre"]);
+        Route::get("/{id}/top-artist", [GenreController::class, "getTopArtistByGenre"]);
+        Route::get("/{id}/top-album", [GenreController::class, "getTopAlbumByGenre"]);
     });
 
     Route::prefix("song")->group(function () {

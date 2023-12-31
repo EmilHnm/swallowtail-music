@@ -18,6 +18,16 @@ class Artist extends Model
             "song_artists",
             "artist_id",
             "song_id"
-        );
+        )->withTimestamps();
+    }
+
+    public function genres()
+    {
+        return $this->belongsToMany(
+            Genre::class,
+            "artist_genres",
+            "artist_id",
+            "genre_id"
+        )->withTimestamps();
     }
 }

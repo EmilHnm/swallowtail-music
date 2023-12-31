@@ -65,6 +65,7 @@ class AlbumsSyncCommand extends Command
                 $album->album_id = "album_{$raw_album['browse_id']}";
                 $album->user_id = User::first()->user_id;
                 $album->name = $raw_album['title'];
+                $album->type = $raw_album['type'];
                 $album->release_year = $raw_album['release'];
 
                 $path = file_path_helper($raw_album['id']) . '/cover.jpg';

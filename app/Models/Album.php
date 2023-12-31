@@ -21,4 +21,9 @@ class Album extends Model
     {
         return $this->hasMany(Song::class, "album_id", "album_id");
     }
+
+    public function genre()
+    {
+        return $this->belongsToMany(Genre::class, AlbumGenre::class, "album_id", "genre_id")->withTimestamps();
+    }
 }

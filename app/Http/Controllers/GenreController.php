@@ -21,13 +21,32 @@ class GenreController extends Controller
         return response()->json($genre, Response::HTTP_OK);
     }
 
-    public function getSongByGenre($id)
+    public function getTopSongByGenre($id)
     {
-        $genre = Genre::where('genre_id', $id)->first();
-        $songs = $genre->songs;
-        return response()->json([
-            'status' => 'success',
-            'song' => $songs
-        ], Response::HTTP_OK);
+        $top = Genre::where('genre_id', $id)->with([
+            'song' => fn ($q) => $q->with(['artist', 'album', "like"])->orderBy('listens', 'desc')->limit(10)
+        ])->first();
+        return response()->json($top->song, Response::HTTP_OK);
+    }
+
+    public function getTopArtistByGenre($id)
+    {
+        $top = Genre::where('genre_id', $id)->with([
+            'artist' => fn ($q) => $q->orderBy('listens', 'desc')->limit(10),
+        ])->first();
+        return response()->json($top->artist, Response::HTTP_OK);
+    }
+
+    public function getTopAlbumByGenre($id)
+    {
+        $top = Genre::where('genre_id', $id)->with([
+            'album' => fn ($q) => $q->withCount(['song' => fn ($query) => $query->where('display', 'public')])
+                ->having('song_count', '>', 0)
+                ->withSum('song', 'listens')
+                ->orderBy('song_sum_listens', 'desc')
+                ->limit(10)
+                ->get(),
+        ])->first();
+        return response()->json($top->album, Response::HTTP_OK);
     }
 }
