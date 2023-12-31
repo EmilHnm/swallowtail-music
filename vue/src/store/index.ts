@@ -1,5 +1,5 @@
 import { userModule } from "./module/userModule";
-import { createStore, type GetterTree } from "vuex";
+import { createStore } from "vuex";
 import { accountModule } from "./module/accountModule";
 import { albumModule } from "./module/albumModule";
 import { authModule } from "./module/authModule";
