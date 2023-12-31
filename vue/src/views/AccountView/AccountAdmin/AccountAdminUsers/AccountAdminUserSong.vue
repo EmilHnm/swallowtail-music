@@ -265,7 +265,7 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
     }),
-    filteredsongList() {
+    filteredsongList(): songListData {
       return Object.fromEntries(
         Object.entries(this.songList).filter((song: [string, songData]) => {
           return (

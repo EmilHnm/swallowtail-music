@@ -11,13 +11,12 @@ import { testModule } from "./module/testModule";
 import { notificationModule } from "./module/notificationModule";
 import { cacheModule } from "./module/cacheModule";
 import { genreModule } from "./module/genreModule";
-import uploadQueueModule from "./module/uploadQueueModule";
+import { uploadQueueModule } from "./module/uploadQueueModule";
 export default createStore({
   modules: {
     auth: authModule,
     song: songModule,
     album: albumModule,
-    playlist: playlistModule as any,
     account: accountModule,
     artist: artistModule,
     user: userModule,
@@ -25,6 +24,7 @@ export default createStore({
     test: testModule,
     notification: notificationModule,
     cache: cacheModule,
+    playlist: playlistModule as any,
     genre: genreModule as any,
     uploadQueue: uploadQueueModule as any,
   },

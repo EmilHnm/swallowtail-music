@@ -121,7 +121,7 @@ const actions: ActionTree<RootState, RootState> = {
   },
 };
 
-export default {
+export const uploadQueueModule = {
   namespaced: true,
   state,
   getters,
