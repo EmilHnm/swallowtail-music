@@ -6,6 +6,7 @@
       @playAlbum="playAlbum"
       @addAlbumToQueue="addAlbumToQueue"
       @playSongInAlbum="playSongInAlbum"
+      @addToQueue="addToQueue"
     />
     <BaseCircleLoad v-else />
   </div>
@@ -39,6 +40,9 @@ export default defineComponent({
     },
     playSongInAlbum(album_id: string, song_id: string) {
       this.$emit("playSongInAlbum", [album_id, song_id]);
+    },
+    addToQueue(song: any) {
+      this.$emit("addToQueue", song);
     },
   },
   computed: {

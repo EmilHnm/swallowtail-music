@@ -102,6 +102,7 @@
           :key="song.song_id"
           :control="true"
           @select-song="playSongInAlbum(song.song_id)"
+          @addToQueue="addToQueue(song)"
         />
       </div>
     </div>
@@ -142,7 +143,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["playAlbum", "addAlbumToQueue", "playSongInAlbum"],
+  emits: ["playAlbum", "addAlbumToQueue", "playSongInAlbum", "addToQueue"],
   data() {
     return {
       environment: environment,
@@ -215,6 +216,9 @@ export default defineComponent({
     },
     playSongInAlbum(id: string) {
       this.$emit("playSongInAlbum", this.data.album_id, id);
+    },
+    addToQueue(song: any) {
+      this.$emit("addToQueue", song);
     },
   },
   computed: {
