@@ -504,8 +504,15 @@ export default defineComponent({
     },
     // NOTE: Song
     addToQueue(song: any) {
-      this.audioList = [...this.audioList, song];
-      if (this.isOnShuffle) this.shuffledList = [...this.shuffledList, song];
+      this.audioList = [...this.audioList, song].filter(
+        (song: songData, index: number, self: songData[]) =>
+          index === self.findIndex((t) => t.song_id === song.song_id)
+      );
+      if (this.isOnShuffle)
+        this.shuffledList = [...this.shuffledList, song].filter(
+          (song: songData, index: number, self: songData[]) =>
+            index === self.findIndex((t) => t.song_id === song.song_id)
+        );
     },
     playSong(song_id: string) {
       this.getSongForPlay({
