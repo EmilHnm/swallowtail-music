@@ -289,7 +289,7 @@ $tablet-width: 768px;
   position: relative;
   @container main (max-width: #{$tablet-width}) {
     flex-direction: column;
-    jusify-content: center;
+    justify-content: center;
   }
   & .header__background {
     position: absolute;
