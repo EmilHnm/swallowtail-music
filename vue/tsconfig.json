@@ -6,7 +6,9 @@
         "strict": true,
         "lib": ["ESNext", "DOM"],
         "noImplicitThis": true,
-        "ignoreDeprecations": "5.0",
+        "preserveValueImports": false,
+        "importsNotUsedAsValues": "remove",
+        "verbatimModuleSyntax": true,
         "paths": {
             "@/*": ["./src/*"]
         }

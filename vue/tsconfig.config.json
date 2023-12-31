@@ -2,8 +2,10 @@
     "extends": "@vue/tsconfig/tsconfig.node.json",
     "include": ["vite.config.*", "vitest.config.*", "cypress.config.*"],
     "compilerOptions": {
-        "ignoreDeprecations": "5.0",
         "composite": true,
+        "preserveValueImports": false,
+        "importsNotUsedAsValues": "remove",
+        "verbatimModuleSyntax": true,
         "types": ["node"]
     }
 }
