@@ -306,7 +306,7 @@ type songData = song & {
       };
     }[];
 };
-
+// @todo: fix reponsive
 export default defineComponent({
   emits: [...globalEmitListener],
   components: {
