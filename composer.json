@@ -9,8 +9,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
-        "babenkoivan/elastic-scout-driver": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
+        "hocvt/orchid-addons": "^14.0",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
         "laravel/scout": "^10.6",
@@ -21,9 +21,11 @@
         "orchid/platform": "^14.12",
         "pbmedia/laravel-ffmpeg": "^8.1",
         "predis/predis": "^2.0",
-        "rap2hpoutre/laravel-log-viewer": "^2.2"
+        "rap2hpoutre/laravel-log-viewer": "^2.2",
+        "romanzipp/laravel-queue-monitor": "^5.0"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.13",
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.0.1",
