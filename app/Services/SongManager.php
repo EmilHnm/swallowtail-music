@@ -89,6 +89,8 @@ class SongManager
             $this->SongMetadata->status = SongMetadataStatusEnum::DONE;
             $this->SongMetadata->file_path = $final_filepath;
             $this->SongMetadata->driver = $this->disk;
+            $this->SongMetadata->size = Storage::disk($this->disk)->size($final_filepath);
+            $this->SongMetadata->hash = hash("md5", Storage::disk($this->disk)->get($final_filepath));
             FFMpeg::cleanupTemporaryFiles();
             event(new SongConvertedSuccessFull($this->song->user, $this->song));
             return $this;

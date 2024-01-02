@@ -8,6 +8,8 @@ use App\Models\SongMetadata;
 use App\Enum\SongReferer;
 use App\Enum\SongRefererEnum;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
+use ProtoneMedia\LaravelFFMpeg\FFMpeg\FFProbe;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 
 class SongsSyncCommand extends Command
@@ -59,13 +61,13 @@ class SongsSyncCommand extends Command
                 $data = json_decode($response->getBody()->getContents(), true);
                 if (isset($data['status']) && $data['status'] == 'success') {
                     $raw_data = $data['song'];
-                    // dd($raw_data);
                     $song->title = $raw_data['title'];
-                    $song->duration = FFMpeg::fromDisk($raw_data['storage_type'])
-                        ->open($raw_data['storage'])
-                        ->getDurationInSeconds();
+                    $ffdisk = FFMpeg::fromDisk($raw_data['storage_type'])->open($raw_data['storage']);
+                    $song->duration = $ffdisk->getDurationInSeconds();
                     $song->listens = 0;
                     $song->display = 'public';
+                    $size = Storage::disk($raw_data['storage_type'])->size($raw_data['storage']);
+                    $hash = hash('md5', Storage::disk($raw_data['storage_type'])->get($raw_data['storage']));
                     SongMetadata::unguard();
                     $file = SongMetadata::updateOrCreate([
                         'song_id' => $song->song_id
@@ -73,6 +75,8 @@ class SongsSyncCommand extends Command
                         'file_path' => $raw_data['storage'],
                         'driver' => $raw_data['storage_type'],
                         'lyrics' => $raw_data['lyric']['lyrics'],
+                        'size' =>   $size,
+                        'hash' => $hash,
                         'status' => SongMetadataStatusEnum::DONE,
                         'referer' => SongRefererEnum::CRAWLER,
                     ]);

@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\AdvancedFilters;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Orchid\Screen\AsSource;
 
 class Song extends Model
 {
     use HasFactory;
-
+    use AsSource, AdvancedFilters;
     protected $primaryKey = "song_id";
     public $incrementing = false;
     public $timestamps = true;
