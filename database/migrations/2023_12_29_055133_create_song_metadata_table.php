@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string("file_path")->nullable();
             $table->string("driver")->nullable();
             $table->string("status")->nullable();
+            $table->integer("size")->nullable();
+            $table->string("hash")->nullable();
             $table->json("lyrics")->nullable();
             $table->integer('referer')->default(0);
             $table->timestamps();

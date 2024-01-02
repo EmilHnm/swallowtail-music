@@ -15,10 +15,7 @@ return new class extends Migration
     {
         Schema::create("songs", function (Blueprint $table) {
             $table->id();
-            $table
-                ->string("song_id")
-                ->nullable()
-                ->unique();
+            $table->string("song_id");
             $table->string("user_id")->nullable();
             $table->string("album_id")->nullable();
             $table->string("title")->nullable();
