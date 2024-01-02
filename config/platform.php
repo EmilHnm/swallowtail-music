@@ -126,7 +126,9 @@ return [
      */
 
     'resource' => [
-        'stylesheets' => [],
+        'stylesheets' => [
+            '/vendor/orchid-custom/custom.css'
+        ],
         'scripts'     => [],
     ],
 
