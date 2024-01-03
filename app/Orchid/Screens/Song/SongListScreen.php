@@ -29,7 +29,8 @@ class SongListScreen extends Screen
     {
         $songs = Song::with(['artist', 'album', 'genre', 'user'])
         ->advancedFilter([
-            'id:int',
+            ['id', fn(Builder $q, $t) => $q->where('song_id', $t)->orWhere('id', $t)],
+            'title',
             ['artist', fn(Builder $q, $t) => $q->whereHas('artist', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],
             ['album', fn(Builder $q, $t) => $q->whereHas('album', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],
             ['genre', fn(Builder $q, $t) => $q->whereHas('genre', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],

@@ -123,6 +123,16 @@ class SongManager
         ]);
     }
 
+    public function generateDownloadUrl($timeout = 600) {
+        if ($this->song == null) {
+            throw new \Exception("Song is null");
+        }
+        $path = $this->SongMetadata->file_path;
+        $storage = \Storage::disk($this->SongMetadata->driver);
+        $url = $storage->temporaryUrl($path, now()->addSeconds($timeout));
+        return $url;
+    }
+
     public function save()
     {
         if ($this->song == null) {
