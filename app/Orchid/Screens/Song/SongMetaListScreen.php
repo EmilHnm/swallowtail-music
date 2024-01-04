@@ -114,8 +114,8 @@ class SongMetaListScreen extends Screen
                 TD::make('size', 'Size')->render(fn(SongMetadata $metadata) => FileSize::human($metadata->size))->sort(),
                 TD::make('referer', 'Referer')->render((fn(SongMetadata $metadata) => RefererEnum::search($metadata->referer)))
                 ->filter(Select::make()->options(array_flip(RefererEnum::toArray()))->empty('All')),
-                TD::make('created_at', 'Created At')->asComponent(DateTimeSplit::class)->sort()->filter(DateRange::class),
-                TD::make('updated_at', 'Updated At')->asComponent(DateTimeSplit::class)->sort()->filter(DateRange::class),
+                TD::make('created_at', 'Created At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
+                TD::make('updated_at', 'Updated At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
                 TD::make()->render(fn(SongMetadata $metadata) => Button::make('Download')
                     ->icon('download')
                     ->method('download')

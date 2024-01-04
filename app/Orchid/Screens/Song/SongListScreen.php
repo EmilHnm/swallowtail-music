@@ -120,10 +120,10 @@ class SongListScreen extends Screen
                     ->filter()
                     ->render(function(Song $song) {
                         $album = $song->album;
-                        $query = $this->generateQueryStringFilter('album', $album->album_id);
+                        $query = $this->generateQueryStringFilter('id', $album->album_id);
                         $href =  "?$query";
 //                        add album route
-                        $href =  "?$query";
+                        $href =  route('platform.app.albums') . "?$query";
                         $html = \Str::limit($album->name, 20);
                         return "<a class='orchid-custom' title='{$album->name}' href=$href>" . $html . "</a>";
                     }),
@@ -155,10 +155,10 @@ class SongListScreen extends Screen
                         return "<a class='orchid-custom' title='{$user->name}' href=$href>" . $user->name . "</a>";
                     }),
                 TD::make('updated_at', "Updated at")
-                    ->sort()->filter(DateRange::make('updated_at'))
+                    ->sort()->filter(TD::FILTER_DATE_RANGE)
                     ->asComponent(DateTimeSplit::class),
                 TD::make('created_at', "Created at")
-                    ->sort()->filter(DateRange::make('created_at'))
+                    ->sort()->filter(TD::FILTER_DATE_RANGE)
                     ->asComponent(DateTimeSplit::class)
             ]),
             $this->getDumpModal()
