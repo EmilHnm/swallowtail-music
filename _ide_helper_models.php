@@ -28,6 +28,9 @@ namespace App\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Song> $song
  * @property-read int|null $song_count
  * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Album advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Album defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Album idRange($id, $field = 'id')
  * @method static \Illuminate\Database\Eloquent\Builder|Album newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Album newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Album query()
@@ -275,7 +278,7 @@ namespace App\Models{
  * App\Models\Song
  *
  * @property int $id
- * @property string|null $song_id
+ * @property string $song_id
  * @property string|null $user_id
  * @property string|null $album_id
  * @property string|null $title
@@ -398,17 +401,19 @@ namespace App\Models{
  * @property string|null $file_path
  * @property string|null $driver
  * @property string|null $status
- * @property float|null $size
- * @property float|null $bitrate
+ * @property int|null $size
  * @property string|null $hash
  * @property mixed|null $lyrics
  * @property int $referer
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Song|null $song
+ * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata idRange($id, $field = 'id')
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata query()
- * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereBitrate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereDriver($value)
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereFilePath($value)
