@@ -42,6 +42,9 @@ class PlatformProvider extends OrchidServiceProvider
             Menu::make('Songs Metadata')
                 ->icon('file-earmark-code-fill')
                 ->route('platform.app.song-metadata'),
+            Menu::make('Album')
+                ->icon('folder2-open')
+                ->route('platform.app.albums'),
 //            Menu::make('Get Started')
 //                ->icon('bs.book')
 //                ->title('Navigation')
