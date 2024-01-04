@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Sync;
 
+use App\Enum\RefererEnum;
 use App\Models\Song;
 use App\Models\User;
 use App\Models\Album;
@@ -28,13 +29,18 @@ class AlbumsSyncCommand extends Command
      */
     public function handle()
     {
-        //
+        //u
         $domain = $this->option('domain') ?? env('SOURCE_DOMAIN');
         $token = $this->option('token') ?? env('SOURCE_TOKEN');
         $from = $this->argument('from') ?? 1000000000;
         $to = $this->argument('to') ?? '';
 
         $end_point = $domain . '/api/albums?from=' . $from . '&limit=' . $to;
+
+        if(!User::first()) {
+            $this->error('User not found');
+            return;
+        }
 
         $this->info('Start sync albums from ' . $end_point);
 
@@ -66,6 +72,7 @@ class AlbumsSyncCommand extends Command
                 $album->user_id = User::first()->user_id;
                 $album->name = $raw_album['title'];
                 $album->type = $raw_album['type'];
+                $album->referer = RefererEnum::CRAWLER;
                 $album->release_year = $raw_album['release'];
 
                 $path = file_path_helper($raw_album['id']) . '/cover.jpg';

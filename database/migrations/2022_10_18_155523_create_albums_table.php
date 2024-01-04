@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('release_year');
             $table->string('image_path');
             $table->string('type');
+            $table->enum('referer', \App\Enum\RefererEnum::toArray());
             $table->timestamps();
         });
     }
