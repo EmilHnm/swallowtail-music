@@ -2,7 +2,7 @@
 
 namespace App\Orchid\Screens\Song;
 
-use App\Enum\SongRefererEnum;
+use App\Enum\RefererEnum;
 use App\Models\Song;
 use App\Orchid\Helpers\Date;
 use App\Orchid\Screens\Traits\GenerateQueryStringFilter;
@@ -68,11 +68,11 @@ class SongListScreen extends Screen
     public function commandBar(): iterable
     {
         if($filter = \Request::get('filter')){
-            if (isset($filter['referer']) && $filter['referer'] == SongRefererEnum::USER) {
+            if (isset($filter['referer']) && $filter['referer'] == RefererEnum::USER) {
                 $filter['referer'] = null;
             }
         } else {
-            $filter = array_merge($filter ?? [], ['referer' => SongRefererEnum::USER]);
+            $filter = array_merge($filter ?? [], ['referer' => RefererEnum::USER]);
         }
         return [
             Link::make('User Upload')

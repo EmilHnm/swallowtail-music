@@ -6,7 +6,7 @@ use App\Enum\SongMetadataStatusEnum;
 use App\Models\Artist;
 use App\Models\SongMetadata;
 use App\Enum\SongReferer;
-use App\Enum\SongRefererEnum;
+use App\Enum\RefererEnum;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use ProtoneMedia\LaravelFFMpeg\FFMpeg\FFProbe;
@@ -78,7 +78,7 @@ class SongsSyncCommand extends Command
                         'size' =>   $size,
                         'hash' => $hash,
                         'status' => SongMetadataStatusEnum::DONE,
-                        'referer' => SongRefererEnum::CRAWLER,
+                        'referer' => RefererEnum::CRAWLER,
                     ]);
 
                     $song->artist()->detach();

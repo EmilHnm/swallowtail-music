@@ -3,7 +3,7 @@
 namespace App\Orchid\Screens\Song;
 
 use App\Enum\SongMetadataStatusEnum;
-use App\Enum\SongRefererEnum;
+use App\Enum\RefererEnum;
 use App\Models\Song;
 use App\Models\SongMetadata;
 use App\Orchid\Helpers\FileSize;
@@ -112,8 +112,8 @@ class SongMetaListScreen extends Screen
                 }),
                 TD::make('driver', 'Storage Driver')->sort(),
                 TD::make('size', 'Size')->render(fn(SongMetadata $metadata) => FileSize::human($metadata->size))->sort(),
-                TD::make('referer', 'Referer')->render((fn(SongMetadata $metadata) => SongRefererEnum::search($metadata->referer)))
-                ->filter(Select::make()->options(array_flip(SongRefererEnum::toArray()))->empty('All')),
+                TD::make('referer', 'Referer')->render((fn(SongMetadata $metadata) => RefererEnum::search($metadata->referer)))
+                ->filter(Select::make()->options(array_flip(RefererEnum::toArray()))->empty('All')),
                 TD::make('created_at', 'Created At')->asComponent(DateTimeSplit::class)->sort()->filter(DateRange::class),
                 TD::make('updated_at', 'Updated At')->asComponent(DateTimeSplit::class)->sort()->filter(DateRange::class),
                 TD::make()->render(fn(SongMetadata $metadata) => Button::make('Download')

@@ -14,7 +14,7 @@ use App\Models\PlaylistSong;
 use Illuminate\Http\Request;
 use App\Services\SongManager;
 use App\Enum\SongMetadataStatusEnum;
-use App\Enum\SongRefererEnum;
+use App\Enum\RefererEnum;
 use App\Jobs\ProcessSongConvert;
 use App\Services\StorageManager;
 use Illuminate\Support\Facades\DB;
@@ -115,7 +115,7 @@ class SongController extends Controller
                 $song_file = new SongMetadata();
                 $song_file->song_id = $id;
                 $song_file->status = SongMetadataStatusEnum::UPLOADING;
-                $song_file->referer = SongRefererEnum::USER;
+                $song_file->referer = RefererEnum::USER;
                 $song_file->save();
             }
         } else {
