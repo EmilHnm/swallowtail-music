@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\AdvancedFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Orchid\Screen\AsSource;
 
 class Artist extends Model
 {
     use HasFactory;
+    use AsSource, AdvancedFilters;
     protected $primaryKey = "artist_id";
     public $incrementing = false;
     public $timestamps = true;

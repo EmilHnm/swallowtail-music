@@ -119,4 +119,10 @@ Route::screen('album', \App\Orchid\Screens\Song\AlbumListScreen::class)
     ->name('platform.app.albums')
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
-        ->push(__('Albums'), route('platform.app.song-metadata')));
+        ->push(__('Albums'), route('platform.app.albums')));
+
+Route::screen('artist', \App\Orchid\Screens\Song\ArtistListScreen::class)
+    ->name('platform.app.artists')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push(__('Artists'), route('platform.app.artists')));

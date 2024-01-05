@@ -45,6 +45,9 @@ class PlatformProvider extends OrchidServiceProvider
             Menu::make('Album')
                 ->icon('folder2-open')
                 ->route('platform.app.albums'),
+            Menu::make('Artist')
+                ->icon('person-badge')
+                ->route('platform.app.artists'),
 //            Menu::make('Get Started')
 //                ->icon('bs.book')
 //                ->title('Navigation')

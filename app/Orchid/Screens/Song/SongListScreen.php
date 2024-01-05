@@ -30,9 +30,9 @@ class SongListScreen extends Screen
         $songs = Song::with(['artist', 'album', 'genre', 'user'])
         ->advancedFilter([
             ['id', fn(Builder $q, $t) => $q->where('song_id', $t)->orWhere('id', $t)],
-            'title',
-            ['artist', fn(Builder $q, $t) => $q->whereHas('artist', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],
-            ['album', fn(Builder $q, $t) => $q->whereHas('album', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],
+            ['title', fn(Builder $q, $t) => $q->where('title', 'like', '%' . $t . '%')],
+            ['artist', fn(Builder $q, $t) => $q->whereHas('artist', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('artists.artist_id', "$t"))],
+            ['album', fn(Builder $q, $t) => $q->whereHas('album', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('album_id', $t))],
             ['genre', fn(Builder $q, $t) => $q->whereHas('genre', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],
             ['user', fn(Builder $q, $t) => $q->whereHas('user',
                 fn($k) => $k->where('name', 'like', '%' . $t . '%')
@@ -109,9 +109,9 @@ class SongListScreen extends Screen
                     ->filter()
                     ->render(function(Song $song) {
                         return implode("<br>", $song->artist->map(function($artist) {
-                            $query = $this->generateQueryStringFilter('artist', $artist->artist_id);
+                            $query = $this->generateQueryStringFilter('id', $artist->artist_id);
 //                            add artist route
-                            $href =  "?$query";
+                            $href =  route('platform.app.artists')."?$query";
                             $html = \Str::limit($artist->name, 20);
                             return "<a class='orchid-custom'  href=$href>" . $html . "</a>";
                         })->toArray());
@@ -163,5 +163,29 @@ class SongListScreen extends Screen
             ]),
             $this->getDumpModal()
         ];
+    }
+
+    public function asyncLyricEdit(Request $request)
+    {
+        return [
+            'data' => $request->get('lyricEdit'),
+        ];
+    }
+
+    public function saveLyrics(Request $request) {
+        $id = $request->get('id');
+        $lyric = $request->get('lyric');
+
+        try {
+            $songMetadata = SongMetadata::find($id);
+            $songMetadata->lyrics = json_encode(['lyric' => explode("\n", $lyric)]);
+            $songMetadata->save();
+        } catch (\Exception $e) {
+            Toast::error($e->getMessage());
+            return redirect()->back();
+        }
+
+        Toast::info('Lyrics saved');
+        return redirect()->route('platform.app.song-metadata');
     }
 }
