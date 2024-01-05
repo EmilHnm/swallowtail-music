@@ -27,7 +27,7 @@ class AlbumListScreen extends Screen
     {
         $albums = Album::withCount(['song'])->with(['genre'])->advancedFilter([
             ['id', fn($q, $t) => $q->where('album_id', $t)->orWhere('id', $t)],
-            'name',
+            ['name', fn(Builder $q, $t) => $q->where('name', 'like', '%' . $t . '%')],
             ['type', fn($q, $t) => $q->where('type', $t)],
             ['genre', fn(Builder $q, $t) => $q->whereHas('genre', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],
             'created_at:date_range_tz',
@@ -99,7 +99,10 @@ class AlbumListScreen extends Screen
                     }),
                 TD::make('', 'Meta')->render(function(Album $album){
                     $html = '';
-                    $html .= "<span class=''>Songs: {$album->song_count} </span>";
+                    $query = $this->generateQueryStringFilter('album', $album->album_id);
+//                            add genre route
+                    $href =  route('platform.app.songs') . "?$query";
+                    $html .= "<a class='orchid-custom'  href=$href>Songs count: " . $album->song_count . "</a>";
                     $html .= "<br>";
                     $html .= "<span class=''>Released: {$album->release_year} </span>";
                     $html .= "<br>";
