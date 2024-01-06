@@ -48,6 +48,10 @@ class PlatformProvider extends OrchidServiceProvider
             Menu::make('Artist')
                 ->icon('person-badge')
                 ->route('platform.app.artists'),
+            Menu::make('Genres')
+                ->icon('tag')
+                ->route('platform.classification.genres')
+                ->title(__('CLASSIFICATION')),
 //            Menu::make('Get Started')
 //                ->icon('bs.book')
 //                ->title('Navigation')

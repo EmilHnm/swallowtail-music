@@ -21,6 +21,7 @@ namespace App\Models{
  * @property int $release_year
  * @property string $image_path
  * @property string $type
+ * @property string $referer
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Genre> $genre
@@ -39,6 +40,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereImagePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Album whereReferer($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereReleaseYear($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereUpdatedAt($value)
@@ -85,6 +87,9 @@ namespace App\Models{
  * @property-read int|null $genres_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Song> $song
  * @property-read int|null $song_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Artist advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Artist defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Artist idRange($id, $field = 'id')
  * @method static \Illuminate\Database\Eloquent\Builder|Artist newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Artist newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Artist query()
@@ -161,6 +166,9 @@ namespace App\Models{
  * @property-read int|null $artist_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Song> $song
  * @property-read int|null $song_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Genre advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Genre defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Genre idRange($id, $field = 'id')
  * @method static \Illuminate\Database\Eloquent\Builder|Genre newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Genre newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Genre query()

@@ -92,7 +92,7 @@ class ArtistListScreen extends Screen
                     ->filter()
                     ->render(function(Artist $artist) {
                         return implode("<br>", $artist->genres->map(function($genre) {
-                            $query = $this->generateQueryStringFilter('genre', $genre->genre_id);
+                            $query = $this->generateQueryStringFilter('id', $genre->genre_id);
                             return "<a class='orchid-custom' href='{$query}'>{$genre->name}</a>";
                         })->toArray());
                     }),

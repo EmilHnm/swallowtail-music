@@ -33,7 +33,7 @@ class SongListScreen extends Screen
             ['title', fn(Builder $q, $t) => $q->where('title', 'like', '%' . $t . '%')],
             ['artist', fn(Builder $q, $t) => $q->whereHas('artist', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('artists.artist_id', "$t"))],
             ['album', fn(Builder $q, $t) => $q->whereHas('album', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('album_id', $t))],
-            ['genre', fn(Builder $q, $t) => $q->whereHas('genre', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],
+            ['genre', fn(Builder $q, $t) => $q->whereHas('genre', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('genres.genre_id', $t))],
             ['user', fn(Builder $q, $t) => $q->whereHas('user',
                 fn($k) => $k->where('name', 'like', '%' . $t . '%')
                 ->orWhere('email', 'like', '%' . $t . '%')
@@ -121,7 +121,6 @@ class SongListScreen extends Screen
                     ->render(function(Song $song) {
                         $album = $song->album;
                         $query = $this->generateQueryStringFilter('id', $album->album_id);
-                        $href =  "?$query";
 //                        add album route
                         $href =  route('platform.app.albums') . "?$query";
                         $html = \Str::limit($album->name, 20);
@@ -131,9 +130,8 @@ class SongListScreen extends Screen
                     ->filter()
                     ->render(function(Song $song) {
                         return implode("<br>", $song->genre->map(function($genre) {
-                            $query = $this->generateQueryStringFilter('genre', $genre->genre_id);
-//                            add genre route
-                            $href =  "?$query";
+                            $query = $this->generateQueryStringFilter('id', $genre->genre_id);
+                            $href =  route('platform.classification.genres')."?$query";
                             $html = \Str::limit($genre->name, 20);
                             return "<a class='orchid-custom'  href=$href>" . $html . "</a>";
                         })->toArray());

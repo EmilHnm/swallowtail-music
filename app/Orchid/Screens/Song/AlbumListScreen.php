@@ -29,7 +29,7 @@ class AlbumListScreen extends Screen
             ['id', fn($q, $t) => $q->where('album_id', $t)->orWhere('id', $t)],
             ['name', fn(Builder $q, $t) => $q->where('name', 'like', '%' . $t . '%')],
             ['type', fn($q, $t) => $q->where('type', $t)],
-            ['genre', fn(Builder $q, $t) => $q->whereHas('genre', fn($k) => $k->where('name', 'like', '%' . $t . '%'))],
+            ['genre', fn(Builder $q, $t) => $q->whereHas('genre', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('genres.genre_id', $t))],
             'created_at:date_range_tz',
             'updated_at:date_range_tz',
         ], [

@@ -126,3 +126,9 @@ Route::screen('artist', \App\Orchid\Screens\Song\ArtistListScreen::class)
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Artists'), route('platform.app.artists')));
+
+Route::screen('genre', \App\Orchid\Screens\Classification\GenreListScreen::class)
+    ->name('platform.classification.genres')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push(__('Genres'), route('platform.classification.genres')));

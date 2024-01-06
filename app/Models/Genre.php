@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\AdvancedFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Orchid\Screen\AsSource;
 
 class Genre extends Model
 {
     use HasFactory;
-
+    use AsSource, AdvancedFilters;
     protected $primaryKey = "genre_id";
     public $incrementing = false;
     public $timestamps = true;

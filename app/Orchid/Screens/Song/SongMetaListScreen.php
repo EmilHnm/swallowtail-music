@@ -13,6 +13,7 @@ use App\Orchid\Screens\Traits\HasShowHideCountingToggle;
 use App\Services\SongManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Number;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Screen\Components\Cells\DateTimeSplit;
@@ -45,7 +46,8 @@ class SongMetaListScreen extends Screen
                     $q->whereHas('song', fn(Builder $q) =>
                             $q->where('title', 'like', "%$t%")
                                 ->orWhere('song_id', $t)
-                    )]
+                    )],
+                'referer'
             ],
         );
 
@@ -111,7 +113,7 @@ class SongMetaListScreen extends Screen
                         ->icon('pencil');
                 }),
                 TD::make('driver', 'Storage Driver')->sort(),
-                TD::make('size', 'Size')->render(fn(SongMetadata $metadata) => FileSize::human($metadata->size))->sort(),
+                TD::make('size', 'Size')->render(fn(SongMetadata $metadata) =>  Number::fileSize($metadata->size))->sort(),
                 TD::make('referer', 'Referer')->render((fn(SongMetadata $metadata) => RefererEnum::search($metadata->referer)))
                 ->filter(Select::make()->options(array_flip(RefererEnum::toArray()))->empty('All')),
                 TD::make('created_at', 'Created At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
