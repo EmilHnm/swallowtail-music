@@ -28,6 +28,7 @@
       >
         <swiper-slide v-for="index in 10">
           <BaseCardAlbum
+            v-if="albums[index - 1]"
             :key="albums[index - 1].album_id"
             :id="albums[index - 1].album_id"
             :songCount="albums[index - 1].song_count"
