@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Orchid\Helpers;
-
+// @deprecated
 class FileSize
 {
     public static function human($bytes, $decimals = 2)
