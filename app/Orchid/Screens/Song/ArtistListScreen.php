@@ -2,25 +2,28 @@
 
 namespace App\Orchid\Screens\Song;
 
+use App\Http\Controllers\admin\ArtistAdminController;
 use App\Models\Artist;
+use App\Orchid\Layouts\Song\Artist\EditArtistDetailLayout;
+use App\Orchid\Layouts\Song\Artist\GroupArtistLayout;
+use App\Orchid\Layouts\Song\Artist\ImageArtistLayout;
 use App\Orchid\Screens\Traits\GenerateQueryStringFilter;
 use App\Orchid\Screens\Traits\HasDumpModelModal;
 use App\Orchid\Screens\Traits\HasShowHideCountingToggle;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Orchid\Screen\Actions\Button;
+use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Screen\Components\Cells\DateTimeSplit;
-use Orchid\Screen\Fields\TextArea;
 use Orchid\Screen\Layouts\Modal;
 use Orchid\Screen\Screen;
 use Orchid\Screen\TD;
 use Orchid\Support\Facades\Layout;
-use Orchid\Support\Facades\Toast;
 
 class ArtistListScreen extends Screen
 {
-    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter;
+    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter, ArtistAdminController;
     /**
      * Fetch data to be displayed on the screen.
      *
@@ -64,6 +67,10 @@ class ArtistListScreen extends Screen
     public function commandBar(): iterable
     {
         return [
+            ModalToggle::make("Add Artist")
+                ->modal('editDetailModal')
+                ->icon('plus')
+                ->method('create'),
             $this->getCountingToggleLink(),
         ];
     }
@@ -86,7 +93,21 @@ class ArtistListScreen extends Screen
                     ->filter(),
                 TD::make('', 'Image')->render(function(Artist $artist) {
                     $cover_url = Storage::disk('public')->url('upload/artist_image/'.$artist->image_path);
-                    return $artist->image_path ? "<img src='{$cover_url}' class='img-fluid rounded' width='75' height='75'>" : 'Empty';
+                    return $artist->image_path ? "<img src='{$cover_url}' class='img-fluid rounded' width='75' height='75'>" :
+                        ModalToggle::make("Upload Image")
+                            ->modal('imageModal')
+                            ->async('asyncPassingId')
+                            ->asyncParameters(['id' => (string)$artist->artist_id])
+                            ->method('uploadImage');
+                }),
+                TD::make('', 'Banner')->render(function(Artist $artist) {
+                    $cover_url = Storage::disk('public')->url('upload/artist_image/'.$artist->banner_path);
+                    return $artist->banner_path ? "<img src='{$cover_url}' class='img-fluid rounded' width='75' height='75'>" :
+                        ModalToggle::make("Upload Image")
+                            ->modal('imageModal')
+                            ->async('asyncPassingId')
+                            ->asyncParameters(['id' => (string)$artist->artist_id])
+                            ->method('uploadBanner');
                 }),
                 TD::make('genres', "Genres")
                     ->filter()
@@ -97,59 +118,70 @@ class ArtistListScreen extends Screen
                         })->toArray());
                     }),
                 TD::make('description', 'Description')->render(function(Artist $artist) {
-                    return ModalToggle::make('Edit')
-                        ->modal('descriptionModal')
-                        ->async('asyncDescriptionEdit')
-                        ->class('btn text-primary')
-                        ->method('saveDescription')
-                        ->asyncParameters(['id' => (string)$artist->artist_id])
-                        ->icon('pencil');
+                    $short_description = \Str::limit($artist->description, 20);
+                    return "<span title='{$artist->description}'>{$short_description}</span>";
                 }),
-                TD::make('song_count', "Songs")->render(function(Artist $artist) {
+                TD::make('song_count', "Songs Count")->render(function(Artist $artist) {
                     $query = $this->generateQueryStringFilter('artist', $artist->artist_id);
                     $query = route('platform.app.songs') . '?' . $query;
                     return "<a class='orchid-custom' href='{$query}'>{$artist->song_count}</a>";
                 })->sort(),
                 TD::make('created_at', 'Created At')->sort()->filter(TD::FILTER_DATE_RANGE)->asComponent(DateTimeSplit::class),
                 TD::make('updated_at', 'Updated At')->sort()->filter(TD::FILTER_DATE_RANGE)->asComponent(DateTimeSplit::class),
+                TD::make('', 'Actions')->render(fn(Artist $artist) => DropDown::make()
+                    ->icon('three-dots-vertical')
+                        ->list([
+                            ModalToggle::make("Edit Information")
+                                ->modal('editDetailModal')
+                                ->async('asyncPassingId')
+                                ->asyncParameters(['id' => (string)$artist->artist_id])
+                                ->icon('pencil')
+                                ->method('updateInformation'),
+                            ModalToggle::make("Group Artist To")
+                                ->modal('groupModal')
+                                ->async('asyncPassingId')
+                                ->asyncParameters(['id' => (string)$artist->artist_id])
+                                ->icon('person-plus-fill')
+                                ->method('group'),
+                            ModalToggle::make("Change Image")
+                                ->modal('imageModal')
+                                ->async('asyncPassingId')
+                                ->asyncParameters(['id' => (string)$artist->artist_id])
+                                ->method('uploadImage')
+                                ->canSee((bool)$artist->image_path)
+                                ->icon('person-square'),
+                            ModalToggle::make("Upload Image")
+                                ->modal('imageModal')
+                                ->async('asyncPassingId')
+                                ->asyncParameters(['id' => (string)$artist->artist_id])
+                                ->method('uploadBanner')
+                                ->canSee((bool)$artist->banner_path)
+                                ->icon('image'),
+                            Button::make('Delete')
+                                ->method('delete')
+                                ->confirm('This action is irreversible. Are you sure you want to delete this artist?')
+                                ->parameters([
+                                    'id' => $artist->artist_id
+                                ])
+                                ->icon('trash'),
+                        ])
+                ),
             ]),
             $this->getDumpModal(),
-            Layout::modal('descriptionModal', [
-                Layout::rows([
-                    TextArea::make('description')
-                        ->title('Description')
-                        ->value(function() {
-                            $request = collect(\Request::all());
-                            $artist = Artist::find($request->get('id'));
-                            return $artist?->description ?? $request->get('id');
-                        })->rows(20),
-                    ]),
-                ])->title('Edit Description')
-            ->async('asyncDescriptionEdit'),
+            Layout::modal('editDetailModal', [
+                    EditArtistDetailLayout::class
+                ])->title('Edit Artist Detail')
+                ->async('asyncPassingId'),
+            Layout::modal('groupModal', [
+                    GroupArtistLayout::class
+                ])->title('Edit Artist Detail')
+                ->async('asyncPassingId'),
+            Layout::modal('imageModal', [
+                    ImageArtistLayout::class
+                ])->title('Upload Image')
+                ->async('asyncPassingId')
+                ->size(Modal::SIZE_LG),
+
         ];
-    }
-
-    public function asyncDescriptionEdit(Request $request)
-    {
-        return [
-            'data' => $request->get('id'),
-        ];
-    }
-
-    public function saveDescription(Request $request) {
-        $id = $request->get('id');
-        $description = $request->get('description');
-
-        try {
-            $artist = Artist::find($id);
-            $artist->description = $description;
-            $artist->save();
-        } catch (\Exception $e) {
-            Toast::error($e->getMessage());
-            return redirect()->back();
-        }
-
-        Toast::info('Description saved');
-        return redirect()->route('platform.app.artists');
     }
 }

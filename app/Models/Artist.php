@@ -33,4 +33,16 @@ class Artist extends Model
             "genre_id"
         )->withTimestamps();
     }
+
+
+    public function downloadImageByUrl($url, $type = 'avatar')
+    {
+        $contents = file_get_contents($url);
+        \Storage::disk('final_artist_image')->put($this->id . "/$type.jpg", $contents);
+        if ($type == 'avatar')
+            $this->image_path = $this->id . "/$type.jpg";
+        elseif($type == 'banner')
+            $this->banner_path = $this->id . "/$type.jpg";
+        $this->save();
+    }
 }

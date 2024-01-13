@@ -70,7 +70,8 @@ class ArtistSyncCommand extends Command
 
                 if ($item['avatar'] != null) {
                     try {
-                        $client->get($item['avatar'], ['sink' => public_path('storage/upload/artist_image/' . $item['id'] . '/avatar.jpg')]);
+                        \Storage::disk('final_artist_image')->put($item['id'] . '/avatar.jpg', file_get_contents($item['avatar']));
+//                        $client->get($item['avatar'], ['sink' => public_path('storage/upload/artist_image/' . $item['id'] . '/avatar.jpg')]);
                         $artist->image_path = $item['id'] . '/avatar.jpg';
                     } catch (\Exception $e) {
                         $this->error($item['id'] . " - avatar url error");
@@ -79,7 +80,8 @@ class ArtistSyncCommand extends Command
 
                 if ($item['banner'] != null) {
                     try {
-                        $client->get($item['banner'], ['sink' => public_path('storage/upload/artist_image/' . $item['id'] . '/banner.jpg')]);
+                        \Storage::disk('final_artist_image')->put($item['id'] . '/banner.jpg', file_get_contents($item['banner']));
+//                        $client->get($item['banner'], ['sink' => public_path('storage/upload/artist_image/' . $item['id'] . '/banner.jpg')]);
                         $artist->banner_path = $item['id'] . '/banner.jpg';
                     } catch (\Exception $th) {
                         $this->error($item['id'] . " - banner url error");

@@ -4,74 +4,118 @@ namespace App\Http\Controllers\admin;
 
 use App\Models\Artist;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Illuminate\Support\Str;
+use Orchid\Support\Facades\Toast;
 
-class ArtistAdminController extends Controller
+trait ArtistAdminController
 {
-    //
 
-    public function getAll(Request $request)
+    public function asyncPassingId(Request $request)
     {
-        $query = urldecode($request->get("query"));
-        $itemPerPage = $request->get("itemPerPage") ?? 10;
-        $artist = Artist::withCount(["song"])
-            ->where("name", "like", "%$query%")
-            ->paginate($itemPerPage);
-        return response()->json([
-            "status" => "success",
-            "artists" => $artist,
-        ]);
+        return [
+            'id' => $request->get('id'),
+        ];
     }
 
-    public function show($id)
+    public function create(Request $request)
     {
-        $artist = Artist::find($id);
-        if (!$artist) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Artist not found",
-            ]);
-        }
-        return response()->json([
-            "status" => "success",
-            "artist" => $artist,
-        ]);
-    }
-
-    public function update(Request $request)
-    {
-        $artistData = json_decode($request->artist);
-        $artist = Artist::find($artistData->artist_id);
-        if (!$artist) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Artist not found",
-            ]);
-        }
-        $artist->name = $artistData->name;
-        if ($request->hasFile("image")) {
-            $image = $request->file("image");
-            $image_name =
-                $artistData->artist_id .
-                "." .
-                $image->getClientOriginalExtension();
-            @unlink(public_path("storage/upload/artist_image/" . $image_name));
-            $image->move(
-                public_path("storage/upload/artist_image"),
-                $image_name
-            );
-            $artist->image_path = $image_name;
-        }
+        $name = $request->get('name');
+        $description = $request->get('description');
+        $artist = new Artist();
+        $artist->artist_id = "artist_" . Str::random(10);
+        $artist->name = $name;
+        $artist->description = $description;
         $artist->save();
-        return response()->json([
-            "status" => "success",
-            "artist" => $artist,
-        ]);
+        Toast::info('Artist created');
+        return redirect()->route('platform.app.artists');
     }
 
-    public function delete($id)
-    {
+
+    public function updateInformation(Request $request) {
+        $id = $request->get('id');
+        $name = $request->get('name');
+        $description = $request->get('description');
+
+        try {
+            $artist = Artist::find($id);
+            $artist->name = $name;
+            $artist->description = $description;
+            $artist->save();
+        } catch (\Exception $e) {
+            Toast::error($e->getMessage());
+            return redirect()->back();
+        }
+
+        Toast::info('Information saved');
+        return redirect()->route('platform.app.artists');
+    }
+
+    public function uploadImage(Request $request) {
+        $id = $request->get('id');
         $artist = Artist::find($id);
+        $via = $request->get('via');
+        if ($via == 'url') {
+            $request->validate([
+                'url' => 'required|url',
+            ]);
+            try {
+                $url = $request->get('url');
+                $artist->downloadImageByUrl($url);
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
+        } else if ($via == 'file') {
+            $request->validate([
+                'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            ]);
+            try {
+                $file = $request->file('file');
+                \Storage::disk('final_artist_image')->put($artist->artist_id . '/avatar.jpg', file_get_contents($file));
+                $artist->image_path = $artist->artist_id . '/avatar.jpg';
+                $artist->save();
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
+        }
+    }
+
+    public function uploadBanner(Request $request)
+    {
+        $id = $request->get('id');
+        $artist = Artist::find($id);
+        $via = $request->get('via');
+        if ($via == 'url') {
+            $request->validate([
+                'url' => 'required|url',
+            ]);
+            try {
+                $url = $request->get('url');
+                $artist->downloadImageByUrl($url, 'banner');
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
+        } else if ($via == 'file') {
+            $request->validate([
+                'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            ]);
+            try {
+                $file = $request->file('file');
+                \Storage::disk('final_artist_image')->put($artist->artist_id . '/banner.jpg', file_get_contents($file));
+                $artist->image_path = $artist->artist_id . '/banner.jpg';
+                $artist->save();
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        $artist = Artist::find($request->id);
         $songs = $artist
             ->song()
             ->withCount("artist")
@@ -82,26 +126,24 @@ class ArtistAdminController extends Controller
             $song->save();
         }
         $artist->song()->detach();
-        @unlink(
-            public_path("storage/upload/artist_image/" . $artist->image_path)
-        );
+        if($artist->image_path)
+            \Storage::disk('final_artist_image')->delete($artist->image_path);
+        if($artist->banner_path)
+            \Storage::disk('final_artist_image')->delete($artist->banner_path);
+        Toast::warning("Artist {$artist->artist_id} deleted");
         $artist->delete();
-        return response()->json([
-            "status" => "success",
-        ]);
+        return redirect()->route('platform.app.artists');
     }
 
     public function group(Request $request)
     {
-        $from_id = $request->from;
-        $to_id = $request->to;
+        $from_id = $request->start_id;
+        $to_id = $request->endpoint_id;
         $artist_from = Artist::find($from_id);
         $artist_to = Artist::find($to_id);
         if (!$artist_from || !$artist_to) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Artist not found",
-            ]);
+           Toast::error("Artist not found");
+          return redirect()->back();
         }
 
         $songs = $artist_from->song()->get();
@@ -116,29 +158,8 @@ class ArtistAdminController extends Controller
                 $song->artist()->attach($artist_to->artist_id);
             }
         }
-        return response()->json([
-            "status" => "success",
-        ]);
-    }
-
-    public function getArtistSong($id, Request $request)
-    {
-        $query = urldecode($request->get("query"));
-        $artist = Artist::find($id);
-        if (!$artist) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Artist not found",
-            ]);
-        }
-        $songs = $artist
-            ->song()
-            ->with(["user", "album"])
-            ->where("title", "like", "%" . $query . "%")
-            ->paginate(10);
-        return response()->json([
-            "status" => "success",
-            "songs" => $songs,
-        ]);
+        Toast::info("Artist {$artist_from->artist_id} grouped to {$artist_to->artist_id}");
+        $this->delete(new Request(["id" => $artist_from->artist_id]));
+        return redirect()->route('platform.app.artists');
     }
 }

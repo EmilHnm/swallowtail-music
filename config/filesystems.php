@@ -64,6 +64,22 @@ return [
             'throw' => false,
         ],
 
+        'final_cover' => [
+            'driver' => 'local',
+            'root' => public_path('storage/upload/album_cover'),
+            'url' => env('APP_URL') . '/storage/upload/album_cover',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        'final_artist_image' => [
+            'driver' => 'local',
+            'root' => public_path('storage/upload/artist_image'),
+            'url' => env('APP_URL') . '/storage/upload/artist_image',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
 
     ],
 
