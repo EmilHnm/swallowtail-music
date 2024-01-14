@@ -2,213 +2,154 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Enum\RefererEnum;
 use App\Models\Song;
 use App\Models\Album;
+use App\Orchid\Screens\Traits\GenerateQueryStringFilter;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Orchid\Support\Facades\Toast;
 
-class AlbumAdminController extends Controller
+trait AlbumAdminController
 {
     //
-    public function getAll(Request $request)
+    use GenerateQueryStringFilter;
+
+    public function asyncPassingId(Request $request)
     {
-        $albums = [];
-        $itemPerPage = $request->get("itemPerPage") ?? 10;
-        switch ($request->get("type")) {
-            case "title":
-                $albums = Album::with(["user"])
-                    ->where("name", "like", "%" . $request->get("query") . "%")
-                    ->withCount(["song"])
-                    ->paginate($itemPerPage);
-                break;
-            case "uploader":
-                $albums = Album::with(["user"])
-                    ->whereHas("user", function ($query) use ($request) {
-                        $query->where(
-                            "name",
-                            "like",
-                            "%" . $request->get("query") . "%"
-                        );
-                    })
-                    ->withCount(["song"])
-                    ->paginate($itemPerPage);
-                break;
-            case "year":
-                $albums = Album::with(["user"])
-                    ->where(
-                        "release_year",
-                        "like",
-                        "%" . $request->get("query") . "%"
-                    )
-                    ->withCount(["song"])
-                    ->paginate($itemPerPage);
-                break;
-            default:
-                $albums = Album::with(["user"])
-                    ->withCount(["song"])
-                    ->paginate($itemPerPage);
-                break;
+        return [
+            'id' => $request->get('id'),
+        ];
+    }
+
+    public function create(Request $request){
+        $request->validate([
+            'name' => 'required',
+            'release_year' => 'required|numeric|regex:/^[0-9]{4}$/',
+            'type' => 'required',
+            'cover_source' => 'required',
+            'url' => 'required_if:cover_source,url',
+            'file' => 'required_if:cover_source,file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+        $name = $request->name;
+        $release_year = $request->release_year;
+        $type = $request->type;
+        $album = new Album();
+        $album->album_id = "album_" . \Str::random(10);
+        $album->name = $name;
+        $album->release_year = $release_year;
+        $album->type = $type;
+        $album->user_id = Auth::user()->user_id;
+        $album->referer = RefererEnum::ADMIN;
+        $album->save();
+        if($request->cover_source == 'url'){
+            try {
+                $album->downloadCoverByUrl($request->url);
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
+        } elseif ($request->cover_source == 'file') {
+            try {
+                $file = $request->file('file');
+                \Storage::disk('final_cover')->put(file_path_helper($album->id) . '/thumbnail.jpg', file_get_contents($file));
+                $album->image_path = file_path_helper($album->id) . '/thumbnail.jpg';
+                $album->save();
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
         }
-        return response()->json(
-            [
-                "albums" => $albums,
-                "status" => "success",
-            ],
-            200
-        );
-    }
 
-    public function show($id)
-    {
-        $album = Album::with(["user"])
-            ->withCount(["song"])
-            ->find($id);
-        $songs = Song::where("album_id", $id)->get();
-        return response()->json([
-            "status" => "success",
-            "album" => $album,
-            "songs" => $songs,
-        ]);
-    }
-
-    public function song($id)
-    {
-        $songs = Song::where("album_id", $id)->get();
-        return response()->json([
-            "status" => "success",
-            "songs" => $songs,
-        ]);
-    }
-
-    public function songRemove(Request $request)
-    {
-        $song = Song::where("song_id", $request->song_id)->first();
-        $song->album_id = null;
-        $song->save();
-        return response()->json([
-            "status" => "success",
-            "message" => "Song removed successfully!",
-        ]);
-    }
-
-    public function getSongNotInAlbum(Request $request)
-    {
-        $query = urldecode($request->get("query"));
-        $songs = Song::with("artist")
-            ->where("album_id", null)
-            ->where("title", "like", "%" . $query . "%")
-            ->get();
-        return response()->json([
-            "status" => "success",
-            "songs" => $songs,
-        ]);
-    }
-
-    public function songAdd(Request $request)
-    {
-        $album = Album::find($request->album_id);
-        $album = Album::where("album_id", $request->album_id)->first();
-        if (!$album) {
-            return response()->json(
-                [
-                    "status" => "error",
-                    "message" => "Album not found!",
-                ],
-                402
-            );
-        }
-        $song = Song::where("song_id", $request->song_id)->first();
-        if (!$song) {
-            return response()->json(
-                [
-                    "status" => "error",
-                    "message" => "Song not found!",
-                ],
-                402
-            );
-        }
-        $song->album_id = $album->album_id;
-        $song->save();
-        return response()->json(
-            [
-                "status" => "success",
-                "message" => "Add song to album successfully!",
-            ],
-            200
-        );
+        Toast::success('Album created successfully!');
+        $query = $this->generateQueryStringFilter('id', $album->album_id);
+        return redirect()->to(route('platform.app.albums'). "?$query");
     }
 
     public function update(Request $request)
     {
-        $albumData = json_decode($request->albumData);
-        $album = Album::where("album_id", $albumData->album_id)->first();
-        if (!$album) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Album not found!",
-            ]);
-        }
-        if ($album->user_id != Auth::user()->user_id) {
-            return response()->json([
-                "status" => "error",
-                "message" => "You are not allowed to update this album!",
-            ]);
-        }
-        if ($request->file("image")) {
-            $imageFile = $request->file("image");
-            $fileName =
-                $album->album_id .
-                "." .
-                $imageFile->getClientOriginalExtension();
-            @unlink(
-                public_path("storage/upload/album_cover") .
-                    "/" .
-                    $album->image_path
-            );
-            $imageFile->move(
-                public_path("storage/upload/album_cover"),
-                $fileName
-            );
-            $album->image_path = $fileName;
-        }
-        $album->name = $albumData->name;
-        $album->release_year = $albumData->release_year;
-        $album->type = $albumData->type;
-        $album->save();
-        return response()->json([
-            "status" => "success",
-            "message" => "Album updated successfully!",
+        $request->validate([
+            'name' => 'required',
+            'release_year' => 'required|numeric|regex:/^[0-9]{4}$/',
+            'type' => 'required',
+            'url' => 'required_if:cover_source,url',
+            'file' => 'required_if:cover_source,file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
+        $name = $request->name;
+        $release_year = $request->release_year;
+        $type = $request->type;
+        $album = Album::find($request->id);
+        $album->name = $name;
+        $album->release_year = $release_year;
+        $album->type = $type;
+        if($request->cover_source == 'url'){
+            try {
+                $album->downloadCoverByUrl($request->url);
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
+        } elseif ($request->cover_source == 'file') {
+            try {
+                $file = $request->file('file');
+                \Storage::disk('final_cover')->put(file_path_helper($album->id) . '/thumbnail.jpg', file_get_contents($file));
+                $album->image_path = file_path_helper($album->id) . '/thumbnail.jpg';
+                $album->save();
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
+        }
+
+        $album->save();
+        Toast::success('Album created successfully!');
+        $query = $this->generateQueryStringFilter('id', $album->album_id);
+        return redirect()->to(route('platform.app.albums'). "?$query");
     }
 
-    public function delete($id)
-    {
-        $album = Album::find($id);
-        if (!$album) {
-            return response()->json(
-                [
-                    "status" => "error",
-                    "message" => "Album not found!",
-                ],
-                402
-            );
+    public function syncSongs(Request $request) {
+        $request->validate([
+            'songs' => 'required|array',
+            'id' => 'required|exists:albums,album_id'
+        ]);
+        $album = Album::find($request->id);
+        foreach ($album->song as $song) {
+            $song->album_id = null;
+            $song->save();
         }
-        $songs = Song::where("album_id", $id)->get();
+        foreach ($request->songs as $song) {
+            try {
+                $song = Song::findOrFail($song['song_id']);
+                $song->album_id = $request->id;
+                $song->save();
+            } catch (\Exception $e) {
+                Toast::error($e->getMessage());
+                return redirect()->back();
+            }
+        }
+        Toast::success('Songs synced successfully!');
+        $query = $this->generateQueryStringFilter('id',$request->id);
+        return redirect()->to(route('platform.app.albums'). "?$query");
+    }
+
+    public function delete(Request $request)
+    {
+        $album = Album::find($request->id);
+        if (!$album) {
+            Toast::error('Album not found!');
+            return redirect()->back();
+        }
+
+        $songs = Song::where('album_id', $album->album_id)->get();
         foreach ($songs as $song) {
             $song->album_id = null;
             $song->save();
         }
-        @unlink(
-            public_path("storage/upload/album_cover/") . "/" . $album->album_id
-        );
+
+        \Storage::disk('final_cover')->delete($album->image_path);
+        Toast::warning("Album \"{$album->name}\" deleted successfully!");
         $album->delete();
-        return response()->json(
-            [
-                "status" => "success",
-                "message" => "Delete album successfully!",
-            ],
-            200
-        );
+        return redirect()->route('platform.app.albums');
     }
 }

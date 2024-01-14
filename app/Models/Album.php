@@ -29,4 +29,12 @@ class Album extends Model
     {
         return $this->belongsToMany(Genre::class, AlbumGenre::class, "album_id", "genre_id")->withTimestamps();
     }
+
+    public function downloadCoverByUrl($url)
+    {
+        $contents = file_get_contents($url);
+        \Storage::disk('final_cover')->put($this->id . "/thumbnail.jpg", $contents);
+        $this->image_path = $this->id . "/thumbnail.jpg";
+        $this->save();
+    }
 }

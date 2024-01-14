@@ -150,7 +150,7 @@ class ArtistListScreen extends Screen
                                 ->method('uploadImage')
                                 ->canSee((bool)$artist->image_path)
                                 ->icon('person-square'),
-                            ModalToggle::make("Upload Image")
+                            ModalToggle::make("Change Banner")
                                 ->modal('imageModal')
                                 ->async('asyncPassingId')
                                 ->asyncParameters(['id' => (string)$artist->artist_id])

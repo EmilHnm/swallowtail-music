@@ -4,12 +4,18 @@ namespace App\Orchid\Screens\Song;
 
 use App\Enum\AlbumTypeEnum;
 use App\Enum\RefererEnum;
+use App\Http\Controllers\admin\AlbumAdminController;
 use App\Models\Album;
+use App\Orchid\Layouts\Song\Album\EditAlbumDetailLayout;
+use App\Orchid\Layouts\Song\Album\EditAlbumSongsLayout;
 use App\Orchid\Screens\Traits\GenerateQueryStringFilter;
 use App\Orchid\Screens\Traits\HasDumpModelModal;
 use App\Orchid\Screens\Traits\HasShowHideCountingToggle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Orchid\Screen\Actions\Button;
+use Orchid\Screen\Actions\DropDown;
+use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Screen\Components\Cells\DateTimeSplit;
 use Orchid\Screen\Screen;
 use Orchid\Screen\TD;
@@ -17,7 +23,7 @@ use Orchid\Support\Facades\Layout;
 
 class AlbumListScreen extends Screen
 {
-    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter;
+    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter, AlbumAdminController;
     /**
      * Fetch data to be displayed on the screen.
      *
@@ -58,6 +64,10 @@ class AlbumListScreen extends Screen
     public function commandBar(): iterable
     {
         return [
+            ModalToggle::make("Add Album")
+                ->modal('editDetailModal')
+                ->icon('plus')
+                ->method('create'),
             $this->getCountingToggleLink(),
         ];
     }
@@ -74,10 +84,10 @@ class AlbumListScreen extends Screen
                 TD::make('id', 'ID')
                     ->render(fn(Album $album) => $album->id .'<br\/>'
                      . $this->getDumpModelToggle(Album::class, $album->album_id, $album->album_id, ['with'=> ['song', 'genre']]))
-                    ->sort(),
+                    ->sort()->filter(),
                 TD::make('name', 'Name')->render(function(Album $album) {
                     $name = \Str::limit($album->name, 30);
-                    return "<span class='' title='{$name}'>" . $name . "</span>";
+                    return "<span class='' title='{$album->name}'>" . $name . "</span>";
                 })->sort(),
                 TD::make('type', 'Type')->sort()->filter(TD::FILTER_SELECT)->filterOptions(
                     AlbumTypeEnum::toArray()
@@ -100,7 +110,6 @@ class AlbumListScreen extends Screen
                 TD::make('', 'Meta')->render(function(Album $album){
                     $html = '';
                     $query = $this->generateQueryStringFilter('album', $album->album_id);
-//                            add genre route
                     $href =  route('platform.app.songs') . "?$query";
                     $html .= "<a class='orchid-custom'  href=$href>Songs count: " . $album->song_count . "</a>";
                     $html .= "<br>";
@@ -112,8 +121,40 @@ class AlbumListScreen extends Screen
                 }),
                 TD::make('created_at', 'Created At')->sort()->filter(TD::FILTER_DATE_RANGE)->asComponent(DateTimeSplit::class),
                 TD::make('updated_at', 'Updated At')->sort()->filter(TD::FILTER_DATE_RANGE)->asComponent(DateTimeSplit::class),
+                TD::make('', 'Actions')->render(fn(Album $album) => DropDown::make()
+                    ->icon('three-dots-vertical')
+                    ->list([
+                        ModalToggle::make("Edit Information")
+                            ->modal('editDetailModal')
+                            ->async('asyncPassingId')
+                            ->asyncParameters(['id' => (string)$album->album_id])
+                            ->icon('pencil')
+                            ->method('update'),
+                        ModalToggle::make("Edit Album Songs")
+                            ->modal('editSongsModal')
+                            ->async('asyncPassingId')
+                            ->asyncParameters(['id' => (string)$album->album_id])
+                            ->icon('disc-fill')
+                            ->method('syncSongs'),
+                        Button::make('Delete')
+                            ->method('delete')
+                            ->confirm('This action is irreversible. Are you sure you want to delete this album?')
+                            ->parameters([
+                                'id' => $album->album_id
+                            ])
+                            ->icon('trash')
+                    ])
+                ),
             ]),
             $this->getDumpModal(),
+            Layout::modal('editDetailModal', [
+                EditAlbumDetailLayout::class
+            ])->title('Edit Album Detail')
+                ->async('asyncPassingId'),
+            Layout::modal('editSongsModal', [
+                EditAlbumSongsLayout::class
+            ])->title('Edit Album Songs')
+                ->async('asyncPassingId'),
         ];
     }
 }
