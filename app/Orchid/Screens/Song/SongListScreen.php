@@ -3,6 +3,7 @@
 namespace App\Orchid\Screens\Song;
 
 use App\Enum\RefererEnum;
+use App\Enum\SongMetadataStatusEnum;
 use App\Http\Controllers\admin\SongAdminController;
 use App\Models\Song;
 use App\Models\SongMetadata;
@@ -12,6 +13,7 @@ use App\Orchid\Screens\Traits\GenerateQueryStringFilter;
 use App\Orchid\Screens\Traits\HasDumpModelModal;
 use App\Orchid\Screens\Traits\HasShowHideCountingToggle;
 use Illuminate\Database\Eloquent\Builder;
+use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Actions\ModalToggle;
@@ -109,7 +111,9 @@ class SongListScreen extends Screen
                     ->render(fn(Song $song) => $song->id .
                         "<br>" . $this->getDumpModelToggle(Song::class, $song->song_id, $song->song_id)),
                 TD::make('title', "Title")
-                    ->filter()->sort(),
+                    ->filter()->sort()->render(fn(Song $song) => $song->title . "<br>" .
+                        "<span style='font-size: 12px'>{$song->normalized_title}</span>"
+                        ),
                 TD::make('artist', "Artist")
                     ->filter()
                     ->render(function(Song $song) {
@@ -147,7 +151,10 @@ class SongListScreen extends Screen
                 TD::make('listens', "Meta")->render(function(Song $song) {
                     $html = '';
                     $html .= "Status: " . ($song->display ?? 'Inactive') . "<br>";
-                    $html .= "File Status: " . ($song->file?->status ?? 'Inactive') . "<br>";
+                    $status_query = $this->generateQueryStringFilter('song.title', $song->song_id);
+                    $status_href = route('platform.app.song-metadata') . "?$status_query";
+                    $status_tag = "<a class='orchid-custom'  href=$status_href>" . SongMetadataStatusEnum::search($song->file?->status) . "</a>";
+                    $html .= "File Status: " . ($status_tag ?? 'Inactive') . "<br>";
                     $html .= "Listens: " . ($song->listens ?? '0') . "<br>";
                     return $html;
                 }),
@@ -176,6 +183,13 @@ class SongListScreen extends Screen
                                 ->method('update')
                                 ->async('asyncPassingId')
                                 ->asyncParameters(['id' => $song->song_id]),
+                            Button::make('Delete')
+                                ->icon('trash')
+                                ->method('delete')
+                                ->confirm('Are you sure you want to delete this song?')
+                                ->parameters([
+                                    'id' => $song->song_id,
+                                ]),
                         ])
                     ),
             ]),

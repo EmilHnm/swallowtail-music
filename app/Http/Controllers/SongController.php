@@ -230,14 +230,14 @@ class SongController extends Controller
         if ($request->query->has("query")) {
             $query = $request->query->get("query");
             $songs = $songs->where("title", "like", "%" . $query . "%")
-                ->orWhere("sub_title", "like", "%" . $query . "%");
+                ->orWhere("normalized_title", "like", "%" . $query . "%");
         }
 
         if ($request->query->has("sort") && $request->query->has("order")) {
             $sort = $request->query->get("sort");
             $order = $request->query->get("order");
             if (
-                in_array($sort, ['title', 'sub_title', 'listens', 'created_at'])
+                in_array($sort, ['title', 'normalized_title', 'listens', 'created_at'])
                 && in_array($order, ['asc', 'desc'])
             ) {
                 $songs = $songs->orderBy($sort, $order);
@@ -425,7 +425,7 @@ class SongController extends Controller
             $songs = Song::with(["artist", "album", "like"])
                 ->withCount("artist")
                 ->where("title", "like", "%" . $query . "%")
-                ->orWhere("sub_title", "like", "%" . $query . "%")
+                ->orWhere("normalized_title", "like", "%" . $query . "%")
                 ->where("display", "public")
                 ->having("artist_count", '>=', '1')
                 ->limit(10)

@@ -149,9 +149,10 @@ class SongManager
     {
         if ($filepath == null) {
             $filepath = $this->SongMetadata->file_path;
-            $driver = $this->SongMetadata->driver;
-            Storage::disk($driver)->delete($filepath);
-            $this->SongMetadata->delete();
         }
+        $driver = $this->SongMetadata->driver;
+        if ($driver != 's3')
+            Storage::disk($driver)->delete($filepath);
+        $this->SongMetadata->delete();
     }
 }
