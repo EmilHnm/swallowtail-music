@@ -18,6 +18,7 @@ namespace App\Models{
  * @property string $album_id
  * @property string $user_id
  * @property string $name
+ * @property string $normalized_name
  * @property int $release_year
  * @property string $image_path
  * @property string $type
@@ -40,6 +41,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereImagePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Album whereNormalizedName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereReferer($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereReleaseYear($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Album whereType($value)
@@ -77,6 +79,7 @@ namespace App\Models{
  * @property int $id
  * @property string $artist_id
  * @property string $name
+ * @property string $normalized_name
  * @property string|null $description
  * @property string|null $image_path
  * @property string|null $banner_path
@@ -101,6 +104,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Artist whereImagePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Artist whereListens($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Artist whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Artist whereNormalizedName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Artist whereUpdatedAt($value)
  */
 	class Artist extends \Eloquent {}
@@ -287,13 +291,13 @@ namespace App\Models{
  *
  * @property int $id
  * @property string $song_id
- * @property string|null $user_id
+ * @property string $user_id
  * @property string|null $album_id
- * @property string|null $title
- * @property string|null $sub_title
- * @property int|null $listens
- * @property int|null $duration
- * @property string|null $display
+ * @property string $title
+ * @property string $normalized_title
+ * @property int $listens
+ * @property int $duration
+ * @property string $display
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Album|null $album
@@ -317,8 +321,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereDuration($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereListens($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Song whereNormalizedTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereSongId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Song whereSubTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereUserId($value)
@@ -411,6 +415,7 @@ namespace App\Models{
  * @property string|null $status
  * @property int|null $size
  * @property string|null $hash
+ * @property int $duration
  * @property mixed|null $lyrics
  * @property int $referer
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -424,6 +429,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata query()
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereDriver($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereDuration($value)
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereFilePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereHash($value)
  * @method static \Illuminate\Database\Eloquent\Builder|SongMetadata whereId($value)

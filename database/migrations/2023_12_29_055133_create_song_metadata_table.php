@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string("status")->nullable();
             $table->integer("size")->nullable();
             $table->string("hash")->nullable();
+            $table->integer("duration")->default(0);
             $table->json("lyrics")->nullable();
             $table->integer('referer')->default(0);
             $table->timestamps();

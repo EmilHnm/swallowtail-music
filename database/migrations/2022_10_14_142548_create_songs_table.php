@@ -16,13 +16,12 @@ return new class extends Migration
         Schema::create("songs", function (Blueprint $table) {
             $table->id();
             $table->string("song_id");
-            $table->string("user_id")->nullable();
+            $table->string("user_id");
             $table->string("album_id")->nullable();
-            $table->string("title")->nullable();
-            $table->string("sub_title")->nullable();
-            $table->integer("listens")->nullable();
-            $table->integer("duration")->nullable();
-            $table->string("display")->nullable();
+            $table->string("title");
+            $table->string("normalized_title");
+            $table->integer("listens")->default(0);
+            $table->string("display")->default("private");
             $table->timestamps();
         });
     }

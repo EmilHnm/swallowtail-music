@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string("artist_id");
             $table->string("name");
+            $table->string("normalized_name");
             $table->longText("description")->nullable();
             $table->string("image_path")->nullable();
             $table->string("banner_path")->nullable();

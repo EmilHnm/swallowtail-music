@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('album_id');
             $table->string('user_id');
             $table->string('name');
+            $table->string('normalized_name');
             $table->integer('release_year');
             $table->string('image_path');
             $table->string('type');
