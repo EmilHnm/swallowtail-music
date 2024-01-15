@@ -63,8 +63,6 @@ class SongsSyncCommand extends Command
                     $raw_data = $data['song'];
                     $song->title = $raw_data['title'];
                     $ffdisk = FFMpeg::fromDisk($raw_data['storage_type'])->open($raw_data['storage']);
-                    $song->duration = $ffdisk->getDurationInSeconds();
-                    $song->listens = 0;
                     $song->display = 'public';
                     $size = Storage::disk($raw_data['storage_type'])->size($raw_data['storage']);
                     $hash = hash('md5', Storage::disk($raw_data['storage_type'])->get($raw_data['storage']));
@@ -79,6 +77,7 @@ class SongsSyncCommand extends Command
                         'hash' => $hash,
                         'status' => SongMetadataStatusEnum::DONE,
                         'referer' => RefererEnum::CRAWLER,
+                        'duration' => $ffdisk->getDurationInSeconds(),
                     ]);
 
                     $song->artist()->detach();

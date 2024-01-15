@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Sync;
 
+use App\Orchid\Helpers\Text;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -60,6 +61,7 @@ class ArtistSyncCommand extends Command
                 }
                 $artist->artist_id = $item['channel_id'] ? "artist_" . $item['channel_id'] : "artist_" . \Str::random(10);
                 $artist->name = $item['name'];
+                $artist->normalized_name = Text::normalize($item['name']);
                 $artist->description = $item['description'];
 
                 // dd(Storage::disk('public')->url('/upload/artist_image/1000000005/avatar.jpg'));

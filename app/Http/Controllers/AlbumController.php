@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Orchid\Helpers\Text;
 use Carbon\Carbon;
 use App\Models\Song;
 use App\Models\Album;
@@ -26,17 +27,20 @@ class AlbumController extends Controller
             $imageFile = $request->file("albumImage");
             $fileName =
                 $album_id . "." . $imageFile->getClientOriginalExtension();
-            @unlink(
-                public_path("storage/upload/album_cover") . "/" . $fileName
-            );
-            $imageFile->move(
-                public_path("storage/upload/album_cover"),
-                $fileName
-            );
+//            @unlink(
+//                public_path("storage/upload/album_cover") . "/" . $fileName
+//            );
+//            $imageFile->move(
+//                public_path("storage/upload/album_cover"),
+//                $fileName
+//            );
+            \Storage::disk('final_cover')->delete($fileName);
+            \Storage::disk('final_cover')->put($fileName, file_get_contents($imageFile));
             $album->image_path = $fileName;
         }
 
         $album->name = $name;
+        $album->normalized_name = Text::normalize($name);
         $album->album_id = $album_id;
         $album->user_id = Auth::user()->user_id;
         $album->release_year = $release_year;
@@ -48,7 +52,6 @@ class AlbumController extends Controller
             $song->user_id = Auth::user()->user_id;
             $song->title = $request["songName_" . $i];
             $song->display = "private";
-            $song->listens = 0;
             $song->album_id = $album_id;
             $songData[] = (object)[
                 "song_id" => $song->song_id,
@@ -80,9 +83,7 @@ class AlbumController extends Controller
 
     public function getAlbumInfo($id)
     {
-        $album = Album::where("album_id", $id)->first();
-        $songs = Song::where("album_id", $id)->where("display", "public")->count();
-        $album->song_count = $songs;
+        $album = Album::withCount('song')->where("album_id", $id)->first();
         return response()->json([
             "status" => "success",
             "album" => $album,
