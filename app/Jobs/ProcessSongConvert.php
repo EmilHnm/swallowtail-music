@@ -35,7 +35,6 @@ class ProcessSongConvert implements ShouldQueue, ShouldBeUnique
             $song_mananger->convert($this->name_final);
             $song_mananger->save();
             Storage::disk($this->disk)->delete($this->name_final);
-            Storage::disk($this->disk)->delete("chunks/" . $this->song->id);
         } catch (\Exception $ex) {
             dump($ex->getMessage());
             $this->fail($ex->getMessage());

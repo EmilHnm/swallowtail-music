@@ -56,6 +56,22 @@ return [
             'throw' => false,
         ],
 
+        'chunk_file' => [
+            'driver' => 'local',
+            'root' => storage_path('app/chunks'),
+            'url' => env('APP_URL') . '/storage/chunks',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
+        'raws_audio' => [
+            'driver' => 'local',
+            'root' => storage_path('app/raws'),
+            'url' => env('APP_URL') . '/storage/raws',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
         'final_audio' => [
             'driver' => 'local',
             'root' => public_path('storage/upload/song_src'),

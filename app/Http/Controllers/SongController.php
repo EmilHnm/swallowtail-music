@@ -37,7 +37,6 @@ class SongController extends Controller
         $song->user_id = Auth::user()->user_id;
         $song->title = $request->songName;
         $song->display = $request->displayMode;
-        $song->listens = 0;
 
         foreach ($artist as $id) {
             $song_artist = new SongArtist();
@@ -107,8 +106,8 @@ class SongController extends Controller
 
         $disk = StorageManager::getDisk();
 
-        $path = Storage::disk($disk)->path("chunks/$id/{$request->file('file')->getClientOriginalName()}");
-        if (Storage::disk($disk)->exists("chunks/$id/{$file->getClientOriginalName()}")) {
+        $path = Storage::disk('chunk_file')->path("$id/{$request->file('file')->getClientOriginalName()}");
+        if (Storage::disk('chunk_file')->exists("$id/{$file->getClientOriginalName()}")) {
             // Storage::disk($disk)->append("chunks/{$file->getClientOriginalName()}", $file->get());
             \File::append($path, $file->get());
             if (!SongMetadata::where("song_id", $id)->exists()) {
@@ -119,21 +118,28 @@ class SongController extends Controller
                 $song_file->save();
             }
         } else {
-            Storage::disk($disk)->put("chunks/$id/{$file->getClientOriginalName()}", $file->get());
+            Storage::disk('chunk_file')->put("$id/{$file->getClientOriginalName()}", $file->get());
             // \File::put($path, $file->get());
         }
 
         if ($request->has('is_last') && $request->boolean('is_last')) {
-            \Log::info("Last chunk" . $id);
             $name_final = str_replace(".part", "", $file->getClientOriginalName());
-            if (Storage::disk($disk)->exists($name_final)) {
-                Storage::disk($disk)->delete($name_final);
+            if (Storage::disk("raws_audio")->exists($name_final)) {
+                Storage::disk('raws_audio')->delete($name_final);
             }
-            Storage::disk($disk)->move("chunks/$id/{$file->getClientOriginalName()}", $name_final);
+            Storage::disk('raws_audio')->writeStream(
+                $name_final,
+                Storage::disk('chunk_file')->readStream("$id/{$file->getClientOriginalName()}")
+            );
+            Storage::disk('chunk_file')->deleteDirectory($id);
             $song = Song::find($id);
             $song->file->status = SongMetadataStatusEnum::UPLOADED;
+            $song->file->driver = 'raws_audio';
             $song->save();
-            dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
+            $song->file->save();
+//            dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
+            ProcessSongConvert::dispatchSync(Song::find($id), 'raws_audio', $name_final);
+            \Log::info("Song uploaded: $id" . $song->file->status);
             return response()->json(['uploaded' => true]);
         }
     }

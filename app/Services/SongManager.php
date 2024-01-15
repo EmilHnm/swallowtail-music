@@ -21,8 +21,6 @@ class SongManager
 
     private ?SongMetadata $SongMetadata = null;
 
-    private $disk;
-
     private $directory = "song_src";
 
     private $raw_directory = "song_raw";
@@ -43,7 +41,7 @@ class SongManager
 
     public function convert($file_path)
     {
-        $file = Storage::disk($this->disk)->get($file_path);
+        $file = Storage::disk('raws_audio')->get($file_path);
         if ($this->song == null) {
             throw new \Exception("Song is null");
         }
@@ -59,15 +57,18 @@ class SongManager
             $filename = $this->raw_directory . "/" . date("YmdHi");
             $final_filepath = $savePath . $this->song->song_id . ".ogg";
 
-            $codec = FFMpeg::fromDisk($this->disk)
+            $codec = FFMpeg::fromDisk('raws_audio')
                 ->open($file_path)
                 ->getVideoStream()
                 ->get('codec_name');
             if ($codec == "vorbis") {
-                Storage::disk($this->disk)->move($file_path, $final_filepath);
-                $this->removeFile($filename);
+                Storage::disk('final_audio')->writeStream(
+                    $final_filepath,
+                    Storage::disk('raws_audio')->readStream($file_path)
+                );
+                Storage::disk('raws_audio')->delete($file_path);
             } else {
-                FFMpeg::fromDisk($this->disk)
+                FFMpeg::fromDisk('raws_audio')
                     ->open($file_path)
                     ->export()
                     ->addFilter([
@@ -78,19 +79,20 @@ class SongManager
                         "-b:a",
                         "320k",
                     ])
+                    ->toDisk('final_audio')
                     ->save($final_filepath);
+                Storage::disk('raws_audio')->delete($file_path);
             }
 
-            $this->removeFile($filename);
-            $duration = FFMpeg::fromDisk($this->disk)
+            $duration = FFMpeg::fromDisk('final_audio')
                 ->open($final_filepath)
                 ->getDurationInSeconds();
-            $this->song->duration = $duration;
+            $this->SongMetadata->duration = $duration;
             $this->SongMetadata->status = SongMetadataStatusEnum::DONE;
             $this->SongMetadata->file_path = $final_filepath;
-            $this->SongMetadata->driver = $this->disk;
-            $this->SongMetadata->size = Storage::disk($this->disk)->size($final_filepath);
-            $this->SongMetadata->hash = hash("md5", Storage::disk($this->disk)->get($final_filepath));
+            $this->SongMetadata->driver = 'final_audio';
+            $this->SongMetadata->size = Storage::disk('final_audio')->size($final_filepath);
+            $this->SongMetadata->hash = hash("md5", Storage::disk('final_audio')->get($final_filepath));
             FFMpeg::cleanupTemporaryFiles();
             event(new SongConvertedSuccessFull($this->song->user, $this->song));
             return $this;
@@ -99,8 +101,8 @@ class SongManager
             $errorLog = $exception->getErrorOutput();
             $this->SongMetadata->status = SongMetadataStatusEnum::ERROR;
             $this->SongMetadata->save();
-            Log::error($command . ' meet error: ' . '$errorLog',);
-            throw new \Exception($exception->getMessage());
+            Log::error($command . ' meet error: ' . "$errorLog");
+            throw new \Exception("Song Manager convert error: " . $exception->getMessage());
         }
     }
 
@@ -147,13 +149,9 @@ class SongManager
     {
         if ($filepath == null) {
             $filepath = $this->SongMetadata->file_path;
+            $driver = $this->SongMetadata->driver;
+            Storage::disk($driver)->delete($filepath);
             $this->SongMetadata->delete();
-        }
-        if (StorageManager::getDisk() == "local") {
-            Storage::disk("local")->delete($filepath);
-        }
-        if (StorageManager::getDisk() == "s3") {
-            Storage::disk("s3")->delete($filepath);
         }
     }
 }
