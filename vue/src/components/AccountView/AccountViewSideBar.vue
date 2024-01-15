@@ -40,12 +40,6 @@
           <span>Upload Management</span>
         </router-link>
       </li>
-      <li @click="closeSideBar" v-if="user.role === 'Admin'">
-        <router-link :to="{ name: 'accountAdmin' }">
-          <IconMenuBlock />
-          <span>Admin Dashboard</span>
-        </router-link>
-      </li>
     </ul>
   </nav>
 </template>
