@@ -3,23 +3,28 @@
 namespace App\Orchid\Screens\Song;
 
 use App\Enum\RefererEnum;
+use App\Http\Controllers\admin\SongAdminController;
 use App\Models\Song;
+use App\Models\SongMetadata;
 use App\Orchid\Helpers\Date;
+use App\Orchid\Layouts\Song\Song\EditSongDetailLayout;
 use App\Orchid\Screens\Traits\GenerateQueryStringFilter;
 use App\Orchid\Screens\Traits\HasDumpModelModal;
 use App\Orchid\Screens\Traits\HasShowHideCountingToggle;
 use Illuminate\Database\Eloquent\Builder;
 use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\Link;
+use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Screen\Components\Cells\DateTimeSplit;
 use Orchid\Screen\Fields\DateRange;
 use Orchid\Screen\Screen;
 use Orchid\Screen\TD;
 use Orchid\Support\Facades\Layout;
+use Orchid\Support\Facades\Toast;
 
 class SongListScreen extends Screen
 {
-    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter;
+    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter, SongAdminController;
     /**
      * Fetch data to be displayed on the screen.
      *
@@ -119,12 +124,15 @@ class SongListScreen extends Screen
                 TD::make('album', "Album")
                     ->filter()
                     ->render(function(Song $song) {
-                        $album = $song->album;
-                        $query = $this->generateQueryStringFilter('id', $album->album_id);
-//                        add album route
-                        $href =  route('platform.app.albums') . "?$query";
-                        $html = \Str::limit($album->name, 20);
-                        return "<a class='orchid-custom' title='{$album->name}' href=$href>" . $html . "</a>";
+                        if ($album = $song->album) {
+                            $query = $this->generateQueryStringFilter('id', $album->album_id);
+    //                        add album route
+                            $href =  route('platform.app.albums') . "?$query";
+                            $html = \Str::limit($album->name, 20);
+                            return "<a class='orchid-custom' title='{$album->name}' href=$href>" . $html . "</a>";
+                        } else {
+                            return '';
+                        }
                     }),
                 TD::make('genre', "Genre")
                     ->filter()
@@ -157,33 +165,26 @@ class SongListScreen extends Screen
                     ->asComponent(DateTimeSplit::class),
                 TD::make('created_at', "Created at")
                     ->sort()->filter(TD::FILTER_DATE_RANGE)
-                    ->asComponent(DateTimeSplit::class)
+                    ->asComponent(DateTimeSplit::class),
+                TD::make('', 'Actions')
+                    ->render(fn(Song $song) => DropDown::make()
+                        ->icon('three-dots-vertical')
+                        ->list([
+                            ModalToggle::make('Edit Information')
+                                ->icon('pencil')
+                                ->modal('editDetailModal')
+                                ->method('update')
+                                ->async('asyncPassingId')
+                                ->asyncParameters(['id' => $song->song_id]),
+                        ])
+                    ),
             ]),
-            $this->getDumpModal()
+            $this->getDumpModal(),
+            Layout::modal('editDetailModal', [
+                EditSongDetailLayout::class
+            ])->title('Edit Song Detail')
+                ->async('asyncPassingId')
+
         ];
-    }
-
-    public function asyncLyricEdit(Request $request)
-    {
-        return [
-            'data' => $request->get('lyricEdit'),
-        ];
-    }
-
-    public function saveLyrics(Request $request) {
-        $id = $request->get('id');
-        $lyric = $request->get('lyric');
-
-        try {
-            $songMetadata = SongMetadata::find($id);
-            $songMetadata->lyrics = json_encode(['lyric' => explode("\n", $lyric)]);
-            $songMetadata->save();
-        } catch (\Exception $e) {
-            Toast::error($e->getMessage());
-            return redirect()->back();
-        }
-
-        Toast::info('Lyrics saved');
-        return redirect()->route('platform.app.song-metadata');
     }
 }
