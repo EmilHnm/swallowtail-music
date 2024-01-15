@@ -101,7 +101,9 @@ class SongMetaListScreen extends Screen
                     $html = \Str::limit($songMetadata->song->title, 20);
                     return "<a class='orchid-custom'  href=$href>" . $html . "</a>";
                 })->filter(),
-                TD::make('status', 'Status')->render(fn(SongMetadata $metadata) => SongMetadataStatusEnum::search($metadata->status))
+                TD::make('status', 'Status')->render(fn(SongMetadata $metadata) =>
+                    Button::make(SongMetadataStatusEnum::search($metadata->status))
+                )
                 ->filter(Select::make()->options(array_flip(SongMetadataStatusEnum::toArray()))->empty('All'))->sort(),
                 TD::make('', 'Lyric')->render(function(SongMetadata $metadata) {
                     return ModalToggle::make('Lyric')
@@ -113,7 +115,7 @@ class SongMetaListScreen extends Screen
                         ->icon('pencil');
                 }),
                 TD::make('driver', 'Storage Driver')->sort(),
-                TD::make('size', 'Size')->render(fn(SongMetadata $metadata) =>  Number::fileSize($metadata->size))->sort(),
+                TD::make('size', 'Size')->render(fn(SongMetadata $metadata) => $metadata->size ? Number::fileSize($metadata->size) : 'N/A')->sort(),
                 TD::make('referer', 'Referer')->render((fn(SongMetadata $metadata) => RefererEnum::search($metadata->referer)))
                 ->filter(Select::make()->options(array_flip(RefererEnum::toArray()))->empty('All')),
                 TD::make('created_at', 'Created At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
