@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Orchid;
 
+use App\Enum\PermissionEnum;
 use Orchid\Platform\Dashboard;
 use Orchid\Platform\ItemPermission;
 use Orchid\Platform\OrchidServiceProvider;
@@ -38,20 +39,25 @@ class PlatformProvider extends OrchidServiceProvider
             Menu::make('Songs')
                 ->icon('disc')
                 ->route('platform.app.songs')
+                ->permission(PermissionEnum::SONG_INDEX)
                 ->title(__('APPLICATION')),
             Menu::make('Songs Metadata')
                 ->icon('file-earmark-code-fill')
+                ->permission(PermissionEnum::SONG_INDEX)
                 ->route('platform.app.song-metadata'),
             Menu::make('Album')
                 ->icon('folder2-open')
+                ->permission(PermissionEnum::ALBUM_INDEX)
                 ->route('platform.app.albums'),
             Menu::make('Artist')
                 ->icon('person-badge')
-                ->route('platform.app.artists'),
+                ->route('platform.app.artists')
+                ->permission(PermissionEnum::ARTIST_INDEX),
             Menu::make('Genres')
                 ->icon('tag')
                 ->route('platform.classification.genres')
-                ->title(__('CLASSIFICATION')),
+                ->title(__('CLASSIFICATION'))
+            ->permission(PermissionEnum::CLASSIFYING_INDEX),
 //            Menu::make('Get Started')
 //                ->icon('bs.book')
 //                ->title('Navigation')
@@ -98,10 +104,12 @@ class PlatformProvider extends OrchidServiceProvider
 
             Menu::make(__('Logs'))
                 ->icon('bug')
+                ->permission(PermissionEnum::SYSTEM_INFO)
                 ->route('platform.logs', ['sort' => '-last_modified'])->title(__('SYSTEM')),
 
             Menu::make(__('Php Info'))
                 ->icon('bug')
+                ->permission(PermissionEnum::SYSTEM_INFO)
                 ->route('platform.phpinfo', ['sort' => '-last_modified']),
 
             Menu::make('Documentation')
@@ -126,9 +134,33 @@ class PlatformProvider extends OrchidServiceProvider
     public function permissions(): array
     {
         return [
+            ItemPermission::group('Songs')
+                ->addPermission(PermissionEnum::SONG_INDEX, 'View Songs')
+                ->addPermission(PermissionEnum::SONG_CREATE, 'Create Songs')
+                ->addPermission(PermissionEnum::SONG_EDIT, 'Update Songs')
+                ->addPermission(PermissionEnum::SONG_DELETE, 'Delete Songs'),
+
+            ItemPermission::group('Albums')
+                ->addPermission(PermissionEnum::ALBUM_INDEX, 'View Albums')
+                ->addPermission(PermissionEnum::ALBUM_CREATE, 'Create Albums')
+                ->addPermission(PermissionEnum::ALBUM_EDIT, 'Update Albums')
+                ->addPermission(PermissionEnum::ALBUM_DELETE, 'Delete Albums'),
+
+            ItemPermission::group('Artists')
+                ->addPermission(PermissionEnum::ARTIST_INDEX, 'View Artists')
+                ->addPermission(PermissionEnum::ARTIST_CREATE, 'Create Artists')
+                ->addPermission(PermissionEnum::ARTIST_EDIT, 'Update Artists')
+                ->addPermission(PermissionEnum::ARTIST_DELETE, 'Delete Artists'),
+
+            ItemPermission::group('Classification')
+                ->addPermission(PermissionEnum::CLASSIFYING_INDEX, 'View Genres'),
+
+
             ItemPermission::group(__('System'))
                 ->addPermission('platform.systems.roles', __('Roles'))
-                ->addPermission('platform.systems.users', __('Users')),
+                ->addPermission('platform.systems.users', __('Users'))
+                ->addPermission(PermissionEnum::SYSTEM_INFO, __('System info')),
+
         ];
     }
 }

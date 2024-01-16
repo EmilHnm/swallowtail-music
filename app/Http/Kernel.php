@@ -74,5 +74,6 @@ class Kernel extends HttpKernel
         "adminAccess" =>
         \App\Http\Middleware\AdministratorAccessMiddleware::class,
         "logRequest" => \App\Http\Middleware\LogRequest::class,
+        'access' => \Orchid\Platform\Http\Middleware\Access::class,
     ];
 }
