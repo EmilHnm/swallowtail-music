@@ -18,6 +18,18 @@ class UserEditLayout extends Rows
     public function fields(): array
     {
         return [
+            Input::make('user.user_id')
+                ->type('text')
+                ->required()
+                ->title(__('User ID'))
+                ->readonly()
+                ->value(function ($user_id) {
+                    if(gettype($user_id) == 'string')
+                        return $user_id ?: \Str::uuid();
+                    else
+                        return  \Str::uuid();
+                }),
+
             Input::make('user.name')
                 ->type('text')
                 ->max(255)
@@ -30,6 +42,7 @@ class UserEditLayout extends Rows
                 ->required()
                 ->title(__('Email'))
                 ->placeholder(__('Email')),
+
         ];
     }
 }

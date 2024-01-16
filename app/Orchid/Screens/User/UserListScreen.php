@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Orchid\Screens\User;
 
+use App\Http\Controllers\admin\UserAdminController;
 use App\Orchid\Layouts\User\UserEditLayout;
 use App\Orchid\Layouts\User\UserFiltersLayout;
 use App\Orchid\Layouts\User\UserListLayout;
+use App\Orchid\Screens\Traits\HasDumpModelModal;
+use App\Orchid\Screens\Traits\HasShowHideCountingToggle;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Orchid\Platform\Models\User;
+use App\Models\User;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Screen;
 use Orchid\Support\Facades\Layout;
@@ -17,6 +20,8 @@ use Orchid\Support\Facades\Toast;
 
 class UserListScreen extends Screen
 {
+
+    use HasDumpModelModal, HasShowHideCountingToggle, UserAdminController;
     /**
      * Fetch data to be displayed on the screen.
      *
@@ -79,40 +84,11 @@ class UserListScreen extends Screen
         return [
             UserFiltersLayout::class,
             UserListLayout::class,
-
+            $this->getDumpModal(),
             Layout::modal('asyncEditUserModal', UserEditLayout::class)
                 ->async('asyncGetUser'),
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function asyncGetUser(User $user): iterable
-    {
-        return [
-            'user' => $user,
-        ];
-    }
 
-    public function saveUser(Request $request, User $user): void
-    {
-        $request->validate([
-            'user.email' => [
-                'required',
-                Rule::unique(User::class, 'email')->ignore($user),
-            ],
-        ]);
-
-        $user->fill($request->input('user'))->save();
-
-        Toast::info(__('User was saved.'));
-    }
-
-    public function remove(Request $request): void
-    {
-        User::findOrFail($request->get('id'))->delete();
-
-        Toast::info(__('User was removed'));
-    }
 }

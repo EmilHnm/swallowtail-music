@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Orchid\Layouts\User;
 
+use App\Orchid\Screens\Traits\HasDumpModelModal;
 use Orchid\Platform\Models\User;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\DropDown;
@@ -11,12 +12,12 @@ use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Screen\Components\Cells\DateTimeSplit;
 use Orchid\Screen\Fields\Input;
-use Orchid\Screen\Layouts\Persona;
 use Orchid\Screen\Layouts\Table;
 use Orchid\Screen\TD;
 
 class UserListLayout extends Table
 {
+    use  HasDumpModelModal;
     /**
      * @var string
      */
@@ -28,11 +29,27 @@ class UserListLayout extends Table
     public function columns(): array
     {
         return [
+
+            TD::make('id', __('ID'))
+                ->sort()
+                ->cantHide()
+                ->filter(Input::make())
+            ->render(function (User $user) {
+                $id = $user->id;
+                $user_id = \Str::limit($user->user_id, 8);
+                return $id . "<br>" . $this->getDumpModelToggle(\App\Models\User::class, $id, $user_id);
+            }),
+
             TD::make('name', __('Name'))
                 ->sort()
                 ->cantHide()
                 ->filter(Input::make())
-                ->render(fn (User $user) => new Persona($user->presenter())),
+                ->render(fn (User $user) => new \App\Orchid\Layouts\User\Persona($user->presenter())),
+
+            TD::make('gender', __('Gender'))
+                ->sort()
+                ->cantHide()
+                ->filter(Input::make()),
 
             TD::make('email', __('Email'))
                 ->sort()
@@ -68,9 +85,15 @@ class UserListLayout extends Table
                             ->route('platform.systems.users.edit', $user->id)
                             ->icon('bs.pencil'),
 
-                        Button::make(__('Delete'))
-                            ->icon('bs.trash3')
-                            ->confirm(__('Once the account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.'))
+                        Button::make(__('Impersonate user'))
+                            ->icon('bg.box-arrow-in-right')
+                            ->confirm(__('You can revert to your original state by logging out.'))
+                            ->method('loginAs')
+                            ->canSee($user->exists && $user->id !== \request()->user()->id),
+
+                        Button::make(__('Disable'))
+                            ->icon('bs.ban')
+                            ->confirm(__('Are you sure you want to disable this user?'))
                             ->method('remove', [
                                 'id' => $user->id,
                             ]),

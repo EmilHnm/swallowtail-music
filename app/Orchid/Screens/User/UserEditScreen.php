@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Orchid\Screens\User;
 
+use App\Http\Controllers\admin\UserAdminController;
 use App\Orchid\Layouts\Role\RolePermissionLayout;
 use App\Orchid\Layouts\User\UserEditLayout;
 use App\Orchid\Layouts\User\UserPasswordLayout;
@@ -19,10 +20,10 @@ use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Screen;
 use Orchid\Support\Color;
 use Orchid\Support\Facades\Layout;
-use Orchid\Support\Facades\Toast;
 
 class UserEditScreen extends Screen
 {
+    use UserAdminController;
     /**
      * @var User
      */
@@ -146,62 +147,5 @@ class UserEditScreen extends Screen
         ];
     }
 
-    /**
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function save(User $user, Request $request)
-    {
-        $request->validate([
-            'user.email' => [
-                'required',
-                Rule::unique(User::class, 'email')->ignore($user),
-            ],
-        ]);
 
-        $permissions = collect($request->get('permissions'))
-            ->map(fn ($value, $key) => [base64_decode($key) => $value])
-            ->collapse()
-            ->toArray();
-
-        $user->when($request->filled('user.password'), function (Builder $builder) use ($request) {
-            $builder->getModel()->password = Hash::make($request->input('user.password'));
-        });
-
-        $user
-            ->fill($request->collect('user')->except(['password', 'permissions', 'roles'])->toArray())
-            ->fill(['permissions' => $permissions])
-            ->save();
-
-        $user->replaceRoles($request->input('user.roles'));
-
-        Toast::info(__('User was saved.'));
-
-        return redirect()->route('platform.systems.users');
-    }
-
-    /**
-     * @throws \Exception
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function remove(User $user)
-    {
-        $user->delete();
-
-        Toast::info(__('User was removed'));
-
-        return redirect()->route('platform.systems.users');
-    }
-
-    /**
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function loginAs(User $user)
-    {
-        Impersonation::loginAs($user);
-
-        Toast::info(__('You are now impersonating this user'));
-
-        return redirect()->route(config('platform.index'));
-    }
 }
