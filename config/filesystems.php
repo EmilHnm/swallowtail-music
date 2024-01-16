@@ -96,6 +96,14 @@ return [
             'throw' => false,
         ],
 
+        'profile_image' => [
+            'driver' => 'local',
+            'root' => public_path('storage/upload/profile_image'),
+            'url' => env('APP_URL') . '/storage/upload/profile_image',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
 
     ],
 
