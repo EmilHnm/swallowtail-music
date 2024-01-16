@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enum\PermissionEnum;
 use App\Orchid\Screens\Examples\ExampleActionsScreen;
 use App\Orchid\Screens\Examples\ExampleCardsScreen;
 use App\Orchid\Screens\Examples\ExampleChartsScreen;
@@ -105,30 +106,35 @@ Route::screen('example', ExampleScreen::class)
 
 Route::screen('songs', \App\Orchid\Screens\Song\SongListScreen::class)
     ->name('platform.app.songs')
+    ->middleware(PermissionEnum::getMiddleware([PermissionEnum::SONG_INDEX]))
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Songs'), route('platform.app.songs')));
 
 Route::screen('song-metadata', \App\Orchid\Screens\Song\SongMetaListScreen::class)
     ->name('platform.app.song-metadata')
+    ->middleware(PermissionEnum::getMiddleware([PermissionEnum::SONG_INDEX]))
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Songs'), route('platform.app.song-metadata')));
 
-Route::screen('album', \App\Orchid\Screens\Song\AlbumListScreen::class)
+Route::screen('albums', \App\Orchid\Screens\Song\AlbumListScreen::class)
     ->name('platform.app.albums')
+    ->middleware(PermissionEnum::getMiddleware([PermissionEnum::ALBUM_INDEX]))
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Albums'), route('platform.app.albums')));
 
-Route::screen('artist', \App\Orchid\Screens\Song\ArtistListScreen::class)
+Route::screen('artists', \App\Orchid\Screens\Song\ArtistListScreen::class)
     ->name('platform.app.artists')
+    ->middleware(PermissionEnum::getMiddleware([PermissionEnum::ARTIST_INDEX]))
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Artists'), route('platform.app.artists')));
 
-Route::screen('genre', \App\Orchid\Screens\Classification\GenreListScreen::class)
+Route::screen('genres', \App\Orchid\Screens\Classification\GenreListScreen::class)
     ->name('platform.classification.genres')
+    ->middleware(PermissionEnum::getMiddleware([PermissionEnum::CLASSIFYING_INDEX]))
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Genres'), route('platform.classification.genres')));
