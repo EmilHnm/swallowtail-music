@@ -17,6 +17,7 @@ class UserController extends Controller
     {
         $user = User::where("user_id", $id)
             ->select("users.name", "users.user_id", "users.profile_photo_url")
+            ->withTrashed()
             ->first();
         if (!$user) {
             return response()->json([
