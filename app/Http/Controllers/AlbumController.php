@@ -23,21 +23,7 @@ class AlbumController extends Controller
         $type = $request->albumType;
         $songCount = json_decode($request->songCount);
         $album = new Album();
-        if ($request->file("albumImage")) {
-            $imageFile = $request->file("albumImage");
-            $fileName =
-                $album_id . "." . $imageFile->getClientOriginalExtension();
-//            @unlink(
-//                public_path("storage/upload/album_cover") . "/" . $fileName
-//            );
-//            $imageFile->move(
-//                public_path("storage/upload/album_cover"),
-//                $fileName
-//            );
-            \Storage::disk('final_cover')->delete($fileName);
-            \Storage::disk('final_cover')->put($fileName, file_get_contents($imageFile));
-            $album->image_path = $fileName;
-        }
+
 
         $album->name = $name;
         $album->normalized_name = Text::normalize($name);
@@ -60,6 +46,16 @@ class AlbumController extends Controller
             $song->save();
         }
         $album->save();
+
+        if ($request->file("albumImage")) {
+            $imageFile = $request->file("albumImage");
+            $file_path = file_path_helper($album->id) .
+                $album_id . "." . $imageFile->getClientOriginalExtension();
+            \Storage::disk('final_cover')->delete($file_path);
+            \Storage::disk('final_cover')->put($file_path, file_get_contents($imageFile));
+            $album->image_path = $file_path;
+        }
+
         return response()->json([
             "status" => "success",
             "message" => 'Album uploaded successfully!
