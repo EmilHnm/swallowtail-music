@@ -3,6 +3,7 @@
 namespace App\Orchid\Screens\Song;
 
 use App\Enum\AlbumTypeEnum;
+use App\Enum\PermissionEnum;
 use App\Enum\RefererEnum;
 use App\Http\Controllers\admin\AlbumAdminController;
 use App\Models\Album;
@@ -67,7 +68,8 @@ class AlbumListScreen extends Screen
             ModalToggle::make("Add Album")
                 ->modal('editDetailModal')
                 ->icon('plus')
-                ->method('create'),
+                ->method('create')->canSee(\Auth::user()
+                ->hasAccess(PermissionEnum::ALBUM_CREATE)),
             $this->getCountingToggleLink(),
         ];
     }
@@ -129,13 +131,15 @@ class AlbumListScreen extends Screen
                             ->async('asyncPassingId')
                             ->asyncParameters(['id' => (string)$album->album_id])
                             ->icon('pencil')
-                            ->method('update'),
+                            ->method('update')
+                            ->canSee(\Auth::user()->hasAccess(PermissionEnum::ALBUM_EDIT)),
                         ModalToggle::make("Edit Album Songs")
                             ->modal('editSongsModal')
                             ->async('asyncPassingId')
                             ->asyncParameters(['id' => (string)$album->album_id])
                             ->icon('disc-fill')
-                            ->method('syncSongs'),
+                            ->method('syncSongs')
+                            ->canSee(\Auth::user()->hasAccess(PermissionEnum::ALBUM_EDIT)),
                         Button::make('Delete')
                             ->method('delete')
                             ->confirm('This action is irreversible. Are you sure you want to delete this album?')
@@ -143,6 +147,7 @@ class AlbumListScreen extends Screen
                                 'id' => $album->album_id
                             ])
                             ->icon('trash')
+                            ->canSee(\Auth::user()->hasAccess(PermissionEnum::ALBUM_DELETE)),
                     ])
                 ),
             ]),

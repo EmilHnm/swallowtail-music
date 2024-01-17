@@ -2,6 +2,7 @@
 
 namespace App\Orchid\Screens\Song;
 
+use App\Enum\PermissionEnum;
 use App\Http\Controllers\admin\ArtistAdminController;
 use App\Models\Artist;
 use App\Orchid\Layouts\Song\Artist\EditArtistDetailLayout;
@@ -70,7 +71,8 @@ class ArtistListScreen extends Screen
             ModalToggle::make("Add Artist")
                 ->modal('editDetailModal')
                 ->icon('plus')
-                ->method('create'),
+                ->method('create')
+                ->canSee(\Auth::user()->hasAccess(PermissionEnum::ARTIST_CREATE)),
             $this->getCountingToggleLink(),
         ];
     }
@@ -136,34 +138,39 @@ class ArtistListScreen extends Screen
                                 ->async('asyncPassingId')
                                 ->asyncParameters(['id' => (string)$artist->artist_id])
                                 ->icon('pencil')
-                                ->method('updateInformation'),
+                                ->method('updateInformation')
+                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::ARTIST_EDIT)),
                             ModalToggle::make("Group Artist To")
                                 ->modal('groupModal')
                                 ->async('asyncPassingId')
                                 ->asyncParameters(['id' => (string)$artist->artist_id])
                                 ->icon('person-plus-fill')
-                                ->method('group'),
+                                ->method('group')
+                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::ARTIST_EDIT)),
                             ModalToggle::make("Change Image")
                                 ->modal('imageModal')
                                 ->async('asyncPassingId')
                                 ->asyncParameters(['id' => (string)$artist->artist_id])
                                 ->method('uploadImage')
                                 ->canSee((bool)$artist->image_path)
-                                ->icon('person-square'),
+                                ->icon('person-square')
+                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::ARTIST_EDIT)),
                             ModalToggle::make("Change Banner")
                                 ->modal('imageModal')
                                 ->async('asyncPassingId')
                                 ->asyncParameters(['id' => (string)$artist->artist_id])
                                 ->method('uploadBanner')
                                 ->canSee((bool)$artist->banner_path)
-                                ->icon('image'),
+                                ->icon('image')
+                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::ARTIST_EDIT)),
                             Button::make('Delete')
                                 ->method('delete')
                                 ->confirm('This action is irreversible. Are you sure you want to delete this artist?')
                                 ->parameters([
                                     'id' => $artist->artist_id
                                 ])
-                                ->icon('trash'),
+                                ->icon('trash')
+                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::ARTIST_DELETE)),
                         ])
                 ),
             ]),

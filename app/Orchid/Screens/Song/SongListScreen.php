@@ -2,6 +2,7 @@
 
 namespace App\Orchid\Screens\Song;
 
+use App\Enum\PermissionEnum;
 use App\Enum\RefererEnum;
 use App\Enum\SongMetadataStatusEnum;
 use App\Http\Controllers\admin\SongAdminController;
@@ -151,10 +152,14 @@ class SongListScreen extends Screen
                 TD::make('listens', "Meta")->render(function(Song $song) {
                     $html = '';
                     $html .= "Status: " . ($song->display ?? 'Inactive') . "<br>";
-                    $status_query = $this->generateQueryStringFilter('song.title', $song->song_id);
-                    $status_href = route('platform.app.song-metadata') . "?$status_query";
-                    $status_tag = "<a class='orchid-custom'  href=$status_href>" . SongMetadataStatusEnum::search($song->file?->status) . "</a>";
-                    $html .= "File Status: " . ($status_tag ?? 'Inactive') . "<br>";
+                    if ($song->file) {
+                        $status_query = $this->generateQueryStringFilter('song.title', $song->song_id);
+                        $status_href = route('platform.app.song-metadata') . "?$status_query";
+                        $status_tag = "<a class='orchid-custom'  href=$status_href>" . SongMetadataStatusEnum::search($song->file?->status) . "</a>";
+                    } else {
+                        $status_tag = 'Not Available';
+                    }
+                    $html .= "File Status: " . $status_tag  . "<br>";
                     $html .= "Listens: " . ($song->listens ?? '0') . "<br>";
                     return $html;
                 }),
@@ -182,14 +187,16 @@ class SongListScreen extends Screen
                                 ->modal('editDetailModal')
                                 ->method('update')
                                 ->async('asyncPassingId')
-                                ->asyncParameters(['id' => $song->song_id]),
+                                ->asyncParameters(['id' => $song->song_id])
+                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::SONG_EDIT)),
                             Button::make('Delete')
                                 ->icon('trash')
                                 ->method('delete')
                                 ->confirm('Are you sure you want to delete this song?')
                                 ->parameters([
                                     'id' => $song->song_id,
-                                ]),
+                                ])
+                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::SONG_DELETE)),
                         ])
                     ),
             ]),
