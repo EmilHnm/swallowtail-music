@@ -81,11 +81,19 @@ class UserEditScreen extends Screen
                 ->method('loginAs')
                 ->canSee($this->user->exists && $this->user->id !== \request()->user()->id),
 
-            Button::make(__('Remove'))
+            Button::make(__('Disable'))
                 ->icon('bs.trash3')
-                ->confirm(__('Once the account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.'))
+                ->confirm(__('Do you really want to disable this user?'))
                 ->method('remove')
-                ->canSee($this->user->exists),
+                ->class('btn btn-danger')
+                ->canSee(!$this->user->deleted_at),
+
+            Button::make(__('Enable'))
+                ->icon('bs.check2')
+                ->confirm(__('Do you really want to enable this user?'))
+                ->method('enable')
+                ->class('btn btn-success')
+                ->canSee((bool)$this->user->deleted_at),
 
             Button::make(__('Save'))
                 ->icon('bs.check-circle')

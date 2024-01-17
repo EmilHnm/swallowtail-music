@@ -45,6 +45,13 @@ trait UserAdminController
         Toast::info(__('User was disabled.'));
     }
 
+    public function enable(Request $request): void
+    {
+        User::withTrashed()->findOrFail($request->get('id'))->restore();
+
+        Toast::info(__('User was enabled.'));
+    }
+
     /**
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -90,6 +97,88 @@ trait UserAdminController
         return redirect()->route(config('platform.index'));
     }
     //
+
+    public function search(Request $request) {
+        $date = $request->input('filter.date', []);
+        $this->start_date = $date['start'] ?? null;
+        $this->end_date = $date['end'] ?? $this->start_date;
+        if($search = $request->input('filter.user', '')){
+            if (\Str::isMatch('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $search)) {
+                $this->user = User::withTrashed()->with(
+                    [
+                        'uploaded_songs' => function ($q) {
+                            $q->where('display', 'public')->limit(10)->orderBy('created_at', 'desc');
+                        },
+                        'playlists' => function ($q) {
+                            $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
+                        },
+                        'uploaded_albums'=> function ($q) {
+                            $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
+                        },
+                    ]
+                )->withCount('likes')->where('email', $search)->first();
+            } elseif (\Str::isUrl($search)) {
+                preg_match('/\/user\/([a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})/', $search, $matches);
+                $this->user = User::withTrashed()->with(
+                    [
+                        'uploaded_songs' => function ($q) {
+                            $q->where('display', 'public')->limit(10)->orderBy('created_at', 'desc');
+                        },
+                        'playlists' => function ($q) {
+                            $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
+                        },
+                        'uploaded_albums' => function ($q) {
+                            $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
+                        },
+                    ]
+                )->withCount('likes')
+                    ->withCount('uploaded_songs')
+                    ->withCount('playlists')
+                    ->withCount('uploaded_albums')->find($matches[1]);
+            } elseif (\Str::isUuid($search)) {
+                $this->user = User::withTrashed()->with(
+                    [
+                        'uploaded_songs' => function ($q) {
+                            $q->where('display', 'public')->limit(10)->orderBy('created_at', 'desc');
+                        },
+                        'playlists' => function ($q) {
+                            $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
+                        },
+                        'uploaded_albums' => function ($q) {
+                            $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
+                        },
+                    ]
+                )->withCount('likes')
+                    ->withCount('uploaded_songs')
+                    ->withCount('playlists')
+                    ->withCount('uploaded_albums')->where('user_id', $search)->first();
+            } elseif (is_numeric($search)) {
+                $this->user = User::withTrashed()->with(
+                    [
+                        'uploaded_songs' => function ($q) {
+                            $q->where('display', 'public')->limit(10)->orderBy('created_at', 'desc');
+                        },
+                        'playlists' => function ($q) {
+                            $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
+                        },
+                        'uploaded_albums' => function ($q) {
+                            $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
+                        },
+                    ]
+                )
+                    ->withCount('likes')
+                    ->withCount('uploaded_songs')
+                    ->withCount('playlists')
+                    ->withCount('uploaded_albums')
+                    ->find($search);
+            } else {
+                $this->user = null;
+            }
+        } else {
+            $this->user = null;
+        }
+    }
+
     public function showUserUploadSong($id)
     {
         $songs = Song::whereHas("user", function ($q) use ($id) {
