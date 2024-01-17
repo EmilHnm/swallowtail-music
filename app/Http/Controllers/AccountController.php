@@ -81,22 +81,15 @@ class AccountController extends Controller
         ]);
         if ($requets->file("profile_image")) {
             $imageFile = $requets->file("profile_image");
-            $fileName = Auth::user()->user_id . ".jpg";
-            @unlink(public_path("storage/upload/profile_image/") . $fileName);
-            $imageFile->move(
-                public_path("storage/upload/profile_image/"),
-                $fileName
-            );
+            $fileName = file_path_helper(Auth::user()->id) . Auth::user()->user_id . ".jpg";
+            \Storage::disk('profile_image')->put($fileName, file_get_contents($imageFile));
             $user = User::where("user_id", Auth::user()->user_id)->first();
             $user->profile_photo_url = $fileName;
             $user->save();
-            return response(
-                json_encode([
-                    "status" => "success",
-                    "message" => "Profile image updated successfully",
-                ]),
-                Response::HTTP_OK
-            );
+            return response()->json([
+                "status" => "success",
+                "message" => "Profile image updated successfully",
+            ]);
         }
         return response(
             json_encode([
