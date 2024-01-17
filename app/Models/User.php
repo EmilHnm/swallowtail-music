@@ -106,4 +106,25 @@ class User extends Authenticatable
     {
         return new UserPresenter($this);
     }
+
+    public function uploaded_songs() {
+        return $this->hasMany(Song::class, 'user_id', 'user_id');
+    }
+
+    public function uploaded_albums() {
+        return $this->hasMany(Album::class, 'user_id', 'user_id');
+    }
+
+    public function playlists() {
+        return $this->hasMany(Playlist::class, 'user_id', 'user_id');
+    }
+
+    public function likes() {
+        return $this->belongsToMany(
+            Song::class,
+            LikedSong::class,
+            'user_id',
+            'song_id'
+        );
+    }
 }

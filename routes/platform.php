@@ -16,6 +16,7 @@ use App\Orchid\Screens\PlatformScreen;
 use App\Orchid\Screens\Role\RoleEditScreen;
 use App\Orchid\Screens\Role\RoleListScreen;
 use App\Orchid\Screens\User\UserEditScreen;
+use App\Orchid\Screens\User\UserInspectionScreen;
 use App\Orchid\Screens\User\UserListScreen;
 use App\Orchid\Screens\User\UserProfileScreen;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,13 @@ Route::screen('users/create', UserEditScreen::class)
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.systems.users')
         ->push(__('Create'), route('platform.systems.users.create')));
+
+// Platform > System > Users > Inspector
+Route::screen('users/inspector', UserInspectionScreen::class)
+    ->name('platform.systems.users.inspector')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.systems.users')
+        ->push(__('Inspector'), route('platform.systems.users.inspector')));
 
 // Platform > System > Users
 Route::screen('users', UserListScreen::class)
