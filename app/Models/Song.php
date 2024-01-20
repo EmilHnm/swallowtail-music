@@ -16,6 +16,11 @@ class Song extends Model
     public $incrementing = false;
     public $timestamps = true;
 
+    protected static function booted()
+    {
+        static::addGlobalScope('duration', fn ($query) => $query->with(["file" =>  fn($q) => $q->select(["song_id","duration"])]));
+    }
+
     public function genre()
     {
         return $this->belongsToMany(

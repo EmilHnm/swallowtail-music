@@ -130,7 +130,7 @@ export default defineComponent({
             this.likedList = res.likedList;
             this.songCount = this.likedList.length;
             const tempDuration = this.likedList.reduce(
-              (acc, cur) => acc + cur.duration,
+              (acc, cur) => acc + cur.file.duration,
               0
             );
             this.totalDuration = new Date(tempDuration * 1000)

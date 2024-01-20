@@ -86,19 +86,19 @@
           <div
             class="now_playing__controls--progress--bar--progress"
             :style="{
-              width: (progress / playingAudio.duration) * 100 + '%',
+              width: (progress / playingAudio.file.duration) * 100 + '%',
             }"
           ></div>
           <input
             type="range"
             class="now_playing__controls--progress--bar--range"
-            :value="(progress / playingAudio.duration) * 100"
+            :value="(progress / playingAudio.file.duration) * 100"
             @input="setProgress"
           />
         </div>
         <div class="now_playing__controls--progress--time--duration">
           {{
-            new Date(playingAudio.duration * 1000)
+            new Date(playingAudio.file.duration * 1000)
               .toISOString()
               .substring(14, 19)
           }}

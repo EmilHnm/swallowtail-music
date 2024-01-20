@@ -62,7 +62,7 @@
 
         <div class="song-item__right--duration">
           <span>{{
-            new Date(data.duration * 1000).toISOString().substring(14, 19)
+            new Date(data.file.duration * 1000).toISOString().substring(14, 19)
           }}</span>
         </div>
         <div class="song-item__right--control" v-if="control">

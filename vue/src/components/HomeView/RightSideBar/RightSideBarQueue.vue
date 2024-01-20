@@ -10,9 +10,9 @@
           </div>
           <div class="playing-list__song--duration">
             {{
-              Math.floor(playingAudio.duration / 60) +
+              Math.floor(playingAudio.file.duration / 60) +
               ":" +
-              Math.floor(playingAudio.duration % 60)
+              Math.floor(playingAudio.file.duration % 60)
             }}
           </div>
         </div>

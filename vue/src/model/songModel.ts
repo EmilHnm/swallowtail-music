@@ -10,10 +10,13 @@ export interface song {
   title: string;
   sub_title?: string;
   listens: number;
-  duration: number;
   display: string;
   created_at: string;
   updated_at: string;
+  file: {
+    duration: number;
+    song_id: string;
+  }
 }
 
 export type songFileUpload = {

@@ -422,7 +422,7 @@ export default defineComponent({
             this.songList = res.songList;
             this.songCount = this.songList.length;
             let duration = this.songList.reduce((a: number, key: songData) => {
-              return a + key.duration;
+              return a + key.file.duration;
             }, 0);
             this.totalDuration = new Date(duration * 1000)
               .toISOString()

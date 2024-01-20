@@ -28,11 +28,11 @@
               </div>
               <div class="latest-song__song--duration">
                 {{
-                  Math.floor(song.duration / 60) +
+                  Math.floor(song.file.duration / 60) +
                   ":" +
-                  (Math.floor(song.duration % 60) < 10
-                    ? "0" + Math.floor(song.duration % 60)
-                    : Math.floor(song.duration % 60))
+                  (Math.floor(song.file.duration % 60) < 10
+                    ? "0" + Math.floor(song.file.duration % 60)
+                    : Math.floor(song.file.duration % 60))
                 }}
               </div>
               <div class="latest-song__song--add-queue">
@@ -181,6 +181,10 @@ import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import globalEmitListener from "@/shared/globalEmitListener";
 type LatestSong = song & {
   artist: artist[];
+  file: {
+    song_id: string;
+    duration: number;
+  };
 };
 
 type LatestAlbum = album & {

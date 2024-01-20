@@ -3,7 +3,7 @@
     <div class="information" :class="{ mobile: mobile }" v-if="playingAudio">
       <BaseCircleProgress
         :completed-steps="progress"
-        :total-steps="playingAudio.duration"
+        :total-steps="playingAudio.file.duration"
         :animation-duration="500"
         :diameter="300"
       >
@@ -47,7 +47,7 @@
           }}
           -
           {{
-            new Date(playingAudio.duration * 1000)
+            new Date(playingAudio.file.duration * 1000)
               .toISOString()
               .substring(14, 19)
           }}
