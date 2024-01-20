@@ -56,6 +56,18 @@ return [
             'throw' => false,
         ],
 
+        's3_gdriver' => [
+            'driver' => 's3',
+            'key' => env('GDRIVER_ACCESS_KEY_ID'),
+            'secret' => env('GDRIVER_SECRET_ACCESS_KEY'),
+            'region' => env('GDRIVER_DEFAULT_REGION'),
+            'bucket' => env('GDRIVER_BUCKET'),
+            'url' => env('GDRIVER_URL'),
+            'endpoint' => env('GDRIVER_ENDPOINT'),
+            'use_path_style_endpoint' => env('GDRIVER_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+        ],
+
         'chunk_file' => [
             'driver' => 'local',
             'root' => storage_path('app/chunks'),
