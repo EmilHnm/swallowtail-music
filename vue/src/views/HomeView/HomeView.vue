@@ -141,10 +141,11 @@ export default defineComponent({
       this.progress = this.audio.currentTime;
     },
     getDuration() {
-      this.playingAudio.duration = this.audio.duration;
+      this.playingAudio.file.duration = this.audio.duration;
     },
     setProgress(progress: number) {
-      this.audio.currentTime = (progress * this.playingAudio.duration) / 100;
+      this.audio.currentTime =
+        (progress * this.playingAudio.file.duration) / 100;
     },
     setVolume(value: string) {
       this.volume = +value;
@@ -162,6 +163,7 @@ export default defineComponent({
     },
     waiting() {
       this.isAudioWaitting = true;
+      this.setProgress(0);
       this.audio.pause();
     },
     loadeddata() {
@@ -620,6 +622,9 @@ export default defineComponent({
             });
         }, 45000);
         this.timeOut.resume();
+        this.audio.src = "";
+        this.audio.load();
+        this.waiting();
         fetch(`${environment.api}/song/${this.playingAudio.song_id}/stream`, {
           method: "GET",
           headers: {
@@ -630,6 +635,7 @@ export default defineComponent({
           .then((blob) => {
             const objectUrl = URL.createObjectURL(blob);
             this.audio.src = objectUrl;
+            this.audio.load();
             if (this.isPlaying) this.playAudio();
           });
       }
