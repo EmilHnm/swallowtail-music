@@ -4,9 +4,11 @@ namespace App\Console\Commands\Sync;
 
 use App\Enum\SongMetadataStatusEnum;
 use App\Models\Artist;
+use App\Models\Song;
 use App\Models\SongMetadata;
 use App\Enum\SongReferer;
 use App\Enum\RefererEnum;
+use App\Orchid\Helpers\Text;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use ProtoneMedia\LaravelFFMpeg\FFMpeg\FFProbe;
@@ -51,10 +53,19 @@ class SongsSyncCommand extends Command
                 'Authorization' => 'Bearer ' . $token,
             ]
         ]);
+
+        $bar = $this->output->createProgressBar($to - $from);
+        $bar->setFormat("%message%\n%current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%");
+        $bar->start();
         foreach (range($from, $to) as $id) {
-            $song = \App\Models\Song::where('id', $id)->first();
+            $song = Song::where('id', $id)
+                ->whereDoesntHave('file')
+                // ->orWhereHas('file', function ($query) {
+                //     $query->where('referer', RefererEnum::CRAWLER);
+                // })
+                ->first();
             if ($song) {
-                $this->info('Syncing song ' . $song->id . ' - ' . $song->title);
+                $bar->setMessage('Syncing song ' . $song->id . ' - ' . $song->title);
 
                 $response = $client->get($end_point . str_replace('song_', '', $song->song_id));
 
@@ -62,6 +73,7 @@ class SongsSyncCommand extends Command
                 if (isset($data['status']) && $data['status'] == 'success') {
                     $raw_data = $data['song'];
                     $song->title = $raw_data['title'];
+                    $song->normalized_title = Text::normalize($raw_data['title']);
                     $ffdisk = FFMpeg::fromDisk($raw_data['storage_type'])->open($raw_data['storage']);
                     $song->display = 'public';
                     $size = Storage::disk($raw_data['storage_type'])->size($raw_data['storage']);
@@ -103,7 +115,11 @@ class SongsSyncCommand extends Command
                     $song->save();
                 }
             }
-            sleep(5);
+            $bar->advance();
+            $bar->setMessage('Sleeping for 5 seconds');
+            // sleep(5);
         }
+
+        $bar->finish();
     }
 }
