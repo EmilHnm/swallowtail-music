@@ -163,7 +163,6 @@ export default defineComponent({
     },
     waiting() {
       this.isAudioWaitting = true;
-      this.setProgress(0);
       this.audio.pause();
     },
     loadeddata() {
@@ -623,6 +622,7 @@ export default defineComponent({
         }, 45000);
         this.timeOut.resume();
         this.audio.src = "";
+        this.audio.pause();
         this.audio.load();
         this.waiting();
         fetch(`${environment.api}/song/${this.playingAudio.song_id}/stream`, {
