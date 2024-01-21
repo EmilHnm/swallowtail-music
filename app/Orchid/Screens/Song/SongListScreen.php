@@ -35,24 +35,25 @@ class SongListScreen extends Screen
      */
     public function query(): iterable
     {
-        $songs = Song::with(['artist', 'album', 'genre', 'user'])
-        ->advancedFilter([
-            ['id', fn(Builder $q, $t) => $q->where('song_id', $t)->orWhere('id', $t)],
-            ['title', fn(Builder $q, $t) => $q->where('title', 'like', '%' . $t . '%')],
-            ['artist', fn(Builder $q, $t) => $q->whereHas('artist', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('artists.artist_id', "$t"))],
-            ['album', fn(Builder $q, $t) => $q->whereHas('album', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('album_id', $t))],
-            ['genre', fn(Builder $q, $t) => $q->whereHas('genre', fn($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('genres.genre_id', $t))],
-            ['user', fn(Builder $q, $t) => $q->whereHas('user',
-                fn($k) => $k->where('name', 'like', '%' . $t . '%')
-                ->orWhere('email', 'like', '%' . $t . '%')
-                ->orWhere('user_id', 'like', '%' . $t . '%')
-            )],
-            'created_at:date_range_tz',
-            'updated_at:date_range_tz',
-            ['referer', fn(Builder $q, $t) => $q->whereHas('file', fn($k) => $k->where('referer', $t))] ,
-        ], [
-            'id', 'title', 'listens', 'created_at', 'updated_at'
-        ]);
+        $songs = Song::withoutGlobalScopes(['duration'])->with(['artist', 'album', 'genre', 'user', 'file'])
+            ->advancedFilter([
+                ['id', fn (Builder $q, $t) => $q->where('song_id', $t)->orWhere('id', $t)],
+                ['title', fn (Builder $q, $t) => $q->where('title', 'like', '%' . $t . '%')],
+                ['artist', fn (Builder $q, $t) => $q->whereHas('artist', fn ($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('artists.artist_id', "$t"))],
+                ['album', fn (Builder $q, $t) => $q->whereHas('album', fn ($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('album_id', $t))],
+                ['genre', fn (Builder $q, $t) => $q->whereHas('genre', fn ($k) => $k->where('name', 'like', '%' . $t . '%')->orWhere('genres.genre_id', $t))],
+                ['user', fn (Builder $q, $t) => $q->whereHas(
+                    'user',
+                    fn ($k) => $k->where('name', 'like', '%' . $t . '%')
+                        ->orWhere('email', 'like', '%' . $t . '%')
+                        ->orWhere('user_id', 'like', '%' . $t . '%')
+                )],
+                'created_at:date_range_tz',
+                'updated_at:date_range_tz',
+                ['referer', fn (Builder $q, $t) => $q->whereHas('file', fn ($k) => $k->where('referer', $t))],
+            ], [
+                'id', 'title', 'listens', 'created_at', 'updated_at'
+            ]);
         return [
             'songs' => $this->paging($songs, 15),
         ];
@@ -75,7 +76,7 @@ class SongListScreen extends Screen
      */
     public function commandBar(): iterable
     {
-        if($filter = \Request::get('filter')){
+        if ($filter = \Request::get('filter')) {
             if (isset($filter['referer']) && $filter['referer'] == RefererEnum::USER) {
                 $filter['referer'] = null;
             }
@@ -109,29 +110,30 @@ class SongListScreen extends Screen
             Layout::table('songs', [
                 TD::make('id', "ID")
                     ->filter()->sort()
-                    ->render(fn(Song $song) => $song->id .
+                    ->render(fn (Song $song) => $song->id .
                         "<br>" . $this->getDumpModelToggle(Song::class, $song->song_id, $song->song_id)),
                 TD::make('title', "Title")
-                    ->filter()->sort()->render(fn(Song $song) => $song->title . "<br>" .
-                        "<span style='font-size: 12px'>{$song->normalized_title}</span>"
-                        ),
+                    ->filter()->sort()->render(
+                        fn (Song $song) => $song->title . "<br>" .
+                            "<span style='font-size: 12px'>{$song->normalized_title}</span>"
+                    ),
                 TD::make('artist', "Artist")
                     ->filter()
-                    ->render(function(Song $song) {
-                        return implode("<br>", $song->artist->map(function($artist) {
+                    ->render(function (Song $song) {
+                        return implode("<br>", $song->artist->map(function ($artist) {
                             $query = $this->generateQueryStringFilter('id', $artist->artist_id);
-//                            add artist route
-                            $href =  route('platform.app.artists')."?$query";
+                            //                            add artist route
+                            $href =  route('platform.app.artists') . "?$query";
                             $html = \Str::limit($artist->name, 20);
                             return "<a class='orchid-custom'  href=$href>" . $html . "</a>";
                         })->toArray());
                     }),
                 TD::make('album', "Album")
                     ->filter()
-                    ->render(function(Song $song) {
+                    ->render(function (Song $song) {
                         if ($album = $song->album) {
                             $query = $this->generateQueryStringFilter('id', $album->album_id);
-    //                        add album route
+                            //                        add album route
                             $href =  route('platform.app.albums') . "?$query";
                             $html = \Str::limit($album->name, 20);
                             return "<a class='orchid-custom' title='{$album->name}' href=$href>" . $html . "</a>";
@@ -141,15 +143,15 @@ class SongListScreen extends Screen
                     }),
                 TD::make('genre', "Genre")
                     ->filter()
-                    ->render(function(Song $song) {
-                        return implode("<br>", $song->genre->map(function($genre) {
+                    ->render(function (Song $song) {
+                        return implode("<br>", $song->genre->map(function ($genre) {
                             $query = $this->generateQueryStringFilter('id', $genre->genre_id);
-                            $href =  route('platform.classification.genres')."?$query";
+                            $href =  route('platform.classification.genres') . "?$query";
                             $html = \Str::limit($genre->name, 20);
                             return "<a class='orchid-custom'  href=$href>" . $html . "</a>";
                         })->toArray());
                     }),
-                TD::make('listens', "Meta")->render(function(Song $song) {
+                TD::make('listens', "Meta")->render(function (Song $song) {
                     $html = '';
                     $html .= "Status: " . ($song->display ?? 'Inactive') . "<br>";
                     if ($song->file) {
@@ -160,16 +162,16 @@ class SongListScreen extends Screen
                         $status_tag = 'Not Available';
                     }
                     $html .= "File Status: " . $status_tag  . "<br>";
-                    $html .= "Listens: " . ($song->listens ?? '0') . "<br>";
+                    $html .= "Listens: " . $song->listens . "<br>";
                     return $html;
                 }),
                 TD::make('user', "User")
                     ->filter()
-                    ->render(function(Song $song) {
+                    ->render(function (Song $song) {
                         $user = $song->user;
                         $query = $this->generateQueryStringFilter('user', $user->id);
                         $href = "?$query";
-//                        add user route
+                        //                        add user route
                         return "<a class='orchid-custom' title='{$user->name}' href=$href>" . $user->name . "</a>";
                     }),
                 TD::make('updated_at', "Updated at")
@@ -179,25 +181,26 @@ class SongListScreen extends Screen
                     ->sort()->filter(TD::FILTER_DATE_RANGE)
                     ->asComponent(DateTimeSplit::class),
                 TD::make('', 'Actions')
-                    ->render(fn(Song $song) => DropDown::make()
-                        ->icon('three-dots-vertical')
-                        ->list([
-                            ModalToggle::make('Edit Information')
-                                ->icon('pencil')
-                                ->modal('editDetailModal')
-                                ->method('update')
-                                ->async('asyncPassingId')
-                                ->asyncParameters(['id' => $song->song_id])
-                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::SONG_EDIT)),
-                            Button::make('Delete')
-                                ->icon('trash')
-                                ->method('delete')
-                                ->confirm('Are you sure you want to delete this song?')
-                                ->parameters([
-                                    'id' => $song->song_id,
-                                ])
-                                ->canSee(\Auth::user()->hasAccess(PermissionEnum::SONG_DELETE)),
-                        ])
+                    ->render(
+                        fn (Song $song) => DropDown::make()
+                            ->icon('three-dots-vertical')
+                            ->list([
+                                ModalToggle::make('Edit Information')
+                                    ->icon('pencil')
+                                    ->modal('editDetailModal')
+                                    ->method('update')
+                                    ->async('asyncPassingId')
+                                    ->asyncParameters(['id' => $song->song_id])
+                                    ->canSee(\Auth::user()->hasAccess(PermissionEnum::SONG_EDIT)),
+                                Button::make('Delete')
+                                    ->icon('trash')
+                                    ->method('delete')
+                                    ->confirm('Are you sure you want to delete this song?')
+                                    ->parameters([
+                                        'id' => $song->song_id,
+                                    ])
+                                    ->canSee(\Auth::user()->hasAccess(PermissionEnum::SONG_DELETE)),
+                            ])
                     ),
             ]),
             $this->getDumpModal(),

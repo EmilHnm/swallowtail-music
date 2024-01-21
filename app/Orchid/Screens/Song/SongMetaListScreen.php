@@ -39,16 +39,21 @@ class SongMetaListScreen extends Screen
     {
         $metadata = SongMetadata::with(['song'])->advancedFilter(
             [
-                ['id', fn(Builder $q, $t) => $q->where('id', $t)->orWhere('hash', 'like',  $t. '%')],
+                ['id', fn (Builder $q, $t) => $q->where('id', $t)->orWhere('hash', 'like',  $t . '%')],
                 'created_at:date_range_tz',
                 'updated_at:date_range_tz',
-                ['song.title', fn(Builder $q, $t) =>
-                    $q->whereHas('song', fn(Builder $q) =>
-                            $q->where('title', 'like', "%$t%")
-                                ->orWhere('song_id', $t)
-                    )],
+                ['song.title', fn (Builder $q, $t) =>
+                $q->whereHas(
+                    'song',
+                    fn (Builder $q) =>
+                    $q->where('title', 'like', "%$t%")
+                        ->orWhere('song_id', $t)
+                )],
                 'referer'
             ],
+            [
+                'id', 'song.title', 'status', 'driver', 'size', 'referer', 'created_at', 'updated_at'
+            ]
         );
 
         return [
@@ -87,25 +92,26 @@ class SongMetaListScreen extends Screen
     {
         return [
             Layout::table('metadata', [
-                TD::make('id', 'ID')->render(fn(SongMetadata $metadata) =>
-                    $metadata->id . '<br>' .
+                TD::make('id', 'ID')->render(fn (SongMetadata $metadata) =>
+                $metadata->id . '<br>' .
                     $this->getDumpModelToggle(
                         SongMetadata::class,
                         $metadata->id,
                         \Str::limit($metadata->hash, 10)
                     ))->sort()->filter(),
-                TD::make('song.title', 'Title')->render(function(SongMetadata $songMetadata) {
+                TD::make('song.title', 'Title')->render(function (SongMetadata $songMetadata) {
                     $query = $this->generateQueryStringFilter('id', $songMetadata->song_id);
-//                            add artist route
-                    $href =  route('platform.app.songs')."?$query";
+                    //                            add artist route
+                    $href =  route('platform.app.songs') . "?$query";
                     $html = \Str::limit($songMetadata->song->title, 20);
                     return "<a class='orchid-custom'  href=$href>" . $html . "</a>";
                 })->filter(),
-                TD::make('status', 'Status')->render(fn(SongMetadata $metadata) =>
+                TD::make('status', 'Status')->render(
+                    fn (SongMetadata $metadata) =>
                     Button::make(SongMetadataStatusEnum::search($metadata->status))
                 )
-                ->filter(Select::make()->options(array_flip(SongMetadataStatusEnum::toArray()))->empty('All'))->sort(),
-                TD::make('', 'Lyric')->render(function(SongMetadata $metadata) {
+                    ->filter(Select::make()->options(array_flip(SongMetadataStatusEnum::toArray()))->empty('All'))->sort(),
+                TD::make('', 'Lyric')->render(function (SongMetadata $metadata) {
                     return ModalToggle::make('Lyric')
                         ->modal('lyricModal')
                         ->async('asyncLyricEdit')
@@ -115,16 +121,17 @@ class SongMetaListScreen extends Screen
                         ->icon('pencil');
                 }),
                 TD::make('driver', 'Storage Driver')->sort(),
-                TD::make('size', 'Size')->render(fn(SongMetadata $metadata) => $metadata->size ? Number::fileSize($metadata->size) : 'N/A')->sort(),
-                TD::make('referer', 'Referer')->render((fn(SongMetadata $metadata) => RefererEnum::search($metadata->referer)))
-                ->filter(Select::make()->options(array_flip(RefererEnum::toArray()))->empty('All')),
+                TD::make('size', 'Size')->render(fn (SongMetadata $metadata) => $metadata->size ? Number::fileSize($metadata->size) : 'N/A')->sort(),
+                TD::make('referer', 'Referer')->render((fn (SongMetadata $metadata) => RefererEnum::search($metadata->referer)))
+                    ->filter(Select::make()->options(array_flip(RefererEnum::toArray()))->empty('All')),
                 TD::make('created_at', 'Created At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
                 TD::make('updated_at', 'Updated At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
-                TD::make()->render(fn(SongMetadata $metadata) => Button::make('Download')
-                    ->icon('download')
-                    ->method('download')
-                    ->parameters(['id' => $metadata->id])
-                    ->turbo(false),
+                TD::make()->render(
+                    fn (SongMetadata $metadata) => Button::make('Download')
+                        ->icon('download')
+                        ->method('download')
+                        ->parameters(['id' => $metadata->id])
+                        ->turbo(false),
                 ),
             ]),
             $this->getDumpModal(),
@@ -132,7 +139,7 @@ class SongMetaListScreen extends Screen
                 Layout::rows([
                     TextArea::make('lyric')
                         ->title('Lyric')
-                        ->value(function() {
+                        ->value(function () {
                             $request = collect(\Request::all());
                             $model = $request->get('model');
                             $lyric = "";
@@ -158,7 +165,8 @@ class SongMetaListScreen extends Screen
         ];
     }
 
-    public function saveLyrics(Request $request) {
+    public function saveLyrics(Request $request)
+    {
         $id = $request->get('id');
         $lyric = $request->get('lyric');
 
@@ -175,7 +183,8 @@ class SongMetaListScreen extends Screen
         return redirect()->route('platform.app.song-metadata');
     }
 
-    public function download($id) {
+    public function download($id)
+    {
         try {
             $metadata = SongMetadata::findOrFail($id);
             $file = $metadata->file_path;
@@ -186,5 +195,4 @@ class SongMetaListScreen extends Screen
             return redirect()->back();
         }
     }
-
 }

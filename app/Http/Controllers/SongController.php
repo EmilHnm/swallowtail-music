@@ -104,8 +104,6 @@ class SongController extends Controller
     {
         $file = $request->file('file');
 
-        $disk = StorageManager::getDisk();
-
         $path = Storage::disk('chunk_file')->path("$id/{$request->file('file')->getClientOriginalName()}");
         if (Storage::disk('chunk_file')->exists("$id/{$file->getClientOriginalName()}")) {
             // Storage::disk($disk)->append("chunks/{$file->getClientOriginalName()}", $file->get());
@@ -137,9 +135,8 @@ class SongController extends Controller
             $song->file->driver = 'raws_audio';
             $song->save();
             $song->file->save();
-//            dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
+            //            dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
             ProcessSongConvert::dispatchSync(Song::find($id), 'raws_audio', $name_final);
-            \Log::info("Song uploaded: $id" . $song->file->status);
             return response()->json(['uploaded' => true]);
         }
     }
