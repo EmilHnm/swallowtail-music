@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "db1a6b15e86edf6f05fea7d9321801d2",
+    "content-hash": "216a87d3b4989ef1ce43f1888690cd58",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -4673,6 +4673,76 @@
                 }
             ],
             "time": "2023-12-25T11:46:58+00:00"
+        },
+        {
+            "name": "spresnac/laravel-artisan-database-helper",
+            "version": "1.0.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spresnac/laravel-artisan-database-helper.git",
+                "reference": "4e61912a8764a5f7a1194425a0415a1104ddede9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spresnac/laravel-artisan-database-helper/zipball/4e61912a8764a5f7a1194425a0415a1104ddede9",
+                "reference": "4e61912a8764a5f7a1194425a0415a1104ddede9",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/console": "^6|^7|^8|^9|^10",
+                "illuminate/support": "^6|^7|^8|^9|^10",
+                "php": "^7.4|^8.0|^8.1|^8.2",
+                "symfony/process": "^4.2|^5|^6"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "spresnac\\databasehelper\\ArtisanDatabaseHelperServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "spresnac\\": "src/spresnac/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sascha Presnac",
+                    "email": "presnac@gmail.com"
+                }
+            ],
+            "description": "Some usefull helper to handle database backup & restores",
+            "keywords": [
+                "artisan",
+                "database",
+                "laravel",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/spresnac/laravel-artisan-database-helper/issues",
+                "source": "https://github.com/spresnac/laravel-artisan-database-helper/tree/1.0.11"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/spresnac",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.buymeacoffee.com/spresnac",
+                    "type": "other"
+                },
+                {
+                    "url": "https://www.paypal.me/paladin",
+                    "type": "paypal"
+                }
+            ],
+            "time": "2023-04-15T18:54:28+00:00"
         },
         {
             "name": "symfony/cache",

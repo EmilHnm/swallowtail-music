@@ -69,10 +69,6 @@ class Kernel extends HttpKernel
         "verified" => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         "cors" => \App\Http\Middleware\CORS::class,
         "requestTimeDelay" => \App\Http\Middleware\IncreaseListenTimeOut::class,
-        "moderatorAccess" =>
-        \App\Http\Middleware\ModeratorAccessMiddleware::class,
-        "adminAccess" =>
-        \App\Http\Middleware\AdministratorAccessMiddleware::class,
         "logRequest" => \App\Http\Middleware\LogRequest::class,
         'access' => \Orchid\Platform\Http\Middleware\Access::class,
     ];

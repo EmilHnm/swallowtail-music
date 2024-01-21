@@ -112,6 +112,12 @@ Route::screen('example', ExampleScreen::class)
 
 //Route::screen('idea', Idea::class, 'platform.screens.idea');
 
+Route::screen('backups', \App\Orchid\Screens\Platform\BackupListScreen::class)
+    ->name('platform.backups')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push(__('Backups'), route('platform.backups')));
+
 Route::screen('songs', \App\Orchid\Screens\Song\SongListScreen::class)
     ->name('platform.app.songs')
     ->middleware(PermissionEnum::getMiddleware([PermissionEnum::SONG_INDEX]))
