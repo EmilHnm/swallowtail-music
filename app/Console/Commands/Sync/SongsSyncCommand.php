@@ -67,52 +67,60 @@ class SongsSyncCommand extends Command
             if ($song) {
                 $bar->setMessage('Syncing song ' . $song->id . ' - ' . $song->title);
 
-                $response = $client->get($end_point . str_replace('song_', '', $song->song_id));
+                try {
 
-                $data = json_decode($response->getBody()->getContents(), true);
-                if (isset($data['status']) && $data['status'] == 'success') {
-                    $raw_data = $data['song'];
-                    $song->title = $raw_data['title'];
-                    $song->normalized_title = Text::normalize($raw_data['title']);
-                    $ffdisk = FFMpeg::fromDisk($raw_data['storage_type'])->open($raw_data['storage']);
-                    $song->display = 'public';
-                    $size = Storage::disk($raw_data['storage_type'])->size($raw_data['storage']);
-                    $hash = hash('md5', Storage::disk($raw_data['storage_type'])->get($raw_data['storage']));
-                    SongMetadata::unguard();
-                    $file = SongMetadata::updateOrCreate([
-                        'song_id' => $song->song_id
-                    ], [
-                        'file_path' => $raw_data['storage'],
-                        'driver' => $raw_data['storage_type'],
-                        'lyrics' => $raw_data['lyric']['lyrics'],
-                        'size' =>   $size,
-                        'hash' => $hash,
-                        'status' => SongMetadataStatusEnum::DONE,
-                        'referer' => RefererEnum::CRAWLER,
-                        'duration' => $ffdisk->getDurationInSeconds(),
-                    ]);
+                    $response = $client->get($end_point . str_replace('song_', '', $song->song_id));
 
-                    $song->artist()->detach();
+                    $data = json_decode($response->getBody()->getContents(), true);
+                    if (isset($data['status']) && $data['status'] == 'success') {
+                        $raw_data = $data['song'];
+                        $song->title = $raw_data['title'];
+                        $song->normalized_title = Text::normalize($raw_data['title']);
+                        $ffdisk = FFMpeg::fromDisk($raw_data['storage_type'])->open($raw_data['storage']);
+                        $song->display = 'public';
+                        $size = Storage::disk($raw_data['storage_type'])->size($raw_data['storage']);
+                        $hash = hash('md5', Storage::disk($raw_data['storage_type'])->get($raw_data['storage']));
+                        SongMetadata::unguard();
+                        $file = SongMetadata::updateOrCreate([
+                            'song_id' => $song->song_id
+                        ], [
+                            'file_path' => $raw_data['storage'],
+                            'driver' => $raw_data['storage_type'],
+                            'lyrics' => $raw_data['lyric']['lyrics'],
+                            'size' =>   $size,
+                            'hash' => $hash,
+                            'status' => SongMetadataStatusEnum::DONE,
+                            'referer' => RefererEnum::CRAWLER,
+                            'duration' => $ffdisk->getDurationInSeconds(),
+                        ]);
 
-                    foreach ($raw_data['artists'] as $artist) {
-                        $artist = Artist::where('artist_id', 'artist_' . $artist['channel_id'])
-                            ->orWhere('id', $artist['id'])->firstOrFail();
-                        if ($artist) {
-                            $song->artist()->attach($artist->artist_id);
+                        $song->artist()->detach();
+
+                        foreach ($raw_data['artists'] as $artist) {
+                            $artist = Artist::where('artist_id', 'artist_' . $artist['channel_id'])
+                                ->orWhere('id', $artist['id'])->firstOrFail();
+                            if ($artist) {
+                                $song->artist()->attach($artist->artist_id);
+                            }
                         }
-                    }
 
-                    $song->genre()->detach();
-                    foreach ($raw_data['genres'] as $genre) {
-                        $genre_data = \App\Models\Genre::where('genre_id', 'genre_' . $genre['id'])
-                            ->orWhere('id', $genre['id'])->firstOrFail();
-                        if ($genre_data) {
-                            $song->genre()->attach($genre_data->genre_id);
+                        $song->genre()->detach();
+                        foreach ($raw_data['genres'] as $genre) {
+                            $genre_data = \App\Models\Genre::where('genre_id', 'genre_' . $genre['id'])
+                                ->orWhere('id', $genre['id'])->firstOrFail();
+                            if ($genre_data) {
+                                $song->genre()->attach($genre_data->genre_id);
+                            }
                         }
-                    }
 
-                    SongMetadata::reguard();
-                    $song->save();
+                        SongMetadata::reguard();
+                        $song->save();
+                    }
+                } catch (\Exception $e) {
+                    $bar->setMessage('Error syncing song ' . $song->id . ' - ' . $song->title);
+                    \Log::error("Error syncing song " . $song->id . " - " . $song->title . " with errors " . $e);
+                    $bar->advance();
+                    continue;
                 }
             }
             $bar->advance();
