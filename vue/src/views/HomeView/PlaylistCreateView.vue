@@ -24,7 +24,7 @@ import { defineComponent } from "vue";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import { mapActions, mapGetters } from "vuex";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 export default defineComponent({
   data() {
     return {

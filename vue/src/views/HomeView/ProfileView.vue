@@ -119,7 +119,7 @@ import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { like } from "@/model/likeModel";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 
 type userProfileData = user & {
   publicPlaylist_count: number;

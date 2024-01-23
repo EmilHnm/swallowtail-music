@@ -75,7 +75,7 @@ import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
 import type { song } from "@/model/songModel";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 type songData = song & {
   album: album;
   artist: artist[];

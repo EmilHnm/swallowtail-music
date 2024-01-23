@@ -178,7 +178,7 @@ import BaseSkeletonsLoadingCard from "@/components/UI/BaseSkeletonsLoadingCard.v
 import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 type LatestSong = song & {
   artist: artist[];
   file: {

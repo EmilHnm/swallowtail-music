@@ -19,7 +19,7 @@ import type { album } from "@/model/albumModel";
 import { mapActions, mapGetters } from "vuex";
 import { defineComponent } from "vue";
 import { useMeta, createMetaManager } from "vue-meta";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 type albumData = album & {
   song_count: number;
 };

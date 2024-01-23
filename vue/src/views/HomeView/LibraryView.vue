@@ -27,7 +27,7 @@ import { mapGetters, mapActions } from "vuex";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import { environment } from "@/environment/environment";
 import { useMeta } from "vue-meta";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 
 export default defineComponent({
   components: { BaseCardAlbum },

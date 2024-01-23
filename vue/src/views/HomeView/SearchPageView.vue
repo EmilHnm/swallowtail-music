@@ -94,7 +94,7 @@ import type { song } from "@/model/songModel";
 import type { like } from "@/model/likeModel";
 import { useMeta } from "vue-meta";
 import BaseCardVue from "@/components/UI/BaseCard.vue";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 type songData = song & {
   album: album;
   artist: artist[];

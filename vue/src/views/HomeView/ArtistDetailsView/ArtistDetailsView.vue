@@ -96,7 +96,7 @@ import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vu
 import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 
 type artistData = artist & {
   total_album: number;

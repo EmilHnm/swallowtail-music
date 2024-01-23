@@ -106,7 +106,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 import type { songData } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";

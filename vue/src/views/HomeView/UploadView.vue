@@ -24,7 +24,7 @@ import SongUpload from "@/components/UploadPage/SongUpload.vue";
 import AlbumUpload from "@/components/UploadPage/AlbumUpload.vue";
 import { mapGetters } from "vuex";
 import { useMeta } from "vue-meta";
-import globalEmitListener from "@/shared/globalEmitListener";
+import globalEmitListener from "@/shared/constants/globalEmitListener";
 export default defineComponent({
   data() {
     return { componentName: "SongUpload" };
