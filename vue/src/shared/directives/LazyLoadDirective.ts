@@ -1,4 +1,5 @@
 import { environment } from "@/environment/environment";
+import type { DirectiveBinding, VNode } from "vue";
 export default {
   mounted: (el: HTMLImageElement) => {
     function loadImage() {
@@ -41,6 +42,17 @@ export default {
       createObserver();
     } else {
       loadImage();
+    }
+  },
+
+  updated: (
+    el: HTMLImageElement,
+    binding: DirectiveBinding,
+    vnode: VNode,
+    prevNode: VNode
+  ) => {
+    if (el.classList.contains("loaded")) {
+      el.src = el.dataset.url as string;
     }
   },
 };
