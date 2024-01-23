@@ -192,7 +192,7 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     width: 90%;
-    row-gap: 10px;
+    gap: 10px;
     &--text {
       flex: 1;
       display: flex;
@@ -204,6 +204,7 @@ export default defineComponent({
         color: var(--text-primary-color);
         text-decoration: none;
         overflow: hidden;
+        white-space: nowrap;
         text-overflow: ellipsis;
         &:hover {
           text-decoration: underline;
@@ -239,6 +240,9 @@ export default defineComponent({
         outline: none;
         border: none;
         cursor: pointer;
+        aspect-ratio: 1/1;
+        width: 36px;
+        height: auto;
         &:hover {
           background-color: var(--background-glass-color-primary);
         }
