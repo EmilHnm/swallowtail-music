@@ -35,7 +35,7 @@
           - {{ user.songUploaded_count }} Songs -
         </div>
         <div class="info__other--albumUploaded">
-          {{ user.albumUploaded_count }} Album
+          {{ user.albumUploaded_count }} Albums
         </div>
       </div>
     </div>

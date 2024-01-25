@@ -390,20 +390,20 @@ $widescreen-width: 1536px;
 .genres-container {
   width: 90%;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   grid-gap: 40px;
   padding: 40px 0;
   margin: auto;
 
   @container main (max-width: #{$large-desktop-width}) {
     & {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       grid-gap: 10px;
     }
   }
   @container main (max-width: #{$tablet-width}) {
     & {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       grid-gap: 20px;
     }
   }
