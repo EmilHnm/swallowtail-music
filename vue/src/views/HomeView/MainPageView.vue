@@ -11,19 +11,31 @@
           <base-list-item v-for="(song, index) in latestSongs" :key="index">
             <div class="latest-song__song">
               <div class="latest-song__song--title">
-                <h2>{{ song.title }}</h2>
-                <p>
-                  <router-link
-                    v-for="(artist, i) in song.artist"
-                    :key="artist.artist_id"
-                    :to="{
-                      name: 'artistPage',
-                      params: { id: artist.artist_id },
-                    }"
+                <h2 @click="playSong(song.song_id)">
+                  <BaseTooltipVue
+                    :position="'bottom'"
+                    :tooltip-text="song.title"
                   >
-                    {{ artist.name
-                    }}<span v-if="i != song.artist.length - 1">, </span>
-                  </router-link>
+                    {{ song.title }}
+                  </BaseTooltipVue>
+                </h2>
+                <p>
+                  <BaseTooltipVue
+                    :position="'bottom'"
+                    :tooltip-text="song.artist.map((a) => a.name).join(', ')"
+                  >
+                    <router-link
+                      v-for="(artist, i) in song.artist"
+                      :key="artist.artist_id"
+                      :to="{
+                        name: 'artistPage',
+                        params: { id: artist.artist_id },
+                      }"
+                    >
+                      {{ artist.name
+                      }}<span v-if="i != song.artist.length - 1">, </span>
+                    </router-link>
+                  </BaseTooltipVue>
                 </p>
               </div>
               <div class="latest-song__song--duration">
@@ -179,6 +191,8 @@ import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import globalEmitListener from "@/shared/constants/globalEmitListener";
+import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
+
 type LatestSong = song & {
   artist: artist[];
   file: {
@@ -205,6 +219,7 @@ export default defineComponent({
     BaseSkeletonsLoadingCard,
     Swiper,
     SwiperSlide,
+    BaseTooltipVue,
   },
   emits: [...globalEmitListener],
   data() {

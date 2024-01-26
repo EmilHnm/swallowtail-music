@@ -50,6 +50,8 @@ export default defineComponent({
       audio: null as HTMLAudioElement | null,
       audioList: [] as songData[],
       timeOut: null as null | Timer,
+      songLoadController: null as AbortController | null,
+      songLoadSignal: null as AbortSignal | null,
       //play song property
       isPlaying: false,
       progress: 0,
@@ -625,11 +627,19 @@ export default defineComponent({
         this.audio.pause();
         this.audio.load();
         this.waiting();
+        if (!this.songLoadController) {
+          this.songLoadController = new AbortController();
+        } else {
+          this.songLoadController.abort();
+          this.songLoadController = new AbortController();
+        }
+        this.songLoadSignal = this.songLoadController.signal;
         fetch(`${environment.api}/song/${this.playingAudio.song_id}/stream`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
+          signal: this.songLoadSignal,
         })
           .then((res) => res.blob())
           .then((blob) => {

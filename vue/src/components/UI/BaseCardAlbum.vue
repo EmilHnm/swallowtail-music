@@ -7,7 +7,11 @@
           <IconPlay @click="play" />
         </div>
       </div>
-      <div class="album__title" @click="redirect">{{ title }}</div>
+      <div class="album__title" @click="redirect">
+        <BaseTooltipVue :position="'bottom'" :tooltip-text="title">
+          {{ title }}
+        </BaseTooltipVue>
+      </div>
       <div class="album__uploader" v-if="uploader">{{ uploader }}</div>
       <div class="album__songCount" v-if="songCount !== undefined">
         {{ songCount }} songs
@@ -23,9 +27,10 @@
 import { defineComponent } from "vue";
 import BaseCard from "./BaseCard.vue";
 import IconPlay from "@/components/icons/IconPlay.vue";
+import BaseTooltipVue from "./BaseTooltip.vue";
 
 export default defineComponent({
-  components: { BaseCard, IconPlay },
+  components: { BaseCard, IconPlay, BaseTooltipVue },
   props: {
     title: {
       type: String,
@@ -106,7 +111,7 @@ export default defineComponent({
     }
     &--play {
       position: absolute;
-      bottom: -10px;
+      bottom: -100px;
       right: 10px;
       transform: translateY(-50%);
       width: 25px;
@@ -125,6 +130,7 @@ export default defineComponent({
     }
     &:hover .album__image--play {
       opacity: 1;
+      bottom: -10px;
     }
   }
   &__title {

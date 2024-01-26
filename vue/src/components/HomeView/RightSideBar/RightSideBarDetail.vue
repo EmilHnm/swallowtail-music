@@ -11,22 +11,33 @@
     />
     <div class="playing-details__title">
       <div class="playing-details__title--text">
-        <router-link
-          :to="
-            playingAudio.album_id
-              ? { name: 'albumViewPage', params: { id: playingAudio.album_id } }
-              : { name: 'playingPage' }
-          "
-          :title="playingAudio.title"
-          >{{ playingAudio.title }}</router-link
-        >
-        <div class="playing-details__title--artists">
+        <BaseTooltipVue :tooltipText="playingAudio.title" :position="'bottom'">
           <router-link
-            v-for="artist in playingAudio.artist"
-            :key="artist.id"
-            :to="{ name: 'artistPage', params: { id: artist.id } }"
-            >{{ artist.name }}</router-link
+            :to="
+              playingAudio.album_id
+                ? {
+                    name: 'albumViewPage',
+                    params: { id: playingAudio.album_id },
+                  }
+                : { name: 'playingPage' }
+            "
+            >{{ playingAudio.title }}</router-link
           >
+        </BaseTooltipVue>
+        <div class="playing-details__title--artists">
+          <BaseTooltipVue
+            :tooltipText="
+              playingAudio.artist.map((artist) => artist.name).join(',')
+            "
+            :position="'bottom'"
+          >
+            <router-link
+              v-for="artist in playingAudio.artist"
+              :key="artist.id"
+              :to="{ name: 'artistPage', params: { id: artist.artist_id } }"
+              >{{ artist.name }}
+            </router-link>
+          </BaseTooltipVue>
         </div>
       </div>
       <div class="playing-details__title--menu">
@@ -74,6 +85,7 @@ import { environment } from "@/environment/environment";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
 import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
 import { ImageColor } from "@/mixins/ImageColor";
+import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
 type songData = song & {
   album: album;
   artist: artist[];
@@ -170,7 +182,7 @@ export default defineComponent({
       }
     };
   },
-  components: { IconThreeDots, BaseDotLoading },
+  components: { IconThreeDots, BaseDotLoading, BaseTooltipVue },
 });
 </script>
 
@@ -213,17 +225,14 @@ export default defineComponent({
     }
     &--artists {
       display: flex;
-      width: max-content;
-      // white-space: nowrap;
-      // text-overflow: ellipsis;
-      // overflow: scroll;
-      gap: 8px;
+      width: 100%;
+      flex-wrap: nowrap;
       a {
         font-size: 1rem;
-        display: block;
         width: max-content;
         white-space: nowrap;
         color: var(--text-subdued);
+        margin-right: 8px;
         &:hover {
           color: var(--text-primary-color);
         }

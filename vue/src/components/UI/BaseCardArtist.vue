@@ -16,7 +16,11 @@
           <IconPlay @click="playArtistSong" />
         </div>
       </div>
-      <div class="artist__name" @click="redirectToArtist">{{ data.name }}</div>
+      <div class="artist__name" @click="redirectToArtist">
+        <BaseTooltipVue :position="'bottom'" :tooltip-text="data.name">
+          {{ data.name }}
+        </BaseTooltipVue>
+      </div>
       <div class="artist__sub">Artist</div>
     </div></BaseCard
   >
@@ -27,6 +31,7 @@ import BaseCard from "./BaseCard.vue";
 import IconPlay from "@/components/icons/IconPlay.vue";
 import type { artist } from "@/model/artistModel";
 import { environment } from "@/environment/environment";
+import BaseTooltipVue from "./BaseTooltip.vue";
 
 export default defineComponent({
   emits: ["playArtistSong"],
@@ -52,7 +57,7 @@ export default defineComponent({
       this.$emit("playArtistSong", this.data.artist_id);
     },
   },
-  components: { BaseCard, IconPlay },
+  components: { BaseCard, IconPlay, BaseTooltipVue },
 });
 </script>
 <style lang="scss" scoped>
@@ -78,7 +83,7 @@ export default defineComponent({
     }
     &--play {
       position: absolute;
-      bottom: -10px;
+      bottom: 100px;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 25px;
@@ -116,6 +121,7 @@ export default defineComponent({
       clip-path: polygon(50% 0, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
     }
     .artist__image--play {
+      bottom: -10px;
       opacity: 1;
     }
   }

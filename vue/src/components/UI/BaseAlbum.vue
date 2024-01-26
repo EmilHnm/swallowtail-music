@@ -46,7 +46,10 @@
           {{ data.name }}
         </h3>
         <div class="album__details--prof--sub">
-          <span> {{ data.release_year }} - {{ data.song_count }} Songs</span>
+          <span>
+            {{ data.release_year }} - {{ data.song_count }} Songs -
+            {{ data.type }}</span
+          >
         </div>
         <div class="album__details--prof--menu">
           <div class="album__details--prof--menu--play">

@@ -23,9 +23,14 @@
           />
         </div>
         <div class="song-item__left--title">
-          <span @click="selectSong">{{ data.title }}</span>
+          <BaseTooltip :tooltipText="data.title" :position="'bottom'">
+            <span @click="selectSong">{{ data.title }}</span>
+          </BaseTooltip>
           <span v-if="data.artist.length > 0">
-            <span>
+            <BaseTooltip
+              :tooltipText="data.artist.map((item) => item.name).join(', ')"
+              :position="'bottom'"
+            >
               <router-link
                 :to="{
                   name: 'artistPage',
@@ -35,7 +40,7 @@
                 :key="artistitem.artist_id"
                 >{{ artistitem.name
                 }}<span v-if="index !== data.artist.length - 1">,</span>
-              </router-link></span
+              </router-link></BaseTooltip
             >
           </span>
           <span v-else><BaseLineLoad /></span>
@@ -43,9 +48,15 @@
       </div>
       <div class="song-item__right">
         <div class="song-item__right--album">
-          <span v-if="data.album" @click="redirectToAlbum(data.album_id)">{{
-            data.album.name
-          }}</span>
+          <BaseTooltip
+            v-if="data.album"
+            :tooltipText="data.album.name"
+            :position="'bottom'"
+          >
+            <span @click="redirectToAlbum(data.album_id)">{{
+              data.album.name
+            }}</span>
+          </BaseTooltip>
           <span v-else>Unknown</span>
         </div>
         <div
@@ -157,6 +168,7 @@ import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
 import BaseListItem from "./BaseListItem.vue";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
+import BaseTooltip from "./BaseTooltip.vue";
 import BaseLineLoad from "./BaseLineLoad.vue";
 import { mapActions, mapGetters } from "vuex";
 import BaseDialog from "./BaseDialog.vue";
@@ -295,7 +307,13 @@ export default defineComponent({
       playlists: "playlist/getPlaylists",
     }),
   },
-  components: { BaseListItem, IconThreeDots, BaseLineLoad, BaseDialog },
+  components: {
+    BaseListItem,
+    IconThreeDots,
+    BaseLineLoad,
+    BaseDialog,
+    BaseTooltip,
+  },
 });
 </script>
 
@@ -376,6 +394,7 @@ $tablet-width: 768px;
     }
     &--album {
       margin: 10px auto;
+      width: calc(100% - 40px);
       span {
         display: block;
         width: 100%;

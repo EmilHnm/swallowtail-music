@@ -6,7 +6,9 @@
         <div class="playing-list__song">
           <IconPlay />
           <div class="playing-list__song--title">
-            {{ playingAudio.title }}
+            <BaseTooltip :position="'bottom'" :tooltipText="playingAudio.title">
+              {{ playingAudio.title }}
+            </BaseTooltip>
           </div>
           <div class="playing-list__song--duration">
             {{
@@ -73,6 +75,7 @@ import type { song } from "@/model/songModel";
 import { defineComponent } from "vue";
 import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
+import BaseTooltip from "@/components/UI/BaseTooltip.vue";
 
 type songData = song & {
   album: album;
@@ -133,7 +136,7 @@ export default defineComponent({
       this.$emit("deleteFromQueue", index);
     },
   },
-  components: { IconPlay, BaseSongItem },
+  components: { IconPlay, BaseSongItem, BaseTooltip },
 });
 </script>
 
