@@ -54,9 +54,6 @@ class SongsSyncCommand extends Command
             ]
         ]);
 
-        $bar = $this->output->createProgressBar($to - $from);
-        $bar->setFormat("%message%\n%current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%");
-        $bar->start();
         foreach (range($from, $to) as $id) {
             $song = Song::where('id', $id)
                 ->whereDoesntHave('file')
@@ -64,9 +61,9 @@ class SongsSyncCommand extends Command
                 //     $query->where('referer', RefererEnum::CRAWLER);
                 // })
                 ->first();
-            if ($song) {
-                $bar->setMessage('Syncing song ' . $song->id . ' - ' . $song->title);
 
+            if ($song) {
+                $this->info("Syncing song " . $song->id . " - " . $song->title);
                 try {
 
                     $response = $client->get($end_point . str_replace('song_', '', $song->song_id));
@@ -101,6 +98,7 @@ class SongsSyncCommand extends Command
                                 ->orWhere('id', $artist['id'])->firstOrFail();
                             if ($artist) {
                                 $song->artist()->attach($artist->artist_id);
+                                $this->warn("   Syncing with artist " . $artist->name);
                             }
                         }
 
@@ -110,6 +108,7 @@ class SongsSyncCommand extends Command
                                 ->orWhere('id', $genre['id'])->firstOrFail();
                             if ($genre_data) {
                                 $song->genre()->attach($genre_data->genre_id);
+                                $this->warn("   Syncing with genre " . $genre_data->name);
                             }
                         }
 
@@ -117,17 +116,11 @@ class SongsSyncCommand extends Command
                         $song->save();
                     }
                 } catch (\Exception $e) {
-                    $bar->setMessage('Error syncing song ' . $song->id . ' - ' . $song->title);
                     \Log::error("Error syncing song " . $song->id . " - " . $song->title . " with errors " . $e);
-                    $bar->advance();
                     continue;
                 }
+                sleep(5);
             }
-            $bar->advance();
-            $bar->setMessage('Sleeping for 5 seconds');
-            // sleep(5);
         }
-
-        $bar->finish();
     }
 }
