@@ -46,12 +46,6 @@
           @click="func.removeItemFormArr(index, artistArray)"
           >{{ artist.name }}</BaseTag
         >
-        <BaseTag
-          v-for="(artist, index) in newArtistArray"
-          :key="artist"
-          @click="func.removeItemFormArr(index, newArtistArray)"
-          >{{ artist }}</BaseTag
-        >
       </div>
       <BaseInput
         :label="'Artist Name'"
@@ -59,9 +53,6 @@
         :placeholder="'Enter Artist Name'"
         :id="'artistName'"
         v-model="artistName"
-        @keyup.enter="
-          pushItemtoNewArray(artistName, newArtistArray, templateArtistArray)
-        "
       />
       <div
         class="uploadform__control--artistSearch"
@@ -80,6 +71,10 @@
           {{ artist.name }}
         </div>
       </div>
+      <div class="uploadform__control--artistSearch--new">
+        <span>Don't find your artist?</span>
+        <BaseButton>Request Artist</BaseButton>
+      </div>
     </div>
     <div class="uploadform__control">
       <div class="uploadform__control--genre">
@@ -90,12 +85,6 @@
           @click="func.removeItemFormArr(index, genreArray)"
           >{{ genre.name }}</BaseTag
         >
-        <BaseTag
-          v-for="(genre, index) in newGenreArray"
-          :key="genre"
-          @click="func.removeItemFormArr(index, newGenreArray)"
-          >{{ genre }}</BaseTag
-        >
       </div>
       <BaseInput
         :label="'Genre'"
@@ -103,9 +92,6 @@
         :id="'genre'"
         :placeholder="'Enter Genre'"
         v-model="genreName"
-        @keyup.enter="
-          pushItemtoNewArray(genreName, newGenreArray, templateGenreArray)
-        "
       />
       <div
         class="uploadform__control--genreSearch"
@@ -123,6 +109,10 @@
         >
           {{ genre.name }}
         </div>
+      </div>
+      <div class="uploadform__control--genreSearch--new">
+        <span>Don't find your genre?</span>
+        <BaseButton>Request Genre</BaseButton>
       </div>
     </div>
     <div class="uploadform__control">
@@ -174,8 +164,8 @@ export default defineComponent({
       templateGenreArray: [] as genre[],
       artistArray: [] as artist[],
       genreArray: [] as genre[],
-      newArtistArray: [] as string[],
-      newGenreArray: [] as string[],
+      // newArtistArray: [] as string[],
+      // newGenreArray: [] as string[],
       artistName: "",
       genreName: "",
       songFile: null as File | null,
@@ -231,10 +221,7 @@ export default defineComponent({
         return;
       }
       if (this.displayMode === "public") {
-        if (
-          (this.artistArray.length === 0 && this.newArtistArray.length === 0) ||
-          (this.genreArray.length === 0 && this.newGenreArray.length) === 0
-        ) {
+        if (this.artistArray.length === 0 || this.genreArray.length === 0) {
           this.dialogWaring.content =
             "If you want to public, please fill in the artist and genre";
           this.dialogWaring.show = true;
@@ -253,13 +240,11 @@ export default defineComponent({
         if (artist.artist_id) artistArrUpload.push(artist.artist_id);
       });
       songForm.append("artist", JSON.stringify(artistArrUpload));
-      songForm.append("newArtist", JSON.stringify(this.newArtistArray));
       let genreArrUpload: string[] = [];
       this.genreArray.forEach((genre: genre) => {
         if (genre.genre_id) genreArrUpload.push(genre.genre_id);
       });
       songForm.append("genre", JSON.stringify(genreArrUpload));
-      songForm.append("newGenre", JSON.stringify(this.newGenreArray));
       this.dialogWaring.content =
         "Uploading Song Infomation! Please do not close tab when uploading";
       this.dialogWaring.show = true;
@@ -285,8 +270,6 @@ export default defineComponent({
             this.songFile = null;
             this.artistArray = [];
             this.genreArray = [];
-            this.newArtistArray = [];
-            this.newGenreArray = [];
           } else {
             this.dialogWaring.content = res.error;
             this.dialogWaring.show = true;
@@ -388,6 +371,15 @@ export default defineComponent({
           justify-content: center;
           cursor: pointer;
         }
+        &--new {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 10px;
+          & button {
+            padding: 5px 10px;
+          }
+        }
       }
     }
     &--artist {
@@ -419,6 +411,15 @@ export default defineComponent({
           align-items: center;
           justify-content: center;
           cursor: pointer;
+        }
+        &--new {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 10px;
+          & button {
+            padding: 5px 10px;
+          }
         }
       }
     }
