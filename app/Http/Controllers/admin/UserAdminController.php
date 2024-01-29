@@ -98,11 +98,12 @@ trait UserAdminController
     }
     //
 
-    public function search(Request $request) {
+    public function search(Request $request)
+    {
         $date = $request->input('filter.date', []);
         $this->start_date = $date['start'] ?? null;
         $this->end_date = $date['end'] ?? $this->start_date;
-        if($search = $request->input('filter.user', '')){
+        if ($search = $request->input('filter.user', '')) {
             if (\Str::isMatch('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $search)) {
                 $this->user = User::withTrashed()->with(
                     [
@@ -112,7 +113,7 @@ trait UserAdminController
                         'playlists' => function ($q) {
                             $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
                         },
-                        'uploaded_albums'=> function ($q) {
+                        'uploaded_albums' => function ($q) {
                             $q->limit(10)->orderBy('created_at', 'desc')->withCount('song');
                         },
                     ]
@@ -185,7 +186,7 @@ trait UserAdminController
             $q->where("user_id", $id);
         })
             ->where("display", "public")
-            ->with(["album","artist"])
+            ->with(["album", "artist"])
             ->get();
 
         return response()->json([

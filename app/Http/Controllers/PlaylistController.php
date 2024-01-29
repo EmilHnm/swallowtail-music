@@ -136,17 +136,12 @@ class PlaylistController extends Controller
             ->with([
                 "artist",
                 "album",
-                "like" => function ($query) {
-                    $query->where("user_id", Auth::user()->user_id);
-                },
+                "like"
             ])
-            ->get();
-        $likedList = $likedList
-            ->filter(function ($song) {
-                return $song->like->count() > 0;
+            ->whereHas("like", function ($query) {
+                $query->where("user_id", Auth::user()->user_id);
             })
-            ->toArray();
-        $likedList = array_values($likedList);
+            ->get();
         return response()->json([
             "status" => "success",
             "likedList" => $likedList,
