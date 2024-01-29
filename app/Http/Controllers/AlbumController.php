@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Orchid\Helpers\Text;
 use Carbon\Carbon;
 use App\Models\Song;
 use App\Models\Album;
+use App\Enum\AlbumTypeEnum;
 use Illuminate\Support\Str;
+use App\Orchid\Helpers\Text;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -283,6 +284,14 @@ class AlbumController extends Controller
         return response()->json([
             "status" => "success",
             "songs" => $songs,
+        ]);
+    }
+
+    public function getAlbumType()
+    {
+        return response()->json([
+            "status" => "success",
+            "types" => AlbumTypeEnum::toArray(),
         ]);
     }
 }
