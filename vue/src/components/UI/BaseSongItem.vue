@@ -281,6 +281,14 @@ export default defineComponent({
         })
         .then((res: any) => {
           this.liked = res.liked;
+          document.dispatchEvent(
+            new CustomEvent("like-song", {
+              detail: {
+                song_id: this.data.song_id,
+                liked: res.liked,
+              },
+            })
+          );
           this.isLoading = false;
         });
     },
@@ -292,7 +300,6 @@ export default defineComponent({
           userToken: this.token,
           songId: this.data.song_id,
         }).then(() => {
-          this.$emit("likeSong", this.data.song_id);
           this.loadLiked();
         });
       }
@@ -300,6 +307,13 @@ export default defineComponent({
   },
   created() {
     this.liked = this.data.like.length > 0 ? 1 : 0;
+  },
+  mounted() {
+    document.addEventListener("like-song", (data: any) => {
+      if (data.detail.song_id === this.data.song_id) {
+        this.liked = data.detail.liked;
+      }
+    });
   },
   computed: {
     ...mapGetters({

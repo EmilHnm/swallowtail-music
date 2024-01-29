@@ -1,12 +1,4 @@
 <template>
-  <teleport to="body">
-    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
-      <template #default>
-        <BaseLineLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseDialog>
-  </teleport>
   <div class="collection-header">
     <div class="header__background"></div>
     <div class="header__icon">
@@ -27,22 +19,18 @@
       <div class="control__left--play" v-if="Object.keys(likedList).length > 0">
         <IconPlay @click="playLikedSong" />
       </div>
-      <div class="control__left--menu">
+      <div
+        class="control__left--menu"
+        v-click-outside="() => (isMenuOpen = false)"
+      >
         <IconHorizontalThreeDot @click="toggleMenu" />
-        <teleport to="body">
-          <div
-            class="bg"
-            :class="{ active: isMenuOpen }"
-            @click="toggleMenu"
-          ></div>
-        </teleport>
         <div class="collection-menu" :class="{ active: isMenuOpen }">
           <BaseListItem @click="addLikedSongToQueue">Add to Queue</BaseListItem>
         </div>
       </div>
     </div>
   </div>
-  <div class="songList" ref="songList">
+  <div class="songList" v-if="!isLoading" ref="songList">
     <div class="songList__header" v-if="Object.keys(likedList).length > 0">
       <div class="songList__header--left">
         <div class="songList__header--left--img"></div>
@@ -63,9 +51,11 @@
         v-for="song in likedList"
         :key="song.song_id"
         :data="song"
-        @likeSong="likeSong"
       />
     </div>
+  </div>
+  <div class="" v-else>
+    <BaseCircleLoad />
   </div>
 </template>
 <script lang="ts">
@@ -84,6 +74,7 @@ import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { like } from "@/model/likeModel";
 import type { artist } from "@/model/artistModel";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 
 type songData = song & {
   album: album;
@@ -101,6 +92,7 @@ export default defineComponent({
     IconHeartFilled,
     BaseDialog,
     BaseLineLoad,
+    BaseCircleLoad,
   },
   data() {
     return {
@@ -158,6 +150,9 @@ export default defineComponent({
   },
   created() {
     this.loadLikedList();
+    document.addEventListener("like-song", (data: any) => {
+      this.loadLikedList();
+    });
   },
   computed: {
     ...mapGetters({
