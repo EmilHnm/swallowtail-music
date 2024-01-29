@@ -9,8 +9,8 @@
       crossorigin="anonymous"
       ref="cover"
     />
-    <div class="playing-details__title">
-      <div class="playing-details__title--text">
+    <div class="playing-details__meta">
+      <div class="playing-details__meta--title">
         <BaseTooltipVue :tooltipText="playingAudio.title" :position="'bottom'">
           <router-link
             :to="
@@ -24,7 +24,7 @@
             >{{ playingAudio.title }}</router-link
           >
         </BaseTooltipVue>
-        <div class="playing-details__title--artists">
+        <div class="playing-details__meta--artists">
           <BaseTooltipVue
             :tooltipText="
               playingAudio.artist.map((artist) => artist.name).join(',')
@@ -40,13 +40,70 @@
           </BaseTooltipVue>
         </div>
       </div>
-      <div class="playing-details__title--menu">
-        <button>
+      <div class="playing-details__meta--options">
+        <button @click="menu.open = !menu.open">
           <IconThreeDots />
         </button>
+        <div class="menu" v-if="menu.open">
+          <template v-if="menu.menuMode == 'default'">
+            <BaseListItem v-if="!menu.isLikeLoading" @click="onLikeSong">
+              <span v-if="playingAudio.like !== null">
+                {{ playingAudio.like?.length ? "Unlike" : "Like" }}
+              </span>
+            </BaseListItem>
+            <BaseListItem v-else>
+              <BaseLineLoad />
+            </BaseListItem>
+            <BaseListItem
+              v-if="!menu.isPlaylistLoading"
+              @click="menu.menuMode = 'playlists'"
+            >
+              <span>Add to playlist</span>
+            </BaseListItem>
+            <BaseListItem v-else>
+              <BaseLineLoad />
+            </BaseListItem>
+            <BaseListItem @click="menu.menuMode = 'artists'">
+              <span>View Artists</span>
+            </BaseListItem>
+            <BaseListItem @click="navigateToAlbum(playingAudio.album_id)">
+              <span>View Album</span>
+            </BaseListItem>
+            <BaseListItem>
+              <span>Report</span>
+            </BaseListItem>
+          </template>
+
+          <template v-if="menu.menuMode == 'playlists'">
+            <BaseListItem
+              v-for="playlist in playlists"
+              :key="playlist.playlist_id"
+              @click="addToPlaylist(playlist.playlist_id)"
+            >
+              <span>
+                {{ playlist.title }}
+              </span>
+            </BaseListItem>
+            <BaseListItem @click="menu.menuMode = 'default'">
+              <span>Back</span>
+            </BaseListItem>
+          </template>
+
+          <template v-if="menu.menuMode == 'artists'">
+            <BaseListItem
+              @click="navigateToArtist(artist.artist_id)"
+              v-for="artist in playingAudio.artist"
+              :key="artist.artist_id"
+            >
+              <span>{{ artist.name }}</span>
+            </BaseListItem>
+            <BaseListItem @click="menu.menuMode = 'default'">
+              <span>Back</span>
+            </BaseListItem>
+          </template>
+        </div>
       </div>
     </div>
-    <div class="playing-details__artist"></div>
     <div
       class="playing-details__lyric"
       :style="{
@@ -86,6 +143,8 @@ import IconThreeDots from "@/components/icons/IconThreeDots.vue";
 import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
 import { ImageColor } from "@/mixins/ImageColor";
 import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
+import BaseListItem from "@/components/UI/BaseListItem.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 type songData = song & {
   album: album;
   artist: artist[];
@@ -127,10 +186,17 @@ export default defineComponent({
       lyricsColor: "var(--text-primary-color)",
       imgCover: null as HTMLImageElement | null,
       imageColor: null as ImageColor | null,
+      menu: {
+        open: false,
+        menuMode: "default" as "default" | "artists" | "playlists",
+        isLikeLoading: false,
+        isPlaylistLoading: false,
+      },
     };
   },
   methods: {
-    ...mapActions("song", ["getSongLyrics"]),
+    ...mapActions("song", ["getSongLyrics", "likeSong", "likedSong"]),
+    ...mapActions("playlist", ["addSongToPlaylist"]),
     songChanged() {
       this.lyrics_loading = true;
       this.getSongLyrics({
@@ -147,16 +213,89 @@ export default defineComponent({
           this.lyrics_loading = false;
         })
         .catch((err: any) => {
-          console.log(err);
           this.lyrics = [];
           this.lyrics_loading = false;
         });
     },
+    onLikeSong() {
+      this.menu.isLikeLoading = true;
+      this.likeSong({
+        songId: this.playingAudio.song_id,
+        userToken: this.token,
+      }).then(() => {
+        this.loadLiked();
+        this.menu.isLikeLoading = false;
+      });
+    },
+    loadLiked() {
+      this.menu.isLikeLoading = true;
+      this.likedSong({
+        userToken: this.token,
+        songId: this.playingAudio.song_id,
+      })
+        .then((res: any) => {
+          return res.json();
+        })
+        .then((res: any) => {
+          document.dispatchEvent(
+            new CustomEvent("like-song", {
+              detail: {
+                song_id: this.playingAudio.song_id,
+                liked: res.liked,
+              },
+            })
+          );
+          if (res.liked) {
+            this.playingAudio.like = [
+              {
+                id: 0,
+                created_at: "",
+                updated_at: "",
+                user_id: this.user.user_id,
+                song_id: this.playingAudio.song_id,
+              },
+            ];
+          } else {
+            this.playingAudio.like = [];
+          }
+          this.menu.isLikeLoading = false;
+        });
+    },
+    navigateToArtist(artist_id: string) {
+      this.menu.open = false;
+      this.menu.menuMode = "default";
+      this.$router.push({
+        name: "artistPage",
+        params: {
+          id: artist_id,
+        },
+      });
+    },
+    navigateToAlbum(album_id: string) {
+      this.menu.open = false;
+      this.$router.push({
+        name: "albumViewPage",
+        params: {
+          id: album_id,
+        },
+      });
+    },
+    addToPlaylist(playlist_id: string) {
+      this.menu.open = false;
+      this.menu.menuMode = "default";
+      this.addSongToPlaylist({
+        token: this.token,
+        song_id: this.playingAudio.song_id,
+        playlist_id: playlist_id,
+      }).then(() => {});
+    },
   },
   watch: {
     playingAudio: {
-      handler() {
-        this.songChanged();
+      handler(n, o) {
+        if (n.song_id != o?.song_id) {
+          this.songChanged();
+        }
       },
       deep: true,
       immediate: true,
@@ -165,6 +304,8 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       token: "auth/userToken",
+      user: "auth/userData",
+      playlists: "playlist/getPlaylists",
     }),
   },
   mounted() {
@@ -181,8 +322,31 @@ export default defineComponent({
         this.album_cover_color = "var(--background-glass-color-primary)";
       }
     };
+    document.addEventListener("like-song", (data: any) => {
+      if (data.detail.song_id === this.playingAudio.song_id) {
+        if (data.detail.liked) {
+          this.playingAudio.like = [
+            {
+              id: 0,
+              created_at: "",
+              updated_at: "",
+              user_id: this.user.user_id,
+              song_id: this.playingAudio.song_id,
+            },
+          ];
+        } else {
+          this.playingAudio.like = [];
+        }
+      }
+    });
   },
-  components: { IconThreeDots, BaseDotLoading, BaseTooltipVue },
+  components: {
+    IconThreeDots,
+    BaseDotLoading,
+    BaseTooltipVue,
+    BaseListItem,
+    BaseLineLoad,
+  },
 });
 </script>
 
@@ -200,12 +364,12 @@ export default defineComponent({
     border-radius: 10px;
     max-width: 300px;
   }
-  &__title {
+  &__meta {
     display: flex;
     justify-content: space-between;
     width: 90%;
     gap: 10px;
-    &--text {
+    &--title {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -238,7 +402,7 @@ export default defineComponent({
         }
       }
     }
-    &--menu {
+    &--options {
       display: flex;
       align-items: center;
       position: relative;
@@ -261,9 +425,24 @@ export default defineComponent({
           fill: var(--text-primary-color);
         }
       }
+      .menu {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background-color: var(--background-blur-color-primary);
+        border-radius: 10px;
+        padding: 20px 0px;
+        min-width: 250px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+        & > * {
+          cursor: pointer;
+        }
+      }
     }
-  }
-  &__artist {
   }
   &__lyric {
     width: 90%;
