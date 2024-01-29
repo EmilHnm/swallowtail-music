@@ -193,5 +193,14 @@ export const albumModule = {
         },
       });
     },
+    getAlbumAvailableTypes(context: any, userToken: string): Promise<Response> {
+      return fetch(`${environment.api}/album/available-types`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+    },
   },
 };

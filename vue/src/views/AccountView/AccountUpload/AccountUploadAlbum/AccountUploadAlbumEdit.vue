@@ -39,11 +39,7 @@
               alt="album image"
               v-if="!imgPath"
             />
-            <img
-              :src="imgPath"
-              alt="album image"
-              v-else-if="imgPath"
-            />
+            <img :src="imgPath" alt="album image" v-else-if="imgPath" />
             <label for="image" v-else>
               <span>Click or drag your album image here to upload </span>
             </label>
@@ -72,46 +68,12 @@
               <select name="albumType" id="albumType" v-model="album.type">
                 <option value="" disable>Select album type</option>
                 <option
-                  :selected="album.type === 'single' ? true : false"
-                  value="single"
+                  v-for="(value, key) in availableAlbumTypes"
+                  :key="key"
+                  :value="key"
+                  :selected="album.type === key"
                 >
-                  Single
-                </option>
-                <option
-                  :selected="album.type === 'album' ? true : false"
-                  value="album"
-                >
-                  Album
-                </option>
-                <option
-                  :selected="album.type === 'mixtape' ? true : false"
-                  value="mixtape"
-                >
-                  Mixtape
-                </option>
-                <option
-                  :selected="album.type === 'DJ Mix' ? true : false"
-                  value="DJ Mix"
-                >
-                  DJ Mix
-                </option>
-                <option
-                  :selected="album.type === 'bootleg' ? true : false"
-                  value="bootleg"
-                >
-                  Bootleg / Unauthorized
-                </option>
-                <option
-                  :selected="album.type === 'soundtracks' ? true : false"
-                  value="soundtracks"
-                >
-                  Soundtracks
-                </option>
-                <option
-                  :selected="album.type === 'live albums' ? true : false"
-                  value="live albums"
-                >
-                  Live albums
+                  {{ value }}
                 </option>
               </select>
             </div>
@@ -232,6 +194,7 @@ export default defineComponent({
       songs: [] as songItem[],
       addableSongList: [] as addableSong[],
       album: {} as album,
+      availableAlbumTypes: {} as { [key: string]: string },
       file: null as File | null,
       imgPath: "",
       songData: reactive([] as songItem[]),
@@ -255,6 +218,7 @@ export default defineComponent({
       "removeAlbumSongs",
       "addAlbumSongs",
       "updateAlbumInfo",
+      "getAlbumAvailableTypes",
     ]),
     removeSongs(id?: string) {
       this.isLoading = true;
@@ -393,6 +357,13 @@ export default defineComponent({
         }
       });
     this.loadAlbumSongs();
+    this.getAlbumAvailableTypes(this.token)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          this.availableAlbumTypes = data.types;
+        }
+      });
   },
   components: { BaseFlatDialog, BaseCircleLoad },
 });

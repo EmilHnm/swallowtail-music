@@ -43,7 +43,6 @@
           </label>
           <img
             class="preview"
-            v-lazyload
             :data-url="albumImageTempPath"
             v-if="albumImageTempPath"
           />
@@ -69,13 +68,13 @@
             <label for="albumType">Album Type</label>
             <select name="albumType" id="albumType" v-model="albumType">
               <option value="" disable>Select album type</option>
-              <option value="single">Single</option>
-              <option value="album">Album</option>
-              <option value="mixtape">Mixtape</option>
-              <option value="DJ Mix">DJ Mix</option>
-              <option value="bootleg">Bootleg / Unauthorized</option>
-              <option value="soundtracks">Soundtracks</option>
-              <option value="live albums">Live albums</option>
+              <option
+                v-for="(value, key) in availableAlbumTypes"
+                :key="key"
+                :value="key"
+              >
+                {{ value }}
+              </option>
             </select>
           </div>
         </div>
@@ -134,9 +133,9 @@ import { defineComponent, reactive } from "vue";
 import { mapGetters, mapActions } from "vuex";
 import { environment } from "@/environment/environment";
 import { _function } from "@/mixins/index";
-import BaseInput from "../UI/BaseInput.vue";
-import BaseButton from "../UI/BaseButton.vue";
-import BaseDialog from "../UI/BaseDialog.vue";
+import BaseInput from "@/components/UI/BaseInput.vue";
+import BaseButton from "@/components/UI/BaseButton.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
 
 export default defineComponent({
   data() {
@@ -145,6 +144,7 @@ export default defineComponent({
       albumImageTempPath: "",
       albumTitle: "",
       albumReleaseYear: "",
+      availableAlbumTypes: {} as { [key: string]: string },
       albumType: "",
       observableData: null as any,
       songForm: reactive([
@@ -181,9 +181,18 @@ export default defineComponent({
       }
     });
     if (wrapper) this.observer.observe(wrapper);
+
+    this.getAlbumAvailableTypes(this.userToken)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          this.availableAlbumTypes = data.types;
+        }
+      });
   },
   methods: {
     ...mapActions("uploadQueue", ["addFileToQueue"]),
+    ...mapActions("album", ["getAlbumAvailableTypes"]),
     albumImageChange(e: any) {
       if (e.target.files.length > 0) {
         if (!_function.validateImageFileType(e.target.files[0])) {

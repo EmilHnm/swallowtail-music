@@ -97,7 +97,7 @@ Route::middleware("auth:sanctum")->group(function () {
         Route::get("/search", [AlbumController::class, "searchAlbum"]);
         Route::get("/latest", [AlbumController::class, "getLatestAlbum"]);
         Route::get("/top", [AlbumController::class, "getTopAlbum"]);
-        Route::get("/type", [AlbumController::class, "getAlbumType"]);
+        Route::get("/available-types", [AlbumController::class, "getAlbumType"]);
         Route::get("/{id}", [AlbumController::class, "getAlbumInfo"]);
         Route::get("/{id}/song", [AlbumController::class, "getAlbumSongs"]);
     });
