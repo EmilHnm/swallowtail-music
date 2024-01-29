@@ -112,6 +112,7 @@ class ArtistController extends Controller
                 DB::raw("count(albums.album_id) as song_count")
             )
             ->where("artists.artist_id", $id)
+            ->limit(10)
             ->get();
         return response()->json([
             "status" => "success",
