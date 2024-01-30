@@ -36,22 +36,9 @@
             :key="artist.artist_id"
             >{{ artist.name }}</BaseTag
           >
-          <BaseTag
-            v-for="(artist, index) in newArtistArray"
-            @click="func.removeItemFormArr(index, newArtistArray)"
-            :key="index"
-            >{{ artist }}</BaseTag
-          >
         </div>
         <label for="">Artist Name</label>
-        <input
-          type="text"
-          placeholder="Artist Name"
-          v-model="artistName"
-          @keydown.enter.prevent="
-            pushItemtoNewArray(artistName, newArtistArray, templateArtistArray)
-          "
-        />
+        <input type="text" placeholder="Artist Name" v-model="artistName" />
         <div class="form__row--searchBox" v-if="artistName">
           <div
             class="form__row--searchBox--item"
@@ -66,6 +53,10 @@
             {{ artist.name }}
           </div>
         </div>
+        <div class="form__row--new">
+          <span>Don't find your artists?</span>
+          <button>Request artists</button>
+        </div>
       </div>
       <div class="form__row">
         <div class="tagList">
@@ -75,22 +66,9 @@
             @click="func.removeItemFormArr(index, genreArray)"
             >{{ genre.name }}</BaseTag
           >
-          <BaseTag
-            v-for="(genre, index) in newGenreArray"
-            @click="func.removeItemFormArr(index, newGenreArray)"
-            :key="genre"
-            >{{ genre }}</BaseTag
-          >
         </div>
         <label for="">Genre</label>
-        <input
-          type="text"
-          placeholder="Genre"
-          v-model="genreName"
-          @keydown.enter.prevent="
-            pushItemtoNewArray(genreName, newGenreArray, templateGenreArray)
-          "
-        />
+        <input type="text" placeholder="Genre" v-model="genreName" />
         <div class="form__row--searchBox" v-if="genreName">
           <div
             class="form__row--searchBox--item"
@@ -105,23 +83,26 @@
             {{ genre.name }}
           </div>
         </div>
+        <div class="form__row--new">
+          <span>Don't find your genre?</span>
+          <button>Request Genre</button>
+        </div>
       </div>
       <div class="form__row">
         <label for="">Display Mode</label>
         <BaseRadio
           :name="'displayMode'"
           v-model="displayMode"
-          :disable="
-            artistArray.length != 0 && genreArray.length != 0 ? false : true
-          "
+          :disable="artistArray.length === 0 || genreArray.length === 0"
           :value="'public'"
+          :checked="displayMode === 'public'"
           >Public</BaseRadio
         >
         <BaseRadio
           :name="'displayMode'"
           v-model="displayMode"
           :value="'private'"
-          :checked="true"
+          :checked="displayMode === 'private'"
           >Private</BaseRadio
         >
       </div>
@@ -152,8 +133,6 @@ export default defineComponent({
       templateGenreArray: [] as genre[],
       artistArray: [] as artist[],
       genreArray: [] as genre[],
-      newArtistArray: [] as string[],
-      newGenreArray: [] as string[],
       artistName: "",
       genreName: "",
       songName: "",
@@ -194,10 +173,7 @@ export default defineComponent({
         return;
       }
       if (this.displayMode === "public") {
-        if (
-          (this.artistArray.length === 0 && this.newArtistArray.length === 0) ||
-          (this.genreArray.length === 0 && this.newGenreArray.length) === 0
-        ) {
+        if (this.artistArray.length === 0 || this.genreArray.length === 0) {
           this.dialogWaring.content =
             "If you want to public, please fill in the artist and genre";
           this.dialogWaring.show = true;
@@ -213,13 +189,11 @@ export default defineComponent({
         if (artist.artist_id) artistArrUpload.push(artist.artist_id);
       });
       songForm.append("artist", JSON.stringify(artistArrUpload));
-      songForm.append("newArtist", JSON.stringify(this.newArtistArray));
       let genreArrUpload: string[] = [];
       this.genreArray.forEach((genre: genre) => {
         if (genre.genre_id) genreArrUpload.push(genre.genre_id);
       });
       songForm.append("genre", JSON.stringify(genreArrUpload));
-      songForm.append("newGenre", JSON.stringify(this.newGenreArray));
       this.isLoading = true;
       this.updateSong({ token: this.token, songForm: songForm })
         .then((res) => res.json())
@@ -247,6 +221,24 @@ export default defineComponent({
     BaseTag,
     BaseFlatDialog,
     BaseCircleLoad,
+  },
+  watch: {
+    artistArray: {
+      handler(n: artist[]) {
+        if (n.length === 0 || this.genreArray.length === 0) {
+          this.displayMode = "private";
+        }
+      },
+      deep: true,
+    },
+    genreArray: {
+      handler(n: genre[]) {
+        if (n.length === 0 || this.artistArray.length === 0) {
+          this.displayMode = "private";
+        }
+      },
+      deep: true,
+    },
   },
   created() {
     this.song_id = this.$route.query.id;
@@ -338,6 +330,15 @@ export default defineComponent({
           &:hover {
             background: var(--background-color-secondary);
           }
+        }
+      }
+      &--new {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        gap: 10px;
+        button {
+          padding: 0px 10px !important;
         }
       }
       .tagList {
