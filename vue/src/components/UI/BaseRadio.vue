@@ -5,8 +5,8 @@
       :name="name"
       :checked="checked"
       :value="value"
-      v-model="modelValue"
-      @input="onInput"
+      :disabled="disable"
+      v-model="localValue"
     />
     <span><slot></slot></span>
   </label>
@@ -38,9 +38,14 @@ export default defineComponent({
       default: "",
     },
   },
-  methods: {
-    onInput() {
-      this.$emit("update:modelValue", this.value);
+  data() {
+    return {
+      localValue: this.$props.modelValue,
+    };
+  },
+  watch: {
+    localValue(newValue) {
+      this.$emit("update:modelValue", newValue);
     },
   },
 });
@@ -53,6 +58,11 @@ label {
   position: relative;
   overflow: hidden;
   margin-bottom: 0.375em;
+
+  &:has(input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 
   input {
     position: absolute;
