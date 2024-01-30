@@ -287,6 +287,36 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\Request
+ *
+ * @property int $id
+ * @property string $requester
+ * @property string $request_type
+ * @property string $request_status
+ * @property mixed $request_description
+ * @property string|null $filled_by
+ * @property int $user_fillable
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Request newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Request newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Request query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereFilledBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereRequestDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereRequestStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereRequestType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereRequester($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereUserFillable($value)
+ */
+	class Request extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\Song
  *
  * @property int $id
@@ -296,7 +326,6 @@ namespace App\Models{
  * @property string $title
  * @property string $normalized_title
  * @property int $listens
- * @property int $duration
  * @property string $display
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -318,7 +347,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereAlbumId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereDisplay($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Song whereDuration($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereListens($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Song whereNormalizedTitle($value)
@@ -451,7 +479,6 @@ namespace App\Models{
  * @property string $name
  * @property string $user_id
  * @property string $email
- * @property string|null $role
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $gender
@@ -461,14 +488,22 @@ namespace App\Models{
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $deleted_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property array|null $permissions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Song> $likes
+ * @property-read int|null $likes_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Playlist> $playlists
+ * @property-read int|null $playlists_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Orchid\Platform\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Album> $uploaded_albums
+ * @property-read int|null $uploaded_albums_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Song> $uploaded_songs
+ * @property-read int|null $uploaded_songs_count
  * @method static \Illuminate\Database\Eloquent\Builder|User averageByDays(string $value, $startDate = null, $stopDate = null, ?string $dateColumn = null)
  * @method static \Illuminate\Database\Eloquent\Builder|User byAccess(string $permitWithoutWildcard)
  * @method static \Illuminate\Database\Eloquent\Builder|User byAnyAccess($permitsWithoutWildcard)
@@ -483,6 +518,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User minByDays(string $value, $startDate = null, $stopDate = null, ?string $dateColumn = null)
  * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|User query()
  * @method static \Illuminate\Database\Eloquent\Builder|User sumByDays(string $value, $startDate = null, $stopDate = null, ?string $dateColumn = null)
  * @method static \Illuminate\Database\Eloquent\Builder|User valuesByDays(string $value, $startDate = null, $stopDate = null, string $dateColumn = 'created_at')
@@ -499,9 +535,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User whereProfilePhotoUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereRegion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereRole($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|User withoutTrashed()
  */
 	class User extends \Eloquent {}
 }

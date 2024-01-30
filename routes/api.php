@@ -8,6 +8,7 @@ use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\admin\SongAdminController;
@@ -137,6 +138,10 @@ Route::middleware("auth:sanctum")->group(function () {
         ]);
     });
 
+    Route::prefix("requests")->group(function () {
+        Route::post("/create", [RequestController::class, "create"]);
+    })->middleware(["verified"]);
+
     Route::prefix("user")->group(function () {
         Route::get("/search", [UserController::class, "searchUser"]);
         Route::get("/{id}", [UserController::class, "show"]);
@@ -194,104 +199,6 @@ Route::middleware("auth:sanctum")->group(function () {
         Route::post('/mark-as-read', [NotificationController::class, 'markAsRead']);
         Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
     });
-
-    //    Route::prefix("admin")
-    //        ->middleware(["verified", "moderatorAccess"])
-    //        ->group(function () {
-    //            Route::prefix("users")->group(function () {
-    //                Route::get("/", [UserAdminController::class, "getAll"]);
-    //                Route::get("/{id}", [UserAdminController::class, "show"]);
-    //                Route::get("/{id}/songs", [
-    //                    UserAdminController::class,
-    //                    "showUserUploadSong",
-    //                ]);
-    //                Route::get("/{id}/albums", [
-    //                    UserAdminController::class,
-    //                    "showUserUploadAlbum",
-    //                ]);
-    //                Route::post("/{id}/role/update", [
-    //                    UserAdminController::class,
-    //                    "updateRole",
-    //                ])->middleware(["adminAccess"]);
-    //                Route::delete("/{id}/delete", [
-    //                    UserAdminController::class,
-    //                    "deleteUser",
-    //                ])->middleware(["adminAccess"]);
-    //            });
-    //
-    //            Route::prefix("songs")->group(function () {
-    //                Route::get("/", [SongAdminController::class, "getAll"]);
-    //                Route::post("/update", [SongAdminController::class, "update"]);
-    //                Route::get("/{id}", [SongAdminController::class, "show"]);
-    //                Route::delete("/{id}/delete", [
-    //                    SongAdminController::class,
-    //                    "delete",
-    //                ]);
-    //            });
-    //
-    //            Route::prefix("albums")->group(function () {
-    //                Route::get("/", [AlbumAdminController::class, "getAll"]);
-    //                Route::post("/update", [AlbumAdminController::class, "update"]);
-    //                Route::post("/song-remove", [
-    //                    AlbumAdminController::class,
-    //                    "songRemove",
-    //                ]);
-    //                Route::post("/song-add", [
-    //                    AlbumAdminController::class,
-    //                    "songAdd",
-    //                ]);
-    //                Route::get("/addable", [
-    //                    AlbumAdminController::class,
-    //                    "getSongNotInAlbum",
-    //                ]);
-    //                Route::get("/{id}", [AlbumAdminController::class, "show"]);
-    //                Route::get("/{id}/song", [AlbumAdminController::class, "song"]);
-    //                Route::delete("/{id}/delete", [
-    //                    AlbumAdminController::class,
-    //                    "delete",
-    //                ]);
-    //            });
-    //
-    //            Route::prefix("artists")->group(function () {
-    //                Route::get("/", [ArtistAdminController::class, "getAll"]);
-    //                Route::post("/update", [
-    //                    ArtistAdminController::class,
-    //                    "update",
-    //                ]);
-    //                Route::post("/group", [ArtistAdminController::class, "group"]);
-    //                Route::get("/{id}", [ArtistAdminController::class, "show"]);
-    //                Route::delete("/{id}/delete", [
-    //                    ArtistAdminController::class,
-    //                    "delete",
-    //                ]);
-    //                Route::get("/{id}/song", [
-    //                    ArtistAdminController::class,
-    //                    "getArtistSong",
-    //                ]);
-    //            });
-    //            Route::prefix("genres")->group(function () {
-    //                Route::get("/", [GenreAdminController::class, "getAll"]);
-    //                Route::post("/update", [GenreAdminController::class, "update"]);
-    //                Route::post("/group", [GenreAdminController::class, "group"]);
-    //                Route::get("/{id}", [GenreAdminController::class, "get"]);
-    //                Route::get("/{id}/songs", [
-    //                    GenreAdminController::class,
-    //                    "getSong",
-    //                ]);
-    //                Route::delete("/{id}/delete", [
-    //                    GenreAdminController::class,
-    //                    "delete",
-    //                ]);
-    //            });
-    //            Route::prefix("statistic")
-    //                ->middleware(["adminAccess"])
-    //                ->group(function () {
-    //                    Route::get("/logs", [
-    //                        StatisticAdminController::class,
-    //                        "getLogger",
-    //                    ]);
-    //                });
-    //        });
 });
 Route::prefix("auth")->group(function () {
     Route::post("/register", [AuthController::class, "register"])->name(
