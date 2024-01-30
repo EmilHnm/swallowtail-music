@@ -71,7 +71,6 @@ export default defineComponent({
     left: 50%;
     width: 80%;
     height: 80%;
-    background: #fff;
     border-radius: 8px;
     transform: translate(-50%, -50%);
     background: linear-gradient(

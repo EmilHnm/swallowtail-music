@@ -101,6 +101,7 @@ export default defineComponent({
     font-size: 1.2rem;
     transition: 0.3s;
     font-weight: bold;
+
     &.primary {
       color: var(--color-primary);
     }
@@ -137,11 +138,13 @@ export default defineComponent({
     color: var(--text-primary-color);
     font-size: 1rem;
     transition: 0.3s;
-
     width: calc(100% - 36px);
     &:focus {
       border-left: solid 1px var(--color-primary);
       border-top: solid 2px var(--color-primary);
+    }
+    &::placeholder {
+      color: var(--text-subdued);
     }
   }
 }
