@@ -28,6 +28,9 @@
           :size="{ cols: 20, rows: 10 }"
           v-model="descriptions"
         />
+        <span class="errors">
+          {{ errors }}
+        </span>
       </div>
     </template>
     <template v-else #default>
@@ -48,6 +51,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapActions, mapGetters } from "vuex";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseInput from "@/components/UI/BaseInput.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
@@ -65,22 +69,53 @@ export default defineComponent({
     return {
       name: "",
       descriptions: "",
+      errors: "",
       isRequseting: false,
     };
   },
   methods: {
+    ...mapActions("request", ["create"]),
     closeDialog() {
       this.name = "";
       this.descriptions = "";
       this.$emit("genre-request-close");
     },
     onRequest() {
+      if (this.name === "") {
+        this.errors = "Name is required";
+        return;
+      }
+      if (this.descriptions === "") {
+        this.errors = "Descriptions is required";
+        return;
+      }
+      this.errors = "";
       this.isRequseting = true;
-      setTimeout(() => {
-        this.isRequseting = false;
-        this.closeDialog();
-      }, 3000);
+      this.create({
+        name: this.name,
+        description: this.descriptions,
+        type: "genre",
+        token: this.userToken,
+      })
+        .then((res: any) => res.json())
+        .then((data: any) => {
+          this.isRequseting = false;
+          if (data.errors) {
+            this.errors = data.message;
+            return;
+          }
+          this.closeDialog();
+        })
+        .catch((err) => {
+          this.isRequseting = false;
+          this.errors = err.message;
+        });
     },
+  },
+  computed: {
+    ...mapGetters({
+      userToken: "auth/userToken",
+    }),
   },
   components: {
     BaseDialog,
@@ -96,5 +131,10 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  & .errors {
+    color: var(--color-danger);
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
 }
 </style>

@@ -163,7 +163,7 @@ import BaseButton from "@/components/UI/BaseButton.vue";
 import BaseTag from "@/components/UI/BaseTag.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import ArtistRequestDialog from "@/components/HomeView/partials/Request/ArtistRequestDialog.vue";
-import GenreRequestDialog from "../HomeView/partials/Request/GenreRequestDialog.vue";
+import GenreRequestDialog from "@/components/HomeView/partials/Request/GenreRequestDialog.vue";
 export default defineComponent({
   emits: ["uploadSong"],
   data() {

@@ -6,12 +6,12 @@ import { authModule } from "./module/authModule";
 import { playlistModule } from "./module/playlistModule";
 import { songModule } from "./module/songModule";
 import { artistModule } from "./module/artistModule";
-import { adminModule } from "./module/adminModule";
 import { testModule } from "./module/testModule";
 import { notificationModule } from "./module/notificationModule";
 import { cacheModule } from "./module/cacheModule";
 import { genreModule } from "./module/genreModule";
 import { uploadQueueModule } from "./module/uploadQueueModule";
+import requestModule from "./module/requestModule";
 export default createStore({
   modules: {
     auth: authModule,
@@ -20,12 +20,12 @@ export default createStore({
     account: accountModule,
     artist: artistModule,
     user: userModule,
-    admin: adminModule,
     test: testModule,
     notification: notificationModule,
     cache: cacheModule,
     playlist: playlistModule as any,
     genre: genreModule as any,
     uploadQueue: uploadQueueModule as any,
+    request: requestModule as any,
   },
 });
