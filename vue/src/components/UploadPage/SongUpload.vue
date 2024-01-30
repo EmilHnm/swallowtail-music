@@ -10,6 +10,14 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseDialog>
+    <ArtistRequestDialog
+      :is-open="isRequsetingArtist"
+      @artist-request-close="isRequsetingArtist = false"
+    />
+    <GenreRequestDialog
+      :is-open="isRequsetingGenre"
+      @genre-request-close="isRequsetingGenre = false"
+    />
   </teleport>
   <form class="uploadform">
     <div class="uploadform__control">
@@ -73,7 +81,9 @@
       </div>
       <div class="uploadform__control--artistSearch--new">
         <span>Don't find your artist?</span>
-        <BaseButton>Request Artist</BaseButton>
+        <BaseButton @click="isRequsetingArtist = true"
+          >Request Artist</BaseButton
+        >
       </div>
     </div>
     <div class="uploadform__control">
@@ -112,7 +122,7 @@
       </div>
       <div class="uploadform__control--genreSearch--new">
         <span>Don't find your genre?</span>
-        <BaseButton>Request Genre</BaseButton>
+        <BaseButton @click="isRequsetingGenre = true">Request Genre</BaseButton>
       </div>
     </div>
     <div class="uploadform__control">
@@ -121,17 +131,16 @@
         <BaseRadio
           :name="'displayMode'"
           v-model="displayMode"
-          :disable="
-            artistArray.length != 0 && genreArray.length != 0 ? false : true
-          "
+          :disable="artistArray.length === 0 || genreArray.length === 0"
           :value="'public'"
+          :checked="displayMode === 'public'"
           >Public</BaseRadio
         >
         <BaseRadio
           :name="'displayMode'"
           v-model="displayMode"
           :value="'private'"
-          :checked="true"
+          :checked="displayMode === 'private'"
           >Private</BaseRadio
         >
       </div>
@@ -153,6 +162,8 @@ import BaseRadio from "@/components/UI/BaseRadio.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 import BaseTag from "@/components/UI/BaseTag.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
+import ArtistRequestDialog from "@/components/HomeView/partials/Request/ArtistRequestDialog.vue";
+import GenreRequestDialog from "../HomeView/partials/Request/GenreRequestDialog.vue";
 export default defineComponent({
   emits: ["uploadSong"],
   data() {
@@ -164,8 +175,6 @@ export default defineComponent({
       templateGenreArray: [] as genre[],
       artistArray: [] as artist[],
       genreArray: [] as genre[],
-      // newArtistArray: [] as string[],
-      // newGenreArray: [] as string[],
       artistName: "",
       genreName: "",
       songFile: null as File | null,
@@ -175,6 +184,8 @@ export default defineComponent({
         content: "Please fill in all the fields",
         show: false,
       },
+      isRequsetingArtist: false,
+      isRequsetingGenre: false,
       isLoading: true,
       func: _function,
     };
@@ -283,6 +294,8 @@ export default defineComponent({
     BaseButton,
     BaseTag,
     BaseDialog,
+    ArtistRequestDialog,
+    GenreRequestDialog,
   },
   computed: {
     ...mapGetters({
@@ -301,6 +314,24 @@ export default defineComponent({
       .then((res) => {
         this.templateArtistArray = res;
       });
+  },
+  watch: {
+    artistArray: {
+      handler(n: artist[]) {
+        if (n.length === 0 || this.genreArray.length === 0) {
+          this.displayMode = "private";
+        }
+      },
+      deep: true,
+    },
+    genreArray: {
+      handler(n: genre[]) {
+        if (n.length === 0 || this.artistArray.length === 0) {
+          this.displayMode = "private";
+        }
+      },
+      deep: true,
+    },
   },
 });
 </script>
