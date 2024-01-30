@@ -1,10 +1,11 @@
 <template>
   <div class="base-input">
-    <label class="base-input__label" :for="id">
+    <label class="base-input__label" :class="labelColor" :for="id">
       {{ label }}<span class="required" v-if="required">*</span>
     </label>
     <div class="base-input__inputBox">
       <input
+        v-if="mode === 'input'"
         class="base-input__input"
         :id="id"
         :type="type"
@@ -13,6 +14,18 @@
         :placeholder="placeholder"
         :autocomplete="autocomplete ? 'on' : 'off'"
       />
+      <textarea
+        v-else-if="mode === 'textarea'"
+        class="base-input__input"
+        :id="id"
+        :type="type"
+        v-model="value"
+        :required="required"
+        :placeholder="placeholder"
+        :autocomplete="autocomplete ? 'on' : 'off'"
+        :cols="size.cols"
+        :rows="size.rows"
+      ></textarea>
     </div>
   </div>
 </template>
@@ -29,13 +42,17 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    labelColor: {
+      type: String,
+      default: "primary",
+    },
     type: {
       type: String,
-      required: true,
+      default: "text",
     },
     mode: {
-      type: String,
-      default: "",
+      type: String as () => "input" | "textarea",
+      default: "input",
     },
     required: {
       type: Boolean,
@@ -51,6 +68,11 @@ export default defineComponent({
     autocomplete: {
       type: Boolean,
       default: false,
+    },
+    size: {
+      type: Object as () => { cols: number; rows: number },
+      default: { cols: 20, rows: 2 },
+      required: false,
     },
   },
   data() {
@@ -79,6 +101,15 @@ export default defineComponent({
     font-size: 1.2rem;
     transition: 0.3s;
     font-weight: bold;
+    &.primary {
+      color: var(--color-primary);
+    }
+    &.secondary {
+      color: var(--color-secondary);
+    }
+    &.text {
+      color: var(--text-primary-color);
+    }
     & > .required {
       color: var(--color-danger);
     }
@@ -102,7 +133,7 @@ export default defineComponent({
     border-top: solid 2px var(--text-primary-color);
     border-radius: 10px;
     background: var(--background-glass-color-primary);
-    font-family: Consolas;
+    font-family: "Inconsolata", monospace;
     color: var(--text-primary-color);
     font-size: 1rem;
     transition: 0.3s;
