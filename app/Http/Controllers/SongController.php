@@ -104,9 +104,7 @@ class SongController extends Controller
     public function updateSong(Request $request)
     {
         $artist = json_decode($request->artist);
-        $newArtist = json_decode($request->newArtist);
         $genre = json_decode($request->genre);
-        $newGenre = json_decode($request->newGenre);
         $song = Song::find($request->song_id);
         if ($song->user_id != Auth::user()->user_id) {
             return response()->json([
@@ -121,37 +119,6 @@ class SongController extends Controller
         $song->genre()->detach();
         $song->artist()->attach($artist);
         $song->genre()->attach($genre);
-        foreach ($newArtist as $name) {
-            $check = Artist::where("name", $name)->first();
-            if ($check) {
-                $song_artist = new SongArtist();
-                $song_artist->song_id = $song->song_id;
-                $song_artist->artist_id = $check->artist_id;
-                $song_artist->save();
-                continue;
-            }
-            $saveNewArtist = new Artist();
-            $saveNewArtist->artist_id = "artist_" . Str::random(10);
-            $saveNewArtist->name = $name;
-            $saveNewArtist->image_path = "";
-            $saveNewArtist->save();
-            $song->artist()->attach([$saveNewArtist->artist_id]);
-        }
-        foreach ($newGenre as $name) {
-            $check = Genre::where('$name', $name)->first();
-            if ($check) {
-                $song_genre = new SongGenre();
-                $song_genre->song_id = $song->song_id;
-                $song_genre->genre_id = $check->genre_id;
-                $song_genre->save();
-                continue;
-            }
-            $savenewGenre = new Genre();
-            $savenewGenre->genre_id = "genre_" . Str::random(10);
-            $savenewGenre->name = $name;
-            $savenewGenre->save();
-            $song->genre()->attach([$genre->genre_id]);
-        }
         return response()->json([
             "status" => "success",
             "message" => "Song Updated Successfully",
