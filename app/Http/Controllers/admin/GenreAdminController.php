@@ -3,84 +3,67 @@
 namespace App\Http\Controllers\admin;
 
 use App\Models\Genre;
+use App\Models\Song;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Orchid\Support\Facades\Toast;
 
-class GenreAdminController extends Controller
+trait GenreAdminController
 {
-    //
-    public function getAll(Request $request)
+
+    public function asyncPassingId(Request $request)
     {
-        $query = urldecode($request->get("query"));
-        $perPage = $request->get("itemPerPage") ?? 10;
-        $genres = Genre::withCount(["song"])
-            ->where("name", "like", "%" . $query . "%")
-            ->paginate($perPage, ["id", "genre_id", "name"]);
-        return response()->json([
-            "status" => "success",
-            "genres" => $genres,
-        ]);
+        return [
+            'id' => $request->get('id'),
+        ];
     }
 
-    public function get($id)
+    public function create(Request $request)
     {
-        $genre = Genre::find($id);
-        return response()->json([
-            "status" => "success",
-            "genre" => $genre,
+        $request->validate([
+            "name" => "required|string|max:255",
+            "description" => "required|string|min:50",
         ]);
+        $genre = new Genre();
+        $genre->genre_id = "genre_" . \Str::random(10);
+        $genre->name = $request->name;
+        $genre->description = $request->description;
+        $genre->save();
+        Toast::success("Update '{$genre->name}' Genre Successfully");
+        return redirect()->route('platform.classification.genres');
     }
 
     public function update(Request $request)
     {
         $request->validate([
             "name" => "required|string|max:255",
-            "description" => "required|string|min:100",
+            "description" => "required|string|min:50",
             "genre_id" => "required|string|exists:genres,genre_id",
         ]);
         $genre = Genre::find($request->genre_id);
         $genre->name = $request->name;
         $genre->description = $request->description;
         $genre->save();
-        return response()->json([
-            "status" => "success",
-            "genre" => "Update Gerne Successfully",
-        ]);
+        Toast::success("Update '{$genre->name}' Genre Successfully");
+        return redirect()->route('platform.classification.genres');
     }
 
     public function delete($id)
     {
         $genre = Genre::find($id);
-        $songs = $genre
-            ->song()
-            ->withCount("artist")
-            ->having("artist_count", "<=", 1)
+        $songs = Song::whereHas("genre", function ($query) use ($id) {
+            $query->where("genres.genre_id", $id);
+        })->withCount('genre')
+            ->having('genre_count', '=', 1)
+            ->where('display', '=', 'public')
             ->get();
         foreach ($songs as $song) {
             $song->display = "private";
             $song->save();
         }
         $genre->song()->detach();
+        Toast::warning("Delete '{$genre->name}' Genre Successfully");
         $genre->delete();
-        return response()->json([
-            "status" => "success",
-        ]);
-    }
-
-    public function getSong($id, Request $request)
-    {
-        $query = urldecode($request->get("query"));
-        $itemPerPage = $request->get("itemPerPage") ?? 10;
-        $genre = Genre::find($id);
-        $songs = $genre
-            ->song()
-            ->where("title", "LIKE", "%" . $query . "%")
-            ->orWhere("sub_title", "LIKE", "%" . $query . "%")
-            ->paginate($itemPerPage);
-        return response()->json([
-            "status" => "success",
-            "songs" => $songs,
-        ]);
+        return redirect()->route('platform.classification.genres');
     }
 
     public function group(Request $request)
@@ -91,29 +74,13 @@ class GenreAdminController extends Controller
         ]);
         $from_id = $request->from;
         $to_id = $request->to;
-        if ($from_id == $to_id) {
-            return response()->json([
-                "status" => "error",
-                "message" => "Genre not found",
-            ]);
-        }
         $genre_from = Genre::find($from_id);
         $genre_to = Genre::find($to_id);
 
-        $songs = $genre_from->song()->get();
-        foreach ($songs as $song) {
-            $song->genre()->detach($genre_from->genre_id);
-            if (
-                !$song
-                    ->genre()
-                    ->where("genre_id", $genre_to->genre_id)
-                    ->exists()
-            ) {
-                $song->genre()->attach($genre_to->genre_id);
-            }
-        }
-        return response()->json([
-            "status" => "success",
-        ]);
+        $genre_to->song()->attach($genre_from->song()->get()->pluck('song_id')->toArray());
+        $genre_from->song()->detach();
+        Toast::warning("Group '{$genre_from->name}' to '{$genre_to->name}' Successfully");
+        $genre_from->delete();
+        return redirect()->route('platform.classification.genres');
     }
 }

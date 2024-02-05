@@ -2,13 +2,18 @@
 
 namespace App\Orchid\Screens\Classification;
 
+use App\Http\Controllers\admin\GenreAdminController;
 use App\Models\Genre;
 use App\Orchid\Helpers\Text;
+use App\Orchid\Layouts\Genre\EditGenreLayout;
+use App\Orchid\Layouts\Genre\GroupGenreLayout;
 use App\Orchid\Screens\Traits\GenerateQueryStringFilter;
 use App\Orchid\Screens\Traits\HasDumpModelModal;
 use App\Orchid\Screens\Traits\HasShowHideCountingToggle;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Orchid\Screen\Actions\Button;
+use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Screen\Components\Cells\DateTimeSplit;
 use Orchid\Screen\Fields\TextArea;
@@ -19,7 +24,7 @@ use Orchid\Support\Facades\Toast;
 
 class GenreListScreen extends Screen
 {
-    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter;
+    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter, GenreAdminController;
     /**
      * Fetch data to be displayed on the screen.
      *
@@ -28,8 +33,8 @@ class GenreListScreen extends Screen
     public function query(): iterable
     {
         $genres = Genre::withCount('song')->withCount('artist')->withCount('album')->advancedFilter([
-            ['id', fn(Builder $q, $t) => $q->where('genre_id', $t)->orWhere('id', $t)],
-            ['name', fn(Builder $q, $t) => $q->where('name', 'like', '%' . $t . '%')],
+            ['id', fn (Builder $q, $t) => $q->where('genre_id', $t)->orWhere('id', $t)],
+            ['name', fn (Builder $q, $t) => $q->where('name', 'like', '%' . $t . '%')],
             'created_at:date_range_tz',
             'updated_at:date_range_tz',
         ], [
@@ -64,6 +69,10 @@ class GenreListScreen extends Screen
     public function commandBar(): iterable
     {
         return [
+            ModalToggle::make('Add Genre')
+                ->icon('plus')
+                ->method('create')
+                ->modal('createModel'),
             $this->getCountingToggleLink(),
         ];
     }
@@ -78,72 +87,69 @@ class GenreListScreen extends Screen
         return [
             Layout::table('genres', [
                 TD::make('id', 'ID')
-                    ->render(fn(Genre $genre) => $genre->id .'<br\/>'
+                    ->render(fn (Genre $genre) => $genre->id . '<br\/>'
                         . $this->getDumpModelToggle(Genre::class, $genre->genre_id, $genre->genre_id))
-                ->sort()->filter(),
+                    ->sort()->filter(),
                 TD::make('name', 'Name')->filter()->sort(),
                 TD::make('description', 'Description')
-                    ->render(function(Genre $genre) {
+                    ->render(function (Genre $genre) {
                         return Text::limit($genre->description, 50)
-                            . ModalToggle::make('Edit')
-                                ->modal('descriptionModal')
-                                ->async('asyncDescriptionEdit')
-                                ->class('btn text-primary')
-                                ->method('saveDescription')
-                                ->asyncParameters(['id' => (string)$genre->genre_id])
-                                ->icon('pencil');
+                            ;
                     }),
-                TD::make('', 'Meta')->render(function(Genre $genre) {
+                TD::make('', 'Meta')->render(function (Genre $genre) {
                     $html = '';
                     $query = $this->generateQueryStringFilter('genre', $genre->genre_id);
-                    $url = route('platform.app.songs'). "?$query";
+                    $url = route('platform.app.songs') . "?$query";
                     $html .= "Songs: " . "<a class='orchid-custom' title='{$genre->name}' href=$url>" . $genre->song_count . "</a>" . "<br>";
-                    $url = route('platform.app.albums'). "?$query";
+                    $url = route('platform.app.albums') . "?$query";
                     $html .= "Albums: " . "<a class='orchid-custom' title='{$genre->name}' href=$url>" . $genre->album_count . "</a>" . "<br>";
-                    $url = route('platform.app.artists'). "?$query";
+                    $url = route('platform.app.artists') . "?$query";
                     $html .= "Artists: " . "<a class='orchid-custom' title='{$genre->name}' href=$url>" . $genre->artist_count . "</a>" . "<br>";
                     return $html;
                 }),
                 TD::make('created_at', 'Created At')->sort()->filter(TD::FILTER_DATE_RANGE)->asComponent(DateTimeSplit::class),
                 TD::make('updated_at', 'Updated At')->sort()->filter(TD::FILTER_DATE_RANGE)->asComponent(DateTimeSplit::class),
+                TD::make('', 'Actions')->render(function (Genre $genre) {
+                    return DropDown::make()->icon('three-dots-vertical')->list([
+                        ModalToggle::make('Edit')
+                            ->modal('editModel')
+                            ->method('update')
+                            ->async('asyncPassingId')
+                            ->icon('pencil')
+                            ->asyncParameters([
+                                'id' => $genre->genre_id
+                            ]),
+                        ModalToggle::make('Group Genres')
+                            ->modal('groupGenres')
+                            ->icon('layers')
+                            ->method('group')
+                            ->async('asyncPassingId')
+                            ->asyncParameters([
+                                'id' => $genre->genre_id
+                            ]),
+                        Button::make('Delete')
+                            ->icon('trash')
+                            ->method('delete')
+                            ->confirm('Are you sure you want to delete this genre?')
+                            ->parameters([
+                                'id' => $genre->genre_id
+                            ]),
+                    ]);
+
+                }),
             ]),
             $this->getDumpModal(),
-            Layout::modal('descriptionModal', [
-                Layout::rows([
-                    TextArea::make('description')
-                        ->title('Description')
-                        ->value(function() {
-                            $request = collect(\Request::all());
-                            $artist = Genre::find($request->get('id'));
-                            return $artist?->description ?? $request->get('id');
-                        })->rows(20),
-                ]),
-            ])->title('Edit Description')
-                ->async('asyncDescriptionEdit')
+            Layout::modal('editModel', [
+                EditGenreLayout::class
+            ])->title('Edit Genre')
+                ->async('asyncPassingId'),
+            Layout::modal('createModel', [
+                EditGenreLayout::class
+            ])->title('Create Genre'),
+            Layout::modal('groupGenres', [
+                GroupGenreLayout::class
+            ])->title('Group Genres')
+                ->async('asyncPassingId'),
         ];
-    }
-
-    public function asyncDescriptionEdit(Request $request)
-    {
-        return [
-            'data' => $request->get('id'),
-        ];
-    }
-
-    public function saveDescription(Request $request) {
-        $id = $request->get('id');
-        $description = $request->get('description');
-
-        try {
-            $artist = Genre::find($id);
-            $artist->description = $description;
-            $artist->save();
-        } catch (\Exception $e) {
-            Toast::error($e->getMessage());
-            return redirect()->back();
-        }
-
-        Toast::info('Description saved');
-        return redirect()->route('platform.classification.genres');
     }
 }
