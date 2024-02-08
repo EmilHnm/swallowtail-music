@@ -17,7 +17,7 @@ export class DateService {
     const years = Math.floor(months / 12);
 
     if (years > 0) {
-      return date;
+      return date.toDateString();
     } else if (months > 0) {
       return `${months} months ago`;
     } else if (days > 0) {
