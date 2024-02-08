@@ -40,6 +40,12 @@
           <span>Upload Management</span>
         </router-link>
       </li>
+      <li @click="closeSideBar">
+        <router-link :to="{ name: 'accountRequest', replace: true }">
+          <IconRequest />
+          <span>Request Management</span>
+        </router-link>
+      </li>
     </ul>
   </nav>
 </template>
@@ -54,6 +60,7 @@ import IconSecurity from "@/components/icons/IconSecurity.vue";
 import IconDisk from "@/components/icons/IconDisk.vue";
 import { mapGetters } from "vuex";
 import IconMenuBlock from "@/components/icons/IconMenuBlock.vue";
+import IconRequest from "@/components/icons/IconRequest.vue";
 export default defineComponent({
   props: {
     isSideBarActive: Boolean,
@@ -80,6 +87,7 @@ export default defineComponent({
     IconSecurity,
     IconDisk,
     IconMenuBlock,
+    IconRequest,
   },
 });
 </script>

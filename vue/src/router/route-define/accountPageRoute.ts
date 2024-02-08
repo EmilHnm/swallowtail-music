@@ -62,4 +62,17 @@ export const accountPageRoute = [
       },
     ],
   },
+  {
+    path: "request",
+    name: "accountRequest",
+    redirect: { name: "accountRequestManagement" },
+    children: [
+      {
+        path: "",
+        name: "accountRequestManagement",
+        component: () =>
+          import("@/views/AccountView/AccountRequest/AccountReqest.vue"),
+      },
+    ],
+  },
 ];
