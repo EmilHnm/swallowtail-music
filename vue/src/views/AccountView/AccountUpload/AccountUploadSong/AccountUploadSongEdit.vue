@@ -20,6 +20,14 @@
       </template>
       <template #action><div></div></template>
     </BaseFlatDialog>
+    <GenreRequestFlatDialog
+      :isOpen="isOpenRequestGenre"
+      @genre-request-close="isOpenRequestGenre = false"
+    />
+    <ArtistRequestFlatDialog
+      :isOpen="isOpenRequestArtist"
+      @artist-request-close="isOpenRequestArtist = false"
+    />
   </teleport>
   <div class="main">
     <h3>Song Edit</h3>
@@ -55,7 +63,9 @@
         </div>
         <div class="form__row--new">
           <span>Don't find your artists?</span>
-          <button>Request artists</button>
+          <button @click.prevent="isOpenRequestArtist = true">
+            Request artists
+          </button>
         </div>
       </div>
       <div class="form__row">
@@ -85,7 +95,9 @@
         </div>
         <div class="form__row--new">
           <span>Don't find your genre?</span>
-          <button>Request Genre</button>
+          <button @click.prevent="isOpenRequestGenre = true">
+            Request Genre
+          </button>
         </div>
       </div>
       <div class="form__row">
@@ -124,6 +136,8 @@ import BaseRadio from "@/components/UI/BaseRadio.vue";
 import BaseTag from "@/components/UI/BaseTag.vue";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import GenreRequestFlatDialog from "@/components/AccountView/partials/Request/GenreRequestFlatDialog.vue";
+import ArtistRequestFlatDialog from "@/components/AccountView/partials/Request/ArtistRequestFlatDialog.vue";
 export default defineComponent({
   data() {
     return {
@@ -144,6 +158,8 @@ export default defineComponent({
         content: "Please fill in all the fields",
         show: false,
       },
+      isOpenRequestArtist: false,
+      isOpenRequestGenre: false,
     };
   },
   methods: {
@@ -221,6 +237,8 @@ export default defineComponent({
     BaseTag,
     BaseFlatDialog,
     BaseCircleLoad,
+    GenreRequestFlatDialog,
+    ArtistRequestFlatDialog,
   },
   watch: {
     artistArray: {
@@ -319,8 +337,8 @@ export default defineComponent({
         width: 100%;
         overflow: scroll;
         z-index: 20;
-        background: var(--background-glass-color-primary);
-        backdrop-filter: blur(10px);
+        background: var(--background-blur-color-primary);
+        backdrop-filter: blur(20px);
         top: 100%;
         &--item {
           width: 100%;

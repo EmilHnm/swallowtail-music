@@ -5,7 +5,10 @@
     :mode="'announcement'"
   >
     <template v-if="!isRequseting" #default>
-      <div class="genre-request">
+      <div v-if="isSuccess" class="genre-request">
+        <span>Request success</span>
+      </div>
+      <div v-else class="genre-request">
         <BaseInput
           type="text"
           label="Name"
@@ -40,8 +43,13 @@
       </div>
     </template>
     <template v-if="!isRequseting" #action>
-      <BaseButton @click="onRequest">Request</BaseButton>
-      <BaseButton :mode="'warning'" @click="closeDialog">Cancel</BaseButton>
+      <template v-if="isSuccess">
+        <BaseButton @click="closeDialog">Close</BaseButton>
+      </template>
+      <template v-else>
+        <BaseButton @click="onRequest">Request</BaseButton>
+        <BaseButton :mode="'warning'" @click="closeDialog">Cancel</BaseButton>
+      </template>
     </template>
     <template v-else #action>
       <div></div>
@@ -71,6 +79,7 @@ export default defineComponent({
       descriptions: "",
       errors: "",
       isRequseting: false,
+      isSuccess: false,
     };
   },
   methods: {
@@ -78,6 +87,9 @@ export default defineComponent({
     closeDialog() {
       this.name = "";
       this.descriptions = "";
+      this.errors = "";
+      this.isRequseting = false;
+      this.isSuccess = false;
       this.$emit("genre-request-close");
     },
     onRequest() {
@@ -104,7 +116,7 @@ export default defineComponent({
             this.errors = data.message;
             return;
           }
-          this.closeDialog();
+          this.isSuccess = true;
         })
         .catch((err) => {
           this.isRequseting = false;
