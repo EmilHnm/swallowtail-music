@@ -290,25 +290,24 @@ namespace App\Models{
  * App\Models\Request
  *
  * @property int $id
- * @property string $requester
- * @property string $request_type
- * @property string $request_status
- * @property mixed $request_description
+ * @property \App\Models\User|null $requester
+ * @property string $type
+ * @property string $status
+ * @property mixed|null $body
  * @property string|null $filled_by
  * @property int $user_fillable
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|Request newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Request newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Request query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereBody($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Request whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Request whereFilledBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Request whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Request whereRequestDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Request whereRequestStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Request whereRequestType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Request whereRequester($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Request whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Request whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Request whereUserFillable($value)
  */
