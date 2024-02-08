@@ -1,9 +1,11 @@
+import type { Pagination } from "./mixin/PaginateDataModel";
+
 export interface request {
   id: number;
   requester: string;
-  request_type: "artist" | "genre" | "album" | "song" | "system" | "interface";
-  request_status: "pending" | "resolved" | "rejected";
-  request_description: {
+  type: "artist" | "genre" | "album" | "song";
+  status: "pending" | "resolved" | "rejected";
+  body: {
     name: string;
     description: string;
   };
@@ -11,4 +13,8 @@ export interface request {
   user_fillable: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface RequestResponse extends Pagination {
+  data: request[];
 }

@@ -11,12 +11,6 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\admin\SongAdminController;
-use App\Http\Controllers\admin\UserAdminController;
-use App\Http\Controllers\admin\AlbumAdminController;
-use App\Http\Controllers\admin\GenreAdminController;
-use App\Http\Controllers\admin\ArtistAdminController;
-use App\Http\Controllers\admin\StatisticAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -139,7 +133,10 @@ Route::middleware("auth:sanctum")->group(function () {
     });
 
     Route::prefix("requests")->group(function () {
+        Route::get("", [RequestController::class, "index"]);
         Route::post("/create", [RequestController::class, "create"]);
+        Route::get("/{id}", [RequestController::class, "show"]);
+        Route::post("/{id}/cancel", [RequestController::class, "cancel"]);
     })->middleware(["verified"]);
 
     Route::prefix("user")->group(function () {

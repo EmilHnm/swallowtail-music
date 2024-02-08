@@ -9,4 +9,5 @@ class RequestStatusEnum extends Enum
     const PENDING = 'pending';
     const RESOLVED = 'resolved';
     const REJECTED = 'rejected';
+    const CANCELLED = 'cancelled';
 }
