@@ -50,7 +50,6 @@ class RequestController extends Controller
         }
         if ($request->has('q')) {
             $requests->where('body->name', 'like', '%' . $request->q . '%');
-            $requests->orWhere('body->description', 'like', '%' . $request->q . '%');
         }
         $requests = $requests->orderBy('created_at', 'desc')->paginate($request->per_page ?? 10);
 
