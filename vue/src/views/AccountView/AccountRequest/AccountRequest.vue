@@ -1,6 +1,11 @@
 <template>
-  <div class="main" ref="main">
-    <h1>Request Management</h1>
+  <div class="main">
+    <div class="title">
+      <h1>Request Management</h1>
+      <router-link :to="{ name: 'accountRequestCreate' }" class="btn create"
+        >Create new request</router-link
+      >
+    </div>
     <div class="filter">
       <div class="filter-item">
         <span>Filter with:</span>
@@ -72,7 +77,7 @@
             </BaseTooltip>
           </td>
           <td class="control">
-            <button class="show">Show</button>
+            <button class="btn show">Show</button>
             <ConfirmFlatDialog
               :passingData="request.id"
               @confirm="onCancelRequest"
@@ -81,7 +86,7 @@
                 <span>Are you sure you want to cancel this request?</span>
               </template>
               <button
-                class="cancel"
+                class="btn cancel"
                 v-if="
                   request.status == 'pending' &&
                   request.requester == userData.user_id
@@ -154,7 +159,6 @@ export default defineComponent({
   methods: {
     ...mapActions("request", ["index", "cancel"]),
     getRequests() {
-      console.log(this.filter);
       this.isLoading = true;
       if (!this.signal) this.signal = this.controller.signal;
       else {
@@ -234,6 +238,53 @@ export default defineComponent({
   width: 100%;
   display: flex;
   flex-direction: column;
+  .btn {
+    padding: 5px 10px;
+    background: transparent;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    margin: 5px 2px;
+    &.create {
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+      &:focus {
+        outline: none;
+      }
+      &:hover {
+        background: var(--color-primary);
+        color: var(--background-color-secondary);
+      }
+    }
+    &.show {
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+      &:focus {
+        outline: none;
+      }
+      &:hover {
+        background: var(--color-primary);
+        color: var(--background-color-secondary);
+      }
+    }
+    &.cancel {
+      border: 1px solid var(--color-danger);
+      color: var(--color-danger);
+      &:focus {
+        outline: none;
+      }
+      &:hover {
+        background: var(--color-danger);
+        color: var(--background-color-secondary);
+      }
+    }
+  }
+  .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+  }
   .filter {
     display: flex;
     flex-direction: column;
@@ -297,36 +348,6 @@ export default defineComponent({
             color: var(--color-primary);
             text-decoration: none;
             cursor: pointer;
-          }
-          button {
-            padding: 5px 10px;
-            background: transparent;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-            margin: 5px 2px;
-            &.show {
-              border: 1px solid var(--color-primary);
-              color: var(--color-primary);
-              &:focus {
-                outline: none;
-              }
-              &:hover {
-                background: var(--color-primary);
-                color: var(--background-color-secondary);
-              }
-            }
-            &.cancel {
-              border: 1px solid var(--color-danger);
-              color: var(--color-danger);
-              &:focus {
-                outline: none;
-              }
-              &:hover {
-                background: var(--color-danger);
-                color: var(--background-color-secondary);
-              }
-            }
           }
         }
       }
