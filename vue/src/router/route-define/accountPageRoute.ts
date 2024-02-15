@@ -79,6 +79,14 @@ export const accountPageRoute = [
         component: () =>
           import("@/views/AccountView/AccountRequest/AccountRequestCreate.vue"),
       },
+      {
+        path: ":id",
+        name: "accountRequestDetails",
+        component: () =>
+          import(
+            "@/views/AccountView/AccountRequest/AccountRequestDetails.vue"
+          ),
+      },
     ],
   },
 ];

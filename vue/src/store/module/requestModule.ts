@@ -74,6 +74,82 @@ const actions: ActionTree<RootState, RootState> = {
       },
     });
   },
+  show(
+    { commit },
+    payload: {
+      token: string;
+      id: number;
+    }
+  ): Promise<Response> {
+    return fetch(`${environment.api}/requests/${payload.id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.token}`,
+        Accept: "application/json",
+      },
+    });
+  },
+  response(
+    { commit },
+    payload: {
+      token: string;
+      id: number;
+      content: string;
+    }
+  ): Promise<Response> {
+    return fetch(`${environment.api}/requests/${payload.id}/response`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.token}`,
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        content: payload.content,
+      }),
+    });
+  },
+  approve(
+    { commit },
+    payload: {
+      token: string;
+      response_id: number;
+      request_id: number;
+    }
+  ) {
+    return fetch(`${environment.api}/requests/${payload.request_id}/approve`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.token}`,
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        response_id: payload.response_id,
+      }),
+    });
+  },
+  reject(
+    { commit },
+    payload: {
+      token: string;
+      response_id: number;
+      request_id: number;
+    }
+  ) {
+    return fetch(`${environment.api}/requests/${payload.request_id}/reject`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.token}`,
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        response_id: payload.response_id,
+      }),
+    });
+  },
 };
 
 export default {

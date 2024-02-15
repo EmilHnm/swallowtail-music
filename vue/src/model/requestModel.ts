@@ -1,4 +1,5 @@
 import type { Pagination } from "./mixin/PaginateDataModel";
+import type { user } from "./userModel";
 
 export interface request {
   id: number;
@@ -9,7 +10,7 @@ export interface request {
     name: string;
     description: string;
   };
-  filled_by: string;
+  filled_by: string | user;
   user_fillable: boolean;
   created_at: string;
   updated_at: string;
