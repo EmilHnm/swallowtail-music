@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enum\RequestStatusEnum;
-use Illuminate\Http\Request;
-use App\Models\Request as ClientRequest;
 use Auth;
+use Illuminate\Http\Request;
+use App\Enum\RequestStatusEnum;
+use App\Enum\ResponseStatusEnum;
+use App\Models\Request as ClientRequest;
 
 class RequestController extends Controller
 {
@@ -92,7 +93,7 @@ class RequestController extends Controller
 
     public function show($id)
     {
-        $request = ClientRequest::find($id);
+        $request = ClientRequest::with(['requester', 'filledBy', 'responses' => fn ($q) => $q->with('responder')])->find($id);
         if (!$request) {
             return response()->json([
                 'message' => 'Request not found',
@@ -101,6 +102,119 @@ class RequestController extends Controller
         }
         return response()->json([
             'request' => $request,
+            'status' => 'success',
+        ], 200);
+    }
+
+    public function response(Request $request, $id)
+    {
+        $client_request = ClientRequest::find($id);
+        if (!$client_request) {
+            return response()->json([
+                'message' => 'Request not found',
+                'status' => 'error',
+            ], 404);
+        }
+        if ($client_request->status !== RequestStatusEnum::PENDING) {
+            return response()->json([
+                'message' => 'Request is not pending',
+                'status' => 'error',
+            ], 403);
+        }
+
+        $request->validate([
+            'content' => 'required|string',
+        ]);
+
+        $client_request->responses()->create([
+            'responder' => Auth::user()->user_id,
+            'content' => $request->content,
+        ]);
+
+        return response()->json([
+            'message' => 'Response created successfully',
+            'status' => 'success',
+        ], 200);
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $request->validate([
+            'response_id' => 'required|integer|exists:responses,id',
+        ]);
+
+        $client_request = ClientRequest::find($id);
+        if (!$client_request) {
+            return response()->json([
+                'message' => 'Request not found',
+                'status' => 'error',
+            ], 404);
+        }
+
+        if ($client_request->status !== RequestStatusEnum::PENDING) {
+            return response()->json([
+                'message' => 'Request is not pending',
+                'status' => 'error',
+            ], 403);
+        }
+
+        $response = $client_request->responses()->find($request->response_id);
+        if (!$response) {
+            return response()->json([
+                'message' => 'Response not found',
+                'status' => 'error',
+            ], 404);
+        }
+        foreach ($client_request->responses as $response) {
+            if ($response->id === $request->response_id) {
+                $response->status = ResponseStatusEnum::APPROVED;
+                $client_request->filled_by = $response->responder;
+                $response->save();
+            } else {
+                $response->status = ResponseStatusEnum::REJECTED;
+                $response->save();
+            }
+        }
+        $client_request->status = RequestStatusEnum::RESOLVED;
+        $client_request->save();
+
+        return response()->json([
+            'message' => 'Request approved successfully',
+            'status' => 'success',
+        ], 200);
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'response_id' => 'required|integer|exists:responses,id',
+        ]);
+
+        $client_request = ClientRequest::find($id);
+        if (!$client_request) {
+            return response()->json([
+                'message' => 'Request not found',
+                'status' => 'error',
+            ], 404);
+        }
+        $response = $client_request->responses()->find($request->response_id);
+        if (!$response) {
+            return response()->json([
+                'message' => 'Response not found',
+                'status' => 'error',
+            ], 404);
+        }
+        if ($client_request->status !== RequestStatusEnum::PENDING) {
+            return response()->json([
+                'message' => 'Request is not pending',
+                'status' => 'error',
+            ], 403);
+        }
+        $response->status = ResponseStatusEnum::REJECTED;
+        $response->save();
+
+        return response()->json([
+            'message' => 'Request rejected successfully',
             'status' => 'success',
         ], 200);
     }

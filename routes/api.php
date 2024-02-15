@@ -137,6 +137,9 @@ Route::middleware("auth:sanctum")->group(function () {
         Route::post("/create", [RequestController::class, "create"]);
         Route::get("/{id}", [RequestController::class, "show"]);
         Route::post("/{id}/cancel", [RequestController::class, "cancel"]);
+        Route::post("/{id}/response", [RequestController::class, "response"]);
+        Route::post("/{id}/approve", [RequestController::class, "approve"]);
+        Route::post("/{id}/reject", [RequestController::class, "reject"]);
     })->middleware(["verified"]);
 
     Route::prefix("user")->group(function () {
