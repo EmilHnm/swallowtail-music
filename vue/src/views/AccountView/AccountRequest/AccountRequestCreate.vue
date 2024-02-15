@@ -1,19 +1,19 @@
 <template>
+  <BaseFlatDialog
+    :open="dialog.show"
+    :title="dialog.title"
+    :mode="dialog.mode"
+    @close="closeDialog"
+  >
+    <template #default v-if="!isRequesting">
+      {{ dialog.message }}
+    </template>
+    <template #default v-else>
+      <BaseLineLoad />
+    </template>
+    <template #action> <div v-if="isRequesting"></div> </template>
+  </BaseFlatDialog>
   <div class="main">
-    <BaseFlatDialog
-      :open="dialog.show"
-      :title="dialog.title"
-      :mode="dialog.mode"
-      @close="closeDialog"
-    >
-      <template #default v-if="!isRequesting">
-        {{ dialog.message }}
-      </template>
-      <template #default v-else>
-        <BaseLineLoad />
-      </template>
-      <template #action> <div v-if="isRequesting"></div> </template>
-    </BaseFlatDialog>
     <div class="title">
       <h1>Create new request</h1>
     </div>
@@ -106,6 +106,7 @@ export default defineComponent({
             return;
           }
           this.showSuccessDialog();
+          this.resetForm();
         })
         .catch((err) => {
           this.showErrorMessage(err.message);
@@ -138,6 +139,11 @@ export default defineComponent({
       this.dialog.mode = "";
       this.dialog.message = "";
       this.isRequesting = false;
+    },
+    resetForm() {
+      this.form.type = "";
+      this.form.name = "";
+      this.form.description = "";
     },
     onCancel() {
       this.$router.push({ name: "accountRequestManagement" });

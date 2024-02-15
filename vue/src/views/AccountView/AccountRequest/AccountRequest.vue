@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <div class="title">
+    <div class="heading">
       <h1>Request Management</h1>
       <router-link :to="{ name: 'accountRequestCreate' }" class="btn create"
         >Create new request</router-link
@@ -77,7 +77,17 @@
             </BaseTooltip>
           </td>
           <td class="control">
-            <button class="btn show">Show</button>
+            <button
+              class="btn show"
+              @click="
+                $router.push({
+                  name: 'accountRequestDetails',
+                  params: { id: request.id },
+                })
+              "
+            >
+              Details
+            </button>
             <ConfirmFlatDialog
               :passingData="request.id"
               @confirm="onCancelRequest"
@@ -279,7 +289,7 @@ export default defineComponent({
       }
     }
   }
-  .title {
+  .heading {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -332,22 +342,21 @@ export default defineComponent({
           background: var(--background-glass-color-secondary);
           text-align: center;
           border-bottom: 1px solid var(--background-glass-color-primary);
+          height: 40px;
           &.title {
-            max-width: 10ch;
+            max-width: 70ch;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
           &.control {
             display: flex;
             justify-content: end;
             align-items: center;
             gap: 10px;
-          }
-          a {
-            color: var(--color-primary);
-            text-decoration: none;
-            cursor: pointer;
           }
         }
       }
