@@ -42,10 +42,7 @@ $screen-width: 1280px;
   margin: auto;
   background: var(--background-glass-color-primary);
   height: calc(100vh - 80px);
-}
-
-@media (max-width: $screen-width) {
-  .wrapper {
+  @media screen and (max-width: $screen-width) {
     width: 100%;
   }
 }
