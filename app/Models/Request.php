@@ -17,4 +17,13 @@ class Request extends Model
     {
         return $this->belongsTo(User::class, 'requester', 'user_id');
     }
+    public function responses()
+    {
+        return $this->hasMany(Response::class);
+    }
+
+    public function filledBy()
+    {
+        return $this->belongsTo(User::class, 'filled_by', 'user_id');
+    }
 }
