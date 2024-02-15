@@ -298,6 +298,8 @@ namespace App\Models{
  * @property int $user_fillable
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Response> $responses
+ * @property-read int|null $responses_count
  * @method static \Illuminate\Database\Eloquent\Builder|Request newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Request newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Request query()
@@ -312,6 +314,31 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Request whereUserFillable($value)
  */
 	class Request extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\Response
+ *
+ * @property int $id
+ * @property int $request_id
+ * @property string $responder
+ * @property string $content
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Response newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Response newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Response query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Response whereContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Response whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Response whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Response whereRequestId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Response whereResponder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Response whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Response whereUpdatedAt($value)
+ */
+	class Response extends \Eloquent {}
 }
 
 namespace App\Models{
