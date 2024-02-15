@@ -104,6 +104,21 @@ nav {
   flex: 0 0 auto;
   overflow: scroll;
   height: calc(100vh - 150px);
+  @media (max-width: $tablet-width) {
+    flex-basis: 100%;
+    width: 100%;
+    position: absolute;
+    top: 71px;
+    left: 0;
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    &.active {
+      transform: translateX(0);
+      background: var(--background-color-primary);
+    }
+  }
   &::-webkit-scrollbar {
     display: none;
   }
@@ -153,23 +168,6 @@ nav {
           color: var(--text-primary-color);
         }
       }
-    }
-  }
-}
-
-@media (max-width: $tablet-width) {
-  nav {
-    flex-basis: 100%;
-    width: 100%;
-    position: absolute;
-    top: 71px;
-    left: 0;
-    backdrop-filter: blur(10px);
-    z-index: 100;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    &.active {
-      transform: translateX(0);
     }
   }
 }
