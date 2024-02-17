@@ -69,13 +69,12 @@ trait AdvancedFilters
             }
             switch ($type) {
                 case "int":
-                    if (str_contains($value, "-")) {
-                        [$min, $max] = explode("-", $value);
-                        if ($min) {
-                            $query->where($key, '>=', (int)$min);
+                    if (is_array($value)) {
+                        if (isset($value['min'])) {
+                            $query->where($key, '>=', (int)$value['min']);
                         }
-                        if ($max) {
-                            $query->where($key, '<=', (int)$max);
+                        if (isset($value['max'])) {
+                            $query->where($key, '<=', (int)$value['max']);
                         }
                     } else {
                         $values = explode(",", $value);
