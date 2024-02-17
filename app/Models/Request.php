@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Casts\JSON;
+use App\Models\Traits\AdvancedFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Orchid\Screen\AsSource;
 
 class Request extends Model
 {
-    use HasFactory;
+    use HasFactory, AsSource, AdvancedFilters;
 
     protected $casts = [
         'body' => JSON::class,

@@ -57,7 +57,11 @@ class PlatformProvider extends OrchidServiceProvider
                 ->icon('tag')
                 ->route('platform.classification.genres')
                 ->title(__('CLASSIFICATION'))
-            ->permission(PermissionEnum::CLASSIFYING_INDEX),
+                ->permission(PermissionEnum::CLASSIFYING_INDEX),
+            Menu::make('Requests')
+                ->icon('building-fill-up')
+                ->route('platform.communities.requests')
+                ->title(__('COMMUNITIES')),
 //            Menu::make('Get Started')
 //                ->icon('bs.book')
 //                ->title('Navigation')

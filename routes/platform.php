@@ -152,3 +152,9 @@ Route::screen('genres', \App\Orchid\Screens\Classification\GenreListScreen::clas
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Genres'), route('platform.classification.genres')));
+
+Route::screen('requests', \App\Orchid\Screens\Communities\RequestListScreen::class)
+    ->name('platform.communities.requests')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push(__('Requests'), route('platform.communities.requests')));
