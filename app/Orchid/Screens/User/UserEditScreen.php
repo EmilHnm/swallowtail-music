@@ -86,14 +86,14 @@ class UserEditScreen extends Screen
                 ->confirm(__('Do you really want to disable this user?'))
                 ->method('remove')
                 ->class('btn btn-danger')
-                ->canSee(!$this->user->deleted_at),
+                ->canSee($this->user->exists && !$this->user->deleted_at),
 
             Button::make(__('Enable'))
                 ->icon('bs.check2')
                 ->confirm(__('Do you really want to enable this user?'))
                 ->method('enable')
                 ->class('btn btn-success')
-                ->canSee((bool)$this->user->deleted_at),
+                ->canSee($this->user->exists && $this->user->deleted_at),
 
             Button::make(__('Save'))
                 ->icon('bs.check-circle')
