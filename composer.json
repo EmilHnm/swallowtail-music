@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.7",
         "league/flysystem-aws-s3-v3": "^3.16",
         "league/flysystem-sftp-v3": "^3.6.0",
+        "matchish/laravel-scout-elasticsearch": "^7.5",
         "myclabs/php-enum": "^1.8",
         "orchid/platform": "^14.12",
         "pbmedia/laravel-ffmpeg": "^8.1",

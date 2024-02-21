@@ -3,21 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Song;
-use App\Models\Genre;
-use App\Models\Artist;
-use App\Models\SongMetadata;
+use App\Enum\RefererEnum;
 use App\Models\LikedSong;
 use App\Models\SongGenre;
 use App\Models\SongArtist;
 use Illuminate\Support\Str;
 use App\Models\PlaylistSong;
+use App\Models\SongMetadata;
+use App\Orchid\Helpers\Text;
 use Illuminate\Http\Request;
 use App\Services\SongManager;
-use App\Enum\SongMetadataStatusEnum;
-use App\Enum\RefererEnum;
 use App\Jobs\ProcessSongConvert;
-use App\Services\StorageManager;
-use Illuminate\Support\Facades\DB;
+use App\Enum\SongMetadataStatusEnum;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -345,15 +342,24 @@ class SongController extends Controller
     public function searchSong(Request $request)
     {
         if ($request->query->has("query")) {
-            $query = $request->query->get("query");
-            $songs = Song::with(["artist", "album", "like"])
-                ->withCount("artist")
-                ->where("title", "like", "%" . $query . "%")
-                ->orWhere("normalized_title", "like", "%" . $query . "%")
-                ->where("display", "public")
-                ->having("artist_count", '>=', '1')
-                ->limit(10)
-                ->get();
+            $query = Text::normalize($request->query->get("query"));
+
+            try {
+                $songs = Song::search("title:($query~1)^3 or normalized_title:($query~1)^2 or ($query) or album.name:($query~1) or artist.name:($query~1)")
+                    ->where("display", "public")
+                    ->take(10)
+                    ->get()->load(["artist", "album", "like"]);
+            } catch (\Throwable $th) {
+                $songs = Song::with(["artist", "album", "like"])
+                    ->withCount("artist")
+                    ->where("title", "like", "%" . $query . "%")
+                    ->orWhere("normalized_title", "like", "%" . $query . "%")
+                    ->where("display", "public")
+                    ->having("artist_count", '>=', '1')
+                    ->limit(10)
+                    ->get();
+            }
+
             return response()->json([
                 "status" => "success",
                 "songs" => $songs,

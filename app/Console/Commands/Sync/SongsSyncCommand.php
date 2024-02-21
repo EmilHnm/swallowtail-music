@@ -114,12 +114,16 @@ class SongsSyncCommand extends Command
 
                         SongMetadata::reguard();
                         $song->save();
+
+                        $song->searchable();
                     }
                 } catch (\Exception $e) {
                     \Log::error("Error syncing song " . $song->id . " - " . $song->title . " with errors " . $e);
                     continue;
                 }
-                sleep(5);
+                sleep(0);
+            } else {
+                $this->warn("Song not found with id " . $id);
             }
         }
     }

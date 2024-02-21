@@ -9,7 +9,6 @@ use App\Enum\AlbumTypeEnum;
 use Illuminate\Support\Str;
 use App\Orchid\Helpers\Text;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class AlbumController extends Controller
@@ -154,29 +153,20 @@ class AlbumController extends Controller
             return response()->json([
                 "status" => "error",
                 "message" => "Album not found!",
-            ]);
+            ], 404);
         }
         if ($album->user_id != Auth::user()->user_id) {
             return response()->json([
                 "status" => "error",
                 "message" => "You are not allowed to update this album!",
-            ]);
+            ], 403);
         }
         if ($request->file("image")) {
             $imageFile = $request->file("image");
-            $fileName =
-                $album->album_id .
-                "." .
-                $imageFile->getClientOriginalExtension();
-            @unlink(
-                public_path("storage/upload/album_cover") .
-                    "/" .
-                    $album->image_path
-            );
-            $imageFile->move(
-                public_path("storage/upload/album_cover"),
-                $fileName
-            );
+            $fileName = file_path_helper($album->id) .
+                $album->id . "." . $imageFile->getClientOriginalExtension();
+            \Storage::disk('final_cover')->delete($album->image_path);
+            \Storage::disk('final_cover')->put($fileName, file_get_contents($imageFile));
             $album->image_path = $fileName;
         }
         $album->name = $albumData->name;
@@ -187,8 +177,7 @@ class AlbumController extends Controller
             [
                 "status" => "success",
                 "message" => "Album updated successfully!",
-            ],
-            200
+            ]
         );
     }
 
@@ -199,17 +188,17 @@ class AlbumController extends Controller
             return response()->json([
                 "status" => "error",
                 "message" => "Album not found",
-            ]);
+            ], 404);
         }
         if ($album->user_id != Auth::user()->user_id) {
             return response()->json([
                 "status" => "error",
                 "message" => "You are not allowed to delete this album!",
-            ]);
+            ], 403);
         }
-        @unlink(
-            public_path("storage/upload/album_cover/") . "/" . $album->album_id
-        );
+        if($album->image_path){
+            \Storage::disk('final_cover')->delete($album->image_path);
+        }
         $songs = Song::where("album_id", $album->album_id)->get();
         foreach ($songs as $song) {
             $song->album_id = null;
@@ -239,11 +228,22 @@ class AlbumController extends Controller
     public function searchAlbum(Request $request)
     {
         if ($request->query->has("query")) {
-            $query = $request->query->get("query");
-            $albums = Album::withCount("song")
-                ->where('song_count', '>', 0)
-                ->where("name", "like", "%" . $query . "%")
-                ->get();
+            $query = Text::normalize($request->query->get("query"));
+            try {
+                $albums = Album::search("name:($query~2)^2 or normalized_name:($query~2)^1.5 or ($query)")
+                    ->get()->loadCount("song")->filter(
+                    function ($album) {
+                        return $album->song_count > 0;
+                    }
+                )->take(8);
+            } catch (\Exception $e) {
+                $albums = Album::withCount("song")
+                    ->having('song_count', '>', 0)
+                    ->where("name", "like", "%" . $query . "%")
+                    ->take(8)
+                    ->get();
+            }
+
             return response()->json([
                 "status" => "success",
                 "albums" => $albums,

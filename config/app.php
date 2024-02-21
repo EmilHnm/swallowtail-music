@@ -185,6 +185,7 @@ return [
          */
         Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
         ProtoneMedia\LaravelFFMpeg\Support\ServiceProvider::class,
+        \Matchish\ScoutElasticSearch\ElasticSearchServiceProvider::class,
         /*
          * Application Service Providers...
          */

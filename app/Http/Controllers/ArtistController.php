@@ -49,7 +49,11 @@ class ArtistController extends Controller
     {
         if ($request->query->has("query")) {
             $query = $request->query->get("query");
-            $artists = Artist::where("name", "like", "%" . $query . "%")->get();
+            try {
+                $artists = Artist::search("name:($query~2)^2 or normalized_name:($query~2)^1.5 or $query")->get();
+            } catch (\Throwable $th) {
+                $artists = Artist::where("name", "like", "%" . $query . "%")->get();
+            }
             return response()->json([
                 "status" => "success",
                 "artists" => $artists,

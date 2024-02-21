@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Models\Traits\AdvancedFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 use Orchid\Screen\AsSource;
 
 class Artist extends Model
 {
     use HasFactory;
     use AsSource, AdvancedFilters;
+    use Searchable;
     protected $primaryKey = "artist_id";
     public $incrementing = false;
     public $timestamps = true;
@@ -44,5 +46,13 @@ class Artist extends Model
         elseif($type == 'banner')
             $this->banner_path = $this->id . "/$type.jpg";
         $this->save();
+    }
+
+
+    public function toSearchableArray()
+    {
+        $with = ['song'];
+        $this->loadMissing($with);
+        return $this->toArray();
     }
 }

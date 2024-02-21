@@ -2,16 +2,20 @@
 
 namespace App\Models;
 
+use App\Enum\SongMetadataStatusEnum;
 use App\Models\Traits\AdvancedFilters;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Scout\Searchable;
 use Orchid\Screen\AsSource;
 
 class Song extends Model
 {
     use HasFactory;
     use AsSource, AdvancedFilters;
+    use Searchable;
+
     protected $primaryKey = "song_id";
     public $incrementing = false;
     public $timestamps = true;
@@ -71,5 +75,19 @@ class Song extends Model
     public function file()
     {
         return $this->hasOne(SongMetadata::class, "song_id", "song_id");
+    }
+
+
+    public function toSearchableArray()
+    {
+        $with = ['artist', 'genre', 'album'];
+        $this->loadMissing($with)
+            ->whereHas("file", fn ($q) => $q->where("status", SongMetadataStatusEnum::DONE));
+        return $this->toArray();
+    }
+
+    public function getRouteKeyName()
+    {
+        return "song_id";
     }
 }
