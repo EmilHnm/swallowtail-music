@@ -140,7 +140,7 @@ class SongController extends Controller
                 "message" => "You are not allowed to stream this song.",
             ]);
         }
-        $url = (new SongManager($song))->stream($song);
+        $url = (new SongManager($song))->stream();
         return  $url;
     }
 
@@ -351,7 +351,6 @@ class SongController extends Controller
                     ->get()->load(["artist", "album", "like"]);
             } catch (\Throwable $th) {
                 $songs = Song::with(["artist", "album", "like"])
-                    ->withCount("artist")
                     ->where("title", "like", "%" . $query . "%")
                     ->orWhere("normalized_title", "like", "%" . $query . "%")
                     ->where("display", "public")
