@@ -71,7 +71,7 @@ class PlatformProvider extends OrchidServiceProvider
             Menu::make(__('User Inspector'))
                 ->icon('bs.search')
                 ->route('platform.systems.tools.inspector')
-                ->permission('platform.systems.users'),
+                ->permission(PermissionEnum::SYSTEM_USERS),
 //            Menu::make('Get Started')
 //                ->icon('bs.book')
 //                ->title('Navigation')
@@ -107,15 +107,13 @@ class PlatformProvider extends OrchidServiceProvider
             Menu::make(__('Users'))
                 ->icon('bs.people')
                 ->route('platform.systems.users')
-                ->permission('platform.systems.users')
+                ->permission(PermissionEnum::SYSTEM_USERS)
                 ->title(__('Access Controls')),
-
-
 
             Menu::make(__('Roles'))
                 ->icon('bs.shield')
                 ->route('platform.systems.roles')
-                ->permission('platform.systems.roles')
+                ->permission(PermissionEnum::SYSTEM_ROLES)
                 ->divider(),
 
             Menu::make(__('Logs'))
