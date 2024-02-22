@@ -60,12 +60,14 @@ class ScoutControl extends Command
 
     protected function flushIndex()
     {
-        $this->call('scout:flush ' . $this->model);
+        $this->call('scout:flush ',[$this->model]);
     }
 
     protected function importIndex()
     {
-        $this->call("scout:import $this->model");
+        $this->call("scout:import", [
+            $this->model,
+        ]);
     }
 
     protected function  deleteIndex()

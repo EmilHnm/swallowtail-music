@@ -24,6 +24,7 @@
         "predis/predis": "^2.0",
         "rap2hpoutre/laravel-log-viewer": "^2.2",
         "romanzipp/laravel-queue-monitor": "^5.0",
+        "spatie/laravel-data": "^4.1",
         "spresnac/laravel-artisan-database-helper": "^1.0"
     },
     "require-dev": {

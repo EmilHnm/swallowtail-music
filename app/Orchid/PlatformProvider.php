@@ -62,6 +62,16 @@ class PlatformProvider extends OrchidServiceProvider
                 ->icon('building-fill-up')
                 ->route('platform.communities.requests')
                 ->title(__('COMMUNITIES')),
+
+            Menu::make('FTS Test')
+               ->icon('search')
+                ->route('platform.systems.tools.query-inspector')
+                ->title(__('TOOLS')),
+
+            Menu::make(__('User Inspector'))
+                ->icon('bs.search')
+                ->route('platform.systems.tools.inspector')
+                ->permission('platform.systems.users'),
 //            Menu::make('Get Started')
 //                ->icon('bs.book')
 //                ->title('Navigation')
@@ -100,10 +110,7 @@ class PlatformProvider extends OrchidServiceProvider
                 ->permission('platform.systems.users')
                 ->title(__('Access Controls')),
 
-            Menu::make(__('User Inspector'))
-                ->icon('bs.search')
-                ->route('platform.systems.users.inspector')
-                ->permission('platform.systems.users'),
+
 
             Menu::make(__('Roles'))
                 ->icon('bs.shield')
