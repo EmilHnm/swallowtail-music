@@ -6,6 +6,7 @@ use App\Enum\RefererEnum;
 use App\Models\Song;
 use App\Models\User;
 use App\Models\Album;
+use App\Orchid\Helpers\Text;
 use Illuminate\Console\Command;
 
 class AlbumsSyncCommand extends Command
@@ -71,6 +72,7 @@ class AlbumsSyncCommand extends Command
                 $album->album_id = "album_{$raw_album['browse_id']}";
                 $album->user_id = User::first()->user_id;
                 $album->name = $raw_album['title'];
+                $album->normalized_name = Text::normalize($raw_album['title']);
                 $album->type = $raw_album['type'];
                 $album->referer = RefererEnum::CRAWLER;
                 $album->release_year = $raw_album['release'];
