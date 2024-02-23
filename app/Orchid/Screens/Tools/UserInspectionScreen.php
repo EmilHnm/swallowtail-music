@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Orchid\Screens\User;
+namespace App\Orchid\Screens\Tools;
 
 use App\Http\Controllers\admin\UserAdminController;
 use App\Models\Album;
@@ -13,7 +13,6 @@ use Laravel\Sanctum\PersonalAccessToken;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Components\Cells\DateTimeSplit;
-use Orchid\Screen\Fields\DateRange;
 use Orchid\Screen\Fields\Group;
 use Orchid\Screen\Fields\Input;
 use Orchid\Screen\Screen;
