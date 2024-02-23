@@ -38,7 +38,7 @@ class AlbumsSyncCommand extends Command
 
         $end_point = $domain . '/api/albums?from=' . $from . '&limit=' . $to;
 
-        if(!User::first()) {
+        if (!User::first()) {
             $this->error('User not found');
             return;
         }
@@ -95,8 +95,11 @@ class AlbumsSyncCommand extends Command
                     }
                 }
 
-
                 $album->save();
+
+                $this->warn('   Synchronized album ' . $raw_album['id']);
+                $this->warn("       {$album->name}");
+                $this->warn("       {$album->release_year}");
 
                 foreach ($raw_album['songs'] as $song) {
                     Song::unguard();
