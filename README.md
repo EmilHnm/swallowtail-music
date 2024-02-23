@@ -119,3 +119,4 @@ git clone https://github.com/EmilRailgun/swallowtail-music.git
 -   [x] Add Lazyload for Image
 -   [x] Change admin dashboard
 -   [x] Create API for backup and sync
+-   [x] Add Fulltext-search
