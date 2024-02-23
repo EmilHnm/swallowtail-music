@@ -192,6 +192,14 @@ class SongListScreen extends Screen
                                     ->async('asyncPassingId')
                                     ->asyncParameters(['id' => $song->song_id])
                                     ->canSee(\Auth::user()->hasAccess(PermissionEnum::SONG_EDIT)),
+                                Button::make("Re-Index")
+                                    ->icon('arrow-clockwise')
+                                    ->method('reindex')
+                                ->confirm('Are you sure you want to re-index this song?')
+                                    ->parameters([
+                                        'id' => $song->song_id,
+                                    ])
+                                    ->canSee(\Auth::user()->hasAccess(PermissionEnum::SONG_EDIT)),
                                 Button::make('Delete')
                                     ->icon('trash')
                                     ->method('delete')

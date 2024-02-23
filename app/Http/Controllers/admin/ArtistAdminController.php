@@ -31,7 +31,8 @@ trait ArtistAdminController
     }
 
 
-    public function updateInformation(Request $request) {
+    public function updateInformation(Request $request)
+    {
         $id = $request->get('id');
         $name = $request->get('name');
         $description = $request->get('description');
@@ -50,7 +51,8 @@ trait ArtistAdminController
         return redirect()->route('platform.app.artists');
     }
 
-    public function uploadImage(Request $request) {
+    public function uploadImage(Request $request)
+    {
         $id = $request->get('id');
         $artist = Artist::find($id);
         $via = $request->get('via');
@@ -126,9 +128,9 @@ trait ArtistAdminController
             $song->save();
         }
         $artist->song()->detach();
-        if($artist->image_path)
+        if ($artist->image_path)
             \Storage::disk('final_artist_image')->delete($artist->image_path);
-        if($artist->banner_path)
+        if ($artist->banner_path)
             \Storage::disk('final_artist_image')->delete($artist->banner_path);
         Toast::warning("Artist {$artist->artist_id} deleted");
         $artist->delete();
@@ -142,8 +144,8 @@ trait ArtistAdminController
         $artist_from = Artist::find($from_id);
         $artist_to = Artist::find($to_id);
         if (!$artist_from || !$artist_to) {
-           Toast::error("Artist not found");
-          return redirect()->back();
+            Toast::error("Artist not found");
+            return redirect()->back();
         }
 
         $songs = $artist_from->song()->get();
@@ -160,6 +162,22 @@ trait ArtistAdminController
         }
         Toast::info("Artist {$artist_from->artist_id} grouped to {$artist_to->artist_id}");
         $this->delete(new Request(["id" => $artist_from->artist_id]));
+        return redirect()->route('platform.app.artists');
+    }
+
+    public function reindex($id)
+    {
+        $artist = Artist::find($id);
+        try {
+            if ($artist) {
+                $artist->searchable();
+                Toast::success('Artist re-indexed successfully!');
+            } else {
+                Toast::error('Artist not found!');
+            }
+        } catch (\Throwable $th) {
+            Toast::error($th->getMessage());
+        }
         return redirect()->route('platform.app.artists');
     }
 }

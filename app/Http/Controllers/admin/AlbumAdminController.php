@@ -152,4 +152,19 @@ trait AlbumAdminController
         $album->delete();
         return redirect()->route('platform.app.albums');
     }
+
+    public function reindex($id) {
+        $album = Album::find($id);
+        try {
+            if ($album) {
+                $album->searchable();
+                Toast::success('Album re-indexed successfully!');
+            } else {
+                Toast::error('Album not found!');
+            }
+        } catch (\Throwable $th) {
+            Toast::error($th->getMessage());
+        }
+        return redirect()->route('platform.app.albums');
+    }
 }

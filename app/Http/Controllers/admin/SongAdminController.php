@@ -63,4 +63,19 @@ trait SongAdminController
             return redirect()->route('platform.app.songs');
         }
     }
+
+    public function reindex($id) {
+        $song = Song::find($id);
+        try {
+            if ($song) {
+                $song->searchable();
+                Toast::success('Song re-indexed successfully!');
+            } else {
+                Toast::error('Song not found!');
+            }
+        } catch (\Throwable $th) {
+            Toast::error($th->getMessage());
+        }
+        return redirect()->back();
+    }
 }
