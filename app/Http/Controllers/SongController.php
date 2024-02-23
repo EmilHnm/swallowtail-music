@@ -116,6 +116,7 @@ class SongController extends Controller
         $song->genre()->detach();
         $song->artist()->attach($artist);
         $song->genre()->attach($genre);
+        $song->searchable();
         return response()->json([
             "status" => "success",
             "message" => "Song Updated Successfully",

@@ -173,6 +173,7 @@ class AlbumController extends Controller
         $album->release_year = $albumData->release_year;
         $album->type = $albumData->type;
         $album->save();
+        $album->searchable();
         return response()->json(
             [
                 "status" => "success",
