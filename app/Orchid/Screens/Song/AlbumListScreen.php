@@ -96,7 +96,7 @@ class AlbumListScreen extends Screen
                 TD::make('name', 'Name')->render(function (Album $album) {
                     $name = \Str::limit($album->name, 30);
                     return "<span class='' title='{$album->name}'>" . $name . "</span>";
-                })->sort(),
+                })->sort()->filter(),
                 TD::make('type', 'Type')->sort()->filter(TD::FILTER_SELECT)->filterOptions(
                     AlbumTypeEnum::toArray()
                 ),
