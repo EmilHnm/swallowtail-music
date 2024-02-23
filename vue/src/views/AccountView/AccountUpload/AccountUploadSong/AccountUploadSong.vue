@@ -28,7 +28,7 @@
           <tr>
             <td class="index" @click="sortList('id')">#</td>
             <td class="title" @click="sortList('title')">Title</td>
-            <td class="artist" v-if="mainWidth > 600">Artist</td>
+            <td class="artist">Artist</td>
             <td class="uploadDate" @click="sortList('created_at')">Upload</td>
             <td class="control">Control</td>
           </tr>
@@ -43,29 +43,51 @@
         <tbody v-else>
           <tr v-for="(song, i) in uploadedSongList" :key="i">
             <td>{{ i + 1 + paginate.currentPage * 15 }}</td>
-            <td>{{ song.title }}</td>
-            <td v-if="song.artist.length && mainWidth > 600">
-              <router-link
-                v-for="(artist, index) in song.artist"
-                :key="artist.artist_id"
-                :to="{
-                  name: 'artistOverviewPage',
-                  params: { id: artist.artist_id },
-                }"
-              >
-                {{ artist.name
-                }}<span v-if="index !== song.artist.length - 1">,</span>
-              </router-link>
+            <td>
+              <BaseTooltip :tooltipText="song.title" :position="'bottom'">
+                {{
+                  song.title.slice(0, 15) +
+                  (song.title.length > 15 ? "..." : "")
+                }}
+              </BaseTooltip>
             </td>
-            <td v-if="!song.artist.length && mainWidth > 600">Unset</td>
+            <td class="artist" v-if="song.artist.length">
+              <template v-for="artist in song.artist" :key="artist.artist_id">
+                <router-link
+                  :to="{
+                    name: 'artistOverviewPage',
+                    params: { id: artist.artist_id },
+                  }"
+                >
+                  <BaseTooltip :tooltipText="artist.name" :position="'bottom'">
+                    {{
+                      artist.name.slice(0, 15) +
+                      (artist.name.length > 15 ? "..." : "")
+                    }}
+                  </BaseTooltip>
+                  <br />
+                </router-link>
+              </template>
+            </td>
+            <td v-else>Unset</td>
             <td>{{ new Date(song.created_at).toLocaleDateString() }}</td>
             <td>
-              <button class="edit" @click="navigateToEdit(song.song_id)">
-                Edit
-              </button>
-              <button class="delete" @click="deleteItem(song.song_id)">
-                Delete
-              </button>
+              <div class="control">
+                <button class="edit" @click="navigateToEdit(song.song_id)">
+                  Edit
+                </button>
+                <ConfirmFlatDialogVue
+                  :passingData="song.song_id"
+                  @confirm="deleteItem"
+                >
+                  <template #message>
+                    <p>
+                      Are you sure you want to delete song "{{ song.title }}"?
+                    </p>
+                  </template>
+                  <button class="delete">Delete</button>
+                </ConfirmFlatDialogVue>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -98,6 +120,8 @@ import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import type { song } from "@/model/songModel";
 import type { artist } from "@/model/artistModel";
 import type { Pagination } from "@/model/mixin/PaginateDataModel";
+import BaseTooltip from "@/components/UI/BaseTooltip.vue";
+import ConfirmFlatDialogVue from "@/components/AccountView/partials/Dialog/ConfirmFlatDialog.vue";
 
 type songData = song & {
   artist: artist[];
@@ -112,8 +136,6 @@ export default defineComponent({
     return {
       uploadedSongList: [] as songData[],
       filteredUploadedSongList: [] as songData[],
-      observer: null as ResizeObserver | null,
-      mainWidth: 0,
       filterText: "",
       isLoading: true,
       paginate: {
@@ -137,12 +159,14 @@ export default defineComponent({
   methods: {
     ...mapActions("song", ["getUploadedSongs", "deleteSong"]),
     sortList(colname: string) {
+      if (this.sortMode.column === colname)
+        if (this.sortMode.type === "asc") {
+          this.sortMode.type = "desc";
+        } else {
+          this.sortMode.type = "asc";
+        }
+      else this.sortMode.type = "asc";
       this.sortMode.column = colname;
-      if (this.sortMode.type === "asc") {
-        this.sortMode.type = "desc";
-      } else {
-        this.sortMode.type = "asc";
-      }
       this.loadData();
     },
     navigateToEdit(id: string | number) {
@@ -229,22 +253,14 @@ export default defineComponent({
   },
   mounted() {
     this.loadData();
-    const main = this.$refs.main as HTMLElement;
-    this.observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        this.mainWidth = entry.contentRect.width;
-      }
-    });
-    if (this.observer && main) this.observer.observe(main);
-  },
-  beforeUnmount() {
-    if (this.observer) this.observer.disconnect();
   },
   components: {
     IconSearch,
     BaseFlatDialog,
     BaseCircleLoad,
     BaseTableBodyPagination,
+    BaseTooltip,
+    ConfirmFlatDialogVue,
   },
 });
 </script>
@@ -304,6 +320,11 @@ export default defineComponent({
             background: var(--background-glass-color-primary);
             text-align: center;
             cursor: pointer;
+            &.artist {
+              @media screen and (max-width: 600px) {
+                display: none;
+              }
+            }
           }
         }
       }
@@ -315,6 +336,20 @@ export default defineComponent({
             background: var(--background-glass-color-secondary);
             text-align: center;
             border-bottom: 1px solid var(--background-glass-color-primary);
+            &.artist {
+              @media screen and (max-width: 600px) {
+                display: none;
+              }
+            }
+            & .control {
+              display: flex;
+              flex-direction: row;
+              justify-content: center;
+              align-items: center;
+              @media screen and (max-width: 500px) {
+                flex-direction: column;
+              }
+            }
             a {
               color: var(--color-primary);
               text-decoration: none;
@@ -338,6 +373,7 @@ export default defineComponent({
                   color: var(--background-color-secondary);
                 }
               }
+
               &.delete {
                 border: 1px solid var(--color-danger);
                 color: var(--color-danger);
