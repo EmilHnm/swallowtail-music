@@ -16,14 +16,25 @@ export const albumModule = {
         },
       });
     },
-    getUploadedAlbums(context: any, userToken: string): Promise<Response> {
-      // getUploadedAlbums
-      return fetch(`${environment.api}/account/album/uploaded`, {
+    getUploadedAlbums(
+      context: any,
+      payload: {
+        userToken: string;
+        page: number;
+        query: string;
+        sort: { column: string; type: string };
+        signal: AbortSignal;
+      }
+    ): Promise<Response> {
+      const endpoint = `${environment.api}/account/album/uploaded?page=${payload.page}&query=${payload.query}&sort=${payload.sort.column}&order=${payload.sort.type}`;
+      return fetch(endpoint, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
+          Authorization: `Bearer ${payload.userToken}`,
+          Accept: "application/json",
         },
+        signal: payload.signal,
       });
     },
     searchAlbums(

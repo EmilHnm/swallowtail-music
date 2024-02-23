@@ -10,16 +10,6 @@
         <p>{{ dialogWaring.content }}</p>
       </template>
     </BaseFlatDialog>
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseCircleLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
   </teleport>
   <div class="main" ref="main">
     <h3>Album Upload Management</h3>
@@ -36,74 +26,92 @@
       <table>
         <thead>
           <tr>
-            <td>#</td>
-            <td v-if="mainWidth > 450">Cover</td>
-            <td @click="sortList('title')">Title</td>
-            <td v-if="mainWidth > 500" @click="sortList('release')">Release</td>
-            <td v-if="mainWidth > 700" @click="sortList('type')">Type</td>
-            <td v-if="mainWidth > 600" @click="sortList('songCount')">
-              Song Count
+            <td class="index" @click="sortList('id')">#</td>
+            <td class="cover">Cover</td>
+            <td class="title" @click="sortList('name')">Title</td>
+            <td class="release" @click="sortList('release_year')">Release</td>
+            <td class="type" @click="sortList('type')">Type</td>
+            <td class="count">Song Count</td>
+            <td class="uploaded" @click="sortList('created_at')">
+              Upload Date
             </td>
-            <td @click="sortList('uploadDate')">Upload Date</td>
-            <td>Control</td>
+            <td class="control">Control</td>
           </tr>
         </thead>
-        <tbody v-if="!filterText">
-          <tr v-for="(album, index) in uploadedAlbumList" :key="album.album_id">
-            <td>{{ index + 1 }}</td>
-            <td v-if="mainWidth > 450">
-              <img
-                v-lazyload
-                :data-url="`${environment.album_cover}/${album.image_path}`"
-                alt=""
-                srcset=""
-              />
-            </td>
-            <td>{{ album.name }}</td>
-            <td v-if="mainWidth > 500">{{ album.release_year }}</td>
-            <td v-if="mainWidth > 700">{{ album.type }}</td>
-            <td v-if="mainWidth > 600">{{ album.songCount }}</td>
-            <td>{{ new Date(album.created_at).toLocaleDateString() }}</td>
-            <td>
-              <button class="edit" @click="redirectEdit(album.album_id)">
-                Edit
-              </button>
-              <button class="delete" @click="deleteItem(album.album_id)">
-                Delete
-              </button>
+        <template v-if="isLoading">
+          <tr>
+            <td class="index" colspan="8">
+              <BaseCircleLoad />
             </td>
           </tr>
-        </tbody>
-        <tbody v-else>
-          <tr
-            v-for="(album, index) in filteredUploadedAlbumList"
-            :key="album.album_id"
-          >
-            <td>{{ index + 1 }}</td>
-            <td v-if="mainWidth > 450">
-              <img
-                v-lazyload
-                :data-url="`${environment.album_cover}/${album.image_path}`"
-                alt=""
-                srcset=""
-              />
-            </td>
-            <td>{{ album.name }}</td>
-            <td v-if="mainWidth > 500">{{ album.release_year }}</td>
-            <td v-if="mainWidth > 700">{{ album.type }}</td>
-            <td v-if="mainWidth > 600">{{ album.songCount }}</td>
-            <td>{{ new Date(album.created_at).toLocaleDateString() }}</td>
-            <td>
-              <button class="edit" @click="redirectEdit(album.album_id)">
-                Edit
-              </button>
-              <button class="delete" @click="deleteItem(album.album_id)">
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
+          ">
+        </template>
+        <template v-else>
+          <tbody>
+            <tr
+              v-for="(album, index) in uploadedAlbumList"
+              :key="album.album_id"
+            >
+              <td class="index">{{ index + 1 }}</td>
+              <td class="cover">
+                <img
+                  v-lazyload
+                  :data-url="`${environment.album_cover}/${album.image_path}`"
+                  alt=""
+                  srcset=""
+                />
+              </td>
+              <td class="title">
+                <BaseTooltip :tooltip-text="album.name" :position="'bottom'">
+                  {{
+                    album.name.slice(0, 15) +
+                    (album.name.length > 15 ? "..." : "")
+                  }}
+                </BaseTooltip>
+              </td>
+              <td class="release">
+                {{ album.release_year }}
+              </td>
+              <td class="type">{{ album.type }}</td>
+              <td class="count">{{ album.song_count }}</td>
+              <td class="uploaded">
+                {{ new Date(album.created_at).toLocaleDateString() }}
+              </td>
+              <td>
+                <div class="control">
+                  <button class="edit" @click="redirectEdit(album.album_id)">
+                    Edit
+                  </button>
+                  <ConfirmFlatDialog
+                    :passing-data="album.album_id"
+                    @confirm="deleteItem"
+                  >
+                    <template #message>
+                      <p>
+                        Are you sure you want to delete album "{{
+                          album.name
+                        }}"?
+                      </p>
+                    </template>
+                    <button class="delete">Delete</button>
+                  </ConfirmFlatDialog>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </template>
       </table>
+      <div class="pagination" v-if="!isLoading && uploadedAlbumList.length > 0">
+        <BaseTableBodyPagination
+          :totalPages="paginate.totalPages"
+          :currentPage="paginate.currentPage"
+          @onClickPage="onClickPage"
+          @onGoToFirstPage="onGoToFirstPage"
+          @onGoToPreviousPage="onGoToPreviousPage"
+          @onGoToNextPage="onGoToNextPage"
+          @onGoToLastPage="onGoToLastPage"
+        />
+      </div>
     </div>
     <div class="no-data" v-else>
       <h3>No Album Uploaded</h3>
@@ -119,25 +127,33 @@ import { mapActions, mapGetters } from "vuex";
 import { environment } from "@/environment/environment";
 import BaseFlatDialog from "@/components/UI/BaseFlatDialog.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import BaseTooltip from "@/components/UI/BaseTooltip.vue";
+import BaseTableBodyPagination from "@/components/UI/BaseTableBodyPagination.vue";
+import type { Pagination } from "@/model/mixin/PaginateDataModel";
+import ConfirmFlatDialog from "@/components/AccountView/partials/Dialog/ConfirmFlatDialog.vue";
 
-type albumData = album & { songCount: number };
+type albumData = album & { song_count: number };
+
+type ResponseData = Pagination & {
+  data: albumData[];
+};
 
 export default defineComponent({
   data() {
     return {
       environment: environment,
       uploadedAlbumList: [] as albumData[],
-      filteredUploadedAlbumList: [] as albumData[],
-      observer: null as ResizeObserver | null,
-      mainWidth: 0,
       filterText: "",
       isLoading: false,
       sortMode: {
-        title: "asc",
-        release: "asc",
+        column: "id",
         type: "asc",
-        songCount: "asc",
-        uploadDate: "asc",
+      },
+      abortController: new AbortController(),
+      abortSignal: null as AbortSignal | null,
+      paginate: {
+        currentPage: 0,
+        totalPages: 0,
       },
       dialogWaring: {
         title: "Warning",
@@ -150,71 +166,44 @@ export default defineComponent({
   methods: {
     ...mapActions("album", ["getUploadedAlbums", "deleteAlbum"]),
     sortList(colname: string) {
-      if (colname === "title") {
-        if (this.sortMode.title == "asc") {
-          this.sortMode.title = "desc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.name > b.name ? -1 : 1
-          );
-        } else {
-          this.sortMode.title = "asc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.name < b.name ? -1 : 1
-          );
-        }
-      }
-      if (colname === "release") {
-        if (this.sortMode.release == "asc") {
-          this.sortMode.release = "desc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.release_year > b.release_year ? -1 : 1
-          );
-        } else {
-          this.sortMode.release = "asc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.release_year < b.release_year ? -1 : 1
-          );
-        }
-      }
-      if (colname === "type") {
-        if (this.sortMode.type == "asc") {
+      if (this.sortMode.column === colname)
+        if (this.sortMode.type === "asc") {
           this.sortMode.type = "desc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.type > b.type ? -1 : 1
-          );
         } else {
           this.sortMode.type = "asc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.type < b.type ? -1 : 1
-          );
         }
-      }
-      if (colname === "songCount") {
-        if (this.sortMode.songCount == "asc") {
-          this.sortMode.songCount = "desc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.songCount > b.songCount ? -1 : 1
-          );
-        } else {
-          this.sortMode.type = "asc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.songCount < b.songCount ? -1 : 1
-          );
-        }
-      }
-      if (colname === "uploadDate") {
-        if (this.sortMode.uploadDate == "asc") {
-          this.sortMode.uploadDate = "desc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.created_at > b.created_at ? -1 : 1
-          );
-        } else {
-          this.sortMode.uploadDate = "asc";
-          this.uploadedAlbumList = this.uploadedAlbumList.sort((a, b) =>
-            a.created_at < b.created_at ? -1 : 1
-          );
-        }
-      }
+      else this.sortMode.type = "asc";
+      this.sortMode.column = colname;
+      this.loadData();
+    },
+    loadData() {
+      this.isLoading = true;
+      this.abortController.abort();
+      this.abortController = new AbortController();
+      this.abortSignal = this.abortController.signal;
+      this.getUploadedAlbums({
+        userToken: this.token,
+        page: this.paginate.currentPage + 1,
+        query: this.filterText,
+        sort: this.sortMode,
+        signal: this.abortSignal,
+      })
+        .then((res) => res.json())
+        .then((res: { status: string; albums: ResponseData }) => {
+          if (res.status === "success") {
+            this.uploadedAlbumList = res.albums.data;
+            this.paginate.currentPage = res.albums.current_page - 1;
+            this.paginate.totalPages = res.albums.last_page;
+            this.isLoading = false;
+          }
+        })
+        .catch((err) => {
+          this.dialogWaring.mode = "warning";
+          this.dialogWaring.content = err.message;
+          this.dialogWaring.title = "Warning";
+          this.dialogWaring.show = true;
+          this.isLoading = false;
+        });
     },
     deleteItem(album_id: string) {
       this.isLoading = true;
@@ -222,19 +211,34 @@ export default defineComponent({
         .then((res) => res.json())
         .then((res) => {
           if (res.status === "success") {
-            this.uploadedAlbumList.splice(
-              this.uploadedAlbumList.findIndex(
-                (album) => album.album_id === album_id
-              ),
-              1
-            );
-            this.isLoading = false;
+            this.loadData();
             this.dialogWaring.mode = "announcement";
             this.dialogWaring.content = res.message;
             this.dialogWaring.title = "Success";
             this.dialogWaring.show = true;
+          } else {
+            this.dialogWaring.mode = "warning";
+            this.dialogWaring.content = res.message;
+            this.dialogWaring.title = "Warning";
+            this.dialogWaring.show = true;
           }
+          this.isLoading = false;
         });
+    },
+    onClickPage(index: number) {
+      this.paginate.currentPage = index;
+    },
+    onGoToFirstPage() {
+      this.paginate.currentPage = 0;
+    },
+    onGoToPreviousPage() {
+      this.paginate.currentPage = this.paginate.currentPage - 1;
+    },
+    onGoToNextPage() {
+      this.paginate.currentPage = this.paginate.currentPage + 1;
+    },
+    onGoToLastPage() {
+      this.paginate.currentPage = this.paginate.totalPages - 1;
     },
     closeDialog() {
       this.dialogWaring.show = false;
@@ -251,42 +255,28 @@ export default defineComponent({
       token: "auth/userToken",
     }),
   },
-  components: { IconSearch, BaseFlatDialog, BaseCircleLoad },
+  components: {
+    IconSearch,
+    BaseFlatDialog,
+    BaseCircleLoad,
+    BaseTooltip,
+    BaseTableBodyPagination,
+    ConfirmFlatDialog,
+  },
   watch: {
     filterText() {
-      if (this.filterText === "") {
-        this.filteredUploadedAlbumList.length = 0;
-        return;
-      }
-      this.filteredUploadedAlbumList = this.uploadedAlbumList.filter(
-        (album: albumData) =>
-          album.name.toLowerCase().includes(this.filterText.toLowerCase()) ||
-          album.type.toLowerCase().includes(this.filterText.toLowerCase())
-      );
+      this.paginate.currentPage = 0;
+      this.loadData();
+    },
+    paginate: {
+      handler() {
+        this.loadData();
+      },
+      deep: true,
     },
   },
-  created() {
-    this.isLoading = true;
-    this.getUploadedAlbums(this.token)
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.status === "success") {
-          this.uploadedAlbumList = res.album;
-          this.isLoading = false;
-        }
-      });
-  },
   mounted() {
-    const main = this.$refs.main as HTMLElement;
-    this.observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        this.mainWidth = entry.contentRect.width;
-      }
-    });
-    if (this.observer && main) this.observer.observe(main);
-  },
-  unmounted() {
-    if (this.observer) this.observer.disconnect();
+    this.loadData();
   },
 });
 </script>
@@ -345,8 +335,32 @@ export default defineComponent({
             font-size: 1rem;
             background: var(--background-glass-color-primary);
             text-align: center;
-            cursor: pointer;
             user-select: none;
+            &.id,
+            &.title,
+            &.release,
+            &.type,
+            &.uploaded {
+              cursor: pointer;
+            }
+            @media screen and (max-width: 500px) {
+              &.cover {
+                display: none;
+              }
+            }
+            @media screen and (max-width: 600px) {
+              &.release {
+                display: none;
+              }
+            }
+            @media screen and (max-width: 700px) {
+              &.type {
+                display: none;
+              }
+              &.count {
+                display: none;
+              }
+            }
           }
         }
       }
@@ -358,6 +372,33 @@ export default defineComponent({
             background: var(--background-glass-color-secondary);
             text-align: center;
             border-bottom: 1px solid var(--background-glass-color-primary);
+            & .control {
+              display: flex;
+              flex-direction: row;
+              justify-content: center;
+              align-items: center;
+              @media screen and (max-width: 500px) {
+                flex-direction: column;
+              }
+            }
+            @media screen and (max-width: 500px) {
+              &.cover {
+                display: none;
+              }
+            }
+            @media screen and (max-width: 600px) {
+              &.release {
+                display: none;
+              }
+            }
+            @media screen and (max-width: 700px) {
+              &.type {
+                display: none;
+              }
+              &.count {
+                display: none;
+              }
+            }
             img {
               width: 50px;
               height: 50px;

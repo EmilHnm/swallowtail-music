@@ -65,15 +65,19 @@ class AlbumController extends Controller
         ]);
     }
 
-    public function getUploadedAlbum()
+    public function getUploadedAlbum(Request $request)
     {
         $albumUploaded = Album::withCount("song")
             ->where("albums.user_id", Auth::user()->user_id)
-            ->groupBy("albums.id")
-            ->get();
+            ->when($request->has("query"), function ($query) use ($request) {
+                $query->where("name", "like", "%" . $request->get("query") . "%");
+            })
+            ->when($request->has("sort") && $request->get("order"), function ($query) use ($request) {
+                $query->orderBy($request->get("sort"), $request->get("order"));
+            })->paginate();
         return response()->json([
             "status" => "success",
-            "album" => $albumUploaded,
+            "albums" => $albumUploaded,
         ]);
     }
 
@@ -197,7 +201,7 @@ class AlbumController extends Controller
                 "message" => "You are not allowed to delete this album!",
             ], 403);
         }
-        if($album->image_path){
+        if ($album->image_path) {
             \Storage::disk('final_cover')->delete($album->image_path);
         }
         $songs = Song::where("album_id", $album->album_id)->get();
@@ -233,10 +237,10 @@ class AlbumController extends Controller
             try {
                 $albums = Album::search("name:($query~2)^2 or normalized_name:($query~2)^1.5 or ($query)")
                     ->get()->loadCount("song")->filter(
-                    function ($album) {
-                        return $album->song_count > 0;
-                    }
-                )->take(8);
+                        function ($album) {
+                            return $album->song_count > 0;
+                        }
+                    )->take(8);
             } catch (\Exception $e) {
                 $albums = Album::withCount("song")
                     ->having('song_count', '>', 0)
