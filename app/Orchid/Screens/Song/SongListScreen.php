@@ -155,7 +155,7 @@ class SongListScreen extends Screen
                     $html = '';
                     $html .= "Status: " . ($song->display ?? 'Inactive') . "<br>";
                     if ($song->file) {
-                        $status_query = $this->generateQueryStringFilter('song.title', $song->song_id);
+                        $status_query = $this->generateQueryStringFilter('song.title', $song->song_id, false);
                         $status_href = route('platform.app.song-metadata') . "?$status_query";
                         $status_tag = "<a class='orchid-custom'  href=$status_href>" . SongMetadataStatusEnum::search($song->file?->status) . "</a>";
                     } else {
@@ -169,7 +169,7 @@ class SongListScreen extends Screen
                     ->filter()
                     ->render(function (Song $song) {
                         $user = $song->user;
-                        $query = $this->generateQueryStringFilter('user', $user->id);
+                        $query = $this->generateQueryStringFilter('user', $user->id, false);
                         $href = "?$query";
                         //                        add user route
                         return "<a class='orchid-custom' title='{$user->name}' href=$href>" . $user->name . "</a>";
