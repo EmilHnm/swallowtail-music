@@ -12,6 +12,7 @@ import { cacheModule } from "./module/cacheModule";
 import { genreModule } from "./module/genreModule";
 import { uploadQueueModule } from "./module/uploadQueueModule";
 import requestModule from "./module/requestModule";
+import { queueModule } from "@/store/module/queueModule";
 export default createStore({
   modules: {
     auth: authModule,
@@ -27,5 +28,6 @@ export default createStore({
     genre: genreModule as any,
     uploadQueue: uploadQueueModule as any,
     request: requestModule as any,
+    queue: queueModule as any,
   },
 });

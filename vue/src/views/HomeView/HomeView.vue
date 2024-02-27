@@ -4,7 +4,7 @@ import Echo from "laravel-echo";
 import { computed, defineComponent } from "vue";
 import { _function } from "@/mixins";
 import { Timer } from "@/mixins/Timer";
-import { mapActions, mapGetters } from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import { environment } from "@/environment/environment";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
@@ -54,10 +54,7 @@ export default defineComponent({
       songLoadSignal: null as AbortSignal | null,
       //play song property
       isPlaying: false,
-      progress: 0,
       audioIndex: 0,
-      volume: 100,
-      repeat: "off",
       isOnShuffle: false,
       shuffledList: [] as songData[],
       isAudioWaitting: false,
@@ -92,6 +89,8 @@ export default defineComponent({
       "getLikedSongList",
     ]),
     ...mapActions("album", ["getAlbumSongs"]),
+    ...mapActions("queue", ["playQueuePlaylist"]),
+    ...mapMutations("queue", ["setProgress"]),
     // NOTE: Sidebar control
     toggleLeftSideBar() {
       this.isLeftSideBarActive = !this.isLeftSideBarActive;
@@ -127,37 +126,15 @@ export default defineComponent({
         this.audioIndex--;
       }
     },
-    repeatToggle() {
-      if (this.repeat === "off") {
-        this.repeat = "one";
-      } else if (this.repeat === "one") {
-        this.repeat = "all";
-      } else {
-        this.repeat = "off";
-      }
-    },
     shuffleToggle() {
       this.isOnShuffle = !this.isOnShuffle;
-    },
-    getCurrentTime() {
-      this.progress = this.audio.currentTime;
     },
     getDuration() {
       this.playingAudio.file.duration = this.audio.duration;
     },
-    setProgress(progress: number) {
+    onSetProgress(progress: number) {
       this.audio.currentTime =
         (progress * this.playingAudio.file.duration) / 100;
-    },
-    setVolume(value: string) {
-      this.volume = +value;
-    },
-    setMuted() {
-      if (this.volume > 0) {
-        this.volume = 0;
-      } else {
-        this.volume = 100;
-      }
     },
     canplay() {
       this.isAudioWaitting = false;
@@ -199,7 +176,10 @@ export default defineComponent({
         return;
       }
       if (this.isOnShuffle) {
-        this.shuffledList.splice(index, 1);
+        const deleted = this.shuffledList.splice(index, 1);
+        this.audioList.filter(
+          (song: songData) => song.song_id !== deleted[0].song_id
+        );
       } else {
         this.audioList.splice(index, 1);
       }
@@ -219,6 +199,7 @@ export default defineComponent({
     },
     playPlaylist(id: string) {
       this.isLoading = true;
+      this.playQueuePlaylist(id).then();
       this.getPlaylistSongs({ playlist_id: id, token: this.token })
         .then((res) => res.json())
         .then((res) => {
@@ -545,10 +526,6 @@ export default defineComponent({
     closeDialog() {
       this.dialogWaring.show = false;
     },
-    // NOTE: audio
-    getAudio() {
-      this.audio = this.$refs.audio as HTMLAudioElement;
-    },
   },
   watch: {
     repeat(n) {
@@ -662,11 +639,33 @@ export default defineComponent({
       immediate: true,
       deep: true,
     },
+    playingSong: {
+      handler(n) {
+        console.log("current song", n);
+      },
+      deep: true,
+    },
   },
   computed: {
     ...mapGetters({
       token: "auth/userToken",
+      currentSong: "queue/getCurrentSong",
+      getVolume: "queue/getVolume",
+      getRepeat: "queue/getRepeat",
+      getCurrentProgress: "queue/getCurrentProgress",
     }),
+    playingSong(): songData {
+      return this.currentSong;
+    },
+    volume(): number {
+      return this.getVolume;
+    },
+    repeat(): string {
+      return this.getRepeat;
+    },
+    progress(): number {
+      return this.getCurrentProgress;
+    },
     playingAudio(): songData {
       // BUG : when isOnShuffle change, this run 2 time
       // Once isOnShuffle change, and once audioIndex change
@@ -693,7 +692,7 @@ export default defineComponent({
     this.audio.crossOrigin = "anonymous";
     this.audio.volume = this.volume / 100;
     this.audio.ontimeupdate = () => {
-      this.getCurrentTime();
+      this.setProgress(this.audio.currentTime);
     };
     this.audio.ondurationchange = () => {
       this.getDuration();
@@ -783,39 +782,32 @@ export default defineComponent({
       </router-view>
     </main>
 
-    <HomeViewRightSideBar
-      v-if="audioList.length > 0"
-      :isActive="isRightSideBarActive"
-      :playlist="audioList"
-      :playingAudio="playingAudio"
-      :audioIndex="audioIndex"
-      :shuffle="isOnShuffle"
-      :shuffledPlaylist="shuffledList"
-      @onDrop="onDrop"
-      @setPlaySong="setPlaySong"
-      @deleteFromQueue="deleteFromQueue"
-    />
-    <HomeUploadBox :isPlaying="playingAudio ? true : false"></HomeUploadBox>
+<!--    <HomeViewRightSideBar-->
+<!--      v-if="audioList.length > 0"-->
+<!--      :isActive="isRightSideBarActive"-->
+<!--      :playlist="audioList"-->
+<!--      :playingAudio="playingAudio"-->
+<!--      :audioIndex="audioIndex"-->
+<!--      :shuffle="isOnShuffle"-->
+<!--      :shuffledPlaylist="shuffledList"-->
+<!--      @onDrop="onDrop"-->
+<!--      @setPlaySong="setPlaySong"-->
+<!--      @deleteFromQueue="deleteFromQueue"-->
+<!--    />-->
+    <HomeUploadBox :isPlaying="!!playingAudio"></HomeUploadBox>
   </div>
   <HomeViewPlayer
     v-if="audioList.length > 0"
     :playingAudio="playingAudio"
-    :progress="progress"
-    :volume="volume"
-    :repeat="repeat"
-    :shuffle="isOnShuffle"
     :isPlaying="isPlaying"
     :isWating="isAudioWaitting"
     @toggleRightSideBar="toggleRightSideBar"
     @shuffleToggle="shuffleToggle"
-    @repeatToggle="repeatToggle"
     @playSong="playAudio"
     @pauseSong="pauseAudio"
-    @setProgress="setProgress"
+    @onSetProgress="onSetProgress"
     @prevSong="prevSong"
     @nextSong="nextSong"
-    @setVolume="setVolume"
-    @setMuted="setMuted"
   />
 </template>
 <style lang="scss" scoped>

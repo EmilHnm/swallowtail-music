@@ -47,10 +47,10 @@
       <div class="now_playing__controls--button">
         <button
           class="now_playing__controls--button--shuffle"
-          :class="{ active: shuffle }"
+          :class="{ active: getShuffle }"
           @click="shuffleToggle"
         >
-          <Iconshuffle />
+          <IconShuffle />
         </button>
         <button class="now_playing__controls--button--prev" @click="prevSong">
           <IconPrevious />
@@ -65,35 +65,30 @@
         </button>
         <button
           class="now_playing__controls--button--repeat"
-          :class="{ active: repeat !== 'off' }"
+          :class="{ active: getRepeat !== 'off' }"
           @click="repeatToggle"
         >
-          <IconRepeatOne v-if="repeat === 'one'" />
+          <IconRepeatOne v-if="getRepeat === 'one'" />
           <IconRepeat v-else />
         </button>
       </div>
       <div class="now_playing__controls--progress">
         <div class="now_playing__controls--progress--time--current">
-          {{
-            Math.floor(progress / 60) +
-            ":" +
-            (Math.floor(progress % 60) < 10
-              ? "0" + Math.floor(progress % 60)
-              : Math.floor(progress % 60))
-          }}
+          {{ getCurrentTime }}
         </div>
         <div class="now_playing__controls--progress--bar">
           <div
             class="now_playing__controls--progress--bar--progress"
             :style="{
-              width: (progress / playingAudio.file.duration) * 100 + '%',
+              width:
+                (getCurrentProgress / playingAudio.file.duration) * 100 + '%',
             }"
           ></div>
           <input
             type="range"
             class="now_playing__controls--progress--bar--range"
-            :value="(progress / playingAudio.file.duration) * 100"
-            @input="setProgress"
+            :value="(getCurrentProgress / playingAudio.file.duration) * 100"
+            @input="onSetProgress"
           />
         </div>
         <div class="now_playing__controls--progress--time--duration">
@@ -115,20 +110,20 @@
           <IconQueue />
         </button>
         <div class="now_playing__menu--volume">
-          <button class="now_playing__menu--volume--mute" @click="setMuted">
-            <IconVolume v-if="volume !== 0" />
+          <button class="now_playing__menu--volume--mute" @click="onSetMuted">
+            <IconVolume v-if="getVolume !== 0" />
             <IconMuted v-else />
           </button>
           <div class="now_playing__menu--volume--bar">
             <div
               class="now_playing__menu--volume--bar--progress"
-              :style="{ width: volume + '%' }"
+              :style="{ width: getVolume + '%' }"
             ></div>
             <input
               type="range"
-              :value="volume"
+              :value="getVolume"
               class="now_playing__menu--volume--bar--range"
-              @input="setVolume"
+              @input="onSetVolume"
             />
           </div>
         </div>
@@ -142,7 +137,7 @@ import { environment } from "@/environment/environment";
 import IconHeartFilled from "@/components/icons/IconHeartFilled.vue";
 import IconHeart from "@/components/icons/IconHeart.vue";
 import IconPrevious from "@/components/icons/IconPrevious.vue";
-import Iconshuffle from "@/components/icons/IconShuffle.vue";
+import IconShuffle from "@/components/icons/IconShuffle.vue";
 import IconPlay from "@/components/icons/IconPlay.vue";
 import IconRepeat from "@/components/icons/IconRepeat.vue";
 import IconNext from "@/components/icons/IconNext.vue";
@@ -152,7 +147,7 @@ import IconPause from "@/components/icons/IconPause.vue";
 import IconRepeatOne from "@/components/icons/IconRepeatOne.vue";
 import IconMuted from "@/components/icons/IconMuted.vue";
 import IconCircleLoading from "@/components/icons/IconCircleLoading.vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
@@ -184,22 +179,22 @@ export default defineComponent({
       required: true,
       type: Boolean,
     },
-    progress: {
-      required: true,
-      type: Number,
-    },
-    volume: {
-      required: true,
-      type: Number,
-    },
-    repeat: {
-      required: true,
-      type: String,
-    },
-    shuffle: {
-      required: true,
-      type: Boolean,
-    },
+    // progress: {
+    //   required: true,
+    //   type: Number,
+    // },
+    // volume: {
+    //   required: true,
+    //   type: Number,
+    // },
+    // repeat: {
+    //   required: true,
+    //   type: String,
+    // },
+    // shuffle: {
+    //   required: true,
+    //   type: Boolean,
+    // },
     isWating: {
       required: true,
       type: Boolean,
@@ -208,7 +203,7 @@ export default defineComponent({
   components: {
     IconHeartFilled,
     IconPrevious,
-    Iconshuffle,
+    IconShuffle,
     IconPlay,
     IconRepeat,
     IconNext,
@@ -238,15 +233,24 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("song", ["likeSong", "likedSong"]),
+    ...mapMutations("queue", [
+      "setVolume",
+      "setMuted",
+      "setRepeat",
+      "setShuffle",
+      "setCurrentIndex",
+      "setProgress",
+    ]),
     toggleRightSideBar() {
       this.isRightSideBarActive = !this.isRightSideBarActive;
       this.$emit("toggleRightSideBar", this.isRightSideBarActive);
     },
     shuffleToggle() {
       this.$emit("shuffleToggle");
+      this.setShuffle(!this.getShuffle);
     },
     repeatToggle() {
-      this.$emit("repeatToggle");
+      this.setRepeat();
     },
     playToggle() {
       if (this.isWating) return;
@@ -256,20 +260,24 @@ export default defineComponent({
         this.$emit("pauseSong");
       }
     },
-    setProgress(e: any) {
-      this.$emit("setProgress", e.target.value);
+    onSetProgress(e: any) {
+      this.$emit("onSetProgress", e.target.value);
     },
     nextSong() {
       this.$emit("nextSong");
+      this.setCurrentIndex(this.getCurrentIndex + 1);
     },
     prevSong() {
       this.$emit("prevSong");
+      this.setCurrentIndex(this.getCurrentIndex - 1);
+      console.log(this.getCurrentIndex);
     },
-    setVolume(e: any) {
-      this.$emit("setVolume", e.target.value);
+    onSetVolume(e: any) {
+      this.setVolume(+e.target.value);
     },
-    setMuted() {
-      this.$emit("setMuted");
+    onSetMuted() {
+      if (this.getVolume) this.setVolume(0);
+      else this.setVolume(50);
     },
     navigateToPlaying() {
       this.$router.push({
@@ -314,6 +322,14 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
     }),
+    ...mapGetters("queue", [
+      "getCurrentTime",
+      "getShuffle",
+      "getRepeat",
+      "getCurrentIndex",
+      "getVolume",
+      "getCurrentProgress",
+    ]),
   },
   mounted() {
     this.titleObserver = new ResizeObserver((entries) => {
