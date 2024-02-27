@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Album;
 use App\Orchid\Helpers\Text;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 
 class AlbumsSyncCommand extends Command
 {
@@ -30,9 +31,9 @@ class AlbumsSyncCommand extends Command
      */
     public function handle()
     {
-        //u
-        $domain = $this->option('domain') ?? env('SOURCE_DOMAIN');
-        $token = $this->option('token') ?? env('SOURCE_TOKEN');
+        //
+        $domain = $this->option('domain') ?? config('crawler.domain');
+        $token = $this->option('token') ?? config('crawler.token');
         $from = $this->argument('from') ?? 1000000000;
         $to = $this->argument('to') ?? '';
 
@@ -77,17 +78,19 @@ class AlbumsSyncCommand extends Command
                 $album->referer = RefererEnum::CRAWLER;
                 $album->release_year = $raw_album['release'];
 
-                $path = file_path_helper($raw_album['id']) . '/cover.jpg';
+//                $path = file_path_helper($raw_album['id']) . '/cover.jpg';
 
                 // $full_path = 'storage/upload/album_cover' . $path;
+//
+//                if (!file_exists(public_path('storage/upload/album_cover/' . file_path_helper($raw_album['id'])))) {
+//                    mkdir(public_path('storage/upload/album_cover/' . file_path_helper($raw_album['id'])), 0777, true);
+//                }
 
-                if (!file_exists(public_path('storage/upload/album_cover/' . file_path_helper($raw_album['id'])))) {
-                    mkdir(public_path('storage/upload/album_cover/' . file_path_helper($raw_album['id'])), 0777, true);
-                }
 
                 if ($raw_album['thumbnail'] != null) {
                     try {
-                        $client->get($raw_album['thumbnail'], ['sink' => public_path('storage/upload/album_cover/' . file_path_helper($raw_album['id']) . '/thumbnail.jpg')]);
+                        Storage::disk('final_cover')->put(file_path_helper($raw_album['id']) . '/thumbnail.jpg', $client->get($raw_album['thumbnail'])->getBody()->getContents());
+//                        $client->get($raw_album['thumbnail'], ['sink' => public_path('storage/upload/album_cover/' . file_path_helper($raw_album['id']) . '/thumbnail.jpg')]);
                         $album->image_path = file_path_helper($raw_album['id']) . '/thumbnail.jpg';
                     } catch (\Exception $th) {
                         $this->error($raw_album['id'] . " - thumbnail url error");
