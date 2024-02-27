@@ -36,8 +36,8 @@ class SongsSyncCommand extends Command
     public function handle()
     {
         //
-        $domain = $this->option('domain') ?? env('SOURCE_DOMAIN');
-        $token = $this->option('token') ?? env('SOURCE_TOKEN');
+        $domain = $this->option('domain') ?? config('crawler.domain');
+        $token = $this->option('token') ?? config('crawler.token');
         $from = $this->argument('from') ?? 1;
         $to = $this->argument('to') ?? $from + 99;
 
