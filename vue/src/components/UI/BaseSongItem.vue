@@ -171,7 +171,7 @@ import BaseListItem from "./BaseListItem.vue";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
 import BaseTooltip from "./BaseTooltip.vue";
 import BaseLineLoad from "./BaseLineLoad.vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import BaseDialog from "./BaseDialog.vue";
 import type { playlist } from "@/model/playlistModel";
 import type { song } from "@/model/songModel";
@@ -236,6 +236,7 @@ export default defineComponent({
   methods: {
     ...mapActions("playlist", ["addSongToPlaylist"]),
     ...mapActions("song", ["likeSong", "likedSong"]),
+    ...mapMutations("queue", ["addSong"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
       this.changeMenuMode("default");
@@ -245,7 +246,6 @@ export default defineComponent({
     },
     deleteFromQueue() {
       this.isMenuOpen = false;
-      this.$emit("deleteFromQueue");
     },
     deleteFromPlaylist() {
       this.isMenuOpen = false;
@@ -253,7 +253,7 @@ export default defineComponent({
     },
     addToQueue() {
       this.isMenuOpen = false;
-      this.$emit("addToQueue", { [this.data.song_id]: this.data });
+      this.addSong(this.data);
     },
     selectSong() {
       this.$emit("selectSong", this.data.song_id);
