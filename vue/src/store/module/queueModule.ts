@@ -1,4 +1,10 @@
-import type {ActionContext, ActionTree, GetterTree, Mutation, MutationTree} from "vuex";
+import type {
+  ActionContext,
+  ActionTree,
+  GetterTree,
+  Mutation,
+  MutationTree,
+} from "vuex";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
@@ -349,7 +355,37 @@ const actions: ActionTree<RootState, RootState> = {
               message: "This album is empty, cannot be played",
             });
           }
-        });;
+        });
+    });
+  },
+  playArtist(
+    context: ActionContext<RootState, RootState>,
+    payload: string
+  ): Promise<res> {
+    return new Promise<res>((res, rej) => {
+      context
+        .dispatch(
+          "artist/getArtistTopSongById",
+          {
+            token: context.rootGetters["auth/userToken"],
+            artist_id: payload,
+          },
+          { root: true }
+        )
+        .then((data) => data.json())
+        .then((data) => {
+          if (data.status === "success") {
+            context.commit("setQueue", data.songs);
+            context.commit("setCurrentIndex", 0);
+            document.dispatchEvent(new CustomEvent("play"));
+            res({ status: "success", message: "Playing" });
+          } else {
+            rej({
+              status: "error",
+              message: data.message,
+            });
+          }
+        });
     });
   },
 };
