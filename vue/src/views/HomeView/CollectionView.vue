@@ -146,7 +146,7 @@ export default defineComponent({
     playLikedSong() {
       if (this.likedList.length > 0) {
         this.clearQueue();
-        this.setQueue(this.likedList);
+        this.setQueue([...this.likedList]);
         this.setCurrentIndex(0);
         this.setPlaying(true);
       }
@@ -160,7 +160,7 @@ export default defineComponent({
     onPlaySongInLikedList(song: songData) {
       if (this.likedList.length > 0) {
         this.clearQueue();
-        this.setQueue(this.likedList);
+        this.setQueue([...this.likedList]);
         const index = this.likedList.findIndex(
           (songLiked) => songLiked.song_id === song.song_id
         );
