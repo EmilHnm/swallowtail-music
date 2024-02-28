@@ -30,12 +30,12 @@
       </button>
     </div>
     <div class="header__center">
-      <div class="header__center--logo">
+      <h1 class="header__center--logo">
         <router-link class="header__center--logo" :to="{ name: 'mainPage' }">
           <icon-logo></icon-logo>
           <span class="header__center--logo-text">Swallowtail Music</span>
         </router-link>
-      </div>
+      </h1>
     </div>
     <div class="header__right">
       <div class="header__right--darkmodeBtn">

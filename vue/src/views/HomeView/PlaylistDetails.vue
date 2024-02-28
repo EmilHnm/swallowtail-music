@@ -111,9 +111,9 @@
     </div>
     <div class="info">
       <div class="info__type">{{ playlistDetail.type }}</div>
-      <div class="info__title" @click="openEditDetailsDialog">
+      <h2 class="info__title" @click="openEditDetailsDialog">
         {{ playlistDetail.title }}
-      </div>
+      </h2>
       <div class="info__description">{{ playlistDetail.description }}</div>
       <div class="info__other">
         <router-link

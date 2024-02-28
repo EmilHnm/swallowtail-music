@@ -11,7 +11,7 @@
     </button>
     <div v-show="isActive" class="header_notification__board">
       <div class="board__header">
-        <h3>Notification</h3>
+        <h2>Notification</h2>
         <div
           class="board__header--menu"
           v-click-outside="() => (isMenuActive = false)"
@@ -242,7 +242,7 @@ $tablet-width: 768px;
       align-items: center;
       padding: 10px 20px;
       margin-bottom: 10px;
-      h3 {
+      h2 {
         margin: 0;
         flex: 1;
       }

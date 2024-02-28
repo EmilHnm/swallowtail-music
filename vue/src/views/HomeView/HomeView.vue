@@ -121,10 +121,6 @@ export default defineComponent({
       this.isAudioWaitting = false;
       if (this.isPlaying) this.playAudio();
     },
-    setPlaySong(index: number) {
-      if (this.audioIndex === index) return;
-      this.audioIndex = index;
-    },
     // NOTE:playinglist
     onDrop(start: number, end: number) {
       if (this.isOnShuffle) {

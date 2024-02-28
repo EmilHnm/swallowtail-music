@@ -18,7 +18,8 @@
                 ? `${environment.album_cover}/${data.album.image_path}`
                 : `${environment.default}/no_image.jpg`
             "
-            alt=""
+            :alt="data.title"
+            :title="data.title"
             srcset=""
           />
         </div>
