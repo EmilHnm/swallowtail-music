@@ -236,7 +236,7 @@ export default defineComponent({
   methods: {
     ...mapActions("playlist", ["addSongToPlaylist"]),
     ...mapActions("song", ["likeSong", "likedSong"]),
-    ...mapMutations("queue", ["addSong"]),
+    ...mapMutations("queue", ["addSong", "deleteSong"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
       this.changeMenuMode("default");
@@ -246,6 +246,7 @@ export default defineComponent({
     },
     deleteFromQueue() {
       this.isMenuOpen = false;
+      this.deleteSong(this.data);
     },
     deleteFromPlaylist() {
       this.isMenuOpen = false;
