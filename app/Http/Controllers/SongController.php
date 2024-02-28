@@ -319,7 +319,7 @@ class SongController extends Controller
 
     public function latestSong()
     {
-        $songs = Song::with("artist")
+        $songs = Song::with(["artist", "like", "album"])
             ->where("display", "public")
             ->whereHas("file", fn ($q) => $q->where("status", SongMetadataStatusEnum::DONE))
             ->orderBy("created_at", "DESC")
