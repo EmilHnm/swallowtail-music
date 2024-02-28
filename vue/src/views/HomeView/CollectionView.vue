@@ -51,6 +51,7 @@
         v-for="song in likedList"
         :key="song.song_id"
         :data="song"
+        @select-song="onPlaySongInLikedList(song)"
       />
     </div>
   </div>
@@ -66,7 +67,7 @@ import BaseListItem from "@/components/UI/BaseListItem.vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import globalEmitListener from "@/shared/constants/globalEmitListener";
 import IconHeartFilled from "@/components/icons/IconHeartFilled.vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { useMeta } from "vue-meta";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
@@ -107,6 +108,13 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("playlist", ["getLikedSongList"]),
+    ...mapMutations("queue", [
+      "clearQueue",
+      "addSongs",
+      "setCurrentIndex",
+      "setQueue",
+      "setPlaying",
+    ]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
     },
@@ -136,11 +144,29 @@ export default defineComponent({
       this.loadLikedList();
     },
     playLikedSong() {
-      this.$emit("playLikedSong");
+      if (this.likedList.length > 0) {
+        this.clearQueue();
+        this.setQueue(this.likedList);
+        this.setCurrentIndex(0);
+        this.setPlaying(true);
+      }
     },
     addLikedSongToQueue() {
       this.isMenuOpen = false;
-      this.$emit("addLikedSongToQueue");
+      if (this.likedList.length > 0) {
+        this.addSongs(this.likedList);
+      }
+    },
+    onPlaySongInLikedList(song: songData) {
+      if (this.likedList.length > 0) {
+        this.clearQueue();
+        this.setQueue(this.likedList);
+        const index = this.likedList.findIndex(
+          (songLiked) => songLiked.song_id === song.song_id
+        );
+        this.setCurrentIndex(index);
+        this.setPlaying(true);
+      }
     },
   },
   mounted() {

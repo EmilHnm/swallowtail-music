@@ -81,13 +81,7 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions("playlist", [
-      "getAccountPlaylist",
-      "getPlaylistSongs",
-      "getLikedSongList",
-    ]),
-    ...mapActions("album", ["getAlbumSongs"]),
-    ...mapActions("queue", ["playQueuePlaylist"]),
+    ...mapActions("playlist", ["getAccountPlaylist"]),
     ...mapMutations("queue", ["setProgress", "setPlaying", "setCurrentIndex"]),
     // NOTE: Sidebar control
     toggleLeftSideBar() {
@@ -120,41 +114,6 @@ export default defineComponent({
     loadeddata() {
       this.isAudioWaitting = false;
       if (this.isPlaying) this.playAudio();
-    },
-    // NOTE:playinglist
-    onDrop(start: number, end: number) {
-      if (this.isOnShuffle) {
-        const temp = this.shuffledList[start];
-        this.shuffledList.splice(start, 1);
-        this.shuffledList.splice(end, 0, temp);
-      } else {
-        const temp = this.audioList[start];
-        this.audioList.splice(start, 1);
-        this.audioList.splice(end, 0, temp);
-      }
-      if (start === this.audioIndex) {
-        this.audioIndex = end;
-      } else if (start < this.audioIndex && end >= this.audioIndex) {
-        this.audioIndex--;
-      } else if (start > this.audioIndex && end <= this.audioIndex) {
-        this.audioIndex++;
-      }
-    },
-    deleteFromQueue(index: number) {
-      if (index === this.audioIndex) {
-        return;
-      }
-      if (this.isOnShuffle) {
-        const deleted = this.shuffledList.splice(index, 1);
-        this.audioList.filter(
-          (song: songData) => song.song_id !== deleted[0].song_id
-        );
-      } else {
-        this.audioList.splice(index, 1);
-      }
-      if (index < this.audioIndex) {
-        this.audioIndex--;
-      }
     },
     // NOTE:visualizer
     renderFrame() {
@@ -256,88 +215,7 @@ export default defineComponent({
         });
     },
     //NOTE: Liked Song
-    ...mapActions("song", ["getSongForPlay", "increaseSongListens"]),
-    playLikedSong() {
-      this.isLoading = true;
-      this.getLikedSongList(this.token)
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.status === "success") {
-            this.audioList = res.likedList;
-            this.audioIndex = 0;
-            this.playAudio();
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    addLikedSongToQueue() {
-      this.isLoading = true;
-      this.getLikedSongList(this.token)
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.status === "success") {
-            this.audioList = [...this.audioList, res.likedList].filter(
-              (song: songData, index: number, self: songData[]) =>
-                index === self.findIndex((t) => t.song_id === song.song_id)
-            );
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    // NOTE: Song
-    addToQueue(song: any) {
-      this.audioList = [...this.audioList, song].filter(
-        (song: songData, index: number, self: songData[]) =>
-          index === self.findIndex((t) => t.song_id === song.song_id)
-      );
-      if (this.isOnShuffle)
-        this.shuffledList = [...this.shuffledList, song].filter(
-          (song: songData, index: number, self: songData[]) =>
-            index === self.findIndex((t) => t.song_id === song.song_id)
-        );
-    },
-    playSong(song_id: string) {
-      this.getSongForPlay({
-        token: this.token,
-        song_id: song_id,
-      })
-        .then((res: any) => {
-          return res.json();
-        })
-        .then((res) => {
-          if (res.status === "success") {
-            this.audioList.length = 0;
-            this.audioList.push(res.song);
-            this.audioIndex = 0;
-            this.playAudio();
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
+    ...mapActions("song", ["increaseSongListens"]),
     // NOTE: dialog
     closeDialog() {
       this.dialogWaring.show = false;
@@ -565,10 +443,6 @@ export default defineComponent({
         @playArtistSong="playArtistSong"
         @playSongOfArtist="playSongOfArtist"
         @addArtistSongToQueue="addArtistSongToQueue"
-        @playLikedSong="playLikedSong"
-        @addLikedSongToQueue="addLikedSongToQueue"
-        @addToQueue="addToQueue"
-        @playSong="playSong"
         v-slot="{ Component }"
       >
         <keep-alive include="mainPage">
@@ -578,11 +452,9 @@ export default defineComponent({
     </main>
 
     <HomeViewRightSideBar
-          v-if="getQueue.length > 0"
-          :isActive="isRightSideBarActive"
-          @onDrop="onDrop"
-          @deleteFromQueue="deleteFromQueue"
-        />
+      v-if="getQueue.length > 0"
+      :isActive="isRightSideBarActive"
+    />
     <HomeUploadBox :isPlaying="!!getCurrentSong"></HomeUploadBox>
   </div>
   <HomeViewPlayer
