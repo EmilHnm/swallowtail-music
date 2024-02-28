@@ -1,4 +1,10 @@
 <template>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseDialog>
   <div class="wrapper">
     <div class="news" ref="news">
       <div
@@ -11,7 +17,7 @@
           <base-list-item v-for="(song, index) in latestSongs" :key="index">
             <div class="latest-song__song">
               <div class="latest-song__song--title">
-                <h2 @click="playSong(song.song_id)">
+                <h2 @click="playSong(song)">
                   <BaseTooltipVue
                     :position="'bottom'"
                     :tooltip-text="song.title"
@@ -48,7 +54,7 @@
                 }}
               </div>
               <div class="latest-song__song--add-queue">
-                <IconPlay @click="playSong(song.song_id)" />
+                <IconPlay @click="playSong(song)" />
               </div>
             </div>
           </base-list-item>
@@ -71,7 +77,7 @@
               :img="`${environment.album_cover}/${album.image_path}`"
               :type="'album'"
               :songCount="album.song_count"
-              @playAlbum="playAlbum"
+              @playAlbum="onPlayAlbum"
             />
           </swiper-slide>
         </swiper>
@@ -105,7 +111,7 @@
               :img="`${environment.album_cover}/${album.image_path}`"
               :type="'album'"
               :listens="+album.song_sum_listens"
-              @playAlbum="playAlbum"
+              @playAlbum="onPlayAlbum"
             />
           </swiper-slide>
         </swiper>
@@ -163,7 +169,7 @@
                 {{ playlist.song_count ?? 0 }} songs
               </div>
               <div class="favorite__playlist__item--play">
-                <IconPlay @click="playPlaylist(playlist.playlist_id)" />
+                <IconPlay @click="onPlayPlaylist(playlist.playlist_id)" />
               </div>
             </div>
           </base-list-item>
@@ -178,12 +184,12 @@ import "swiper/css/navigation";
 import { Swiper, SwiperSlide } from "swiper/vue";
 
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import { environment } from "@/environment/environment";
 import { useMeta } from "vue-meta";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
-import type { song } from "@/model/songModel";
+import type {song, songData} from "@/model/songModel";
 import type { user } from "@/model/userModel";
 import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseSkeletonsLoadingCard from "@/components/UI/BaseSkeletonsLoadingCard.vue";
@@ -192,6 +198,9 @@ import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import globalEmitListener from "@/shared/constants/globalEmitListener";
 import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+
 
 type LatestSong = song & {
   artist: artist[];
@@ -212,6 +221,8 @@ type TopAlbum = album & {
 
 export default defineComponent({
   components: {
+    BaseLineLoad,
+    BaseDialog,
     IconPlay,
     BaseCardArtist,
     BaseCardAlbum,
@@ -230,7 +241,7 @@ export default defineComponent({
       topAlbums: [] as TopAlbum[],
       topArtist: [] as artist[],
       //loading
-
+      isLoading: false,
       itemPerSlide: 6,
       containerWidthObserver: null as ResizeObserver | null,
     };
@@ -239,20 +250,39 @@ export default defineComponent({
     ...mapActions("song", ["getLatestSong"]),
     ...mapActions("artist", ["getTopArtists"]),
     ...mapActions("album", ["getLatestAlbums", "getTopAlbums"]),
+    ...mapActions("queue", ["playPlaylist", "playAlbum", "playArtist"]),
+    ...mapMutations("queue", [
+      "clearQueue",
+      "addSong",
+      "setPlaying",
+      "setCurrentIndex",
+    ]),
     redirectToPlaylist(id: string) {
       this.$router.push({ name: "playlistViewPage", params: { id: id } });
     },
-    playPlaylist(id: string) {
-      this.$emit("playPlaylist", id);
+    onPlayPlaylist(id: string) {
+      this.isLoading = true;
+      this.playPlaylist(id)
+        .then(() => (this.isLoading = false))
+        .catch(() => (this.isLoading = false));
     },
     playArtistSong(artist_id: string) {
-      this.$emit("playArtistSong", artist_id);
+      this.isLoading = true;
+      this.playArtist(artist_id)
+        .then(() => (this.isLoading = false))
+        .catch(() => (this.isLoading = false));
     },
-    playAlbum(album_id: string) {
-      this.$emit("playAlbum", album_id);
+    onPlayAlbum(album_id: string) {
+      this.isLoading = true;
+      this.playAlbum(album_id)
+        .then(() => (this.isLoading = false))
+        .catch(() => (this.isLoading = false));
     },
-    playSong(song_id: string) {
-      this.$emit("playSong", song_id);
+    playSong(song: LatestSong) {
+      this.clearQueue();
+      this.addSong(song);
+      this.setCurrentIndex(0);
+      this.setPlaying(true);
     },
     onLoadLatestSong() {
       this.getLatestSong(this.token).then((res) => {
