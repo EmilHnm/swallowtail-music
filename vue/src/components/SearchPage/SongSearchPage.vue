@@ -3,7 +3,7 @@
     v-for="song in songResult"
     :key="song.song_id"
     :data="song"
-    @select-song="playSong"
+    @select-song="onPlaySong(song)"
   />
 </template>
 <script lang="ts">
@@ -13,6 +13,7 @@ import type { like } from "@/model/likeModel";
 import type { song } from "@/model/songModel";
 import { defineComponent } from "vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
+import {mapMutations} from "vuex";
 
 type songData = song & {
   album: album;
@@ -27,10 +28,19 @@ declare module "@vue/runtime-core" {
 }
 
 export default defineComponent({
-  setup() {},
+  date() {},
   methods: {
-    playSong(song_id: string) {
-      this.$emit("playSong", song_id);
+    ...mapMutations("queue", [
+      "setCurrentIndex",
+      "clearQueue",
+      "addSong",
+      "setPlaying",
+    ]),
+    onPlaySong(song: songData) {
+      this.clearQueue();
+      this.addSong(song);
+      this.setCurrentIndex(0);
+      this.setPlaying(true);
     },
   },
   inject: ["songResult"],

@@ -1,11 +1,19 @@
 <template>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action>
+      <div></div>
+    </template>
+  </BaseDialog>
   <div class="search-result__container">
     <div class="search-result__container--artist">
       <BaseCardArtist
         v-for="artist in artistResult"
         :key="artist.artist_id"
         :data="artist"
-        :title="'虹ヶ咲学園スクールアイドル同好会'"
+        :title="artist.name"
         @playArtistSong="playArtistSong"
       />
     </div>
@@ -16,6 +24,9 @@
 import type { artist } from "@/model/artistModel";
 import { defineComponent } from "vue";
 import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import { mapActions } from "vuex";
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
@@ -25,10 +36,23 @@ declare module "@vue/runtime-core" {
 
 export default defineComponent({
   inject: ["artistResult"],
-  components: { BaseCardArtist },
+  components: { BaseDialog, BaseLineLoad, BaseCardArtist },
+  data() {
+    return {
+      isLoading: false,
+    };
+  },
   methods: {
+    ...mapActions("queue", ["playArtist"]),
     playArtistSong(artist_id: string) {
-      this.$emit("playArtistSong", artist_id);
+      this.isLoading = true;
+      this.playArtist(artist_id)
+        .then(() => {
+          this.isLoading = false;
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
     },
   },
 });

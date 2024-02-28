@@ -1,4 +1,12 @@
 <template>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action>
+      <div></div>
+    </template>
+  </BaseDialog>
   <div class="search-result__container">
     <div class="search-result__container--album">
       <BaseCardAlbum
@@ -8,7 +16,7 @@
         :title="album.name"
         :songCount="album.song_count"
         :img="`${environment.album_cover}/${album.image_path}`"
-        @playAlbum="playAlbum"
+        @playAlbum="onPlayAlbum"
       />
     </div>
   </div>
@@ -19,6 +27,9 @@ import type { album } from "@/model/albumModel";
 import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import {mapActions} from "vuex";
 
 type albumData = album & { song_count: number };
 declare module "@vue/runtime-core" {
@@ -29,15 +40,24 @@ declare module "@vue/runtime-core" {
 
 export default defineComponent({
   inject: ["albumResult"],
-  components: { BaseCardAlbum },
+  components: { BaseDialog, BaseLineLoad, BaseCardAlbum },
   data() {
     return {
       environment: environment,
+      isLoading: false,
     };
   },
   methods: {
-    playAlbum(album_id: string) {
-      this.$emit("playAlbum", album_id);
+    ...mapActions("queue", ["playAlbum"]),
+    onPlayAlbum(album_id: string) {
+      this.isLoading = true;
+      this.playAlbum(album_id)
+        .then(() => {
+          this.isLoading = false;
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
     },
   },
 });

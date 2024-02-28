@@ -1,4 +1,12 @@
 <template>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action>
+      <div></div>
+    </template>
+  </BaseDialog>
   <div class="search-result__container" ref="container">
     <div class="search-result__container--song" v-if="songResult.length > 0">
       <h3>Song</h3>
@@ -6,7 +14,7 @@
         <BaseSongItem
           v-if="index <= songResult.length"
           :data="songResult[index - 1]"
-          @select-song="playSong"
+          @select-song="playSong(songResult[index - 1])"
         />
       </div>
       <span @click="changeSearchPage('SongSearchPage')">See more</span>
@@ -23,7 +31,7 @@
             :id="albumResult[index - 1].album_id"
             :title="albumResult[index - 1].name"
             :songCount="albumResult[index - 1].song_count"
-            @playAlbum="playAlbum"
+            @playAlbum="onPlayAlbum"
           />
         </swiper-slide>
       </swiper>
@@ -80,6 +88,9 @@ import type { user } from "@/model/userModel";
 import { environment } from "@/environment/environment";
 import type { song } from "@/model/songModel";
 import type { like } from "@/model/likeModel";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import {mapActions, mapMutations} from "vuex";
 
 type songData = song & {
   album: album;
@@ -106,24 +117,51 @@ export default defineComponent({
       environment: environment,
       itemPerSlide: 6,
       containerWidthObserver: null as ResizeObserver | null,
+      isLoading: false,
     };
   },
   methods: {
+    ...mapActions("queue", ["playAlbum", "playArtist"]),
+    ...mapMutations("queue", [
+      "setCurrentIndex",
+      "clearQueue",
+      "addSong",
+      "setPlaying",
+    ]),
     changeSearchPage(componentName: string) {
       this.$emit("changeSearchPage", componentName);
     },
-    playSong(song_id: string) {
-      this.$emit("playSong", song_id);
+    playSong(song: songData) {
+      this.clearQueue();
+      this.addSong(song);
+      this.setCurrentIndex(0);
+      this.setPlaying(true);
     },
-    playAlbum(album_id: string) {
-      this.$emit("playAlbum", album_id);
+    onPlayAlbum(album_id: string) {
+      this.isLoading = true;
+      this.playAlbum(album_id)
+        .then(() => {
+          this.isLoading = false;
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
     },
     playArtistSong(artist_id: string) {
-      this.$emit("playArtistSong", artist_id);
+      this.isLoading = true;
+      this.playArtist(artist_id)
+        .then(() => {
+          this.isLoading = false;
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
     },
   },
   inject: ["songResult", "albumResult", "artistResult", "userResult"],
   components: {
+    BaseDialog,
+    BaseLineLoad,
     BaseCardArtist,
     BaseCardAlbum,
     BaseCardUser,

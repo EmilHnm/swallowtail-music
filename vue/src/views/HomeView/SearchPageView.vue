@@ -54,9 +54,6 @@
       <component
         :is="selectedSearchFilter"
         @changeSearchPage="changeComponent"
-        @playSong="playSong"
-        @playAlbum="playAlbum"
-        @playArtistSong="playArtistSong"
       ></component>
     </keep-alive>
     <div v-else>
@@ -286,15 +283,6 @@ export default defineComponent({
             this.userResult = res.users;
           }
         });
-    },
-    playSong(song_id: string) {
-      this.$emit("playSong", song_id);
-    },
-    playAlbum(album_id: string) {
-      this.$emit("playAlbum", album_id);
-    },
-    playArtistSong(artist_id: string) {
-      this.$emit("playArtistSong", artist_id);
     },
   },
   computed: {
