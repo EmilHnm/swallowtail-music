@@ -214,19 +214,20 @@ const mutations: MutationTree<RootState> = {
       state.currentIndex++;
     }
   },
-  deleteSong(state, payload: number) {
-    if (payload === state.currentIndex) {
+  deleteSong(state, payload: songData) {
+    const index = state.queues.findIndex((s) => s.song_id === payload.song_id);
+    if (index === state.currentIndex || index === -1) {
       return;
     }
     if (state.shuffled) {
-      const deleted = state.shuffledQueue.splice(payload, 1);
+      const deleted = state.shuffledQueue.splice(index, 1);
       state.queues = state.queues.filter(
         (item) => item.song_id !== deleted[0].song_id
       );
     } else {
-      state.queues.splice(payload, 1);
+      state.queues.splice(index, 1);
     }
-    if (payload < state.currentIndex) {
+    if (index < state.currentIndex) {
       state.currentIndex--;
     }
   },
