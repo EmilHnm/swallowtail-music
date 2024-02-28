@@ -4,8 +4,8 @@
       <div class="now_playing__info--cover" @click="navigateToPlaying">
         <img
           :src="
-            playingAudio.album
-              ? `${environment.album_cover}/${playingAudio.album.image_path}`
+            getCurrentSong.album
+              ? `${environment.album_cover}/${getCurrentSong.album.image_path}`
               : `${environment.default}/no_image.jpg`
           "
           alt="cover"
@@ -13,7 +13,7 @@
       </div>
       <div class="now_playing__info--title" ref="title">
         <div class="now_playing__info--title--name" @click="navigateToPlaying">
-          {{ playingAudio.title }}
+          {{ getCurrentSong.title }}
         </div>
         <div
           class="now_playing__info--title--artist"
@@ -28,11 +28,11 @@
           ref="artistList"
         >
           <span
-            v-for="(item, index) in playingAudio.artist"
+            v-for="(item, index) in getCurrentSong.artist"
             :key="item.artist_id"
             @click="redirectToArtist(item.artist_id)"
             >{{ item.name
-            }}<span v-if="index != playingAudio.artist.length - 1"
+            }}<span v-if="index != getCurrentSong.artist.length - 1"
               >,
             </span></span
           >
@@ -81,19 +81,19 @@
             class="now_playing__controls--progress--bar--progress"
             :style="{
               width:
-                (getCurrentProgress / playingAudio.file.duration) * 100 + '%',
+                (getCurrentProgress / getCurrentSong.file.duration) * 100 + '%',
             }"
           ></div>
           <input
             type="range"
             class="now_playing__controls--progress--bar--range"
-            :value="(getCurrentProgress / playingAudio.file.duration) * 100"
+            :value="(getCurrentProgress / getCurrentSong.file.duration) * 100"
             @input="onSetProgress"
           />
         </div>
         <div class="now_playing__controls--progress--time--duration">
           {{
-            new Date(playingAudio.file.duration * 1000)
+            new Date(getCurrentSong.file.duration * 1000)
               .toISOString()
               .substring(14, 19)
           }}
@@ -171,10 +171,10 @@ type songData = song & {
 export default defineComponent({
   name: "HomeViewPlayer",
   props: {
-    playingAudio: {
-      required: true,
-      type: Object as () => songData,
-    },
+    // playingAudio: {
+    //   required: true,
+    //   type: Object as () => songData,
+    // },
     isPlaying: {
       required: true,
       type: Boolean,
@@ -240,6 +240,7 @@ export default defineComponent({
       "setShuffle",
       "setCurrentIndex",
       "setProgress",
+      "setPlaying",
     ]),
     toggleRightSideBar() {
       this.isRightSideBarActive = !this.isRightSideBarActive;
@@ -254,23 +255,20 @@ export default defineComponent({
     },
     playToggle() {
       if (this.isWating) return;
-      if (!this.isPlaying) {
-        this.$emit("playSong");
+      if (!this.getPlaying) {
+        this.setPlaying(true);
       } else {
-        this.$emit("pauseSong");
+        this.setPlaying(false);
       }
     },
     onSetProgress(e: any) {
       this.$emit("onSetProgress", e.target.value);
     },
     nextSong() {
-      this.$emit("nextSong");
       this.setCurrentIndex(this.getCurrentIndex + 1);
     },
     prevSong() {
-      this.$emit("prevSong");
       this.setCurrentIndex(this.getCurrentIndex - 1);
-      console.log(this.getCurrentIndex);
     },
     onSetVolume(e: any) {
       this.setVolume(+e.target.value);
@@ -329,7 +327,12 @@ export default defineComponent({
       "getCurrentIndex",
       "getVolume",
       "getCurrentProgress",
+      "getCurrentSong",
+      "getPlaying",
     ]),
+    playingAudio(): songData {
+      return this.getCurrentSong;
+    },
   },
   mounted() {
     this.titleObserver = new ResizeObserver((entries) => {
@@ -348,8 +351,10 @@ export default defineComponent({
   },
   watch: {
     playingAudio: {
-      handler() {
-        this.onLoadLikeSong();
+      handler(n: songData | null, o: songData | null) {
+        if (n && n.song_id != o?.song_id) {
+          this.onLoadLikeSong();
+        }
       },
       immediate: true,
       deep: true,

@@ -33,6 +33,9 @@ const state = () => ({
 });
 
 const getters: GetterTree<RootState, RootState> = {
+  getPlaying(state) {
+    return state.isPlaying;
+  },
   getQueue(state) {
     if (state.shuffled) return state.shuffledQueue;
     return state.queues;
@@ -101,6 +104,9 @@ const getters: GetterTree<RootState, RootState> = {
   },
 };
 const mutations: MutationTree<RootState> = {
+  setPlaying(state, payload: boolean) {
+    state.isPlaying = payload;
+  },
   setQueue(state, payload: songData[]) {
     state.queues = payload;
     state.shuffled = false;
@@ -135,8 +141,6 @@ const mutations: MutationTree<RootState> = {
     if (state.shuffled) {
       if (state.shuffledQueue.length <= payload) {
         if (state.repeat != "off") {
-          state.currentIndex = 0;
-          state.isPlaying = false;
           return;
         } else {
           state.currentIndex = 0;
@@ -157,8 +161,6 @@ const mutations: MutationTree<RootState> = {
     }
     if (state.queues.length <= payload) {
       if (state.repeat != "off") {
-        state.currentIndex = 0;
-        state.isPlaying = false;
         return;
       } else {
         state.currentIndex = 0;
@@ -274,7 +276,7 @@ const actions: ActionTree<RootState, RootState> = {
             if (data.songList.length) {
               context.commit("setQueue", data.songList);
               context.commit("setCurrentIndex", 0);
-              dispatchEvent(new CustomEvent("play"));
+              document.dispatchEvent(new CustomEvent("play"));
               res({ status: "success", message: "Playing" });
             } else {
               rej({

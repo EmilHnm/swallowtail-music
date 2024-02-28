@@ -2,9 +2,8 @@
 import io from "socket.io-client";
 import Echo from "laravel-echo";
 import { computed, defineComponent } from "vue";
-import { _function } from "@/mixins";
 import { Timer } from "@/mixins/Timer";
-import {mapActions, mapGetters, mapMutations} from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { environment } from "@/environment/environment";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
@@ -53,7 +52,6 @@ export default defineComponent({
       songLoadController: null as AbortController | null,
       songLoadSignal: null as AbortSignal | null,
       //play song property
-      isPlaying: false,
       audioIndex: 0,
       isOnShuffle: false,
       shuffledList: [] as songData[],
@@ -90,7 +88,7 @@ export default defineComponent({
     ]),
     ...mapActions("album", ["getAlbumSongs"]),
     ...mapActions("queue", ["playQueuePlaylist"]),
-    ...mapMutations("queue", ["setProgress"]),
+    ...mapMutations("queue", ["setProgress", "setPlaying", "setCurrentIndex"]),
     // NOTE: Sidebar control
     toggleLeftSideBar() {
       this.isLeftSideBarActive = !this.isLeftSideBarActive;
@@ -101,40 +99,15 @@ export default defineComponent({
     // NOTE: Song event control
     playAudio() {
       this.audio.play();
-      this.isPlaying = true;
+      this.setPlaying(true);
     },
     pauseAudio() {
       this.audio.pause();
-      this.isPlaying = false;
-    },
-    nextSong() {
-      if (this.audioIndex === this.audioList.length - 1) {
-        if (this.repeat === "off") {
-          this.isPlaying = false;
-          return;
-        }
-        this.audioIndex = 0;
-      } else {
-        this.audioIndex++;
-      }
-    },
-    prevSong() {
-      if (this.audioIndex === 0) {
-        if (this.repeat === "off") return;
-        this.audioIndex = this.audioList.length - 1;
-      } else {
-        this.audioIndex--;
-      }
-    },
-    shuffleToggle() {
-      this.isOnShuffle = !this.isOnShuffle;
-    },
-    getDuration() {
-      this.playingAudio.file.duration = this.audio.duration;
+      this.setPlaying(false);
     },
     onSetProgress(progress: number) {
       this.audio.currentTime =
-        (progress * this.playingAudio.file.duration) / 100;
+        (progress * this.playingSong.file.duration) / 100;
     },
     canplay() {
       this.isAudioWaitting = false;
@@ -199,35 +172,7 @@ export default defineComponent({
     },
     playPlaylist(id: string) {
       this.isLoading = true;
-      this.playQueuePlaylist(id).then();
-      this.getPlaylistSongs({ playlist_id: id, token: this.token })
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.songList) {
-            if (res.songList.length) {
-              this.audioList = res.songList;
-              this.audioIndex = 0;
-              this.playAudio();
-            } else {
-              this.dialogWaring = {
-                title: "Error",
-                mode: "warning",
-                content: "This playlist is empty, cannot be played",
-                show: true,
-              };
-            }
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
+      this.playQueuePlaylist(id).then(() => (this.isLoading = false));
     },
     addPlaylistToQueue(id: string) {
       this.isLoading = true;
@@ -529,28 +474,7 @@ export default defineComponent({
   },
   watch: {
     repeat(n) {
-      if (n === "one") {
-        this.audio.loop = true;
-      } else {
-        this.audio.loop = false;
-      }
-    },
-    isOnShuffle() {
-      if (this.isOnShuffle) {
-        let playingSongData = this.audioList[this.audioIndex];
-        let listNotContainPlaying = this.audioList.filter(
-          (item: songData) => item.song_id !== playingSongData.song_id
-        );
-        let temp: songData[] = _function.shuffleArr(listNotContainPlaying);
-        this.shuffledList = [playingSongData, ...temp];
-        this.audioIndex = 0;
-      } else {
-        let playingKey = this.shuffledList[this.audioIndex].song_id;
-        let audioIndex = this.audioList.findIndex(
-          (key: songData) => key.song_id === playingKey
-        );
-        this.audioIndex = audioIndex;
-      }
+      this.audio.loop = n === "one";
     },
     volume() {
       this.audio.volume = this.volume / 100;
@@ -558,6 +482,7 @@ export default defineComponent({
     // visualizer
     isPlaying() {
       if (this.isPlaying) {
+        this.audio?.play();
         if (this.timeOut) this.timeOut.resume();
         if (this.ctx === null) {
           this.ctx = new AudioContext();
@@ -577,54 +502,12 @@ export default defineComponent({
         }
       } else {
         if (this.timeOut) this.timeOut.pause();
+        this.audio?.pause();
       }
     },
     progress() {
       if (this.isPlaying) {
         this.renderFrame();
-      }
-    },
-    playingAudio() {
-      if (this.playingAudio) {
-        this.timeOut = null;
-        this.timeOut = new Timer(() => {
-          this.increaseSongListens({
-            token: this.token,
-            song_id: this.playingAudio.song_id,
-          })
-            .then((res) => res.json())
-            .then((res) => {
-              if (res.status === "success") {
-                this.timeOut = null;
-              }
-            });
-        }, 45000);
-        this.timeOut.resume();
-        this.audio.src = "";
-        this.audio.pause();
-        this.audio.load();
-        this.waiting();
-        if (!this.songLoadController) {
-          this.songLoadController = new AbortController();
-        } else {
-          this.songLoadController.abort();
-          this.songLoadController = new AbortController();
-        }
-        this.songLoadSignal = this.songLoadController.signal;
-        fetch(`${environment.api}/song/${this.playingAudio.song_id}/stream`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-          signal: this.songLoadSignal,
-        })
-          .then((res) => res.blob())
-          .then((blob) => {
-            const objectUrl = URL.createObjectURL(blob);
-            this.audio.src = objectUrl;
-            this.audio.load();
-            if (this.isPlaying) this.playAudio();
-          });
       }
     },
     "$store.state.uploadQueue.getUploadingFile": {
@@ -640,8 +523,48 @@ export default defineComponent({
       deep: true,
     },
     playingSong: {
-      handler(n) {
-        console.log("current song", n);
+      handler(n: songData | null, o: songData | null) {
+        if (n && n.song_id !== o?.song_id) {
+          this.timeOut = null;
+          this.timeOut = new Timer(() => {
+            this.increaseSongListens({
+              token: this.token,
+              song_id: this.playingSong.song_id,
+            })
+              .then((res) => res.json())
+              .then((res) => {
+                if (res.status === "success") {
+                  this.timeOut = null;
+                }
+              });
+          }, 45000);
+          this.timeOut.resume();
+          this.audio.src = "";
+          this.audio.pause();
+          this.audio.load();
+          this.waiting();
+          if (!this.songLoadController) {
+            this.songLoadController = new AbortController();
+          } else {
+            this.songLoadController.abort();
+            this.songLoadController = new AbortController();
+          }
+          this.songLoadSignal = this.songLoadController.signal;
+          fetch(`${environment.api}/song/${this.playingSong.song_id}/stream`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+            signal: this.songLoadSignal,
+          })
+            .then((res) => res.blob())
+            .then((blob) => {
+              const objectUrl = URL.createObjectURL(blob);
+              this.audio.src = objectUrl;
+              this.audio.load();
+              if (this.isPlaying) this.playAudio();
+            });
+        }
       },
       deep: true,
     },
@@ -653,6 +576,10 @@ export default defineComponent({
       getVolume: "queue/getVolume",
       getRepeat: "queue/getRepeat",
       getCurrentProgress: "queue/getCurrentProgress",
+      getCurrentSong: "queue/getCurrentSong",
+      getPlaying: "queue/getPlaying",
+      getCurrentIndex: "queue/getCurrentIndex",
+      getQueue: "queue/getQueue",
     }),
     playingSong(): songData {
       return this.currentSong;
@@ -666,13 +593,8 @@ export default defineComponent({
     progress(): number {
       return this.getCurrentProgress;
     },
-    playingAudio(): songData {
-      // BUG : when isOnShuffle change, this run 2 time
-      // Once isOnShuffle change, and once audioIndex change
-      if (this.isOnShuffle) {
-        return this.shuffledList[this.audioIndex];
-      }
-      return this.audioList[this.audioIndex];
+    isPlaying(): boolean {
+      return this.getPlaying;
     },
   },
   created() {
@@ -694,11 +616,11 @@ export default defineComponent({
     this.audio.ontimeupdate = () => {
       this.setProgress(this.audio.currentTime);
     };
-    this.audio.ondurationchange = () => {
-      this.getDuration();
-    };
+    // this.audio.ondurationchange = () => {
+    //   this.getDuration();
+    // };
     this.audio.onended = () => {
-      this.nextSong();
+      this.setCurrentIndex(this.getCurrentIndex + 1);
     };
     this.audio.oncanplay = () => {
       this.canplay();
@@ -714,7 +636,7 @@ export default defineComponent({
       if (e.target instanceof HTMLInputElement) {
         return;
       }
-      if (e.key === " " && this.playingAudio) {
+      if (e.key === " " && this.playingSong) {
         e.preventDefault();
         if (this.isPlaying) {
           this.pauseAudio();
@@ -726,6 +648,14 @@ export default defineComponent({
 
     document.addEventListener("contextmenu", (e) => {
       e.preventDefault();
+    });
+
+    document.addEventListener("play", () => {
+      this.playAudio();
+    });
+
+    document.addEventListener("pause", () => {
+      this.pauseAudio();
     });
   },
   unmounted() {
@@ -782,32 +712,28 @@ export default defineComponent({
       </router-view>
     </main>
 
-<!--    <HomeViewRightSideBar-->
-<!--      v-if="audioList.length > 0"-->
-<!--      :isActive="isRightSideBarActive"-->
-<!--      :playlist="audioList"-->
-<!--      :playingAudio="playingAudio"-->
-<!--      :audioIndex="audioIndex"-->
-<!--      :shuffle="isOnShuffle"-->
-<!--      :shuffledPlaylist="shuffledList"-->
-<!--      @onDrop="onDrop"-->
-<!--      @setPlaySong="setPlaySong"-->
-<!--      @deleteFromQueue="deleteFromQueue"-->
-<!--    />-->
-    <HomeUploadBox :isPlaying="!!playingAudio"></HomeUploadBox>
+    <!--    <HomeViewRightSideBar-->
+    <!--      v-if="audioList.length > 0"-->
+    <!--      :isActive="isRightSideBarActive"-->
+    <!--      :playlist="audioList"-->
+    <!--      :playingAudio="playingAudio"-->
+    <!--      :audioIndex="audioIndex"-->
+    <!--      :shuffle="isOnShuffle"-->
+    <!--      :shuffledPlaylist="shuffledList"-->
+    <!--      @onDrop="onDrop"-->
+    <!--      @setPlaySong="setPlaySong"-->
+    <!--      @deleteFromQueue="deleteFromQueue"-->
+    <!--    />-->
+    <HomeUploadBox :isPlaying="!!getCurrentSong"></HomeUploadBox>
   </div>
   <HomeViewPlayer
-    v-if="audioList.length > 0"
-    :playingAudio="playingAudio"
+    v-if="getQueue.length > 0"
     :isPlaying="isPlaying"
     :isWating="isAudioWaitting"
     @toggleRightSideBar="toggleRightSideBar"
-    @shuffleToggle="shuffleToggle"
     @playSong="playAudio"
     @pauseSong="pauseAudio"
     @onSetProgress="onSetProgress"
-    @prevSong="prevSong"
-    @nextSong="nextSong"
   />
 </template>
 <style lang="scss" scoped>
