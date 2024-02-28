@@ -3,10 +3,6 @@
     <BaseAlbum
       v-if="Object.keys(album).length > 0"
       :data="album"
-      @playAlbum="playAlbum"
-      @addAlbumToQueue="addAlbumToQueue"
-      @playSongInAlbum="playSongInAlbum"
-      @addToQueue="addToQueue"
     />
     <BaseCircleLoad v-else />
   </div>
@@ -32,18 +28,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("album", ["getAlbum"]),
-    playAlbum(id: string) {
-      this.$emit("playAlbum", id);
-    },
-    addAlbumToQueue(id: string) {
-      this.$emit("addAlbumToQueue", id);
-    },
-    playSongInAlbum(album_id: string, song_id: string) {
-      this.$emit("playSongInAlbum", [album_id, song_id]);
-    },
-    addToQueue(song: any) {
-      this.$emit("addToQueue", song);
-    },
   },
   computed: {
     ...mapGetters({

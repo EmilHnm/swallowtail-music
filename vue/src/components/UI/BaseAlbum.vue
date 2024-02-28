@@ -63,13 +63,6 @@
             v-click-outside="() => (isMenuOpen = false)"
           >
             <IconHorizontalThreeDot @click="toggleMenu" />
-            <!-- <teleport to="body">
-              <div
-                class="bg"
-                :class="{ active: isMenuOpen }"
-                @click="toggleMenu"
-              ></div>
-            </teleport> -->
             <transition name="playlist-menu">
               <div class="playlist-menu" v-if="isMenuOpen">
                 <BaseListItem @click="addAlbumToQueue"
@@ -105,7 +98,6 @@
           :key="song.song_id"
           :control="true"
           @select-song="playSongInAlbum(song.song_id)"
-          @addToQueue="addToQueue(song)"
         />
       </div>
     </div>
@@ -116,7 +108,7 @@
 import { defineComponent } from "vue";
 import type { album } from "@/model/albumModel";
 import { environment } from "@/environment/environment";
-import { mapActions, mapGetters } from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import IconHeartFilled from "@/components/icons/IconHeartFilled.vue";
 import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vue";
 import BaseSongItem from "./BaseSongItem.vue";
@@ -166,6 +158,12 @@ export default defineComponent({
   methods: {
     ...mapActions("album", ["getAlbumSongs"]),
     ...mapActions("playlist", ["addAlbumToPlaylist"]),
+    ...mapMutations("queue", [
+      "addSongs",
+      "setCurrentIndex",
+      "setShuffle",
+      "clearQueue",
+    ]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
     },
@@ -212,16 +210,43 @@ export default defineComponent({
         });
     },
     playAlbum() {
-      this.$emit("playAlbum", this.data.album_id);
+      if (this.songs.length > 0) {
+        this.clearQueue();
+        this.addSongs(this.songs);
+        this.setCurrentIndex(0);
+        this.setShuffle(false);
+        document.dispatchEvent(new CustomEvent("play"));
+      } else {
+        this.dialogWaring.show = true;
+        this.dialogWaring.title = "Warning";
+        this.dialogWaring.content = "No song in this album";
+        this.dialogWaring.mode = "warning";
+      }
     },
     addAlbumToQueue() {
-      this.$emit("addAlbumToQueue", this.data.album_id);
+      if (this.songs.length > 0) {
+        this.addSongs(this.songs);
+      } else {
+        this.dialogWaring.show = true;
+        this.dialogWaring.title = "Warning";
+        this.dialogWaring.content = "No song in this album";
+        this.dialogWaring.mode = "warning";
+      }
     },
     playSongInAlbum(id: string) {
-      this.$emit("playSongInAlbum", this.data.album_id, id);
-    },
-    addToQueue(song: any) {
-      this.$emit("addToQueue", song);
+      if (this.songs.length > 0) {
+        this.clearQueue();
+        this.addSongs(this.songs);
+        const index = this.songs.findIndex((song) => song.song_id === id);
+        this.setCurrentIndex(index);
+        this.setShuffle(false);
+        document.dispatchEvent(new CustomEvent("play"));
+      } else {
+        this.dialogWaring.show = true;
+        this.dialogWaring.title = "Warning";
+        this.dialogWaring.content = "No song in this album";
+        this.dialogWaring.mode = "warning";
+      }
     },
   },
   computed: {
