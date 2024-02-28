@@ -308,6 +308,8 @@ $tablet-width: 768px;
     height: 150px;
     margin-bottom: 30px;
     background-color: var(--background-glass-color-primary);
+    width: 100%;
+    overflow: hidden;
     @container album-container (max-width: #{$mobile-width}) {
       & {
         flex-direction: column;
@@ -336,7 +338,7 @@ $tablet-width: 768px;
       }
     }
     &--prof {
-      width: 100%;
+      width: calc(100% - 200px);
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -344,6 +346,7 @@ $tablet-width: 768px;
       flex: 1;
       @container album-container (max-width: #{$mobile-width}) {
         & {
+          width: 100%;
           padding-left: 0px;
           padding: 0 10px;
         }
@@ -359,7 +362,7 @@ $tablet-width: 768px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        @container album-container (max-width: #{$tablet-width}) {
+        @container album-container (max-width: #{$mobile-width}) {
           & {
             font-size: 1.7rem;
             font-weight: 600;
