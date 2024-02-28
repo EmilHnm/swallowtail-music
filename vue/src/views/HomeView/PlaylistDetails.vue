@@ -247,31 +247,33 @@
       </button>
       <input type="text" placeholder="Search" v-model="searchText" />
     </div>
-    <div class="searchMore__result" v-if="isGettingSongSearch">
-      <BaseCircleLoad />
-    </div>
-    <div
-      class="searchMore__result"
-      v-else-if="Object.keys(songSearchResuilt).length > 0"
-    >
-      <BaseSongItem
-        v-for="song in songSearchResuilt"
-        :data="song"
-        :key="song.song_id"
-        :control="false"
-        @selectSong="onAddSongToList"
-      />
-    </div>
-    <div class="searchMore__result">
-      <h3 v-if="songSearchResuilt.length === 0 && !isGettingSongSearch">
-        No result
-      </h3>
-    </div>
+    <template v-if="searchText !== ''">
+      <div class="searchMore__result" v-if="isGettingSongSearch">
+        <BaseCircleLoad />
+      </div>
+      <div
+        class="searchMore__result"
+        v-else-if="Object.keys(songSearchResuilt).length > 0"
+      >
+        <BaseSongItem
+          v-for="song in songSearchResuilt"
+          :data="song"
+          :key="song.song_id"
+          :control="false"
+          @selectSong="onAddSongToList"
+        />
+      </div>
+      <div class="searchMore__result">
+        <h3 v-if="songSearchResuilt.length === 0 && !isGettingSongSearch">
+          No result
+        </h3>
+      </div>
+    </template>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import { environment } from "@/environment/environment";
 import { _function } from "@/mixins";
 import { useMeta } from "vue-meta";
@@ -607,17 +609,31 @@ export default defineComponent({
     addToQueue(song: any) {
       this.$emit("addToQueue", song);
     },
+    ...mapActions("queue", ["playQueuePlaylist"]),
+    ...mapMutations("queue", [
+      "addSongs",
+      "setCurrentIndex",
+      "setShuffle",
+      "clearQueue",
+    ]),
     playPlaylist() {
-      this.$emit("playPlaylist", this.playlistDetail.playlist_id);
+      // this.isLoading = true;
+      this.clearQueue();
+      this.addSongs(this.songList);
+      this.setCurrentIndex(0);
+      this.setShuffle(false);
+      document.dispatchEvent(new CustomEvent("play"));
     },
     playSongInPlaylist(song_id: string) {
-      this.$emit("playSongInPlaylist", [
-        this.playlistDetail.playlist_id,
-        song_id,
-      ]);
+      this.clearQueue();
+      this.addSongs(this.songList);
+      const index = this.songList.findIndex((song) => song.song_id === song_id);
+      this.setCurrentIndex(index);
+      this.setShuffle(false);
+      document.dispatchEvent(new CustomEvent("play"));
     },
     addPlaylistToQueue() {
-      this.$emit("addPlaylistToQueue", this.playlistDetail.playlist_id);
+      this.addSongs(this.songList);
     },
     ...mapActions("playlist", [
       "getPlaylist",
@@ -1039,6 +1055,7 @@ $tablet-width: 768px;
 
 .searchMore {
   width: 100%;
+  padding-bottom: 30px;
   h3 {
     width: 100%;
     text-align: center;

@@ -229,22 +229,40 @@ class PlaylistController extends Controller
     public function getAddableListSong(Request $request, $id)
     {
         if (!$request->has("query")) {
-            return;
+            return response()->json([
+                "status" => "error",
+                "message" => "Query is required",
+            ]);
         }
-        $query = "%" . $request->input("query") . "%";
+        $query = $request->input("query") ;
         $playlist_id = $id;
-        $songs = Song::whereNotIn(
-            "songs.song_id",
-            fn ($q) => $q
-                ->select("song_id")
-                ->from("playlist_songs")
-                ->where("playlist_id", $playlist_id)
-                ->get()
-        )
-            ->where("songs.title", "like", $query)
-            ->with(["artist", "album", "like"])
-            ->limit(5)
-            ->get();
+        try {
+            $songs = Song::search("title:($query~1)^3 or normalized_title:($query~1)^2 or ($query) or album.name:($query~1) or artist.name:($query~1)")
+                ->whereNotIn(
+                    "songs.song_id",
+                    fn ($q) => $q
+                        ->select("song_id")
+                        ->from("playlist_songs")
+                        ->where("playlist_id", $playlist_id)
+                        ->get()->toArray()
+                )
+                ->take(5)->get()
+                ->load(['artist', 'album', 'like']);
+        } catch(\Throwable $th) {
+            $songs = Song::whereNotIn(
+                "songs.song_id",
+                fn ($q) => $q
+                    ->select("song_id")
+                    ->from("playlist_songs")
+                    ->where("playlist_id", $playlist_id)
+                    ->get()
+            )
+                ->where("songs.title", "like", "%" .  $query . "%")
+                ->with(["artist", "album", "like"])
+                ->limit(5)
+                ->get();
+        }
+
         return response()->json([
             "status" => "success",
             "songs" => $songs,
