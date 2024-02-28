@@ -120,7 +120,7 @@ const mutations: MutationTree<RootState> = {
       const temp: songData[] = _function.shuffleArr(listNotContainPlaying);
       state.shuffledQueue = [playingSongData, ...temp];
       state.currentIndex = 0;
-    } else {
+    } else if (state.shuffledQueue.length > 0) {
       const playingKey = state.shuffledQueue[state.currentIndex].song_id;
       state.currentIndex = state.queues.findIndex(
         (key: songData) => key.song_id === playingKey
@@ -252,9 +252,29 @@ const mutations: MutationTree<RootState> = {
     state.shuffledQueue = [];
     state.currentIndex = 0;
   },
+  setCurrentSongLike(
+    state,
+    payload: {
+      data: like[];
+      id: string;
+    }
+  ) {
+    if (state.queues.length > 0) {
+      const index = state.queues.findIndex(
+        (song) => song.song_id === payload.id
+      );
+      state.queues[index].like = payload.data;
+      if (state.shuffled) {
+        const index = state.shuffledQueue.findIndex(
+          (song) => song.song_id === payload.id
+        );
+        state.shuffledQueue[index].like = payload.data;
+      }
+    }
+  },
 };
 const actions: ActionTree<RootState, RootState> = {
-  playQueuePlaylist(
+  playPlaylist(
     context: ActionContext<RootState, RootState>,
     payload: string
   ): Promise<res> {
@@ -291,6 +311,45 @@ const actions: ActionTree<RootState, RootState> = {
             });
           }
         });
+    });
+  },
+  playAlbum(
+    context: ActionContext<RootState, RootState>,
+    payload: string
+  ): Promise<res> {
+    return new Promise<res>((res, rej) => {
+      context
+        .dispatch(
+          "album/getAlbumSongs",
+          {
+            album_id: payload,
+            userToken: context.rootGetters["auth/userToken"],
+          },
+          { root: true }
+        )
+        .then((res) => res.json())
+        .then((data: any) => {
+          context.state.shuffled = false;
+          context.state.shuffledQueue = [];
+          if (data.songs) {
+            if (data.songs.length) {
+              context.commit("setQueue", data.songs);
+              context.commit("setCurrentIndex", 0);
+              document.dispatchEvent(new CustomEvent("play"));
+              res({ status: "success", message: "Playing" });
+            } else {
+              rej({
+                status: "error",
+                message: "This album is empty, cannot be played",
+              });
+            }
+          } else {
+            rej({
+              status: "error",
+              message: "This album is empty, cannot be played",
+            });
+          }
+        });;
     });
   },
 };

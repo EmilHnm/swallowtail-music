@@ -11,11 +11,6 @@
     <keep-alive>
       <component
         :is="tabs[activeTab].value"
-        :playlist="playlist"
-        :shuffledPlaylist="shuffledPlaylist"
-        :playingAudio="playingAudio"
-        :audioIndex="audioIndex"
-        :shuffle="shuffle"
         @onDrop="onDrop"
         @setPlaySong="setPlaySong"
         @deleteFromQueue="deleteFromQueue"
@@ -33,38 +28,12 @@ import RightSideBarDetail from "./RightSideBarDetail.vue";
 import RightSideBarQueue from "./RightSideBarQueue.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 
-type songData = song & {
-  album: album;
-  artist: artist[];
-  like: like[];
-};
-
 export default defineComponent({
   emits: ["onDrop", "setPlaySong", "deleteFromQueue"],
   props: {
     isActive: {
       type: Boolean,
       default: false,
-    },
-    playlist: {
-      type: Array as () => songData[],
-      required: true,
-    },
-    shuffledPlaylist: {
-      type: Array as () => songData[],
-      required: true,
-    },
-    playingAudio: {
-      type: Object as () => songData,
-      required: true,
-    },
-    audioIndex: {
-      type: Number,
-      required: true,
-    },
-    shuffle: {
-      type: Boolean,
-      required: true,
     },
   },
   data() {
@@ -88,6 +57,13 @@ export default defineComponent({
     },
     deleteFromQueue(index: number) {
       this.$emit("deleteFromQueue", index);
+    },
+  },
+  watch: {
+    isActive() {
+      if (!this.isActive) {
+        this.setActiveTab(0);
+      }
     },
   },
   components: { RightSideBarDetail, RightSideBarQueue, BaseButton },

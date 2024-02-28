@@ -39,7 +39,7 @@
         </div>
       </div>
       <div class="now_playing__info--heart" @click="onLikeSong">
-        <IconHeartFilled v-if="isLike" />
+        <IconHeartFilled v-if="getCurrentSong.like?.length != 0" />
         <IconHeart v-else />
       </div>
     </div>
@@ -171,30 +171,10 @@ type songData = song & {
 export default defineComponent({
   name: "HomeViewPlayer",
   props: {
-    // playingAudio: {
-    //   required: true,
-    //   type: Object as () => songData,
-    // },
     isPlaying: {
       required: true,
       type: Boolean,
     },
-    // progress: {
-    //   required: true,
-    //   type: Number,
-    // },
-    // volume: {
-    //   required: true,
-    //   type: Number,
-    // },
-    // repeat: {
-    //   required: true,
-    //   type: String,
-    // },
-    // shuffle: {
-    //   required: true,
-    //   type: Boolean,
-    // },
     isWating: {
       required: true,
       type: Boolean,
@@ -221,7 +201,6 @@ export default defineComponent({
       isRightSideBarActive: false,
       currentTime: "0:00",
       durationTime: "",
-      isLike: null as boolean | null,
       isLikeLoading: false,
       isHovered: false,
       artistOverflow: false,
@@ -241,6 +220,7 @@ export default defineComponent({
       "setCurrentIndex",
       "setProgress",
       "setPlaying",
+      "setCurrentSongLike",
     ]),
     toggleRightSideBar() {
       this.isRightSideBarActive = !this.isRightSideBarActive;
@@ -290,35 +270,61 @@ export default defineComponent({
         },
       });
     },
-    onLoadLikeSong() {
+    onLikeSong() {
       this.isLikeLoading = true;
-      this.isLike = null;
-      this.likedSong({
+      this.likeSong({
         songId: this.playingAudio.song_id,
         userToken: this.token,
+      }).then(() => {
+        this.loadLiked();
+        this.isLikeLoading = false;
+      });
+    },
+    loadLiked() {
+      this.isLikeLoading = true;
+      this.likedSong({
+        userToken: this.token,
+        songId: this.playingAudio.song_id,
       })
         .then((res: any) => {
           return res.json();
         })
         .then((res: any) => {
-          this.isLike = res.liked;
+          document.dispatchEvent(
+            new CustomEvent("like-song", {
+              detail: {
+                song_id: this.playingAudio.song_id,
+                liked: res.liked,
+              },
+            })
+          );
+          if (res.liked) {
+            this.setCurrentSongLike({
+              data: [
+                {
+                  id: 0,
+                  created_at: "",
+                  updated_at: "",
+                  user_id: this.user.user_id,
+                  song_id: this.playingAudio.song_id,
+                },
+              ],
+              id: this.playingAudio.song_id,
+            });
+          } else {
+            this.setCurrentSongLike({
+              data: [],
+              id: this.playingAudio.song_id,
+            });
+          }
+          this.isLikeLoading = false;
         });
-    },
-    onLikeSong() {
-      if (this.isLike !== null) {
-        this.isLike = null;
-        this.likeSong({
-          userToken: this.token,
-          songId: this.playingAudio.song_id,
-        }).then(() => {
-          this.onLoadLikeSong();
-        });
-      }
     },
   },
   computed: {
     ...mapGetters({
       token: "auth/userToken",
+      user: "auth/userData",
     }),
     ...mapGetters("queue", [
       "getCurrentTime",
@@ -353,7 +359,7 @@ export default defineComponent({
     playingAudio: {
       handler(n: songData | null, o: songData | null) {
         if (n && n.song_id != o?.song_id) {
-          this.onLoadLikeSong();
+          // this.onLoadLikeSong();
         }
       },
       immediate: true,

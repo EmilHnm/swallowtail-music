@@ -6,60 +6,41 @@
         <div class="playing-list__song">
           <IconPlay />
           <div class="playing-list__song--title">
-            <BaseTooltip :position="'bottom'" :tooltipText="playingAudio.title">
-              {{ playingAudio.title }}
+            <BaseTooltip
+              :position="'bottom'"
+              :tooltipText="getCurrentSong.title"
+            >
+              {{ getCurrentSong.title }}
             </BaseTooltip>
           </div>
           <div class="playing-list__song--duration">
             {{
-              Math.floor(playingAudio.file.duration / 60) +
+              Math.floor(getCurrentSong.file.duration / 60) +
               ":" +
-              Math.floor(playingAudio.file.duration % 60)
+              Math.floor(getCurrentSong.file.duration % 60)
             }}
           </div>
         </div>
       </base-list-item>
     </div>
-    <div class="playing-list__queue" ref="queue" v-if="!shuffle">
+    <div class="playing-list__queue" ref="queue">
       <div class="playing-list--title"><h3>In Queue</h3></div>
       <transition-group tag="ul" name="queue-list">
         <li
           class="playing-list__queue--item"
-          v-for="(item, i) in playlist"
+          v-for="(item, i) in getQueue"
           :key="item.song_id"
           draggable="true"
-          @dragstart="dragStart($event, i)"
+          @dragstart="dragStart($event, +i)"
           @dragend="onDrop($event)"
-          @dragenter="dragEnter($event, i)"
+          @dragenter="dragEnter($event, +i)"
         >
           <BaseSongItem
-            :selected="i === audioIndex ? true : false"
+            :selected="i === getCurrentIndex"
             :data="item"
             :inQueue="true"
-            @deleteFromQueue="deleteFromQueue(i)"
-            @selectSong="setPlaySong(i)"
-          />
-        </li>
-      </transition-group>
-    </div>
-    <div class="playing-list__queue" ref="queue" v-else>
-      <div class="playing-list--title"><h3>In Queue</h3></div>
-      <transition-group tag="ul" name="queue-list" mode="out-in">
-        <li
-          class="playing-list__queue--item"
-          v-for="(item, i) in shuffledPlaylist"
-          :key="item.song_id"
-          draggable="true"
-          @dragstart="dragStart($event, i)"
-          @dragend="onDrop($event)"
-          @dragenter="dragEnter($event, i)"
-        >
-          <BaseSongItem
-            :selected="i === audioIndex ? true : false"
-            :data="item"
-            :inQueue="true"
-            @deleteFromQueue="deleteFromQueue(i)"
-            @selectSong="setPlaySong(i)"
+            @deleteFromQueue="deleteFromQueue(+i)"
+            @selectSong="setPlaySong(+i)"
           />
         </li>
       </transition-group>
@@ -76,6 +57,7 @@ import { defineComponent } from "vue";
 import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import BaseTooltip from "@/components/UI/BaseTooltip.vue";
+import {mapGetters, mapMutations} from "vuex";
 
 type songData = song & {
   album: album;
@@ -90,26 +72,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    playlist: {
-      type: Array as () => songData[],
-      required: true,
-    },
-    shuffledPlaylist: {
-      type: Array as () => songData[],
-      required: true,
-    },
-    playingAudio: {
-      type: Object as () => songData,
-      required: true,
-    },
-    audioIndex: {
-      type: Number,
-      required: true,
-    },
-    shuffle: {
-      type: Boolean,
-      required: true,
-    },
   },
   data() {
     return {
@@ -118,23 +80,29 @@ export default defineComponent({
     };
   },
   methods: {
+    ...mapMutations("queue", ["moveSong", "setCurrentIndex"]),
     dragStart(e: DragEvent, i: number) {
       if (e.target) (e.target as HTMLLIElement).classList.add("dragging");
       this.movingIndex = i;
     },
     onDrop(e: DragEvent) {
       if (e.target) (e.target as HTMLLIElement).classList.remove("dragging");
-      this.$emit("onDrop", this.movingIndex, this.movingOverIndex);
+      this.moveSong({ from: this.movingIndex, to: this.movingOverIndex });
+      this.movingIndex = -1;
+      this.movingOverIndex = -1;
     },
     dragEnter(e: DragEvent, i: number) {
       this.movingOverIndex = i;
     },
     setPlaySong(index: number) {
-      this.$emit("setPlaySong", index);
+      this.setCurrentIndex(index);
     },
     deleteFromQueue(index: number) {
       this.$emit("deleteFromQueue", index);
     },
+  },
+  computed: {
+    ...mapGetters("queue", ["getQueue", "getCurrentSong", "getCurrentIndex"]),
   },
   components: { IconPlay, BaseSongItem, BaseTooltip },
 });

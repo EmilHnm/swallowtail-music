@@ -166,131 +166,6 @@ export default defineComponent({
     loadPlaylist() {
       this.getAccountPlaylist(this.token);
     },
-    playPlaylist(id: string) {
-      this.isLoading = true;
-      this.playQueuePlaylist(id).then(() => (this.isLoading = false));
-    },
-    addPlaylistToQueue(id: string) {
-      this.isLoading = true;
-      this.getPlaylistSongs({ playlist_id: id, token: this.token })
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.songList) {
-            const newSongList = res.songList;
-            this.audioList = [...this.audioList, newSongList];
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    playSongInPlaylist(array: string[]) {
-      this.isLoading = true;
-      this.getPlaylistSongs({ playlist_id: array[0], token: this.token })
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.songList) {
-            this.audioList = res.songList;
-            this.audioIndex = this.audioList.findIndex(
-              (song: songData) => song.song_id == array[1]
-            );
-            this.playAudio();
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    // NOTE: Album
-    playAlbum(id: string) {
-      this.isLoading = true;
-      this.getAlbumSongs({ album_id: id, userToken: this.token })
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.status === "success") {
-            this.audioList = res.songs;
-            this.audioIndex = 0;
-            this.playAudio();
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    addAlbumToQueue(id: string) {
-      this.isLoading = true;
-      this.getAlbumSongs({ album_id: id, userToken: this.token })
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          if (res.status === "success") {
-            const newSongList = res.songs;
-            this.audioList = [...this.audioList, ...newSongList].filter(
-              (song: songData, index: number, self: songData[]) =>
-                index === self.findIndex((t) => t.song_id === song.song_id)
-            );
-            if (this.isOnShuffle)
-              this.shuffledList = [...this.shuffledList, ...newSongList].filter(
-                (song: songData, index: number, self: songData[]) =>
-                  index === self.findIndex((t) => t.song_id === song.song_id)
-              );
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    playSongInAlbum(array: string[]) {
-      this.isLoading = true;
-      this.getAlbumSongs({ album_id: array[0], userToken: this.token })
-        .then((res) => res.json())
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.status === "success") {
-            this.audioList = res.songs;
-            this.audioList.forEach((key, index) => {
-              if (key.song_id === array[1]) {
-                this.audioIndex = index;
-              }
-            });
-            this.playAudio();
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
     //NOTE : Artist
     ...mapActions("artist", ["getArtistTopSongById"]),
     playArtistSong(id: string) {
@@ -687,12 +562,6 @@ export default defineComponent({
     <main>
       <router-view
         @updatePlaylist="loadPlaylist"
-        @playPlaylist="playPlaylist"
-        @playSongInPlaylist="playSongInPlaylist"
-        @addPlaylistToQueue="addPlaylistToQueue"
-        @playAlbum="playAlbum"
-        @addAlbumToQueue="addAlbumToQueue"
-        @playSongInAlbum="playSongInAlbum"
         @playArtistSong="playArtistSong"
         @playSongOfArtist="playSongOfArtist"
         @addArtistSongToQueue="addArtistSongToQueue"
@@ -708,18 +577,12 @@ export default defineComponent({
       </router-view>
     </main>
 
-    <!--    <HomeViewRightSideBar-->
-    <!--      v-if="audioList.length > 0"-->
-    <!--      :isActive="isRightSideBarActive"-->
-    <!--      :playlist="audioList"-->
-    <!--      :playingAudio="playingAudio"-->
-    <!--      :audioIndex="audioIndex"-->
-    <!--      :shuffle="isOnShuffle"-->
-    <!--      :shuffledPlaylist="shuffledList"-->
-    <!--      @onDrop="onDrop"-->
-    <!--      @setPlaySong="setPlaySong"-->
-    <!--      @deleteFromQueue="deleteFromQueue"-->
-    <!--    />-->
+    <HomeViewRightSideBar
+          v-if="getQueue.length > 0"
+          :isActive="isRightSideBarActive"
+          @onDrop="onDrop"
+          @deleteFromQueue="deleteFromQueue"
+        />
     <HomeUploadBox :isPlaying="!!getCurrentSong"></HomeUploadBox>
   </div>
   <HomeViewPlayer

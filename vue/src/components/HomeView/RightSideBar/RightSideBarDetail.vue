@@ -133,11 +133,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
-import type { album } from "@/model/albumModel";
-import type { artist } from "@/model/artistModel";
-import type { like } from "@/model/likeModel";
-import type { song } from "@/model/songModel";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { environment } from "@/environment/environment";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
 import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
@@ -145,36 +141,11 @@ import { ImageColor } from "@/mixins/ImageColor";
 import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
 import BaseListItem from "@/components/UI/BaseListItem.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
-type songData = song & {
-  album: album;
-  artist: artist[];
-  like: like[];
-};
 export default defineComponent({
   props: {
     isActive: {
       type: Boolean,
       default: false,
-    },
-    playlist: {
-      type: Array as () => songData[],
-      required: true,
-    },
-    shuffledPlaylist: {
-      type: Array as () => songData[],
-      required: true,
-    },
-    playingAudio: {
-      type: Object as () => songData,
-      required: true,
-    },
-    audioIndex: {
-      type: Number,
-      required: true,
-    },
-    shuffle: {
-      type: Boolean,
-      required: true,
     },
   },
   data() {
@@ -197,6 +168,7 @@ export default defineComponent({
   methods: {
     ...mapActions("song", ["getSongLyrics", "likeSong", "likedSong"]),
     ...mapActions("playlist", ["addSongToPlaylist"]),
+    ...mapMutations("queue", ["setCurrentSongLike"]),
     songChanged() {
       this.lyrics_loading = true;
       this.getSongLyrics({
@@ -246,18 +218,25 @@ export default defineComponent({
             })
           );
           if (res.liked) {
-            this.playingAudio.like = [
-              {
-                id: 0,
-                created_at: "",
-                updated_at: "",
-                user_id: this.user.user_id,
-                song_id: this.playingAudio.song_id,
-              },
-            ];
+            this.setCurrentSongLike({
+              data: [
+                {
+                  id: 0,
+                  created_at: "",
+                  updated_at: "",
+                  user_id: this.user.user_id,
+                  song_id: this.playingAudio.song_id,
+                },
+              ],
+              id: this.playingAudio.song_id,
+            });
           } else {
-            this.playingAudio.like = [];
+            this.setCurrentSongLike({
+              data: [],
+              id: this.playingAudio.song_id,
+            });
           }
+          console.log(res);
           this.menu.isLikeLoading = false;
         });
     },
@@ -306,7 +285,11 @@ export default defineComponent({
       token: "auth/userToken",
       user: "auth/userData",
       playlists: "playlist/getPlaylists",
+      getCurrentSong: "queue/getCurrentSong",
     }),
+    playingAudio() {
+      return this.getCurrentSong;
+    },
   },
   mounted() {
     this.imgCover = this.$refs.cover as HTMLImageElement;
