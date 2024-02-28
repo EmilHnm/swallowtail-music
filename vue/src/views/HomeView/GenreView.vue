@@ -29,7 +29,6 @@
             :key="song.id"
             :data="song"
             @selectSong="playSong(song.song_id)"
-            @addToQueue="addToQueue(song)"
           >
           </BaseSongItem>
         </div>
@@ -77,7 +76,7 @@
               :img="`${environment.album_cover}/${album.image_path}`"
               :type="'album'"
               :listens="+album.song_sum_listens"
-              @playAlbum="playAlbum"
+              @playAlbum="onPlayAlbum"
             />
           </swiper-slide>
         </swiper>
@@ -103,7 +102,7 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 
 import type { genre } from "@/model/genreModel";
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import globalEmitListener from "@/shared/constants/globalEmitListener";
@@ -140,18 +139,28 @@ export default defineComponent({
       getTopSongs: "genre/getTopSongs",
       getTopArtists: "genre/getTopArtists",
       getTopAlbums: "genre/getTopAlbums",
+      playAlbum: "queue/playAlbum",
+      playArtist: "queue/playArtist",
     }),
+    ...mapMutations("queue", [
+      "clearQueue",
+      "addSong",
+      "setQueue",
+      "setCurrentIndex",
+      "setPlaying",
+    ]),
     playArtistSong(artist_id: string) {
-      this.$emit("playArtistSong", artist_id);
+      this.playArtist(artist_id).then();
     },
     playSong(song_id: string) {
-      this.$emit("playSong", song_id);
+      this.setQueue([...this.topSongs]);
+      this.setCurrentIndex(
+        this.topSongs.findIndex((s) => s.song_id === song_id)
+      );
+      this.setPlaying(true);
     },
-    addToQueue(song: any) {
-      this.$emit("addToQueue", song);
-    },
-    playAlbum(album_id: string) {
-      this.$emit("playAlbum", album_id);
+    onPlayAlbum(album_id: string) {
+      this.playAlbum(album_id).then();
     },
   },
   mounted() {
