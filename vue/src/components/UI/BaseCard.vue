@@ -23,7 +23,7 @@ export default defineComponent({});
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 40px 30px;
+  margin: 15px 15px;
   transition: 0.5s;
   max-width: 200px;
   &::before {
@@ -57,7 +57,6 @@ export default defineComponent({});
     translate: -50% -50%;
     transition: 0.5s;
     filter: blur(30px);
-    transition: 0.5s;
     background: linear-gradient(
       315deg,
       var(--color-primary),
@@ -74,7 +73,7 @@ export default defineComponent({});
     position: relative;
     left: 0;
     background: var(--background-glass-color-primary);
-    box-shadow: 0px 0px 20px 0px #000;
+    box-shadow: 0 0 10px 0 #000;
     border-radius: 8px;
     backdrop-filter: blur(10px);
     z-index: 1;
