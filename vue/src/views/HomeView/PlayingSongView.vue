@@ -1,6 +1,6 @@
 <template>
   <div class="playingSong-container" ref="container">
-    <div class="information" :class="{ mobile: mobile }" v-if="playingAudio">
+    <div class="information" v-if="playingAudio">
       <BaseCircleProgress
         :completed-steps="progress"
         :total-steps="playingAudio.file.duration"
@@ -28,13 +28,17 @@
           {{ playingAudio.title }}
         </div>
         <div class="information__detail--artist">
-          <span
+          <router-link
             v-for="(artist, index) in playingAudio.artist"
             :key="artist.artist_id"
+            :to="{
+              name: 'artistPage',
+              params: { id: artist.artist_id },
+            }"
             >{{ artist.name
             }}<span v-if="index != playingAudio.artist.length - 1"
               >,
-            </span></span
+            </span></router-link
           >
         </div>
         <div class="information__detail--duration">
@@ -55,7 +59,7 @@
       </div>
     </div>
     <h3 v-else>No Audio Playing</h3>
-    <div class="visualizer" :class="{ mobile: mobile }">
+    <div class="visualizer" >
       <div
         v-for="index in 100"
         :key="index"
@@ -76,6 +80,7 @@ import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
 import type { song } from "@/model/songModel";
 import globalEmitListener from "@/shared/constants/globalEmitListener";
+import {mapGetters} from "vuex";
 type songData = song & {
   album: album;
   artist: artist[];
@@ -96,24 +101,27 @@ export default defineComponent({
   data() {
     return {
       environment: environment,
-      observer: null as ResizeObserver | null,
-      mobile: true,
     };
   },
-  inject: ["playingAudio", "progress", "isPlaying", "audio", "frequencyData"],
+  inject: ["audio", "frequencyData"],
+  computed: {
+    ...mapGetters("queue", [
+      "getPlaying",
+      "getCurrentSong",
+      "getCurrentProgress",
+    ]),
+    playingAudio(): songData {
+      return this.getCurrentSong;
+    },
+    isPlaying(): boolean {
+      return this.getPlaying;
+    },
+    progress(): number {
+      return this.getCurrentProgress;
+    },
+  },
   components: { BaseCircleProgress },
   mounted() {
-    const container: HTMLElement = this.$refs.container as HTMLElement;
-    this.observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        if (entry.contentRect.width < 600) {
-          this.mobile = true;
-        } else {
-          this.mobile = false;
-        }
-      }
-    });
-    if (container) this.observer.observe(container);
     useMeta({
       title: `Now Playing - ${this.playingAudio?.title ?? "No Song Playing"}`,
       meta: [
@@ -128,13 +136,11 @@ export default defineComponent({
       ],
     });
   },
-  beforeUnmount() {
-    if (this.observer) this.observer.disconnect();
-  },
 });
 </script>
 
 <style lang="scss" scoped>
+$tablet-width: 768px;
 .playingSong-container {
   width: 100%;
   height: 100%;
@@ -153,6 +159,8 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     padding-top: 20px;
+    max-width: 900px;
+    margin: auto;
     &__detail {
       display: flex;
       flex-direction: column;
@@ -167,9 +175,13 @@ export default defineComponent({
         font-weight: 600;
         color: var(--text-primary);
       }
-      &--artist {
+      &--artist a {
         font-size: 18px;
         color: var(--text-primary);
+        text-decoration: none;
+        &:hover {
+          color: var(--color-primary);
+        }
       }
       &--uploader {
         font-size: 14px;
@@ -219,7 +231,7 @@ export default defineComponent({
         z-index: 11;
       }
     }
-    &.mobile {
+    @container main (max-width: #{$tablet-width}) {
       flex-direction: column;
       .information__detail {
         padding-top: 20px;
@@ -235,8 +247,10 @@ export default defineComponent({
     justify-content: space-around;
     position: absolute;
     bottom: 0;
-    &.mobile {
-      filter: blur(1px);
+    @container main and (max-width: 600px) {
+      & {
+        filter: blur(1px);
+      }
     }
     .visualizer__col {
       width: 0.714%;

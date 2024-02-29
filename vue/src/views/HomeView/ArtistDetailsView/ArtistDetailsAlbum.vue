@@ -47,7 +47,7 @@ type albumData = album & {
 };
 
 type groupedAlbum = {
-  [key: number]: albumData[];
+  [key: string]: albumData[];
 };
 
 export default defineComponent({
@@ -62,7 +62,7 @@ export default defineComponent({
       isMenuOpen: false,
       albums: {} as groupedAlbum,
       isLoading: true,
-      activeYear: 0,
+      activeYear: 0 as number,
     };
   },
   methods: {

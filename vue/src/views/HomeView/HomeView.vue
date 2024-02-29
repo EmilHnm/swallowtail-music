@@ -348,10 +348,7 @@ export default defineComponent({
   <div class="main-body">
     <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
     <main>
-      <router-view
-        @updatePlaylist="loadPlaylist"
-        v-slot="{ Component }"
-      >
+      <router-view @updatePlaylist="loadPlaylist" v-slot="{ Component }">
         <keep-alive include="mainPage">
           <component :is="Component" />
         </keep-alive>

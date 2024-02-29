@@ -141,6 +141,7 @@ import { ImageColor } from "@/mixins/ImageColor";
 import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
 import BaseListItem from "@/components/UI/BaseListItem.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import type { songData } from "@/model/songModel";
 export default defineComponent({
   props: {
     isActive: {
@@ -287,7 +288,7 @@ export default defineComponent({
       playlists: "playlist/getPlaylists",
       getCurrentSong: "queue/getCurrentSong",
     }),
-    playingAudio() {
+    playingAudio(): songData {
       return this.getCurrentSong;
     },
   },
