@@ -91,21 +91,16 @@ export default defineComponent({
       this.isRightSideBarActive = value;
     },
     // NOTE: Song event control
-    playAudio() {
-      this.audio.play();
-      this.setPlaying(true);
-    },
-    pauseAudio() {
-      this.audio.pause();
-      this.setPlaying(false);
-    },
     onSetProgress(progress: number) {
       this.audio.currentTime =
         (progress * this.playingSong.file.duration) / 100;
     },
     canplay() {
       this.isAudioWaitting = false;
-      if (this.isPlaying) this.playAudio();
+      if (this.isPlaying)
+        this.audio?.play().catch((error) => {
+          return;
+        });
     },
     waiting() {
       this.isAudioWaitting = true;
@@ -113,7 +108,10 @@ export default defineComponent({
     },
     loadeddata() {
       this.isAudioWaitting = false;
-      if (this.isPlaying) this.playAudio();
+      if (this.isPlaying)
+        this.audio?.play().catch((error) => {
+          return;
+        });
     },
     // NOTE:visualizer
     renderFrame() {
@@ -138,10 +136,12 @@ export default defineComponent({
     volume() {
       this.audio.volume = this.volume / 100;
     },
-    // visualizer
     isPlaying() {
       if (this.isPlaying) {
-        this.audio?.play();
+        this.audio?.play().catch((error) => {
+          return;
+        });
+        // visualizer
         if (this.timeOut) this.timeOut.resume();
         if (this.ctx === null) {
           this.ctx = new AudioContext();
@@ -221,7 +221,10 @@ export default defineComponent({
               const objectUrl = URL.createObjectURL(blob);
               this.audio.src = objectUrl;
               this.audio.load();
-              if (this.isPlaying) this.playAudio();
+              if (this.isPlaying)
+                this.audio.play().catch((error) => {
+                  return;
+                });
             })
             .catch((err) => {
               if (err instanceof DOMException && err.name === "AbortError") {
@@ -306,23 +309,15 @@ export default defineComponent({
       if (e.key === " " && this.playingSong) {
         e.preventDefault();
         if (this.isPlaying) {
-          this.pauseAudio();
+          this.setPlaying(false);
           return;
         }
-        this.playAudio();
+        this.setPlaying(true);
       }
     });
 
     document.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-    });
-
-    document.addEventListener("play", () => {
-      this.playAudio();
-    });
-
-    document.addEventListener("pause", () => {
-      this.pauseAudio();
     });
   },
   unmounted() {
@@ -374,8 +369,6 @@ export default defineComponent({
     :isPlaying="isPlaying"
     :isWating="isAudioWaitting"
     @toggleRightSideBar="toggleRightSideBar"
-    @playSong="playAudio"
-    @pauseSong="pauseAudio"
     @onSetProgress="onSetProgress"
   />
 </template>
