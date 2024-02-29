@@ -309,7 +309,7 @@ $tablet-width: 768px;
     margin-bottom: 30px;
     background-color: var(--background-glass-color-primary);
     width: 100%;
-    overflow: hidden;
+    box-sizing: border-box;
     @container album-container (max-width: #{$mobile-width}) {
       & {
         flex-direction: column;
