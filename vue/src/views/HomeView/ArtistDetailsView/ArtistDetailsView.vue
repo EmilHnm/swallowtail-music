@@ -77,18 +77,13 @@
     </div>
   </div>
   <div class="artist-details">
-    <RouterView
-      @playAlbum="playAlbum"
-      @addAlbumToQueue="addAlbumToQueue"
-      @playSongInAlbum="playSongInAlbum"
-      @playSongOfArtist="playSongOfArtist"
-    />
+    <RouterView />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import type { artist } from "@/model/artistModel";
 import { environment } from "@/environment/environment";
 import BaseListItem from "@/components/UI/BaseListItem.vue";
@@ -97,6 +92,7 @@ import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import globalEmitListener from "@/shared/constants/globalEmitListener";
+import { songData } from "@/model/songModel";
 
 type artistData = artist & {
   total_album: number;
@@ -114,30 +110,37 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions("artist", ["getArtist"]),
+    ...mapActions("artist", ["getArtist", "getArtistTopSongById"]),
+    ...mapActions("queue", ["playArtist"]),
+    ...mapMutations("queue", ["addSongs"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
     },
     toggleTopSong() {
       this.isSongListOpen = !this.isSongListOpen;
     },
-    playAlbum(id: string) {
-      this.$emit("playAlbum", id);
-    },
-    addAlbumToQueue(id: string) {
-      this.$emit("addAlbumToQueue", id);
-    },
-    playSongInAlbum(id: string) {
-      this.$emit("playSongInAlbum", id);
-    },
     playArtistSong() {
-      this.$emit("playArtistSong", this.artist.artist_id);
-    },
-    playSongOfArtist(song_id: string) {
-      this.$emit("playSongOfArtist", [this.artist.artist_id, song_id]);
+      this.isLoading = true;
+      this.playArtist(this.artist.artist_id)
+        .then(() => (this.isLoading = false))
+        .catch(() => (this.isLoading = false));
     },
     addArtistSongToQueue() {
-      this.$emit("addArtistSongToQueue", this.artist.artist_id);
+      this.isMenuOpen = false;
+      this.isLoading = true;
+      this.getArtistTopSongById({
+        token: this.token,
+        artist_id: this.artist.artist_id,
+      })
+        .then((res: any) => {
+          return res.json();
+        })
+        .then((res) => {
+          this.isLoading = false;
+          if (res.status === "success") {
+            this.addSongs(res.songs);
+          }
+        });
     },
   },
   computed: {

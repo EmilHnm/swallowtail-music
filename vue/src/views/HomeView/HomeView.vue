@@ -125,96 +125,6 @@ export default defineComponent({
     loadPlaylist() {
       this.getAccountPlaylist(this.token);
     },
-    //NOTE : Artist
-    ...mapActions("artist", ["getArtistTopSongById"]),
-    playArtistSong(id: string) {
-      this.isLoading = true;
-      this.getArtistTopSongById({
-        token: this.token,
-        artist_id: id,
-      })
-        .then((res: any) => {
-          return res.json();
-        })
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.status === "success") {
-            this.audioList = res.songs;
-            this.audioIndex = 0;
-            this.playAudio();
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    addArtistSongToQueue(id: string) {
-      this.isLoading = true;
-      this.getArtistTopSongById({
-        token: this.token,
-        artist_id: id,
-      })
-        .then((res: any) => {
-          return res.json();
-        })
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.status === "success") {
-            const newSongList: songData[] = res.songs;
-            this.audioList = [...this.audioList, ...newSongList].filter(
-              (song: songData, index: number, self: songData[]) =>
-                index === self.findIndex((t) => t.song_id === song.song_id)
-            );
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    playSongOfArtist(array: string[]) {
-      this.isLoading = true;
-      this.getArtistTopSongById({
-        token: this.token,
-        artist_id: array[0],
-      })
-        .then((res: any) => {
-          return res.json();
-        })
-        .then((res) => {
-          this.isLoading = false;
-          this.isOnShuffle = false;
-          this.shuffledList = [];
-          if (res.status === "success") {
-            this.audioList = res.songs;
-            this.audioList.forEach((key, index) => {
-              if (key.song_id === array[1]) {
-                this.audioIndex = index;
-              }
-            });
-            this.playAudio();
-          } else {
-            this.dialogWaring = {
-              title: "Error",
-              mode: "warning",
-              content: res.message,
-              show: true,
-            };
-          }
-        });
-    },
-    //NOTE: Liked Song
     ...mapActions("song", ["increaseSongListens"]),
     // NOTE: dialog
     closeDialog() {
@@ -440,9 +350,6 @@ export default defineComponent({
     <main>
       <router-view
         @updatePlaylist="loadPlaylist"
-        @playArtistSong="playArtistSong"
-        @playSongOfArtist="playSongOfArtist"
-        @addArtistSongToQueue="addArtistSongToQueue"
         v-slot="{ Component }"
       >
         <keep-alive include="mainPage">

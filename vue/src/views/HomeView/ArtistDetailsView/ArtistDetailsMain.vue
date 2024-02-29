@@ -1,4 +1,10 @@
 <template>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseDialog>
   <div class="main" ref="main">
     <div class="popular">
       <h2>Popular</h2>
@@ -34,7 +40,7 @@
             :songCount="albums[index - 1].song_count"
             :title="albums[index - 1].name"
             :img="`${environment.album_cover}/${albums[index - 1].image_path}`"
-            @playAlbum="playAlbum"
+            @playAlbum="onPlayAlbum"
             type="album"
           />
         </swiper-slide>
@@ -60,7 +66,7 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { defineComponent } from "vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
-import { mapActions, mapGetters } from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import { environment } from "@/environment/environment";
 import BaseCircleLoadVue from "@/components/UI/BaseCircleLoad.vue";
 import BaseSkeletonsLoadingCard from "@/components/UI/BaseSkeletonsLoadingCard.vue";
@@ -68,6 +74,8 @@ import type { album } from "@/model/albumModel";
 import type { song } from "@/model/songModel";
 import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
 
 type songData = song & {
   album: album;
@@ -88,10 +96,18 @@ export default defineComponent({
       albums: [] as albumData[],
       itemPerSlide: 6,
       containerWidthObserver: null as ResizeObserver | null,
+      isLoading: false,
     };
   },
   methods: {
     ...mapActions("artist", ["getArtistTopSongById", "getArtistAlbumById"]),
+    ...mapMutations("queue", [
+      "clearQueue",
+      "setQueue",
+      "setCurrentIndex",
+      "setPlaying",
+    ]),
+    ...mapActions("queue", ["playAlbum"]),
     toggleTopSong() {
       this.isSongListOpen = !this.isSongListOpen;
     },
@@ -99,10 +115,17 @@ export default defineComponent({
       this.$router.push({ name: "artistAlbumsPage" });
     },
     playSongOfArtist(song_id: string) {
-      this.$emit("playSongOfArtist", song_id);
+      this.clearQueue();
+      this.setQueue([...this.songs]);
+      const index = this.songs.findIndex((song) => song.song_id === song_id);
+      this.setCurrentIndex(index);
+      this.setPlaying(true);
     },
-    playAlbum(album_id: string) {
-      this.$emit("playAlbum", album_id);
+    onPlayAlbum(album_id: string) {
+      this.isLoading = true;
+      this.playAlbum(album_id)
+        .then(() => (this.isLoading = false))
+        .catch(() => (this.isLoading = false));
     },
   },
   mounted() {
@@ -115,6 +138,7 @@ export default defineComponent({
     if (container) this.containerWidthObserver.observe(container);
   },
   components: {
+    BaseDialog, BaseLineLoad,
     BaseCardAlbum,
     BaseSongItem,
     BaseCircleLoadVue,

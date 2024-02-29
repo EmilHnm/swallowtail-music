@@ -11,24 +11,24 @@
         <div
           v-for="year in Object.keys(albums)"
           class="artist-album__year--item"
-          @click="scollToYear(year)"
+          :class="{ active: activeYear === +year }"
+          @click="setActiveYear(year)"
         >
           {{ year }}
         </div>
       </div>
     </div>
     <div class="artist-album__list">
-      <div v-for="(year, key) in albums" class="artist-album__list--item">
-        <h2 class="year-title" :id="`${key}`">{{ key }}</h2>
-        <div v-for="album in year" :key="album.album_id" :id="album.album_id">
-          <BaseAlbum
-            :data="album"
-            @playAlbum="playAlbum"
-            @addAlbumToQueue="addAlbumToQueue"
-            @playSongInAlbum="playSongInAlbum"
-          />
+      <template v-if="activeYear !== 0">
+        <h3>{{ activeYear }}</h3>
+        <div
+          v-for="album in albums[` ${activeYear}`]"
+          :key="album.album_id"
+          class="artist-album__list--item"
+        >
+          <BaseAlbum :data="album" />
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -62,24 +62,13 @@ export default defineComponent({
       isMenuOpen: false,
       albums: {} as groupedAlbum,
       isLoading: true,
+      activeYear: 0,
     };
   },
   methods: {
     ...mapActions("artist", ["getArtistAlbumById"]),
-    playAlbum(id: string) {
-      this.$emit("playAlbum", id);
-    },
-    addAlbumToQueue(id: string) {
-      this.$emit("addAlbumToQueue", id);
-    },
-    playSongInAlbum(album_id: string, song_id: string) {
-      this.$emit("playSongInAlbum", [album_id, song_id]);
-    },
-    scollToYear(year: string) {
-      const element = document.getElementById(year);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
+    setActiveYear(year: string) {
+      this.activeYear = +year;
     },
   },
   computed: {
@@ -105,6 +94,7 @@ export default defineComponent({
             ),
             (a, b) => b - a
           );
+          this.activeYear = +Object.keys(this.albums)[0];
         }
       });
   },
@@ -118,24 +108,34 @@ $mobile-width: 480px;
   display: flex;
   flex-direction: row;
   width: 100%;
+  @container main (max-width: #{$mobile-width}) {
+    & {
+      flex-direction: column;
+    }
+  }
   &__year {
     padding: 20px;
     position: sticky;
     top: 0;
     right: 0;
+    box-sizing: border-box;
     @container main (max-width: #{$mobile-width}) {
-      & {
-        display: none;
-      }
+      display: flex;
+      width: 100%;
+      overflow: scroll;
     }
     &--item {
       border-right: 1px solid var(--text-primary-color);
       color: var(--text-primary-color);
-      padding: 0px 10px;
+      padding: 0 10px;
       font-size: 1.2rem;
       font-weight: 600;
       cursor: pointer;
       &:hover {
+        color: var(--color-primary);
+        border-right: 1px solid var(--color-primary);
+      }
+      &.active {
         color: var(--color-primary);
         border-right: 1px solid var(--color-primary);
       }
@@ -145,24 +145,26 @@ $mobile-width: 480px;
     flex: 1;
     width: 80%;
     padding: 0 20px;
-    &--item {
-      h2 {
-        margin-top: 0;
-        margin-bottom: 0;
-        color: var(--text-primary-color);
-        font-size: 1.6rem;
-        font-weight: 600;
-        background: var(--background-blur-color-primary);
-        display: block;
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-align: center;
-        position: sticky;
-        top: 5px;
-      }
-      & .album-container {
-        margin: auto !important;
-      }
+    box-sizing: border-box;
+    @container main (max-width: #{$mobile-width}) {
+      width: 100%;
+    }
+    h3 {
+      margin-top: 0;
+      margin-bottom: 0;
+      color: var(--text-primary-color);
+      font-size: 1.6rem;
+      font-weight: 600;
+      background: var(--background-blur-color-primary);
+      display: block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-align: center;
+      position: sticky;
+      top: 5px;
+    }
+    & .album-container {
+      margin: auto !important;
     }
   }
 }
