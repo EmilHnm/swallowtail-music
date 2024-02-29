@@ -20,8 +20,18 @@
             "
             :alt="data.title"
             :title="data.title"
-            srcset=""
+            :srcset="
+              data.album
+                ? `${environment.album_cover}/${data.album.image_path}`
+                : `${environment.default}/no_image.jpg`
+            "
           />
+          <div
+            class="playing"
+            v-if="getCurrentSong && data.song_id === getCurrentSong.song_id"
+          >
+            <IconAnalyzerBars />
+          </div>
         </div>
         <div class="song-item__left--title">
           <BaseTooltip :tooltipText="data.title" :position="'bottom'">
@@ -35,11 +45,11 @@
               <router-link
                 :to="{
                   name: 'artistPage',
-                  params: { id: artistitem.artist_id },
+                  params: { id: artist.artist_id },
                 }"
-                v-for="(artistitem, index) in data.artist"
-                :key="artistitem.artist_id"
-                >{{ artistitem.name
+                v-for="(artist, index) in data.artist"
+                :key="artist.artist_id"
+                >{{ artist.name
                 }}<span v-if="index !== data.artist.length - 1">,</span>
               </router-link></BaseTooltip
             >
@@ -103,15 +113,6 @@
         </div>
         <div class="menu__song--title">
           <span class="title">{{ data.title }}</span>
-          <span class="artist">
-            <router-link
-              :to="{ name: 'artistPage', params: { id: artistitem.artist_id } }"
-              v-for="(artistitem, index) in data.artist"
-              :key="artistitem.artist_id"
-              >{{ artistitem.name
-              }}<span v-if="index !== data.artist.length - 1">,</span>
-            </router-link>
-          </span>
         </div>
         <div class="menu__song--album">
           <span v-if="data.album">{{ data.album.name }}</span>
@@ -142,13 +143,18 @@
             >View Artist</BaseListItem
           >
         </div>
-        <div class="" v-if="menuMode === 'artist'">
+        <div
+          style="display: flex; flex-direction: column; gap: 10px"
+          v-if="menuMode === 'artist'"
+        >
           <router-link
-            :to="{ name: 'artistPage', params: { id: artistitem.artist_id } }"
-            v-for="artistitem in data.artist"
-            :key="artistitem.artist_id"
+            :to="{ name: 'artistPage', params: { id: artist.artist_id } }"
+            v-for="artist in data.artist"
+            :key="artist.artist_id"
           >
-            <BaseListItem>{{ artistitem.name }}</BaseListItem>
+            <BaseListItem>
+              {{ artist.name }}
+            </BaseListItem>
           </router-link>
         </div>
         <div class="" v-if="menuMode === 'playlist'">
@@ -169,6 +175,7 @@ import { defineComponent } from "vue";
 import { environment } from "@/environment/environment";
 import BaseListItem from "./BaseListItem.vue";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
+import IconAnalyzerBars from "@/components/icons/IconAnalyzerBars.vue";
 import BaseTooltip from "./BaseTooltip.vue";
 import BaseLineLoad from "./BaseLineLoad.vue";
 import { mapActions, mapGetters, mapMutations } from "vuex";
@@ -321,6 +328,7 @@ export default defineComponent({
     ...mapGetters({
       token: "auth/userToken",
       playlists: "playlist/getPlaylists",
+      getCurrentSong: "queue/getCurrentSong",
     }),
   },
   components: {
@@ -329,6 +337,7 @@ export default defineComponent({
     BaseLineLoad,
     BaseDialog,
     BaseTooltip,
+    IconAnalyzerBars,
   },
 });
 </script>
@@ -494,10 +503,27 @@ $tablet-width: 768px;
       height: 50px;
       flex: 0 0 auto;
       margin-right: 10px;
+      position: relative;
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+      }
+      .playing {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--background-blur-color-primary);
+        z-index: 10;
+        svg {
+          width: 30px;
+          height: 30px;
+        }
       }
     }
     &--title {
