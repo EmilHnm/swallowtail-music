@@ -30,7 +30,7 @@
     </div>
     <div class="info">
       <div class="info__type">Artist</div>
-      <h1 class="info__title" :title="artist.name">{{ artist.name }}</h1>
+      <h2 class="info__title" :title="artist.name">{{ artist.name }}</h2>
       <div class="info__other">
         <div
           class="info__other--monthlyListeners"
