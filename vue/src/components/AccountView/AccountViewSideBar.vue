@@ -59,7 +59,6 @@ import IconAvatarProfile from "@/components/icons/IconAvatarProfile.vue";
 import IconSecurity from "@/components/icons/IconSecurity.vue";
 import IconDisk from "@/components/icons/IconDisk.vue";
 import { mapGetters } from "vuex";
-import IconMenuBlock from "@/components/icons/IconMenuBlock.vue";
 import IconRequest from "@/components/icons/IconRequest.vue";
 export default defineComponent({
   props: {
@@ -86,7 +85,6 @@ export default defineComponent({
     IconAvatarProfile,
     IconSecurity,
     IconDisk,
-    IconMenuBlock,
     IconRequest,
   },
 });
