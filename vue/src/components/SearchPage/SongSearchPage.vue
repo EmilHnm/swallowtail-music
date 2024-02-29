@@ -28,7 +28,6 @@ declare module "@vue/runtime-core" {
 }
 
 export default defineComponent({
-  date() {},
   methods: {
     ...mapMutations("queue", [
       "setCurrentIndex",

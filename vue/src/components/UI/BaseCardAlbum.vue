@@ -1,13 +1,13 @@
 <template>
   <BaseCard>
-    <div class="album">
+    <div class="album" @click="redirect">
       <div class="album__image">
         <img v-lazyload class="img" :data-url="img" :alt="title" />
         <div class="album__image--play">
-          <IconPlay @click="play" />
+          <IconPlay @click.stop.prevent="play" />
         </div>
       </div>
-      <div class="album__title" @click="redirect">
+      <div class="album__title">
         <BaseTooltipVue :position="'bottom'" :tooltip-text="title">
           {{ title }}
         </BaseTooltipVue>

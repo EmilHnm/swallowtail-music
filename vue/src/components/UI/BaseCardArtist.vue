@@ -1,6 +1,6 @@
 <template>
   <BaseCard>
-    <div class="artist">
+    <div class="artist" @click="redirectToArtist">
       <div class="artist__image">
         <img
           v-lazyload
@@ -13,10 +13,10 @@
           :alt="data.name"
         />
         <div class="artist__image--play">
-          <IconPlay @click="playArtistSong" />
+          <IconPlay @click.stop.prevent="playArtistSong" />
         </div>
       </div>
-      <div class="artist__name" @click="redirectToArtist">
+      <div class="artist__name" >
         <BaseTooltipVue :position="'bottom'" :tooltip-text="data.name">
           {{ data.name }}
         </BaseTooltipVue>

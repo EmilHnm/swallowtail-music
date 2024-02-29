@@ -192,6 +192,13 @@ export default defineComponent({
           this.paginate.currentPage = data.requests.current_page - 1;
           this.paginate.totalPages = data.requests.last_page;
           this.isLoading = false;
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          } else {
+            this.isLoading = false;
+          }
         });
     },
     onCancelRequest(id: number) {

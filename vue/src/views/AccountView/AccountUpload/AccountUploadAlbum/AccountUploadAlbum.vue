@@ -198,6 +198,9 @@ export default defineComponent({
           }
         })
         .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          }
           this.dialogWaring.mode = "warning";
           this.dialogWaring.content = err.message;
           this.dialogWaring.title = "Warning";

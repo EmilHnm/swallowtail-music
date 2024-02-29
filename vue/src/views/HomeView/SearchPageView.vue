@@ -216,6 +216,11 @@ export default defineComponent({
           if (res.status === "success") {
             this.songResult = res.songs;
           }
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          }
         });
     },
     onSearchAlbums(query: string) {
@@ -237,6 +242,11 @@ export default defineComponent({
           this.searching.album = false;
           if (res.status === "success") {
             this.albumResult = res.albums;
+          }
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
           }
         });
     },
@@ -260,6 +270,11 @@ export default defineComponent({
           if (res.status === "success") {
             this.artistResult = res.artists;
           }
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          }
         });
     },
     onSearchUser(query: string) {
@@ -281,6 +296,11 @@ export default defineComponent({
           this.searching.user = false;
           if (res.status === "success") {
             this.userResult = res.users;
+          }
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
           }
         });
     },

@@ -281,6 +281,11 @@ export default defineComponent({
           if (res.status === "success") {
             this.addableSongList = res.songs;
           }
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          }
         });
     },
     submitAlbum() {

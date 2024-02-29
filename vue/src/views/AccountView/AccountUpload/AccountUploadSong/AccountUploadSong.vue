@@ -213,7 +213,12 @@ export default defineComponent({
           this.paginate.currentPage = res.songs.current_page - 1;
           this.paginate.totalPages = res.songs.last_page;
           this.isLoading = false;
-        });
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          }
+        });;
     },
     onClickPage(index: number) {
       this.paginate.currentPage = index;

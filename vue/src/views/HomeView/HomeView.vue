@@ -222,6 +222,14 @@ export default defineComponent({
               this.audio.src = objectUrl;
               this.audio.load();
               if (this.isPlaying) this.playAudio();
+            })
+            .catch((err) => {
+              if (err instanceof DOMException && err.name === "AbortError") {
+                return;
+              } else {
+                this.dialogWaring.show = true;
+                this.dialogWaring.content = "Can't load song";
+              }
             });
         }
       },

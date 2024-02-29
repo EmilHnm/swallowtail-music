@@ -231,7 +231,7 @@
     </div>
     <div class="songList__content" v-else>
       <BaseSongItem
-        v-for="song in songFilterResuilt"
+        v-for="song in songFilterResult"
         :data="song"
         :key="song.song_id"
         @addToQueue="addToQueue"
@@ -253,10 +253,10 @@
       </div>
       <div
         class="searchMore__result"
-        v-else-if="Object.keys(songSearchResuilt).length > 0"
+        v-else-if="Object.keys(songSearchResult).length > 0"
       >
         <BaseSongItem
-          v-for="song in songSearchResuilt"
+          v-for="song in songSearchResult"
           :data="song"
           :key="song.song_id"
           :control="false"
@@ -264,7 +264,7 @@
         />
       </div>
       <div class="searchMore__result">
-        <h3 v-if="songSearchResuilt.length === 0 && !isGettingSongSearch">
+        <h3 v-if="songSearchResult.length === 0 && !isGettingSongSearch">
           No result
         </h3>
       </div>
@@ -345,7 +345,7 @@ export default defineComponent({
       filteredSongList: [] as songData[],
       //search part
       searchText: "",
-      songSearchResuilt: [] as songData[],
+      songSearchResult: [] as songData[],
       addbleSongController: null as AbortController | null,
       addableSongSignal: null as AbortSignal | null,
       //Edit part
@@ -455,7 +455,12 @@ export default defineComponent({
         .then((res) => {
           this.isGettingSongSearch = false;
           if (res.status !== "error") {
-            this.songSearchResuilt = res.songs;
+            this.songSearchResult = res.songs;
+          }
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
           }
         });
     },
@@ -647,13 +652,6 @@ export default defineComponent({
     ]),
   },
   mounted() {
-    const songList = this.$refs.songList as HTMLElement;
-    this.observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        this.songListWidth = entry.contentRect.width;
-      }
-    });
-    if (this.observer && songList) this.observer.observe(songList);
     this.setMeta("Playlist");
   },
   created() {
@@ -666,12 +664,12 @@ export default defineComponent({
       user: "auth/userData",
       playlists: "playlist/getPlaylists",
     }),
-    songFilterResuilt() {
+    songFilterResult() {
       if (this.filterText === "") return this.songList;
-      const resuilt = this.songList.filter((song: any) =>
+      const result = this.songList.filter((song: any) =>
         song.title.toLowerCase().includes(this.filterText.toLowerCase())
       );
-      return resuilt;
+      return result;
     },
   },
   watch: {
@@ -693,7 +691,7 @@ export default defineComponent({
         this.loadSearchResult(o);
       } else {
         this.isGettingSongSearch = false;
-        this.songSearchResuilt = [];
+        this.songSearchResult = [];
       }
     },
     "$route.params.id": {

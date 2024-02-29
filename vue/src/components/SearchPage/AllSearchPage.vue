@@ -112,6 +112,7 @@ declare module "@vue/runtime-core" {
 }
 
 export default defineComponent({
+  emits: ["changeSearchPage"],
   data() {
     return {
       environment: environment,

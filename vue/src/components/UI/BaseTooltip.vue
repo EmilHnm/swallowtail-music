@@ -93,7 +93,8 @@ export default defineComponent({
 <style lang="scss">
 .tooltip-container {
   display: block;
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
