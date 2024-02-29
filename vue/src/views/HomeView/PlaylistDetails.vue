@@ -85,7 +85,7 @@
       </template>
     </BaseDialog>
   </teleport>
-  <div class="playlist-header" :class="{ medium: medium, small: small }">
+  <div class="playlist-header">
     <div
       class="header__background"
       :style="[
@@ -95,14 +95,13 @@
               no-repeat center center / cover`,
             }
           : {
-              background: `url(${environment.default}/no_image.jpg) no-repeat center center / cover`,
+              background: `linear-gradient(180deg, var(--color-primary), transparent)`,
             },
       ]"
     ></div>
     <div class="header__image" @click="openEditDetailsDialog">
       <img
-        v-lazyload
-        :data-url="
+        :src="
           playlistDetail.image_path
             ? `${environment.playlist_cover}/${playlistDetail.image_path}`
             : `${environment.default}/no_image.jpg`
@@ -199,22 +198,12 @@
         <div class="songList__header--left--title">Title</div>
       </div>
       <div class="songList__header--right">
-        <div class="songList__header--right--album" :class="{ small: small }">
-          Album
+        <div class="songList__header--right--album">Album</div>
+        <div class="songList__header--right--hears">Added</div>
+        <div class="songList__header--right--duration">
+          <IconClock />
         </div>
-        <div class="songList__header--right--hears" :class="{ medium: medium }">
-          Added
-        </div>
-        <div
-          class="songList__header--right--duration"
-          :class="{ medium: medium, small: small }"
-        >
-          Duration
-        </div>
-        <div
-          class="songList__header--right--control"
-          :class="{ medium: medium, small: small }"
-        ></div>
+        <div class="songList__header--right--control"></div>
       </div>
     </div>
     <div class="songList__content" v-if="isSongLoading">
@@ -241,7 +230,7 @@
   </div>
   <div class="searchMore" ref="searchMore">
     <h3>Let find more song for your playlist</h3>
-    <div class="searchMore__form" :class="{ medium: medium, small: small }">
+    <div class="searchMore__form">
       <button>
         <IconSearch />
       </button>
@@ -273,7 +262,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import {mapActions, mapGetters, mapMutations} from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { environment } from "@/environment/environment";
 import { _function } from "@/mixins";
 import { useMeta } from "vue-meta";
@@ -284,6 +273,7 @@ import type { song } from "@/model/songModel";
 import type { like } from "@/model/likeModel";
 import type { artist } from "@/model/artistModel";
 import IconPlay from "@/components/icons/IconPlay.vue";
+import IconClock from "@/components/icons/IconClock.vue";
 import IconSearch from "@/components/icons/IconSearch.vue";
 import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vue";
 import BaseListItem from "@/components/UI/BaseListItem.vue";
@@ -322,14 +312,11 @@ export default defineComponent({
     IconBallPen,
     BaseLineLoad,
     BaseCircleLoad,
+    IconClock,
   },
   data() {
     return {
       environment: environment,
-      songListWidth: 0,
-      observer: null as ResizeObserver | null,
-      small: false,
-      medium: false,
       songCount: 0,
       totalDuration: "",
       //song list part
@@ -620,6 +607,7 @@ export default defineComponent({
       "setCurrentIndex",
       "setShuffle",
       "clearQueue",
+      "setPlaying",
     ]),
     playPlaylist() {
       // this.isLoading = true;
@@ -627,7 +615,7 @@ export default defineComponent({
       this.addSongs(this.songList);
       this.setCurrentIndex(0);
       this.setShuffle(false);
-      document.dispatchEvent(new CustomEvent("play"));
+      this.setPlaying(true);
     },
     playSongInPlaylist(song_id: string) {
       this.clearQueue();
@@ -635,7 +623,7 @@ export default defineComponent({
       const index = this.songList.findIndex((song) => song.song_id === song_id);
       this.setCurrentIndex(index);
       this.setShuffle(false);
-      document.dispatchEvent(new CustomEvent("play"));
+      this.setPlaying(true);
     },
     addPlaylistToQueue() {
       this.addSongs(this.songList);
@@ -673,18 +661,6 @@ export default defineComponent({
     },
   },
   watch: {
-    songListWidth(o: number) {
-      if (o < 600) {
-        this.small = true;
-        this.medium = true;
-      } else if (o < 700 && o > 600) {
-        this.small = false;
-        this.medium = true;
-      } else {
-        this.small = false;
-        this.medium = false;
-      }
-    },
     searchText(o: string) {
       this.isGettingSongSearch = true;
       if (o !== "") {
@@ -743,6 +719,9 @@ $tablet-width: 768px;
     overflow: hidden;
     flex: 0 0 auto;
     cursor: pointer;
+    @media (max-width: $mobile-width) {
+      display: none;
+    }
     & img {
       width: 100%;
       height: 100%;
@@ -770,10 +749,18 @@ $tablet-width: 768px;
 
     &__title {
       font-size: 32px;
+      @container main (max-width: #{$tablet-width}) {
+        font-size: 28px;
+      }
       color: #fff;
       font-weight: 900;
       cursor: pointer;
       word-break: break-all;
+      line-clamp: 2;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     &__description {
@@ -806,7 +793,13 @@ $tablet-width: 768px;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-
+  @container main (max-width: #{$mobile-width}) {
+    flex-direction: column;
+    align-items: start;
+    justify-content: space-evenly;
+    gap: 10px;
+    height: unset;
+  }
   &__left {
     display: flex;
     height: 100%;
@@ -866,7 +859,7 @@ $tablet-width: 768px;
         border-radius: 10px;
         z-index: 20;
         padding: 10px 0px;
-        background: var(--background-glass-color-primary);
+        background: var(--background-blur-color-primary);
 
         & > * {
           margin: 5px auto;
@@ -881,7 +874,13 @@ $tablet-width: 768px;
     align-items: center;
     justify-content: center;
     width: max-content;
-
+    @container main (max-width: #{$mobile-width}) {
+      flex-direction: column;
+      align-items: start;
+      justify-content: space-evenly;
+      gap: 10px;
+      width: 100%;
+    }
     &--filter {
       display: flex;
       height: 100%;
@@ -889,6 +888,9 @@ $tablet-width: 768px;
       justify-content: center;
       width: max-content;
       margin-right: 10px;
+      @container main (max-width: #{$mobile-width}) {
+        width: 100%;
+      }
 
       & button {
         display: flex;
@@ -927,6 +929,9 @@ $tablet-width: 768px;
         &::placeholder {
           color: var(--text-subdued);
         }
+        @container main (max-width: #{$mobile-width}) {
+          flex: 1;
+        }
       }
     }
 
@@ -960,6 +965,14 @@ $tablet-width: 768px;
           background: var(--background-color-primary);
         }
       }
+
+      @container main (max-width: #{$mobile-width}) {
+        width: 100%;
+        select {
+          width: 100%;
+          margin-right: 0;
+        }
+      }
     }
   }
 }
@@ -975,15 +988,24 @@ $tablet-width: 768px;
     display: flex;
     align-items: center;
     border-bottom: 1px solid var(--text-subdued);
-    padding: 0px 17px;
+    padding: 0 17px;
 
     &--left {
-      width: 70%;
+      width: 40%;
       display: flex;
+      gap: 10px;
+      overflow: hidden;
+      flex: 0 0 auto;
+      @container main  (max-width: #{$mobile-width}) {
+        & {
+          width: 70%;
+        }
+      }
 
       &--img {
         width: 50px;
         flex: 1 0 50px;
+        margin-right: 10px;
       }
 
       &--title {
@@ -996,25 +1018,29 @@ $tablet-width: 768px;
         font-weight: 600;
         white-space: nowrap;
         text-align: center;
-        cursor: pointer;
       }
     }
 
     &--right {
-      width: 100%;
+      width: 60%;
       display: flex;
       justify-content: space-between;
       align-items: center;
       user-select: none;
-
+      @container main  (max-width: #{$mobile-width}) {
+        & {
+          width: 100%;
+        }
+      }
       &--album {
-        width: 60%;
+        width: 50%;
         overflow: hidden;
         text-align: center;
         cursor: pointer;
-
-        &.small {
-          display: none;
+        @container main  (max-width: #{$mobile-width}) {
+          & {
+            display: none;
+          }
         }
       }
 
@@ -1022,23 +1048,27 @@ $tablet-width: 768px;
         width: 20%;
         overflow: hidden;
         text-align: center;
-        cursor: pointer;
-
-        &.medium {
-          display: none;
+        @container main  (max-width: #{$tablet-width}) {
+          & {
+            display: none;
+          }
         }
+
       }
 
       &--duration {
         width: 20%;
         overflow: hidden;
-        text-align: center;
-        cursor: pointer;
-
-        &.medium {
-          width: 20%;
-
-          &.small {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        @container main  (max-width: #{$tablet-width}) {
+          & {
+            width: 20%;
+          }
+        }
+        @container main  (max-width: #{$mobile-width}) {
+          & {
             width: 80%;
           }
         }
@@ -1112,10 +1142,15 @@ $tablet-width: 768px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  @media screen and (max-width: $tablet-width) {
+    flex-direction: column;
+  }
   .edit__image {
     aspect-ratio: 1/1;
     width: 40%;
-    height: 40%;
+    @media screen and (max-width: $tablet-width) {
+      width: 60%;
+    }
     position: relative;
     flex: 0 0 auto;
     border-radius: 10px;
@@ -1167,6 +1202,9 @@ $tablet-width: 768px;
     flex-direction: column;
     justify-content: space-between;
     padding: 0 20px;
+    @media screen and (max-width: $tablet-width) {
+      width: 100%;
+    }
     label {
       font-weight: 600;
       padding: 2px 0;
@@ -1180,7 +1218,7 @@ $tablet-width: 768px;
       input {
         width: 100%;
         height: 50px;
-        background: var(--background-glass-color-primary);
+        background: var(--background-blur-color-primary);
         color: var(--text-primary-color);
         outline: none;
         border: none;
@@ -1199,7 +1237,7 @@ $tablet-width: 768px;
       textarea {
         width: 100%;
         height: 100px;
-        background: var(--background-glass-color-primary);
+        background: var(--background-blur-color-primary);
         color: var(--text-primary-color);
         outline: none;
         border: none;
@@ -1210,14 +1248,6 @@ $tablet-width: 768px;
         border-radius: 10px;
         backdrop-filter: blur(10px);
       }
-    }
-  }
-}
-
-@media (max-width: $mobile-width) {
-  .playlist-header {
-    & .header__image {
-      display: none;
     }
   }
 }
