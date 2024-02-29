@@ -163,6 +163,7 @@ export default defineComponent({
       "setCurrentIndex",
       "setShuffle",
       "clearQueue",
+      "setPlaying",
     ]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
@@ -215,7 +216,7 @@ export default defineComponent({
         this.addSongs(this.songs);
         this.setCurrentIndex(0);
         this.setShuffle(false);
-        document.dispatchEvent(new CustomEvent("play"));
+        this.setPlaying(true);
       } else {
         this.dialogWaring.show = true;
         this.dialogWaring.title = "Warning";
@@ -240,7 +241,7 @@ export default defineComponent({
         const index = this.songs.findIndex((song) => song.song_id === id);
         this.setCurrentIndex(index);
         this.setShuffle(false);
-        document.dispatchEvent(new CustomEvent("play"));
+        this.setPlaying(true);
       } else {
         this.dialogWaring.show = true;
         this.dialogWaring.title = "Warning";
