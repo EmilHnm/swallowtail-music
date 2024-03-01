@@ -39,7 +39,7 @@
       <div class="songList__header--right">
         <div class="songList__header--right--album">Album</div>
         <div class="songList__header--right--hears">Hears</div>
-        <div class="songList__header--right--duration">Duration</div>
+        <div class="songList__header--right--duration"><IconClock /></div>
         <div class="songList__header--right--control"></div>
       </div>
     </div>
@@ -76,6 +76,7 @@ import type { album } from "@/model/albumModel";
 import type { like } from "@/model/likeModel";
 import type { artist } from "@/model/artistModel";
 import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
+import IconClock from "@/components/icons/IconClock.vue";
 
 type songData = song & {
   album: album;
@@ -86,6 +87,7 @@ type songData = song & {
 export default defineComponent({
   emits: [...globalEmitListener],
   components: {
+    IconClock,
     IconPlay,
     IconHorizontalThreeDot,
     BaseListItem,
@@ -421,8 +423,6 @@ $tablet-width: 768px;
       &--duration {
         width: 20%;
         overflow: hidden;
-        text-align: center;
-
         @container main  (max-width: #{$tablet-width}) {
           & {
             width: 20%;
