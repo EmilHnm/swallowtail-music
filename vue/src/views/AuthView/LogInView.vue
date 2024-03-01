@@ -87,13 +87,17 @@ export default defineComponent({
         this.login({ email: this.email, password: this.password })
           .then((res) => res.json())
           .then((res) => {
-            if (res.errors) {
-              this.dialogWaring.content = res.message;
+            if (res.errors || res.error) {
+              this.dialogWaring.content = res.message ?? res.error;
               this.dialogWaring.show = true;
             } else {
               this.setUser(res);
               this.$router.push({ name: "mainPage" });
             }
+          })
+          .catch((err) => {
+            this.dialogWaring.content = err.message ?? err.error;
+            this.dialogWaring.show = true;
           });
       }
     },
