@@ -40,9 +40,7 @@ const router = createRouter({
       meta: {
         requiresAuth: true,
       },
-      children: [
-        ...accountPageRoute,
-      ],
+      children: [...accountPageRoute],
     },
     {
       path: "/verify-email",
