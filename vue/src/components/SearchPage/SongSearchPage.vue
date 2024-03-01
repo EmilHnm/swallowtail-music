@@ -28,6 +28,7 @@ declare module "@vue/runtime-core" {
 }
 
 export default defineComponent({
+  emits: ["changeSearchPage"],
   methods: {
     ...mapMutations("queue", [
       "setCurrentIndex",

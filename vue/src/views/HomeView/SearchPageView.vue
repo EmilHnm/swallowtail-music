@@ -379,16 +379,14 @@ $widescreen-width: 1536px;
 .search-result {
   margin: 0 auto;
   width: 90%;
+  padding-bottom: 20px;
   &__tag {
     display: flex;
-    justify-content: space-between;
     margin: 20px auto;
-    width: 80%;
+    gap: 20px;
+    width: 90%;
     overflow-y: auto;
     cursor: grab;
-    & > * {
-      width: 150px;
-    }
   }
   &__container {
     margin: 20px 0;

@@ -36,6 +36,7 @@ declare module "@vue/runtime-core" {
 
 export default defineComponent({
   inject: ["artistResult"],
+  emits: ["changeSearchPage"],
   components: { BaseDialog, BaseLineLoad, BaseCardArtist },
   data() {
     return {

@@ -40,6 +40,7 @@ declare module "@vue/runtime-core" {
 
 export default defineComponent({
   inject: ["albumResult"],
+  emits: ["changeSearchPage"],
   components: { BaseDialog, BaseLineLoad, BaseCardAlbum },
   data() {
     return {
