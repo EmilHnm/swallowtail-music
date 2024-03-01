@@ -237,7 +237,6 @@ export default defineComponent({
               id: this.playingAudio.song_id,
             });
           }
-          console.log(res);
           this.menu.isLikeLoading = false;
         });
     },
