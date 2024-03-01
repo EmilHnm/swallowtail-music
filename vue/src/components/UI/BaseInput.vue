@@ -13,6 +13,7 @@
         :required="required"
         :placeholder="placeholder"
         :autocomplete="autocomplete ? 'on' : 'off'"
+        :value="modelValue"
       />
       <textarea
         v-else-if="mode === 'textarea'"
