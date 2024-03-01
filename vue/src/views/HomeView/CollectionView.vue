@@ -129,6 +129,10 @@ export default defineComponent({
           if (res.status === "success") {
             this.likedList = res.likedList;
             this.songCount = this.likedList.length;
+            this.likedList = this.likedList.sort(
+              (a: songData, b: songData) =>
+                -a.like[0].created_at.localeCompare(b.like[0].created_at)
+            );
             const tempDuration = this.likedList.reduce(
               (acc, cur) => acc + cur.file.duration,
               0
