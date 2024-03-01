@@ -577,7 +577,7 @@ export default defineComponent({
           });
         } else if (target.value === "date") {
           this.songList = this.songList.sort((a: songData, b: songData) => {
-            return a.playlist[0].pivot.created_at.localeCompare(
+            return -a.playlist[0].pivot.created_at.localeCompare(
               b.playlist[0].pivot.created_at
             );
           });
@@ -1053,7 +1053,6 @@ $tablet-width: 768px;
             display: none;
           }
         }
-
       }
 
       &--duration {
