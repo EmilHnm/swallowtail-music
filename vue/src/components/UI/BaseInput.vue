@@ -13,7 +13,7 @@
         :placeholder="placeholder"
         :autocomplete="autocomplete ? 'on' : 'off'"
         :value="modelValue"
-        @input="update($event.target.value)"
+        @input="update($event)"
       />
       <textarea
         v-else-if="mode === 'textarea'"
@@ -25,7 +25,7 @@
         :autocomplete="autocomplete ? 'on' : 'off'"
         :cols="size.cols"
         :rows="size.rows"
-        @input="update($event.target.value)"
+        @input="update($event)"
       >{{ modelValue }}</textarea>
     </div>
   </div>
@@ -77,7 +77,8 @@ export default defineComponent({
     },
   },
   methods: {
-    update(newValue: string) {
+    update(event: Event) {
+      const newValue = (event.target as HTMLInputElement).value;
       this.$emit("update:modelValue", newValue);
     },
   },
