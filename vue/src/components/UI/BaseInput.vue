@@ -9,24 +9,24 @@
         class="base-input__input"
         :id="id"
         :type="type"
-        v-model="value"
         :required="required"
         :placeholder="placeholder"
         :autocomplete="autocomplete ? 'on' : 'off'"
         :value="modelValue"
+        @input="update($event.target.value)"
       />
       <textarea
         v-else-if="mode === 'textarea'"
         class="base-input__input"
         :id="id"
         :type="type"
-        v-model="value"
         :required="required"
         :placeholder="placeholder"
         :autocomplete="autocomplete ? 'on' : 'off'"
         :cols="size.cols"
         :rows="size.rows"
-      ></textarea>
+        @input="update($event.target.value)"
+      >{{ modelValue }}</textarea>
     </div>
   </div>
 </template>
@@ -76,13 +76,8 @@ export default defineComponent({
       required: false,
     },
   },
-  data() {
-    return {
-      value: this.$props.modelValue,
-    };
-  },
-  watch: {
-    value(newValue) {
+  methods: {
+    update(newValue: string) {
       this.$emit("update:modelValue", newValue);
     },
   },
