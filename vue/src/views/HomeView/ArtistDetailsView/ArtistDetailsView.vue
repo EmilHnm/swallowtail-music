@@ -56,15 +56,8 @@
       <div class="control__left--play">
         <IconPlay @click="playArtistSong" />
       </div>
-      <div class="control__left--menu">
+      <div class="control__left--menu" v-click-outside="() => (isMenuOpen = false)">
         <IconHorizontalThreeDot @click="toggleMenu" />
-        <teleport to="body">
-          <div
-            class="bg"
-            :class="{ active: isMenuOpen }"
-            @click="toggleMenu"
-          ></div>
-        </teleport>
         <transition name="playlist-menu">
           <div class="playlist-menu" v-if="isMenuOpen">
             <BaseListItem @click="addArtistSongToQueue"
