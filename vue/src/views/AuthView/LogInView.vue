@@ -187,6 +187,8 @@ $tablet-width: 768px;
     border: none;
     box-shadow: none;
     border-radius: 0;
+    width: 100%;
+    box-sizing: border-box;
     &__title {
       display: block;
       width: 100%;

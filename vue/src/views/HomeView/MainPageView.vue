@@ -340,6 +340,7 @@ $tablet-width: 768px;
   height: 100%;
   overflow: auto;
   overflow-x: hidden;
+  box-sizing: border-box;
   h1 {
     font-size: 1.5rem;
     font-weight: 600;
@@ -349,7 +350,6 @@ $tablet-width: 768px;
   }
 }
 .news {
-  width: 100%;
   padding: 0 10px;
   & .latest-songs {
     width: 100%;
@@ -456,12 +456,10 @@ $tablet-width: 768px;
 
 .top {
   padding: 0 10px;
-  width: 100%;
 }
 .favorite {
-  padding: 0 10px;
   width: 100%;
-  padding-bottom: 20px;
+  padding: 0 10px 20px;
   & .favorite__playlist {
     width: 100%;
     & .favorite__playlist--container {

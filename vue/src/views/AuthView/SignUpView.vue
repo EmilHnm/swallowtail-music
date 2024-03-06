@@ -200,7 +200,7 @@ $tablet-width: 768px;
     border: none;
     box-shadow: none;
     border-radius: 0;
-
+    height: 100%;
     &__title {
       display: block;
       width: 100%;
