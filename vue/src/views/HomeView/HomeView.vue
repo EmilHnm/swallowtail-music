@@ -47,14 +47,10 @@ export default defineComponent({
       isLeftSideBarActive: false,
       isRightSideBarActive: false,
       audio: null as HTMLAudioElement | null,
-      audioList: [] as songData[],
       timeOut: null as null | Timer,
       songLoadController: null as AbortController | null,
       songLoadSignal: null as AbortSignal | null,
       //play song property
-      audioIndex: 0,
-      isOnShuffle: false,
-      shuffledList: [] as songData[],
       isAudioWaitting: false,
       // visualizer
       ctx: null as AudioContext | null,
@@ -82,7 +78,12 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("playlist", ["getAccountPlaylist"]),
-    ...mapMutations("queue", ["setProgress", "setPlaying", "setCurrentIndex"]),
+    ...mapMutations("queue", [
+      "setProgress",
+      "setPlaying",
+      "setCurrentIndex",
+      "clearQueue",
+    ]),
     // NOTE: Sidebar control
     toggleLeftSideBar() {
       this.isLeftSideBarActive = !this.isLeftSideBarActive;
@@ -322,6 +323,9 @@ export default defineComponent({
   },
   unmounted() {
     if (this.audio.src) this.audio.src = "";
+    this.setCurrentIndex(0);
+    this.setPlaying(false);
+    this.clearQueue();
   },
 });
 </script>
@@ -389,6 +393,7 @@ export default defineComponent({
     user-select: none;
     container-name: main;
     container-type: inline-size;
+    box-sizing: content-box;
   }
 }
 </style>
