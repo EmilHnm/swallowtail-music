@@ -41,11 +41,13 @@
     </div>
   </div>
   <div class="control" v-if="userData.user_id == user.user_id">
-    <BaseButton>Edit Profile</BaseButton>
+    <BaseButton @click="$router.push({ name: 'accountProfile' })"
+      >Edit Profile</BaseButton
+    >
   </div>
   <div class="detail" ref="detail">
     <div class="topArtist">
-      <h2>Top Artists</h2>
+      <h2>Top Contributed Artists</h2>
       <swiper
         v-if="topArtist.length > 0"
         :slides-per-view="itemPerSlide"
@@ -64,7 +66,6 @@
         :key="song.song_id"
         :data="song"
         @select-song="playSong(song)"
-        @addToQueue="addToQueue(song)"
       />
     </div>
     <div class="publicPlaylist" v-if="userPlaylist.length > 0">
@@ -79,7 +80,7 @@
         v-if="userPlaylist.length > 0"
         :slides-per-view="itemPerSlide"
         :space-between="10"
-        navigation
+        :navigation="userPlaylist.length >= itemPerSlide"
       >
         <swiper-slide v-for="playlist in userPlaylist">
           <BaseCardAlbum
@@ -93,7 +94,7 @@
             "
             :type="'playlist'"
             :songCount="playlist.song_count"
-            @play-playlist="playPlaylist(playlist)"
+            @play-playlist="onPlayPlaylist(playlist)"
           />
         </swiper-slide>
       </swiper>
@@ -109,7 +110,7 @@ import BaseButton from "@/components/UI/BaseButton.vue";
 import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
-import { mapActions, mapGetters } from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import type { user } from "@/model/userModel";
 import type { artist } from "@/model/artistModel";
 import { environment } from "@/environment/environment";
@@ -158,17 +159,19 @@ export default defineComponent({
       itemPerSlide: 6,
       user: {} as userProfileData,
       topArtist: [] as artist[],
-      topTracks: {} as songData[],
+      topTracks: [] as songData[],
       userPlaylist: [] as playlistData[],
     };
   },
   methods: {
-    ...mapActions("user", ["getUser"]),
     ...mapActions("user", [
+      "getUser",
       "getTopArtists",
       "getPublicPlaylist",
       "getTopTracks",
     ]),
+    ...mapActions("queue", ["playPlaylist", "playArtist"]),
+    ...mapMutations("queue", ["setQueue", "setCurrentIndex", "setPlaying"]),
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
     },
@@ -183,7 +186,7 @@ export default defineComponent({
           if (res.status === "success") {
             this.user = res.user;
           } else {
-            this.$router.push({ name: "mainPage" });
+            this.$router.push({ name: "notFound" });
           }
         });
     },
@@ -229,17 +232,32 @@ export default defineComponent({
           }
         });
     },
-    playArtistSong(artist: artist) {
-      this.$emit("playArtistSong", artist);
+    playArtistSong(id: string) {
+      this.isLoading = true;
+      this.playArtist(id)
+        .then(() => {
+          this.isLoading = false;
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
     },
     playSong(song: song) {
-      this.$emit("playSong", song.song_id);
+      this.setQueue([...this.topTracks]);
+      this.setCurrentIndex(
+        this.topTracks.findIndex((s) => s.song_id === song.song_id)
+      );
+      this.setPlaying(true);
     },
-    addToQueue(song: any) {
-      this.$emit("addToQueue", song);
-    },
-    playPlaylist(playlist: playlist) {
-      this.$emit("playPlaylist", playlist.playlist_id);
+    onPlayPlaylist(playlist: playlist) {
+      this.isLoading = true;
+      this.playPlaylist(playlist.playlist_id)
+        .then(() => {
+          this.isLoading = false;
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
     },
   },
   mounted() {
