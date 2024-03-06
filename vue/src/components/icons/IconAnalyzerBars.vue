@@ -22,7 +22,7 @@ export default defineComponent({
           attributeName="height"
           dur="1s"
           repeatCount="indefinite"
-          values="90;124;85;119"
+          values="90;124;85;119;90"
         />
       </rect>
       <rect x="60" y="0" width="20" height="40" class="bars">
@@ -30,7 +30,7 @@ export default defineComponent({
           attributeName="height"
           dur="1s"
           repeatCount="indefinite"
-          values="12;32;36;111"
+          values="12;32;36;111;12"
         />
       </rect>
       <rect x="90" y="0" width="20" height="50" class="bars">
@@ -38,7 +38,7 @@ export default defineComponent({
           attributeName="height"
           dur="1s"
           repeatCount="indefinite"
-          values="140;100;10;100"
+          values="140;100;10;100;140"
         />
       </rect>
       <rect x="120" y="0" width="20" height="60" class="bars">
@@ -54,7 +54,7 @@ export default defineComponent({
           attributeName="height"
           dur="1s"
           repeatCount="indefinite"
-          values="160;100;63;140"
+          values="160;100;63;140;160"
         />
       </rect>
       <rect x="180" y="0" width="20" height="70" class="bars">
@@ -62,7 +62,7 @@ export default defineComponent({
           attributeName="height"
           dur="1s"
           repeatCount="indefinite"
-          values="200;120;90;150"
+          values="200;120;90;150;200"
         />
       </rect>
     </g>
