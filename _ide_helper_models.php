@@ -1,6 +1,7 @@
 <?php
 
 // @formatter:off
+// phpcs:ignoreFile
 /**
  * A helper file for your Eloquent Models
  * Copy the phpDocs from this file to the correct Model,
@@ -293,13 +294,17 @@ namespace App\Models{
  * @property \App\Models\User|null $requester
  * @property string $type
  * @property string $status
- * @property mixed|null $body
+ * @property mixed $body
  * @property string|null $filled_by
  * @property int $user_fillable
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $filledBy
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Response> $responses
  * @property-read int|null $responses_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Request advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Request defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Request idRange($id, $field = 'id')
  * @method static \Illuminate\Database\Eloquent\Builder|Request newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Request newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Request query()
@@ -322,11 +327,14 @@ namespace App\Models{
  *
  * @property int $id
  * @property int $request_id
- * @property string $responder
+ * @property \App\Models\User|null $responder
  * @property string $content
  * @property string $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Response advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Response defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Response idRange($id, $field = 'id')
  * @method static \Illuminate\Database\Eloquent\Builder|Response newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Response newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Response query()
