@@ -8,10 +8,12 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use romanzipp\QueueMonitor\Traits\IsMonitored;
 
-class SongConvertedSuccessToUploader extends Notification
+class SongConvertedSuccessToUploader extends Notification implements ShouldQueue
 {
     use Queueable;
+    use IsMonitored;
 
     /**
      * Create a new notification instance.
