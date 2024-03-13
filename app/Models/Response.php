@@ -20,4 +20,8 @@ class Response extends Model
     {
         return $this->belongsTo(User::class, "responder", "user_id");
     }
+
+    public function request() {
+        return $this->belongsTo(Request::class);
+    }
 }
