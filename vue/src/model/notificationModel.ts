@@ -9,7 +9,14 @@ export interface notification {
     title: string;
     message: string;
     icon: string;
-    link: string;
+    link: {
+      name: string;
+      params:
+        | {
+            [key: string]: string | number;
+          }
+        | string;
+    };
   };
   read_at: string;
   created_at: string;
