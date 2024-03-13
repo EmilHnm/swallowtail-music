@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Orchid\Screens\User;
 
 use App\Http\Controllers\admin\UserAdminController;
+use App\Orchid\Layouts\User\SystemNotificationLayout;
 use App\Orchid\Layouts\User\UserEditLayout;
 use App\Orchid\Layouts\User\UserFiltersLayout;
 use App\Orchid\Layouts\User\UserListLayout;
@@ -86,6 +87,8 @@ class UserListScreen extends Screen
             UserListLayout::class,
             $this->getDumpModal(),
             Layout::modal('asyncEditUserModal', UserEditLayout::class)
+                ->async('asyncGetUser'),
+            Layout::modal('asyncSendNotificationModal', SystemNotificationLayout::class)
                 ->async('asyncGetUser'),
         ];
     }

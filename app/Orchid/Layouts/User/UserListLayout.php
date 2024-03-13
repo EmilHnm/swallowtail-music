@@ -85,6 +85,15 @@ class UserListLayout extends Table
                             ->route('platform.systems.users.edit', $user->id)
                             ->icon('bs.pencil'),
 
+                        ModalToggle::make(__('Send System Notification'))
+                            ->icon('bs.bell')
+                            ->method('sendNotification')
+                            ->modal('asyncSendNotificationModal')
+                            ->async('asyncGetUser')
+                            ->asyncParameters([
+                                'user' => $user->id,
+                            ]),
+
                         Button::make(__('Impersonate user'))
                             ->icon('bg.box-arrow-in-right')
                             ->confirm(__('You can revert to your original state by logging out.'))
