@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\ResponseRequestEvent;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -25,6 +26,14 @@ class EventServiceProvider extends ServiceProvider
 
         \App\Events\SongConvertedSuccessFull::class => [
             \App\Listeners\SendSongConvertedSuccessFullListener::class,
+        ],
+
+        \App\Events\SystemNotificationEvent::class => [
+            \App\Listeners\SystemNotificationListener::class,
+        ],
+        
+        ResponseRequestEvent::class => [
+            \App\Listeners\ResponseRequestListener::class,
         ],
     ];
 
