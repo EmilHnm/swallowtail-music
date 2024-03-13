@@ -57,9 +57,11 @@ class SongsSyncCommand extends Command
         foreach (range($from, $to) as $id) {
             $song = Song::where('id', $id)
                 ->whereDoesntHave('file')
-                // ->orWhereHas('file', function ($query) {
-                //     $query->where('referer', RefererEnum::CRAWLER);
-                // })
+                ->when($this->option('force'), fn(Song $q)
+                    => $q->orWhereHas('file', fn($q)
+                        => $q->where('referer', RefererEnum::CRAWLER)
+                    )
+                )
                 ->first();
 
             if ($song) {
@@ -121,7 +123,7 @@ class SongsSyncCommand extends Command
                     \Log::error("Error syncing song " . $song->id . " - " . $song->title . " with errors " . $e);
                     continue;
                 }
-                sleep(0);
+                sleep(2);
             } else {
                 $this->warn("Song not found with id " . $id);
             }
