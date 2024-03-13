@@ -286,7 +286,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .main {
-  width: 100%;
   display: flex;
   flex-direction: column;
   h3 {

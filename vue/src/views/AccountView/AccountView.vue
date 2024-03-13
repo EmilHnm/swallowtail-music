@@ -8,7 +8,9 @@
       :isSideBarActive="isSideBarActive"
       @closeSideBar="toggleSideBar"
     />
-    <RouterView />
+    <main>
+      <RouterView />
+    </main>
   </div>
 </template>
 
@@ -42,6 +44,10 @@ $screen-width: 1280px;
   margin: auto;
   background: var(--background-glass-color-primary);
   height: calc(100vh - 80px);
+  main {
+    flex: 1;
+    box-sizing: border-box;
+  }
   @media screen and (max-width: $screen-width) {
     width: 100%;
   }

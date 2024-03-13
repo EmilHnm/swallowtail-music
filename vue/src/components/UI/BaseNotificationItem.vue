@@ -7,12 +7,27 @@
   >
     <div v-show="isLoading" class="notification__loading"></div>
     <div class="notification__body">
+      <div class="notification__body--title" :class="notification.data.icon">
+        {{ notification.data.title }}
+      </div>
+      <router-link
+        v-if="notification.data.link"
+        :to="notification.data.link"
+        class="notification__body--message"
+        >{{ notification.data.message }}</router-link
+      >
       <p
+        v-else
         class="notification__body--message"
         v-html="notification.data.message"
       ></p>
       <p class="notification__body--timestamp">
-        {{ dateService.dateDiffForHuman(notification.created_at) }}
+        <BaseTooltipVue
+          :position="'bottom'"
+          :tooltip-text="new Date(notification.created_at).toUTCString()"
+        >
+          {{ dateService.dateDiffForHuman(notification.created_at) }}
+        </BaseTooltipVue>
       </p>
     </div>
     <div
@@ -36,6 +51,7 @@ import { defineComponent } from "vue";
 import { DateService } from "@/mixins/DateService";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
 import { mapActions, mapGetters } from "vuex";
+import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
 export default defineComponent({
   props: {
     notification: {
@@ -80,7 +96,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({ token: "auth/userToken" }),
   },
-  components: { IconThreeDots },
+  components: {BaseTooltipVue, IconThreeDots },
 });
 </script>
 
@@ -94,6 +110,7 @@ export default defineComponent({
   display: flex;
   position: relative;
   width: 100%;
+  box-sizing: border-box;
   &.unread {
     background-color: var(--color-primary);
   }
@@ -112,6 +129,24 @@ export default defineComponent({
     z-index: 10;
   }
   &__body {
+    flex: 1;
+    &--title {
+      margin: auto;
+      font-size: 1.2rem;
+      font-weight: bolder;
+      &.SUCCESS {
+        color: var(--text-primary-color);
+      }
+      &.ERROR {
+        color: var(--color-danger);
+      }
+      &.WARNING {
+        color: var(--color-warning);
+      }
+      &.INFO {
+        color: var(--color-negative);
+      }
+    }
     &--message {
       margin: auto;
       font-size: 1rem;

@@ -15,34 +15,63 @@
     <template v-if="!isLoading">
       <template v-if="data">
         <table>
-          <tr>
+          <tr class="request-row">
             <th colspan="2">{{ data.type.toLocaleUpperCase() }}</th>
           </tr>
-          <tr>
-            <th>Name</th>
-            <td>{{ data.body.name }}</td>
+          <tr class="request-row">
+            <th colspan="2" class="small">Name</th>
           </tr>
-          <tr>
-            <th>Descriptions</th>
-            <td>{{ data.body.description }}</td>
+          <tr class="request-row">
+            <th class="medium">Name</th>
+            <td colspan="2">{{ data.body.name }}</td>
           </tr>
-          <tr>
-            <th>Requested by</th>
-            <td>{{ data.requester.name }}</td>
+          <tr class="request-row">
+            <th colspan="2" class="small">Description</th>
           </tr>
-          <tr>
-            <th>Requested at</th>
-            <td>{{ new Date(data.created_at).toLocaleString() }}</td>
+          <tr class="request-row">
+            <th class="medium">Descriptions</th>
+            <td colspan="2">{{ data.body.description }}</td>
           </tr>
-          <tr>
-            <th>Filled by</th>
-            <td>
+          <tr class="request-row">
+            <th colspan="2" class="small">Requested by</th>
+          </tr>
+          <tr class="request-row">
+            <th class="medium">Requested by</th>
+            <td colspan="2">{{ data.requester.name }}</td>
+          </tr>
+          <tr class="request-row">
+            <th colspan="2" class="small">Requested at</th>
+          </tr>
+          <tr class="request-row">
+            <th class="medium">Requested at</th>
+            <td colspan="2">
+              {{ new Date(data.created_at).toLocaleString() }}
+            </td>
+          </tr>
+          <tr class="request-row">
+            <th colspan="2" class="small">Filled by</th>
+          </tr>
+          <tr class="request-row">
+            <th class="medium">Filled by</th>
+            <td colspan="2">
               {{
                 data.filled_by instanceof Object ? data.filled_by.name : "No"
               }}
             </td>
           </tr>
+          <tr v-if="
+              data.user_fillable &&
+              !data.filled_by &&
+              data.responses.findIndex(
+                (r) => r.responder.user_id === user.user_id
+              ) === -1
+            "
+            class="request-row"
+          >
+            <th colspan="2" class="small">Response Request</th>
+          </tr>
           <tr
+            class="request-row"
             v-if="
               data.user_fillable &&
               !data.filled_by &&
@@ -51,8 +80,8 @@
               ) === -1
             "
           >
-            <th>Response Request</th>
-            <td>
+            <th class="medium">Response Request</th>
+            <td colspan="2">
               <div class="response-content">
                 <textarea
                   name="response-content"
@@ -79,10 +108,10 @@
               <th colspan="5">Responses</th>
             </tr>
             <tr>
-              <th>#</th>
-              <th>Content</th>
+              <th class="index">#</th>
+              <th class="content">Content</th>
               <th class="responded">Responded</th>
-              <th>Status</th>
+              <th class="status">Status</th>
               <th
                 v-if="
                   data.requester.user_id === user.user_id && !data.filled_by
@@ -93,7 +122,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(response, index) in data.responses" :key="index">
+            <tr
+              class="response-row"
+              v-for="(response, index) in data.responses"
+              :key="index"
+            >
               <td class="index">{{ index + 1 }}</td>
               <td class="content">
                 <p>
@@ -120,7 +153,6 @@
                 v-if="
                   data.requester.user_id === user.user_id && !data.filled_by
                 "
-                width="20%"
               >
                 <template v-if="response.status === 'responded'">
                   <ConfirmFlatDialogVue
@@ -372,46 +404,9 @@ export default defineComponent({
       td {
         padding: 5px;
         font-size: 1.2rem;
-        background: var(--background-glass-color-secondary);
         border-bottom: 1px solid var(--background-glass-color-primary);
         height: 40px;
-        &.index {
-          text-align: center;
-        }
-        &.title {
-          max-width: 70ch;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        &.control {
-          text-align: end;
-        }
-        &.responded {
-          font-size: 1rem;
-          @media screen and (max-width: 768px) {
-            display: none;
-          }
-        }
-        &.status {
-          text-align: center;
-          font-weight: 900;
-        }
-        &.content {
-          p {
-            margin: 10px 0;
-          }
-          span {
-            display: none;
-            font-size: 0.8rem;
-            @media screen and (max-width: 768px) {
-              display: block;
-            }
-          }
-        }
+        word-break: break-word;
         & .response-content {
           textarea {
             width: calc(100% - 30px);
@@ -432,6 +427,67 @@ export default defineComponent({
               margin: 0;
               padding: 0;
               text-align: justify;
+            }
+          }
+        }
+      }
+      &.request-row {
+        th {
+          &.small {
+            display: none;
+            @media screen and (max-width: 768px) {
+              display: table-cell;
+            }
+          }
+          &.medium {
+            display: table-cell;
+            @media screen and (max-width: 768px) {
+              display: none;
+            }
+          }
+        }
+        td {
+          @media screen and (max-width: 768px) {
+            column-span: all;
+          }
+        }
+      }
+      &.response-row {
+        td {
+          &.index {
+            min-width: 25px;
+            text-align: center;
+          }
+          &.control {
+            text-align: end;
+            max-width: 200px;
+          }
+          &.responded {
+            font-size: 1rem;
+            @media screen and (max-width: 768px) {
+              display: none;
+            }
+          }
+          &.status {
+            text-align: center;
+            font-weight: 900;
+            min-width: 100px;
+            max-width: 100px;
+          }
+          &.control {
+            min-width: 90px;
+          }
+          &.content {
+            p {
+              margin: 10px 0;
+              word-break: break-word;
+            }
+            span {
+              display: none;
+              font-size: 0.9rem;
+              @media screen and (max-width: 768px) {
+                display: block;
+              }
             }
           }
         }

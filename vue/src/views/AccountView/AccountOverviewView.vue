@@ -146,7 +146,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .container {
-  width: 90%;
   max-height: 100%;
   display: flex;
   flex-direction: column;

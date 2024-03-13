@@ -156,11 +156,13 @@ export default defineComponent({
     const echo = window.Echo;
     echo
       .channel(
-        `swallowtail_music_database_private-${environment.notification_channel}.${this.user.user_id}`
+        `${environment.api_name}_database_private-${environment.notification_channel}.${this.user.user_id}`
       )
       .listen(`.${environment.notification_channel}`, () => {
-        this.getNotification();
-        this.hasUnreadMessage = true;
+        setTimeout(() => {
+          this.getNotification();
+          this.hasUnreadMessage = true;
+        }, 2000);
       });
   },
   mounted() {

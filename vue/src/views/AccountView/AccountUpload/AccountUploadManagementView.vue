@@ -19,12 +19,13 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  width: 90%;
+  width: 100%;
   max-height: 100%;
   display: flex;
   flex-direction: column;
   overflow: scroll;
   padding: 20px;
+  box-sizing: border-box;
   h2 {
     margin-bottom: 20px;
     font-weight: 900;
@@ -34,6 +35,8 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
+    width: 100%;
+    margin-bottom: 20px;
     a {
       height: 40px;
       width: 40%;

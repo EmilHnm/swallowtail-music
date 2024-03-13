@@ -99,12 +99,14 @@ nav {
   align-items: center;
   padding: 2rem 0;
   width: 25%;
-  flex: 0 0 auto;
-  overflow: scroll;
+  min-width: 240px;
+  overflow-y: scroll;
   height: calc(100vh - 150px);
+  box-sizing: border-box;
   @media (max-width: $tablet-width) {
     flex-basis: 100%;
     width: 100%;
+    height: calc(100vh - 71px);
     position: absolute;
     top: 71px;
     left: 0;
@@ -139,12 +141,13 @@ nav {
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       width: 100%;
       cursor: pointer;
+      box-sizing: border-box;
       a {
         display: flex;
         align-items: center;
         width: 100%;
         height: 100%;
-        color: var(--text-color-primary);
+        color: var(--text-primary-color);
       }
       svg {
         width: 1.2rem;
