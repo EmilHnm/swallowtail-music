@@ -207,4 +207,26 @@ trait UserAdminController
             "album" => $albumUploaded,
         ]);
     }
+
+    public function sendNotification(Request $request)
+    {
+        $request->validate([
+            'message' => 'required',
+            'user_id' => 'required',
+        ]);
+
+        event(new \App\Events\SystemNotificationEvent(
+            User::find($request->input('user_id')),
+            [
+                'title' => $request->input('title'),
+                'message' => $request->input('message'),
+                'icon' => $request->input('icon'),
+                'link' => '',
+            ]
+        ));
+
+        Toast::info(__('Notification was sent.'));
+
+        return redirect()->route('platform.systems.users');
+    }
 }
