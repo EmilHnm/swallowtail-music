@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ResponseRequestEvent;
 use Auth;
 use Illuminate\Http\Request;
 use App\Enum\RequestStatusEnum;
@@ -131,10 +132,14 @@ class RequestController extends Controller
             'content' => $request->content,
         ]);
 
+        if (Auth::user()->user_id != $client_request->requester) {
+            event(new ResponseRequestEvent($client_request->responses->last()));
+        }
+
         return response()->json([
             'message' => 'Response created successfully',
             'status' => 'success',
-        ], 200);
+        ]);
     }
 
     public function approve(Request $request, $id)
@@ -181,7 +186,7 @@ class RequestController extends Controller
         return response()->json([
             'message' => 'Request approved successfully',
             'status' => 'success',
-        ], 200);
+        ]);
     }
 
     public function reject(Request $request, $id)
@@ -216,6 +221,6 @@ class RequestController extends Controller
         return response()->json([
             'message' => 'Request rejected successfully',
             'status' => 'success',
-        ], 200);
+        ]);
     }
 }
