@@ -67,6 +67,12 @@ class SongManager
                     Storage::disk('raws_audio')->readStream($file_path)
                 );
                 Storage::disk('raws_audio')->delete($file_path);
+                $hash = hash("md5", Storage::disk('final_audio')->get($final_filepath));
+                if(SongMetadata::where('hash', $hash)->exists()) {
+                    $this->SongMetadata->status = SongMetadataStatusEnum::DUPLICATED;
+                    $this->SongMetadata->save();
+                    return $this;
+                }
             } else {
                 FFMpeg::fromDisk('raws_audio')
                     ->open($file_path)
