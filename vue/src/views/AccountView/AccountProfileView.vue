@@ -65,12 +65,12 @@
             type="number"
             placeholder="day"
             v-model="dob_date"
-            :disabled="isUpadateDisabled"
+            :disabled="isUpdateDisabled"
           />
           <select
             name="month__dob"
             id="month__dob"
-            :disabled="isUpadateDisabled"
+            :disabled="isUpdateDisabled"
             v-model="dob_month"
           >
             <option value="-1" disabled>Select Month</option>
@@ -86,7 +86,7 @@
             type="number"
             placeholder="year"
             v-model="dob_year"
-            :disabled="isUpadateDisabled"
+            :disabled="isUpdateDisabled"
           />
         </div>
       </div>
@@ -352,7 +352,7 @@ export default defineComponent({
         show: false,
       },
       isLoading: false,
-      isUpadateDisabled: false,
+      isUpdateDisabled: false,
       email: "",
       username: "",
       gender: "",
@@ -368,7 +368,7 @@ export default defineComponent({
     onSubmit() {
       if (
         !this.isValidDate(this.dob_date, this.dob_month, this.dob_year) &&
-        !this.isUpadateDisabled
+        !this.isUpdateDisabled
       ) {
         this.dialogWaring.content = "Please enter a valid date of birth";
         this.dialogWaring.show = true;
@@ -382,7 +382,7 @@ export default defineComponent({
           gender: this.gender,
           dob: `${this.dob_month}/${this.dob_date}/${this.dob_year}`,
           region: this.region,
-          isUpadateDisabled: this.isUpadateDisabled,
+          isUpdateDisabled: this.isUpdateDisabled,
         },
         token: this.token,
       })
@@ -400,7 +400,7 @@ export default defineComponent({
     isValidDate(day: number, month: number, year: number): boolean {
       // Check the ranges of month and year
       if (year < 1000 || year > 3000 || month == 0 || month > 12) return false;
-      var monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
       // Adjust for leap years
       if (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
         monthLength[1] = 29;
@@ -426,7 +426,7 @@ export default defineComponent({
           this.dob_date = date.getDate();
           this.dob_month = date.getMonth() + 1;
           this.dob_year = date.getFullYear();
-          this.isUpadateDisabled = true;
+          this.isUpdateDisabled = true;
         }
         this.email = res.email;
         this.username = res.name;

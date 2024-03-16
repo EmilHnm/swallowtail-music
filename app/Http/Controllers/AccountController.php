@@ -11,17 +11,6 @@ use Illuminate\Support\Facades\Hash;
 class AccountController extends Controller
 {
     //
-    public function getAccount()
-    {
-        $user = Auth::user();
-        return response(
-            [
-                "user" => $user,
-            ],
-            Response::HTTP_OK
-        );
-    }
-
     public function updateAccount(Request $request): Response
     {
         $credentials = $request->validate([
@@ -32,13 +21,13 @@ class AccountController extends Controller
             "gender" => "required|string",
             "dob" => "required|string",
             "region" => "required|string",
-            "isUpadateDisabled" => "required",
+            "isUpdateDisabled" => "required",
         ]);
         $authUser = Auth::user();
         $user = User::where("user_id", $authUser->user_id)->first();
         $user->name = $credentials["username"];
         $user->gender = $credentials["gender"];
-        if (!$credentials["isUpadateDisabled"]) {
+        if (!$credentials["isUpdateDisabled"]) {
             $user->dob = $credentials["dob"];
         }
         $user->region = $credentials["region"];
@@ -46,7 +35,7 @@ class AccountController extends Controller
         return response(Response::HTTP_OK);
     }
 
-    public function firstupdatePassword(Request $request)
+    public function updatePassword(Request $request)
     {
         $validateData = $request->validate([
             "current_password" => "required",
