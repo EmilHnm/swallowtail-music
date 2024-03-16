@@ -14,4 +14,5 @@ class SongMetadataStatusEnum extends Enum
     const DONE = "done";
     const PUBLISH = "publish";
     const ERROR = "error";
+    const DUPLICATED = "duplicated";
 }
