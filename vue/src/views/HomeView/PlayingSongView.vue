@@ -59,13 +59,16 @@
       </div>
     </div>
     <h3 v-else>No Audio Playing</h3>
-    <div class="visualizer" >
-      <div
-        v-for="index in 100"
-        :key="index"
-        class="visualizer__col"
-        :style="{ height: isPlaying ? frequencyData[index] + 2 + 'px' : '2px' }"
-      ></div>
+    <div class="visualizer">
+      <template v-for="index in 800" :key="index">
+        <div
+          class="visualizer__col"
+          v-if="index % 8 === 0"
+          :style="{
+            height: isPlaying ? frequencyData[index] + 2 + 'px' : '2px',
+          }"
+        ></div>
+      </template>
     </div>
   </div>
 </template>

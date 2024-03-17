@@ -16,7 +16,7 @@
             @select-song="playSongOfArtist(songs[index - 1].song_id)"
           />
         </div>
-        <span @click="toggleTopSong">{{
+        <span v-if="songs.length > 5" @click="toggleTopSong">{{
           isSongListOpen ? "Show Less" : "Show More"
         }}</span>
       </div>
