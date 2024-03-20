@@ -88,7 +88,7 @@ class SongsSyncCommand extends Command
                             'lyrics' => $raw_data['lyric']['lyrics'],
                             'size' =>   $size,
                             'hash' => $hash,
-                            'status' => SongMetadataStatusEnum::DONE,
+                            'status' => SongMetadataStatusEnum::PUBLISH,
                             'referer' => RefererEnum::CRAWLER,
                             'duration' => $ffdisk->getDurationInSeconds(),
                         ]);

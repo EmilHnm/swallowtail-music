@@ -64,6 +64,8 @@ trait SongAdminController
         }
     }
 
+
+
     public function reindex($id) {
         $song = Song::find($id);
         try {

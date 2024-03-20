@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\SongMetadataStatusEnum;
 use App\Models\Album;
 use Carbon\Carbon;
 use App\Models\Song;
@@ -110,17 +111,11 @@ class PlaylistController extends Controller
                 "like" => function ($query) {
                     $query->where("user_id", Auth::user()->user_id);
                 },
-                "playlist" => function ($query) use ($id) {
-                    $query->where("playlists.playlist_id", $id);
-                },
             ])
-            ->get();
-        $songList = $songList
-            ->filter(function ($song) {
-                return $song->playlist->count() > 0;
+            ->whereHas("playlist", function ($query) use ($id) {
+                $query->where("playlists.playlist_id", $id);
             })
-            ->toArray();
-        $songList = array_values($songList);
+            ->get();
         return response()->json([
             "songList" => $songList,
         ]);

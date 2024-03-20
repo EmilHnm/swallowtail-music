@@ -37,6 +37,7 @@ class AlbumController extends Controller
             $song->song_id = "song_" . date("YmdHi") . Str::random(10);
             $song->user_id = Auth::user()->user_id;
             $song->title = $request["songName_" . $i];
+            $song->normalized_title = Text::normalize($request["songName_" . $i]);
             $song->display = "private";
             $song->album_id = $album_id;
             $songData[] = (object)[
@@ -60,7 +61,7 @@ class AlbumController extends Controller
             "status" => "success",
             "message" => 'Album uploaded successfully!
             All songs uploaded will be ready in some minutes and saved as private by default when finish.
-            Please go to Account/Upload Management/Song to update song infomation.',
+            Please go to Account/Upload Management/Song to update song information.',
             "songs" => $songData,
         ]);
     }
@@ -101,6 +102,9 @@ class AlbumController extends Controller
                     $query->where("user_id", Auth::user()->user_id);
                 },
             ])
+            ->when(\Auth::user()->user_id == Album::find($id)->user_id, function ($query) {
+                $query->withoutGlobalScopes(['playable']);
+            })
             ->get();
         return response()->json([
             "status" => "success",

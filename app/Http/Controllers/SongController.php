@@ -87,7 +87,7 @@ class SongController extends Controller
                 Storage::disk('chunk_file')->readStream("$id/{$file->getClientOriginalName()}")
             );
             Storage::disk('chunk_file')->deleteDirectory($id);
-            $song = Song::find($id);
+            $song = Song::withoutGlobalScopes(['playable'])->find($id);
             $song->file->status = SongMetadataStatusEnum::UPLOADED;
             $song->file->driver = 'raws_audio';
             $song->save();
@@ -102,7 +102,7 @@ class SongController extends Controller
     {
         $artist = json_decode($request->artist);
         $genre = json_decode($request->genre);
-        $song = Song::find($request->song_id);
+        $song = Song::withoutGlobalScopes(['playable'])->find($request->song_id);
         if ($song->user_id != Auth::user()->user_id) {
             return response()->json([
                 "status" => "error",
@@ -125,7 +125,7 @@ class SongController extends Controller
 
     public function streamSong($id)
     {
-        $song = Song::where("song_id", $id)->first();
+        $song = Song::withoutGlobalScopes(['playable'])->where("song_id", $id)->first();
         if (!$song) {
             return response()->json([
                 "status" => "error",
@@ -147,7 +147,7 @@ class SongController extends Controller
 
     public function uploadedSong(Request $request)
     {
-        $songs = Song::with(['artist'])->where("user_id", Auth::user()->user_id);
+        $songs = Song::withoutGlobalScopes(['playable'])->with(['artist'])->where("user_id", Auth::user()->user_id);
 
         if ($request->query->has("query")) {
             $query = $request->query->get("query");
@@ -174,7 +174,7 @@ class SongController extends Controller
 
     public function getSongInfo($id)
     {
-        $song = Song::where("song_id", $id)->first();
+        $song = Song::withoutGlobalScopes(['playable'])->where("song_id", $id)->first();
         if (!$song->id) {
             return response()->json([
                 "status" => "error",
@@ -212,7 +212,7 @@ class SongController extends Controller
 
     public function getSongForPlay($id)
     {
-        $song = Song::where("song_id", $id)
+        $song = Song::withoutGlobalScopes(['playable'])->where("song_id", $id)
             ->with(["artist", "album", "like"])
             ->first();
         return response()->json([
@@ -291,7 +291,7 @@ class SongController extends Controller
 
     public function deleteSong($id)
     {
-        $song = Song::where("song_id", $id)->first();
+        $song = Song::withoutGlobalScopes(['playable'])->where("song_id", $id)->first();
         if (!$song->id) {
             return response()->json([
                 "status" => "error",
@@ -321,7 +321,7 @@ class SongController extends Controller
     {
         $songs = Song::with(["artist", "like", "album"])
             ->where("display", "public")
-            ->whereHas("file", fn ($q) => $q->where("status", SongMetadataStatusEnum::DONE))
+            ->whereHas("file", fn ($q) => $q->where("status", SongMetadataStatusEnum::PUBLISH))
             ->orderBy("created_at", "DESC")
             ->limit(5)
             ->get();
@@ -355,7 +355,6 @@ class SongController extends Controller
                     ->where("title", "like", "%" . $query . "%")
                     ->orWhere("normalized_title", "like", "%" . $query . "%")
                     ->where("display", "public")
-                    ->having("artist_count", '>=', '1')
                     ->limit(10)
                     ->get();
             }

@@ -214,7 +214,11 @@ export default defineComponent({
         .then((res) => {
           this.searching.song = false;
           if (res.status === "success") {
-            this.songResult = res.songs;
+            if (typeof res.songs == "object") {
+              this.songResult = Object.values(res.songs);
+            } else {
+              this.songResult = res.songs;
+            }
           }
         })
         .catch((err) => {
@@ -241,7 +245,11 @@ export default defineComponent({
         .then((res) => {
           this.searching.album = false;
           if (res.status === "success") {
-            this.albumResult = res.albums;
+            if (typeof res.albums == "object") {
+              this.albumResult = Object.values(res.albums);
+            } else {
+              this.albumResult = res.albums;
+            }
           }
         })
         .catch((err) => {

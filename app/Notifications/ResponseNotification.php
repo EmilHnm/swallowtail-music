@@ -5,7 +5,6 @@ namespace App\Notifications;
 use App\Enum\NotificationIconEnum;
 use App\Models\Request;
 use App\Models\Response;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -61,9 +60,9 @@ class ResponseNotification extends Notification implements ShouldQueue
     {
         return [
             //
-            "title" => "Song converted Successfully",
+            "title" => "Response Received!",
             "message" => "{$this->responder->name} has responded to your request. Click to view details.",
-            "icon" => NotificationIconEnum::INFO,
+            "icon" => NotificationIconEnum::SUCCESS,
             "link" => [
                 "name" => "accountRequestDetails",
                 "params" => [

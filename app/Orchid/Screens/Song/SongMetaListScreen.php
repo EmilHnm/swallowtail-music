@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Number;
 use Orchid\Screen\Actions\Button;
+use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Screen\Components\Cells\DateTimeSplit;
 use Orchid\Screen\Fields\DateRange;
@@ -37,7 +38,7 @@ class SongMetaListScreen extends Screen
      */
     public function query(): iterable
     {
-        $metadata = SongMetadata::with(['song'])->advancedFilter(
+        $metadata = SongMetadata::with(['song' => fn($q) => $q->withoutGlobalScopes(['playable'])])->advancedFilter(
             [
                 ['id', fn (Builder $q, $t) => $q->where('id', $t)->orWhere('hash', 'like',  $t . '%')],
                 'created_at:date_range_tz',
@@ -127,11 +128,19 @@ class SongMetaListScreen extends Screen
                 TD::make('created_at', 'Created At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
                 TD::make('updated_at', 'Updated At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
                 TD::make()->render(
-                    fn (SongMetadata $metadata) => Button::make('Download')
-                        ->icon('download')
-                        ->method('download')
-                        ->parameters(['id' => $metadata->id])
-                        ->turbo(false),
+
+                    fn (SongMetadata $metadata) => DropDown::make()->icon('three-dots-vertical')->list([
+                        Button::make('Publish')
+                            ->icon('upload')
+                            ->confirm('Are you sure you want to publish this metadata?')
+                            ->method('publish')
+                            ->parameters(['id' => $metadata->id])->canSee($metadata->status == SongMetadataStatusEnum::DONE),
+                        Button::make('Download')
+                            ->icon('download')
+                            ->method('download')
+                            ->parameters(['id' => $metadata->id])
+                            ->turbo(false),
+                    ]),
                 ),
             ]),
             $this->getDumpModal(),
@@ -194,5 +203,22 @@ class SongMetaListScreen extends Screen
             Toast::error($e->getMessage());
             return redirect()->back();
         }
+    }
+
+    public function publish($id)
+    {
+        try {
+            $metadata = SongMetadata::findOrFail($id);
+            if($metadata->status == SongMetadataStatusEnum::DONE) {
+                $metadata->status = SongMetadataStatusEnum::PUBLISH;
+                $metadata->save();
+                Toast::info('Metadata published');
+            } else {
+                Toast::error('Metadata is not ready to be published');
+            }
+        } catch (\Exception $e) {
+            Toast::error($e->getMessage());
+        }
+        return redirect()->back();
     }
 }

@@ -23,6 +23,7 @@ class Song extends Model
     protected static function booted()
     {
         static::addGlobalScope('duration', fn ($query) => $query->with(["file" =>  fn($q) => $q->select(["song_id","duration"])]));
+        static::addGlobalScope('playable', fn ($query) => $query->whereHas("file", fn ($q) => $q->where("status", SongMetadataStatusEnum::PUBLISH)));
     }
 
     public function genre()
@@ -82,12 +83,17 @@ class Song extends Model
     {
         $with = ['artist', 'genre', 'album'];
         $this->loadMissing($with)
-            ->whereHas("file", fn ($q) => $q->where("status", SongMetadataStatusEnum::DONE));
+            ->whereHas("file", fn ($q) => $q->where("status", SongMetadataStatusEnum::PUBLISH));
         return $this->toArray();
     }
 
     public function getRouteKeyName()
     {
         return "song_id";
+    }
+
+    public function isPublishable() : bool
+    {
+        return $this->artist()->exists() && $this->genre()->exists() && $this->file()->where('status', SongMetadataStatusEnum::PUBLISH)->exists();
     }
 }

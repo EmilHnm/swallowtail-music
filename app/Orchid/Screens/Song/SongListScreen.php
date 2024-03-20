@@ -35,7 +35,7 @@ class SongListScreen extends Screen
      */
     public function query(): iterable
     {
-        $songs = Song::withoutGlobalScopes(['duration'])->with(['artist', 'album', 'genre', 'user', 'file'])
+            $songs = Song::withoutGlobalScopes(['duration', 'playable'])->with(['artist', 'album', 'genre', 'user', 'file'])
             ->advancedFilter([
                 ['id', fn (Builder $q, $t) => $q->where('song_id', $t)->orWhere('id', $t)],
                 ['title', fn (Builder $q, $t) => $q->where('title', 'like', '%' . $t . '%')],
