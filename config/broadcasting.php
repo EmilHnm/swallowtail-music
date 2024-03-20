@@ -71,4 +71,6 @@ return [
 
     ],
 
+    'notifications' => env('BROADCAST_NOTIFICATIONS', 'notifications')
+
 ];

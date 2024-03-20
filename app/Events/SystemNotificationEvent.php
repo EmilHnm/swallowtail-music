@@ -13,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 
 class SystemNotificationEvent implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels, BroadcastAsNotification;
 
     /**
      * Create a new event instance.
@@ -37,15 +37,4 @@ class SystemNotificationEvent implements ShouldBroadcast
         ];
     }
 
-    public function broadcastAs(): string
-    {
-        return 'notifications';
-    }
-
-    public function broadcastWith(): array
-    {
-        return [
-            'status' => 'success',
-        ];
-    }
 }

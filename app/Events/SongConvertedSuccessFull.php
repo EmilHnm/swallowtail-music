@@ -16,7 +16,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
 class SongConvertedSuccessFull implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels, BroadcastAsNotification;
 
     public User $user;
     public Song $song;
@@ -38,18 +38,6 @@ class SongConvertedSuccessFull implements ShouldBroadcast
     {
         return [
             new PrivateChannel('notifications.' . $this->user->user_id),
-        ];
-    }
-
-    public function broadcastAs(): string
-    {
-        return 'notifications';
-    }
-
-    public function broadcastWith(): array
-    {
-        return [
-            'status' => 'success',
         ];
     }
 }
