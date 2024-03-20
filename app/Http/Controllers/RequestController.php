@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\ResponseRequestEvent;
+use App\Events\ReviewResponseEvent;
 use Auth;
 use Illuminate\Http\Request;
 use App\Enum\RequestStatusEnum;
@@ -183,6 +184,8 @@ class RequestController extends Controller
         $client_request->status = RequestStatusEnum::RESOLVED;
         $client_request->save();
 
+        event(new ReviewResponseEvent($response));
+
         return response()->json([
             'message' => 'Request approved successfully',
             'status' => 'success',
@@ -217,6 +220,8 @@ class RequestController extends Controller
         }
         $response->status = ResponseStatusEnum::REJECTED;
         $response->save();
+
+        event(new ReviewResponseEvent($response));
 
         return response()->json([
             'message' => 'Request rejected successfully',
