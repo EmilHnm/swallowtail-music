@@ -96,7 +96,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({ token: "auth/userToken" }),
   },
-  components: {BaseTooltipVue, IconThreeDots },
+  components: { BaseTooltipVue, IconThreeDots },
 });
 </script>
 

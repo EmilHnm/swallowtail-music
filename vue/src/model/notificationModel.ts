@@ -1,4 +1,5 @@
 import type { Pagination } from "@/model/mixin/PaginateDataModel";
+import type { RouteLocationRaw } from "vue-router";
 
 export interface notification {
   id: string;
@@ -9,14 +10,7 @@ export interface notification {
     title: string;
     message: string;
     icon: string;
-    link: {
-      name: string;
-      params:
-        | {
-            [key: string]: string | number;
-          }
-        | string;
-    };
+    link: RouteLocationRaw | null;
   };
   read_at: string;
   created_at: string;
