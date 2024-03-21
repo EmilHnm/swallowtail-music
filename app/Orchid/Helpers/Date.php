@@ -18,7 +18,7 @@ class Date
             if(!$d->$field){
                 return $empty;
             }
-            $time = $local_time ? $d->$field->local()->format($format) : $d->$field->format($format);
+            $time =  $d->$field->format($format);
             $diffForHumans = $d->$field->diffForHumans();
             return "<span title='" . $time . "'>" . $diffForHumans . "</span>";
         };

@@ -73,6 +73,41 @@ namespace App\Models{
 	class AlbumGenre extends \Eloquent {}
 }
 
+namespace App\Models\Alt{
+/**
+ * App\Models\Alt\DatabaseNotificationAlt
+ *
+ * @property string $id
+ * @property string $type
+ * @property string $notifiable_type
+ * @property int $notifiable_id
+ * @property array $data
+ * @property \Illuminate\Support\Carbon|null $read_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $notifiable
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Notifications\DatabaseNotificationCollection<int, static> all($columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Notifications\DatabaseNotificationCollection<int, static> get($columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt idRange($id, $field = 'id')
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt query()
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotification read()
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotification unread()
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt whereData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt whereNotifiableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt whereNotifiableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt whereReadAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotificationAlt whereUpdatedAt($value)
+ */
+	class DatabaseNotificationAlt extends \Eloquent {}
+}
+
 namespace App\Models{
 /**
  * App\Models\Artist
@@ -286,6 +321,90 @@ namespace App\Models{
 	class PlaylistSong extends \Eloquent {}
 }
 
+namespace App\Models\Queue{
+/**
+ * App\Models\Queue\Monitor
+ *
+ * @property int $id
+ * @property string|null $job_uuid
+ * @property string $job_id
+ * @property string|null $name
+ * @property string|null $queue
+ * @property int $status
+ * @property \Illuminate\Support\Carbon|null $queued_at
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property string|null $started_at_exact
+ * @property \Illuminate\Support\Carbon|null $finished_at
+ * @property string|null $finished_at_exact
+ * @property int $attempt
+ * @property bool $retried
+ * @property int|null $progress
+ * @property string|null $exception
+ * @property string|null $exception_message
+ * @property string|null $exception_class
+ * @property string|null $data
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor failed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor idRange($id, $field = 'id')
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor lastHour()
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor succeeded()
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor today()
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereAttempt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereException($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereExceptionClass($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereExceptionMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereFinishedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereFinishedAtExact($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereJob($jobId)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereJobId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereJobUuid($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereProgress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereQueue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereQueuedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereRetried($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereStartedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereStartedAtExact($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Monitor whereStatus($value)
+ */
+	class Monitor extends \Eloquent {}
+}
+
+namespace App\Models\Queue{
+/**
+ * App\Models\Queue\QueueFailedJob
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob idRange($id, $field = 'id')
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob query()
+ */
+	class QueueFailedJob extends \Eloquent {}
+}
+
+namespace App\Models\Queue{
+/**
+ * App\Models\Queue\QueueJob
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|Job advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Job defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Job idRange($id, $field = 'id')
+ * @method static \Illuminate\Database\Eloquent\Builder|Job newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Job newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Job query()
+ */
+	class QueueJob extends \Eloquent {}
+}
+
 namespace App\Models{
 /**
  * App\Models\Request
@@ -332,6 +451,7 @@ namespace App\Models{
  * @property string $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Request $request
  * @method static \Illuminate\Database\Eloquent\Builder|Response advancedFilter($filter_keys = [], $allowed_sorts = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Response defaultSortBy(string $column, string $direction = 'asc')
  * @method static \Illuminate\Database\Eloquent\Builder|Response idRange($id, $field = 'id')
