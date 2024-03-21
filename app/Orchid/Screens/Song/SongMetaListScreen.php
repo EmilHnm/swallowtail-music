@@ -4,9 +4,12 @@ namespace App\Orchid\Screens\Song;
 
 use App\Enum\SongMetadataStatusEnum;
 use App\Enum\RefererEnum;
+use App\Http\Controllers\admin\SongMetadataAdminController;
 use App\Models\Song;
 use App\Models\SongMetadata;
 use App\Orchid\Helpers\FileSize;
+use App\Orchid\Layouts\Song\Song\SongLyricEditLayout;
+use App\Orchid\Layouts\Song\Song\SongMetadataStatusEditLayout;
 use App\Orchid\Screens\Traits\GenerateQueryStringFilter;
 use App\Orchid\Screens\Traits\HasDumpModelModal;
 use App\Orchid\Screens\Traits\HasShowHideCountingToggle;
@@ -29,7 +32,7 @@ use Orchid\Support\Facades\Toast;
 
 class SongMetaListScreen extends Screen
 {
-    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter;
+    use HasDumpModelModal, HasShowHideCountingToggle, GenerateQueryStringFilter, SongMetadataAdminController;
 
     /**
      * Fetch data to be displayed on the screen.
@@ -108,17 +111,16 @@ class SongMetaListScreen extends Screen
                     return "<a class='orchid-custom'  href=$href>" . $html . "</a>";
                 })->filter(),
                 TD::make('status', 'Status')->render(
-                    fn (SongMetadata $metadata) =>
-                    Button::make(SongMetadataStatusEnum::search($metadata->status))
+                    fn (SongMetadata $metadata) => SongMetadataStatusEnum::search($metadata->status)
                 )
                     ->filter(Select::make()->options(array_flip(SongMetadataStatusEnum::toArray()))->empty('All'))->sort(),
                 TD::make('', 'Lyric')->render(function (SongMetadata $metadata) {
                     return ModalToggle::make('Lyric')
                         ->modal('lyricModal')
-                        ->async('asyncLyricEdit')
+                        ->async('asyncPassingId')
                         ->class('btn text-primary')
                         ->method('saveLyrics')
-                        ->asyncParameters(['model' => SongMetadata::class, 'id' => (string)$metadata->id])
+                        ->asyncParameters(['id' => (string)$metadata->id])
                         ->icon('pencil');
                 }),
                 TD::make('driver', 'Storage Driver')->sort(),
@@ -128,13 +130,19 @@ class SongMetaListScreen extends Screen
                 TD::make('created_at', 'Created At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
                 TD::make('updated_at', 'Updated At')->asComponent(DateTimeSplit::class)->sort()->filter(TD::FILTER_DATE_RANGE),
                 TD::make()->render(
-
                     fn (SongMetadata $metadata) => DropDown::make()->icon('three-dots-vertical')->list([
                         Button::make('Publish')
                             ->icon('upload')
                             ->confirm('Are you sure you want to publish this metadata?')
                             ->method('publish')
-                            ->parameters(['id' => $metadata->id])->canSee($metadata->status == SongMetadataStatusEnum::DONE),
+                            ->parameters(['id' => $metadata->id])->canSee(!in_array($metadata->status,array_merge(SongMetadataStatusEnum::notReadyStatus(), [SongMetadataStatusEnum::PUBLISH]))),
+                        ModalToggle::make('Set Errors')
+                            ->icon('flag')
+                            ->method('asyncPassingId')
+                            ->parameters(['id' => $metadata->id])
+                            ->modal('statusModal')
+                            ->method('setErrors')
+                            ->canSee($metadata->status == SongMetadataStatusEnum::DONE or $metadata->status == SongMetadataStatusEnum::PUBLISH),
                         Button::make('Download')
                             ->icon('download')
                             ->method('download')
@@ -144,81 +152,19 @@ class SongMetaListScreen extends Screen
                 ),
             ]),
             $this->getDumpModal(),
+            Layout::modal('statusModal',SongMetadataStatusEditLayout::class)
+                ->title('Set Errors')
+                ->applyButton('Save')
+                ->async('asyncPassingId')
+                ->method('setErrors'),
             Layout::modal('lyricModal', [
-                Layout::rows([
-                    TextArea::make('lyric')
-                        ->title('Lyric')
-                        ->value(function () {
-                            $request = collect(\Request::all());
-                            $model = $request->get('model');
-                            $lyric = "";
-                            if ($model) {
-                                $raw_lyric = $model::find($request->get('id'));
-                                $lyric = json_decode($raw_lyric->lyrics)->lyric ?? [];
-                                $lyric = implode("\n", $lyric);
-                            }
-                            return $lyric;
-                        })->rows(20),
-                ]),
+                SongLyricEditLayout::class
             ])->title('Lyric Edit')
                 ->applyButton('Save')
-                ->async('asyncLyricEdit')
+                ->async('asyncPassingId')
                 ->method('saveLyrics'),
         ];
     }
 
-    public function asyncLyricEdit(Request $request)
-    {
-        return [
-            'lyricEdit' => $request->get('lyricEdit'),
-        ];
-    }
 
-    public function saveLyrics(Request $request)
-    {
-        $id = $request->get('id');
-        $lyric = $request->get('lyric');
-
-        try {
-            $songMetadata = SongMetadata::find($id);
-            $songMetadata->lyrics = json_encode(['lyric' => explode("\n", $lyric)]);
-            $songMetadata->save();
-        } catch (\Exception $e) {
-            Toast::error($e->getMessage());
-            return redirect()->back();
-        }
-
-        Toast::info('Lyrics saved');
-        return redirect()->route('platform.app.song-metadata');
-    }
-
-    public function download($id)
-    {
-        try {
-            $metadata = SongMetadata::findOrFail($id);
-            $file = $metadata->file_path;
-            $url = (new SongManager(Song::find($metadata->song_id)))->generateDownloadUrl();
-            return redirect()->to($url);
-        } catch (\Exception $e) {
-            Toast::error($e->getMessage());
-            return redirect()->back();
-        }
-    }
-
-    public function publish($id)
-    {
-        try {
-            $metadata = SongMetadata::findOrFail($id);
-            if($metadata->status == SongMetadataStatusEnum::DONE) {
-                $metadata->status = SongMetadataStatusEnum::PUBLISH;
-                $metadata->save();
-                Toast::info('Metadata published');
-            } else {
-                Toast::error('Metadata is not ready to be published');
-            }
-        } catch (\Exception $e) {
-            Toast::error($e->getMessage());
-        }
-        return redirect()->back();
-    }
 }

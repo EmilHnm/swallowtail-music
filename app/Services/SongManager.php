@@ -69,7 +69,7 @@ class SongManager
                 Storage::disk('raws_audio')->delete($file_path);
                 $hash = hash("md5", Storage::disk('final_audio')->get($final_filepath));
                 if(SongMetadata::where('hash', $hash)->exists()) {
-                    $this->SongMetadata->status = SongMetadataStatusEnum::DUPLICATED;
+                    $this->SongMetadata->status = SongMetadataStatusEnum::ERROR_DUPLICATED;
                     $this->SongMetadata->save();
                     return $this;
                 }
