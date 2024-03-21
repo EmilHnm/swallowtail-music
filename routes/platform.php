@@ -104,6 +104,19 @@ Route::screen('backups', \App\Orchid\Screens\Platform\BackupListScreen::class)
         ->parent('platform.index')
         ->push(__('Backups'), route('platform.backups')));
 
+Route::screen('notification', \App\Orchid\Screens\NotificationListScreen::class)
+    ->name('platform.notification')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push(__('Notifications'), route('platform.notification')));
+
+Route::screen('/queue/jobs', \App\Orchid\Screens\Queue\JobsListScreen::class)
+    ->name('platform.queue.jobs');
+Route::screen('/monitor/queue', \App\Orchid\Screens\Queue\MonitorJobsListScreen::class)
+    ->name('platform.queue.monitor');
+Route::screen('/queue/failed_jobs', \App\Orchid\Screens\Queue\FailedJobListScreen::class)
+    ->name('platform.queue.failed_jobs');
+
 Route::screen('songs', \App\Orchid\Screens\Song\SongListScreen::class)
     ->name('platform.app.songs')
     ->middleware(PermissionEnum::getMiddleware([PermissionEnum::SONG_INDEX]))

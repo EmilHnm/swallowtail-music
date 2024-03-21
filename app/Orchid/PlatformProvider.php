@@ -126,6 +126,15 @@ class PlatformProvider extends OrchidServiceProvider
                 ->permission(PermissionEnum::SYSTEM_INFO)
                 ->route('platform.phpinfo', ['sort' => '-last_modified']),
 
+            Menu::make(__('Notifications'))
+                ->icon('bell')
+                ->permission(PermissionEnum::SYSTEM_INFO)
+                ->route('platform.notification'),
+
+            Menu::make(__('Queue'))
+                ->icon('stack')
+                ->route('platform.queue.jobs'),
+
             Menu::make(__('Backup'))
                 ->icon('bs.layer-backward')
                 ->permission(PermissionEnum::SYSTEM_INFO)
