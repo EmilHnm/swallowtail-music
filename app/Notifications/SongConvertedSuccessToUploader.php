@@ -54,7 +54,7 @@ class SongConvertedSuccessToUploader extends Notification implements ShouldQueue
         return [
             //
             "title" => "Song converted Successfully",
-            "message" => "Your uploaded song <strong>{$this->song->title}</strong> has been converted successfully. It's now ready to publish!",
+            "message" => "Your uploaded song <strong>{$this->song->title}</strong> has been converted successfully. Please wait until it is ready to publish!",
             "icon" => NotificationIconEnum::SUCCESS,
             "link" => "",
         ];
