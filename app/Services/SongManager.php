@@ -107,7 +107,7 @@ class SongManager
             $errorLog = $exception->getErrorOutput();
             $this->SongMetadata->status = SongMetadataStatusEnum::ERROR;
             $this->SongMetadata->save();
-            Log::error($command . ' meet error: ' . "$errorLog");
+            Log::error("Song Metadata id $this->SongMetadata->id meet error: {$exception->getMessage()}  command: $command");
             throw new \Exception("Song Manager convert error: " . $exception->getMessage());
         }
     }
