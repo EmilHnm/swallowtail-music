@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\StatisticController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SongController;
@@ -24,7 +25,7 @@ use App\Http\Controllers\NotificationController;
 */
 
 
-Route::middleware("auth:sanctum")->group(function () {
+Route::middleware(["auth:sanctum", 'counter.requests'])->group(function () {
     Route::prefix("auth")->group(function () {
         Route::post("", [AuthController::class, "check"]);
         Route::post("/logout", [AuthController::class, "logout"]);
@@ -200,6 +201,12 @@ Route::middleware("auth:sanctum")->group(function () {
         Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
     });
 });
+
+Route::prefix('statistics')->middleware('auth:sanctum')->group(function () {
+    Route::post('played-duration', [StatisticController::class, 'saveTotalPlayedDuration']);
+    Route::post('sessions-duration', [StatisticController::class, 'saveTotalSessionsDuration']);
+});
+
 Route::prefix("auth")->group(function () {
     Route::post("/register", [AuthController::class, "register"])->name(
         "register"
@@ -208,4 +215,4 @@ Route::prefix("auth")->group(function () {
     Route::post("/forgot-password", [AuthController::class, "forgotPassword"]);
     Route::post("/reset-password", [AuthController::class, "resetPassword"]);
     Route::get("/verify-email", [AuthController::class, "verifyEmail"]);
-});
+})->middleware(['counter.requests']);
