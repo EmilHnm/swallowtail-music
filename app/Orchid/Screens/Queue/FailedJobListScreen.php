@@ -46,7 +46,7 @@ class FailedJobListScreen extends Screen
      */
     public function name(): ?string
     {
-        return 'FailedJobListScreen';
+        return 'Failed Job List Screen';
     }
 
     /**
