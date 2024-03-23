@@ -71,5 +71,6 @@ class Kernel extends HttpKernel
         "requestTimeDelay" => \App\Http\Middleware\IncreaseListenTimeOut::class,
         "logRequest" => \App\Http\Middleware\LogRequest::class,
         'access' => \Orchid\Platform\Http\Middleware\Access::class,
+        'counter.requests' => \App\Http\Middleware\CountingRequest::class,
     ];
 }

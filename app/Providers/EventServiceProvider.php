@@ -25,6 +25,7 @@ class EventServiceProvider extends ServiceProvider
 
         \App\Events\ListenIncrease::class => [
             \App\Listeners\ArtistListenIncrease::class,
+            \App\Listeners\TotalPlayedIncrease::class,
         ],
 
         SongConvertedSuccessFull::class => [
