@@ -4,7 +4,7 @@ namespace App\Http\Controllers\admin;
 use App\Enum\SongMetadataStatusEnum;
 use App\Models\Song;
 use App\Models\SongMetadata;
-use app\Services\SongManager;
+use App\Services\SongManager;
 use Illuminate\Http\Request;
 use Orchid\Support\Facades\Toast;
 
