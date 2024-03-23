@@ -68,6 +68,18 @@ return [
             'throw' => false,
         ],
 
+        's3_dc' => [
+            'driver' => 's3',
+            'key' => env('DC_ACCESS_KEY_ID'),
+            'secret' => env('DC_SECRET_ACCESS_KEY'),
+            'region' => env('DC_DEFAULT_REGION'),
+            'bucket' => env('DC_BUCKET'),
+            'url' => env('DC_URL'),
+            'endpoint' => env('DC_ENDPOINT'),
+            'use_path_style_endpoint' => env('DC_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+        ],
+
         'chunk_file' => [
             'driver' => 'local',
             'root' => storage_path('app/chunks'),
