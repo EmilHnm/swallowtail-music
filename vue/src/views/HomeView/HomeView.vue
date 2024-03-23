@@ -78,6 +78,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("playlist", ["getAccountPlaylist"]),
+    ...mapActions("statistic", ["saveTotalPlayedDuration"]),
     ...mapMutations("queue", [
       "setProgress",
       "setPlaying",
@@ -128,6 +129,69 @@ export default defineComponent({
     // NOTE: dialog
     closeDialog() {
       this.dialogWaring.show = false;
+    },
+    // song
+    loadNewTimer() {
+      this.timeOut = null;
+      this.timeOut = new Timer(() => {
+        this.increaseSongListens({
+          token: this.token,
+          song_id: this.playingSong.song_id,
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.status === "success") {
+              this.timeOut = null;
+            }
+          });
+      }, 45000);
+      this.timeOut.resume();
+    },
+    loadNewSong() {
+      this.audio.src = "";
+      this.audio.pause();
+      this.audio.load();
+      this.waiting();
+      if (!this.songLoadController) {
+        this.songLoadController = new AbortController();
+      } else {
+        this.songLoadController.abort();
+        this.songLoadController = new AbortController();
+      }
+      this.songLoadSignal = this.songLoadController.signal;
+      fetch(`${environment.api}/song/${this.playingSong.song_id}/stream`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+        signal: this.songLoadSignal,
+      })
+        .then((res) => res.blob())
+        .then((blob) => {
+          this.audio.src = URL.createObjectURL(blob);
+          this.audio.load();
+          if (this.isPlaying)
+            this.audio.play().catch(() => {
+              return;
+            });
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          } else {
+            this.dialogWaring.show = true;
+            this.dialogWaring.content = "Can't load song";
+          }
+        });
+    },
+    recordPlayedDuration() {
+      const playedDuration = Math.floor(this.audio.currentTime);
+      if (playedDuration > 45) {
+        this.saveTotalPlayedDuration({
+          token: this.token,
+          duration: playedDuration,
+        });
+      }
     },
   },
   watch: {
@@ -185,56 +249,9 @@ export default defineComponent({
     playingSong: {
       handler(n: songData | null, o: songData | null) {
         if (n && n.song_id !== o?.song_id) {
-          this.timeOut = null;
-          this.timeOut = new Timer(() => {
-            this.increaseSongListens({
-              token: this.token,
-              song_id: this.playingSong.song_id,
-            })
-              .then((res) => res.json())
-              .then((res) => {
-                if (res.status === "success") {
-                  this.timeOut = null;
-                }
-              });
-          }, 45000);
-          this.timeOut.resume();
-          this.audio.src = "";
-          this.audio.pause();
-          this.audio.load();
-          this.waiting();
-          if (!this.songLoadController) {
-            this.songLoadController = new AbortController();
-          } else {
-            this.songLoadController.abort();
-            this.songLoadController = new AbortController();
-          }
-          this.songLoadSignal = this.songLoadController.signal;
-          fetch(`${environment.api}/song/${this.playingSong.song_id}/stream`, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-            signal: this.songLoadSignal,
-          })
-            .then((res) => res.blob())
-            .then((blob) => {
-              const objectUrl = URL.createObjectURL(blob);
-              this.audio.src = objectUrl;
-              this.audio.load();
-              if (this.isPlaying)
-                this.audio.play().catch((error) => {
-                  return;
-                });
-            })
-            .catch((err) => {
-              if (err instanceof DOMException && err.name === "AbortError") {
-                return;
-              } else {
-                this.dialogWaring.show = true;
-                this.dialogWaring.content = "Can't load song";
-              }
-            });
+          this.loadNewTimer();
+          this.recordPlayedDuration();
+          this.loadNewSong();
         }
       },
       deep: true,
@@ -270,7 +287,6 @@ export default defineComponent({
   },
   created() {
     window.io = io;
-
     window.Echo = new Echo({
       broadcaster: "socket.io",
       host: `${environment.socket_url}:${environment.socket_port}`,
@@ -319,6 +335,9 @@ export default defineComponent({
 
     document.addEventListener("contextmenu", (e) => {
       e.preventDefault();
+    });
+    window.addEventListener("beforeunload", (e) => {
+      this.recordPlayedDuration();
     });
   },
   unmounted() {
