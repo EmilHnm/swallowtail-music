@@ -323,6 +323,34 @@ namespace App\Models{
 
 namespace App\Models\Queue{
 /**
+ * App\Models\Queue\Job
+ *
+ * @property int $id
+ * @property string $queue
+ * @property array $payload
+ * @property int $attempts
+ * @property int|null $reserved_at
+ * @property \Illuminate\Support\Carbon $available_at
+ * @property \Illuminate\Support\Carbon $created_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Job advancedFilter($filter_keys = [], $allowed_sorts = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Job defaultSortBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Job idRange($id, $field = 'id')
+ * @method static \Illuminate\Database\Eloquent\Builder|Job newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Job newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Job query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Job whereAttempts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Job whereAvailableAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Job whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Job whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Job wherePayload($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Job whereQueue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Job whereReservedAt($value)
+ */
+	class Job extends \Eloquent {}
+}
+
+namespace App\Models\Queue{
+/**
  * App\Models\Queue\Monitor
  *
  * @property int $id
@@ -381,28 +409,28 @@ namespace App\Models\Queue{
 /**
  * App\Models\Queue\QueueFailedJob
  *
+ * @property int $id
+ * @property string $uuid
+ * @property string $connection
+ * @property string $queue
+ * @property array $payload
+ * @property string $exception
+ * @property \Illuminate\Support\Carbon $failed_at
  * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob advancedFilter($filter_keys = [], $allowed_sorts = [])
  * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob defaultSortBy(string $column, string $direction = 'asc')
  * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob idRange($id, $field = 'id')
  * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob query()
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob whereConnection($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob whereException($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob whereFailedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob wherePayload($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob whereQueue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|QueueFailedJob whereUuid($value)
  */
 	class QueueFailedJob extends \Eloquent {}
-}
-
-namespace App\Models\Queue{
-/**
- * App\Models\Queue\QueueJob
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Job advancedFilter($filter_keys = [], $allowed_sorts = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Job defaultSortBy(string $column, string $direction = 'asc')
- * @method static \Illuminate\Database\Eloquent\Builder|Job idRange($id, $field = 'id')
- * @method static \Illuminate\Database\Eloquent\Builder|Job newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Job newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Job query()
- */
-	class QueueJob extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -695,5 +723,46 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User withoutTrashed()
  */
 	class User extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\WebStatistic
+ *
+ * @property int $id
+ * @property int $total_users
+ * @property int $total_sessions
+ * @property int $total_sessions_duration
+ * @property int $total_requests
+ * @property int $total_songs
+ * @property int $total_user_upload_songs
+ * @property int $total_played_time
+ * @property int $total_played_duration
+ * @property int $total_albums
+ * @property int $total_artists
+ * @property int $total_playlists
+ * @property int $total_genres
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic query()
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalAlbums($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalArtists($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalGenres($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalPlayedDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalPlayedTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalPlaylists($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalRequests($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalSessions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalSessionsDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalSongs($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalUserUploadSongs($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereTotalUsers($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WebStatistic whereUpdatedAt($value)
+ */
+	class WebStatistic extends \Eloquent {}
 }
 
