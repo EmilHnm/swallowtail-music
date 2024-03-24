@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 namespace App\Orchid\Screens;
 
+use App\Http\Controllers\admin\StatisticAdminController;
+use App\Models\WebStatistic;
+use App\Orchid\Layouts\Dashboard\ChartListener;
+use Carbon\Carbon;
+use Carbon\CarbonInterval;
+use Illuminate\Support\Facades\Redis;
 use Orchid\Screen\Screen;
 use Orchid\Support\Facades\Layout;
 
 class PlatformScreen extends Screen
 {
+    use StatisticAdminController;
     /**
      * Fetch data to be displayed on the screen.
      *
@@ -16,7 +23,12 @@ class PlatformScreen extends Screen
      */
     public function query(): iterable
     {
-        return [];
+        // get yesterday data from database
+
+        return [
+            'current_status' => $this->getCurrentData(),
+            'yesterday_status' => $this->getYesterdayData(),
+        ];
     }
 
     /**
@@ -24,16 +36,9 @@ class PlatformScreen extends Screen
      */
     public function name(): ?string
     {
-        return 'Get Started';
+        return config('app.name') . ' Dashboard';
     }
 
-    /**
-     * Display header description.
-     */
-    public function description(): ?string
-    {
-        return 'Welcome to your Orchid application.';
-    }
 
     /**
      * The screen's action buttons.
@@ -53,8 +58,33 @@ class PlatformScreen extends Screen
     public function layout(): iterable
     {
         return [
-            Layout::view('platform::partials.update-assets'),
-            Layout::view('platform::partials.welcome'),
+            Layout::blank([
+                Layout::metrics([
+                    'Total Played Times Now'    => 'current_status.total_played_time',
+                    'Total Played Duration Now' => 'current_status.total_played_duration',
+                    'Total Sessions Duration Now' => 'current_status.total_sessions_duration',
+                    'Total Requests Now' => 'current_status.total_requests',
+                ])->title('Current Status'),
+                Layout::metrics([
+                    'Users ' => 'yesterday_status.total_users',
+                    'Sessions ' => 'yesterday_status.total_sessions',
+                    'Sessions Duration ' => 'yesterday_status.total_sessions_duration',
+                    'Requests ' => 'yesterday_status.total_requests',
+                ])->title('Yesterday\'s Status'),
+                Layout::metrics([
+                    'Songs ' => 'yesterday_status.total_songs',
+                    'User Upload Songs ' => 'yesterday_status.total_user_upload_songs',
+                    'Played Time ' => 'yesterday_status.total_played_time',
+                    'Played Duration ' => 'yesterday_status.total_played_duration',
+                ]),
+                Layout::metrics([
+                    'Albums ' => 'yesterday_status.total_albums',
+                    'Artists ' => 'yesterday_status.total_artists',
+                    'Genres ' => 'yesterday_status.total_genres',
+                    'Playlists ' => 'yesterday_status.total_playlists',
+                ]),
+            ]),
+            ChartListener::class,
         ];
     }
 }
