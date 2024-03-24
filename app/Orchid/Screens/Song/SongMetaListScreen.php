@@ -53,7 +53,8 @@ class SongMetaListScreen extends Screen
                     $q->where('title', 'like', "%$t%")
                         ->orWhere('song_id', $t)
                 )],
-                'referer'
+                'referer',
+                ['driver', fn (Builder $q, $t) => $q->where('driver', $t)],
             ],
             [
                 'id', 'song.title', 'status', 'driver', 'size', 'referer', 'created_at', 'updated_at'
@@ -123,7 +124,9 @@ class SongMetaListScreen extends Screen
                         ->asyncParameters(['id' => (string)$metadata->id])
                         ->icon('pencil');
                 }),
-                TD::make('driver', 'Storage Driver')->sort(),
+                TD::make('driver', 'Storage Driver')->sort()->filter(TD::FILTER_SELECT)->filterOptions(
+                    array_combine(array_keys(config('filesystems.disks')),array_keys(config('filesystems.disks')))
+                )->sort(),
                 TD::make('size', 'Size')->render(fn (SongMetadata $metadata) => $metadata->size ? Number::fileSize($metadata->size) : 'N/A')->sort(),
                 TD::make('referer', 'Referer')->render((fn (SongMetadata $metadata) => RefererEnum::search($metadata->referer)))
                     ->filter(Select::make()->options(array_flip(RefererEnum::toArray()))->empty('All')),
