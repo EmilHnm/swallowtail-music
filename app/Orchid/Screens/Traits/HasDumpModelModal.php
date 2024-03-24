@@ -29,11 +29,11 @@ trait HasDumpModelModal
         if ($with) {
             $with = explode(",", $with);
             return [
-                'model' => app($model)->with($with)->find($id)?->toArray(),
+                'model' => app($model)->withoutGlobalScopes()->with($with)->find($id)?->toArray(),
             ];
         } else {
             return [
-                'model' => app($model)->find($id)?->toArray(),
+                'model' => app($model)->withoutGlobalScopes()->find($id)?->toArray(),
             ];
         }
     }
