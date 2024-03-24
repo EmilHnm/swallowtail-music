@@ -146,14 +146,14 @@ const mutations: MutationTree<RootState> = {
   setCurrentIndex(state, payload: number) {
     if (state.shuffled) {
       if (state.shuffledQueue.length <= payload) {
-        if (state.repeat != "off") {
+        if (state.repeat == "off") {
           return;
         } else {
           state.currentIndex = 0;
           return;
         }
       } else if (payload < 0) {
-        if (state.repeat != "off") {
+        if (state.repeat == "off") {
           state.currentIndex = state.shuffledQueue.length - 1;
           state.isPlaying = false;
           return;
@@ -166,14 +166,14 @@ const mutations: MutationTree<RootState> = {
       return;
     }
     if (state.queues.length <= payload) {
-      if (state.repeat != "off") {
+      if (state.repeat == "off") {
         return;
       } else {
         state.currentIndex = 0;
         return;
       }
     } else if (payload < 0) {
-      if (state.repeat != "off") {
+      if (state.repeat == "off") {
         state.currentIndex = state.queues.length - 1;
         state.isPlaying = false;
         return;
