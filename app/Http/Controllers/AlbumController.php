@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TopManager;
 use Carbon\Carbon;
 use App\Models\Song;
 use App\Models\Album;
@@ -222,12 +223,8 @@ class AlbumController extends Controller
 
     public function getLatestAlbum()
     {
-        $albums = Album::with(['user'])
-            ->withCount(['song' => fn ($query) => $query->where('display', 'public')])
-            ->having('song_count', '>', 0)
-            ->take(8)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $albums = app(TopManager::class)->getTopAlbums();
+        \Log::info('Latest Album');
         return response()->json([
             "status" => "success",
             "albums" => $albums,

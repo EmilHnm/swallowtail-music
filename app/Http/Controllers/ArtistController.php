@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Song;
 use App\Models\Artist;
+use App\Services\TopManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -68,10 +69,7 @@ class ArtistController extends Controller
 
     public function getTop()
     {
-        $artist = DB::table("artists")
-            ->orderBy("listens", "desc")
-            ->limit(8)
-            ->get();
+        $artist = app(TopManager::class)->getTopArtists();
         return response()->json([
             "status" => "success",
             "artists" => $artist,
