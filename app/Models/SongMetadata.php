@@ -12,6 +12,7 @@ class SongMetadata extends Model
     use HasFactory;
     use AsSource, AdvancedFilters;
 
+
     public function song()
     {
         return $this->belongsTo(Song::class, 'song_id');
@@ -22,7 +23,7 @@ class SongMetadata extends Model
         if (!$this->lyrics) {
             return null;
         }
-        $lyrics = json_decode($this->lyrics)->lyric ?? [];
+        $lyrics = json_decode(json_decode($this->lyrics)) ?? [];
         if (count($lyrics) > 1)
             return $lyrics;
         elseif (count($lyrics) == 1)

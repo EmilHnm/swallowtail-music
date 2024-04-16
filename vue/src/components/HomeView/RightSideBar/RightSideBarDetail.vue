@@ -40,7 +40,9 @@
           </BaseTooltipVue>
         </div>
       </div>
-      <div class="playing-details__meta--options">
+      <div
+        class="playing-details__meta--options"
+      >
         <button @click="menu.open = !menu.open">
           <IconThreeDots />
         </button>
@@ -123,7 +125,7 @@
       </div>
       <div
         class="playing-details__lyrics--error"
-        v-if="lyrics.length == 0 && !lyrics_loading"
+        v-if="lyrics.length == 0 || !lyrics_loading"
       >
         No lyrics found for this song
       </div>
@@ -421,6 +423,8 @@ export default defineComponent({
         gap: 10px;
         backdrop-filter: blur(10px);
         overflow: hidden;
+        max-height: 250px;
+        overflow-y: scroll;
         & > * {
           cursor: pointer;
         }

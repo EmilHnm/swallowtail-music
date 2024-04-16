@@ -24,7 +24,7 @@ trait SongMetadataAdminController
 
         try {
             $songMetadata = SongMetadata::find($id);
-            $songMetadata->lyrics = json_encode(['lyric' => explode("\n", $lyric)]);
+            $songMetadata->lyrics = json_encode(json_encode(explode("\n", $lyric)));
             $songMetadata->save();
         } catch (\Exception $e) {
             Toast::error($e->getMessage());

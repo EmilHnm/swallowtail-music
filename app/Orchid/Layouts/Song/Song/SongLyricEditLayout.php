@@ -26,7 +26,8 @@ class SongLyricEditLayout extends Rows
         $lyric = '';
         $raw_lyric = SongMetadata::find($this->query->get('id'));
         if ($raw_lyric) {
-            $lyric = json_decode($raw_lyric->lyrics)->lyric ?? [];
+            \Log::info(gettype(json_decode(json_decode($raw_lyric->lyrics))));
+            $lyric = json_decode(json_decode($raw_lyric->lyrics)) ?? [];
             $lyric = implode("\n", $lyric);
         }
         return [
