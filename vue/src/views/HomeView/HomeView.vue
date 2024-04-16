@@ -179,8 +179,7 @@ export default defineComponent({
           if (err instanceof DOMException && err.name === "AbortError") {
             return;
           } else {
-            this.dialogWaring.show = true;
-            this.dialogWaring.content = "Can't load song";
+            this.setCurrentIndex(this.getCurrentIndex + 1);
           }
         });
     },
