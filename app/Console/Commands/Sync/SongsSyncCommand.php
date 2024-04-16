@@ -53,17 +53,15 @@ class SongsSyncCommand extends Command
                 'Authorization' => 'Bearer ' . $token,
             ]
         ]);
-
         foreach (range($from, $to) as $id) {
-            $song = Song::where('id', $id)
+            $song = Song::withoutGlobalScopes(['duration', 'playable'])->where('id', $id)
                 ->whereDoesntHave('file')
-                ->when($this->option('force'), fn(Song $q)
-                    => $q->orWhereHas('file', fn($q)
-                        => $q->where('referer', RefererEnum::CRAWLER)
-                    )
-                )
+//                ->when($this->option('force'), function ($q) {
+//                    return $q->orWhereHas('file', fn($qe)
+//                        => $qe->where('referer', RefererEnum::CRAWLER)
+//                    );}
+//                )
                 ->first();
-
             if ($song) {
                 $this->info("Syncing song " . $song->id . " - " . $song->title);
                 try {
@@ -80,12 +78,13 @@ class SongsSyncCommand extends Command
                         $size = Storage::disk($raw_data['storage_type'])->size($raw_data['storage']);
                         $hash = hash('md5', Storage::disk($raw_data['storage_type'])->get($raw_data['storage']));
                         SongMetadata::unguard();
+
                         $file = SongMetadata::updateOrCreate([
                             'song_id' => $song->song_id
                         ], [
                             'file_path' => $raw_data['storage'],
                             'driver' => $raw_data['storage_type'],
-                            'lyrics' => $raw_data['lyric']['lyrics'],
+                            'lyrics' => $raw_data['lyric'] ? json_encode($raw_data['lyric']['lyrics']) : null,
                             'size' =>   $size,
                             'hash' => $hash,
                             'status' => SongMetadataStatusEnum::PUBLISH,
@@ -93,37 +92,37 @@ class SongsSyncCommand extends Command
                             'duration' => $ffdisk->getDurationInSeconds(),
                         ]);
 
+
                         $song->artist()->detach();
 
                         foreach ($raw_data['artists'] as $artist) {
                             $artist = Artist::where('artist_id', 'artist_' . $artist['channel_id'])
-                                ->orWhere('id', $artist['id'])->firstOrFail();
+                                ->orWhere('id', $artist['id'])->first();
                             if ($artist) {
                                 $song->artist()->attach($artist->artist_id);
                                 $this->warn("   Syncing with artist " . $artist->name);
                             }
                         }
-
                         $song->genre()->detach();
                         foreach ($raw_data['genres'] as $genre) {
                             $genre_data = \App\Models\Genre::where('genre_id', 'genre_' . $genre['id'])
-                                ->orWhere('id', $genre['id'])->firstOrFail();
+                                ->orWhere('id', $genre['id'])->first();
                             if ($genre_data) {
                                 $song->genre()->attach($genre_data->genre_id);
                                 $this->warn("   Syncing with genre " . $genre_data->name);
                             }
                         }
-
+//
                         SongMetadata::reguard();
                         $song->save();
 
                         $song->searchable();
                     }
                 } catch (\Exception $e) {
-                    \Log::error("Error syncing song " . $song->id . " - " . $song->title . " with errors " . $e);
+                    $this->error($e->getMessage());
                     continue;
                 }
-                sleep(2);
+                sleep(1);
             } else {
                 $this->warn("Song not found with id " . $id);
             }
