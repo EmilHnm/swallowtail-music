@@ -26,6 +26,16 @@ export const songModule = {
         },
       });
     },
+    getRelatedSongs(context: any, payload: { token: string; song_id: string }) {
+      return fetch(`${environment.api}/song/${payload.song_id}/related`, {
+        method: "GET",
+        headers: {
+          Accept: "application-json",
+          Authorization: `Bearer ${payload.token}`,
+          "Content-Type": "application/json",
+        },
+      });
+    },
     getSongForPlay(context: any, payload: { token: string; song_id: string }) {
       return fetch(`${environment.api}/song/${payload.song_id}/play`, {
         method: "GET",

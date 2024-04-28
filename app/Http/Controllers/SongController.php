@@ -221,6 +221,21 @@ class SongController extends Controller
         ]);
     }
 
+    public function getRelatedSongs($id)
+    {
+        $song = Song::find($id);
+        if (!$song) {
+            return response()->json([
+                "status" => "error",
+                "message" => "Song not found",
+            ]);
+        }
+        return response()->json([
+            "status" => "success",
+            "songs" => $song->related,
+        ]);
+    }
+
     public function increaseSongListens($id, Request $request)
     {
         $song = Song::find($id);

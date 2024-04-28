@@ -21,25 +21,6 @@ return [
                         'type' => 'text',
                         'analyzer' => 'standard',
                     ],
-                    'data' => [
-                        'type' => 'object',
-                        'properties' => [
-
-                        ],
-                    ],
-                    'artist' => [
-                        'type' => 'nested',
-                        "properties" => [
-                            "name" => [
-                                "type" => "text",
-                                "analyzer" => "standard",
-                            ],
-                            "normalized_name" => [
-                                "type" => "text",
-                                "analyzer" => "standard",
-                            ],
-                        ],
-                    ],
                     'album' => [
                         'type' => 'nested',
                         "properties" => [

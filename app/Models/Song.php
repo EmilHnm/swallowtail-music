@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enum\SongMetadataStatusEnum;
+use App\Models\Es\RawHits;
 use App\Models\Traits\AdvancedFilters;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
@@ -95,5 +96,15 @@ class Song extends Model
     public function isPublishable() : bool
     {
         return $this->artist()->exists() && $this->genre()->exists() && $this->file()->where('status', SongMetadataStatusEnum::PUBLISH)->exists();
+    }
+
+    public function getRelatedAttribute(): \Illuminate\Database\Eloquent\Collection  {
+        $artistQuery = $this->artist()->get()->map(fn($artist) => $artist->artist_id)->join(' OR ');
+        $genreQuery = $this->genre()->get()->map(fn($genre) => $genre->genre_id)->join(' OR ');
+        return $this->search("artist.artist_id:($artistQuery)^3 OR genre.genre_id:($genreQuery)^2 OR album_id:({$this->album->album_id})^1.5")
+            ->take(9)
+            ->where("display", "public")
+            ->query(fn ($query) => $query->where("song_id", "!=", $this->song_id))
+            ->get()->load(["artist", "album", "like"]);
     }
 }
