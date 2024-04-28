@@ -161,7 +161,7 @@
           <BaseListItem
             v-for="playlist in playlists"
             :key="playlist.playlist_id"
-            @click="onAddSongToPlaylistlist(playlist.playlist_id)"
+            @click="onAddSongToPlaylist(playlist.playlist_id)"
             >{{ playlist.title }}</BaseListItem
           >
         </div>
@@ -266,7 +266,7 @@ export default defineComponent({
     selectSong() {
       this.$emit("selectSong", this.data.song_id);
     },
-    onAddSongToPlaylistlist(id: string) {
+    onAddSongToPlaylist(id: string) {
       this.isLoading = true;
       this.addSongToPlaylist({
         token: this.token,

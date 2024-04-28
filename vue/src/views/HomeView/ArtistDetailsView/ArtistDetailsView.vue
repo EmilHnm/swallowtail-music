@@ -85,7 +85,6 @@ import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import globalEmitListener from "@/shared/constants/globalEmitListener";
-import { songData } from "@/model/songModel";
 
 type artistData = artist & {
   total_album: number;

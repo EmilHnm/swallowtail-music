@@ -224,7 +224,6 @@ class AlbumController extends Controller
     public function getLatestAlbum()
     {
         $albums = app(TopManager::class)->getTopAlbums();
-        \Log::info('Latest Album');
         return response()->json([
             "status" => "success",
             "albums" => $albums,
