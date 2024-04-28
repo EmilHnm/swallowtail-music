@@ -2,6 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap");
 
 body {
+  --swiper-navigation-color: var(--color-primary);
   background-color: var(--background-color-primary);
   background: var(--background-url) center;
   color: var(--text-primary-color);
