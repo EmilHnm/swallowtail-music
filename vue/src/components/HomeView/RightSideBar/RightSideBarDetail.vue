@@ -40,9 +40,7 @@
           </BaseTooltipVue>
         </div>
       </div>
-      <div
-        class="playing-details__meta--options"
-      >
+      <div class="playing-details__meta--options">
         <button @click="menu.open = !menu.open">
           <IconThreeDots />
         </button>
@@ -106,6 +104,35 @@
         </div>
       </div>
     </div>
+    <div class="playing-details__related">
+      <h3>Maybe you like</h3>
+      <div class="playing-details__related--list">
+        <swiper
+          :slides-per-view="1"
+          v-if="relatedSong.length > 0 && !relatedSongLoading"
+          :navigation="true"
+        >
+          <swiper-slide v-for="(group, index) in relatedSong" :key="index">
+            <div class="playing-details__related--list--group">
+              <BaseSongItem
+                v-for="song in group"
+                :data="song"
+                @select-song="playSong"
+              />
+            </div>
+          </swiper-slide>
+        </swiper>
+        <div class="playing-details__related--loading" v-if="relatedSongLoading">
+          <BaseCircleLoad />
+        </div>
+        <div
+          class="playing-details__related--error"
+          v-if="relatedSong.length == 0 && !relatedSongLoading"
+        >
+          No related songs found
+        </div>
+      </div>
+    </div>
     <div
       class="playing-details__lyric"
       :style="{
@@ -134,16 +161,23 @@
 </template>
 
 <script lang="ts">
+import "swiper/css";
+import "swiper/css/navigation";
 import { defineComponent } from "vue";
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import { environment } from "@/environment/environment";
 import IconThreeDots from "@/components/icons/IconThreeDots.vue";
 import BaseDotLoading from "@/components/UI/BaseDotLoading.vue";
+import BaseCircleLoad from "@/components/UI/BaseCircleLoad.vue";
 import { ImageColor } from "@/mixins/ImageColor";
 import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
 import BaseListItem from "@/components/UI/BaseListItem.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import type { songData } from "@/model/songModel";
+import { _function } from "@/mixins";
+import { Swiper, SwiperSlide } from "swiper/vue";
+
 export default defineComponent({
   props: {
     isActive: {
@@ -156,6 +190,8 @@ export default defineComponent({
       environment,
       lyrics: [] as string[],
       lyrics_loading: false,
+      relatedSong: [] as songData[][],
+      relatedSongLoading: false,
       album_cover_color: "var(--background-glass-color-primary)",
       lyricsColor: "var(--text-primary-color)",
       imgCover: null as HTMLImageElement | null,
@@ -169,9 +205,14 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions("song", ["getSongLyrics", "likeSong", "likedSong"]),
+    ...mapActions("song", [
+      "getSongLyrics",
+      "likeSong",
+      "likedSong",
+      "getRelatedSongs",
+    ]),
     ...mapActions("playlist", ["addSongToPlaylist"]),
-    ...mapMutations("queue", ["setCurrentSongLike"]),
+    ...mapMutations("queue", ["setCurrentSongLike", "setQueue", "setCurrentIndex"]),
     songChanged() {
       this.lyrics_loading = true;
       this.getSongLyrics({
@@ -191,6 +232,25 @@ export default defineComponent({
           this.lyrics = [];
           this.lyrics_loading = false;
         });
+      this.relatedSongLoading = true;
+      this.getRelatedSongs({
+        song_id: this.playingAudio.song_id,
+        token: this.token,
+      })
+        .then((res) => res.json())
+        .then((data: any) => {
+          if (data.status == "success") {
+            this.relatedSongLoading = false;
+            const resSongs: songData[] =
+              data.songs instanceof Object
+                ? Object.values(data.songs)
+                : data.songs;
+            this.relatedSong = _function.chunkArray(resSongs, 3);
+          }
+        })
+        .catch(() => {
+          this.relatedSongLoading = false;
+        });
     },
     onLikeSong() {
       this.menu.isLikeLoading = true;
@@ -201,6 +261,13 @@ export default defineComponent({
         this.loadLiked();
         this.menu.isLikeLoading = false;
       });
+    },
+    playSong(id: string) {
+      const song = this.relatedSong.flat().find((song) => song.song_id === id);
+      if (song) {
+        this.setQueue([song]);
+        this.setCurrentIndex(0);
+      }
     },
     loadLiked() {
       this.menu.isLikeLoading = true;
@@ -326,11 +393,15 @@ export default defineComponent({
     });
   },
   components: {
+    BaseCircleLoad,
+    Swiper,
+    SwiperSlide,
     IconThreeDots,
     BaseDotLoading,
     BaseTooltipVue,
     BaseListItem,
     BaseLineLoad,
+    BaseSongItem,
   },
 });
 </script>
@@ -461,6 +532,36 @@ export default defineComponent({
     }
     &--error {
       text-align: center;
+    }
+  }
+  &__related {
+    width: 100%;
+    h3 {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 0 20px;
+    }
+    &--loading {
+      width: 100%;
+      min-height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    &--error {
+      min-height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    &--list {
+      width: 100%;
+      --swiper-navigation-size: 30px;
+
+      &--group {
+        width: 100%;
+      }
     }
   }
 }

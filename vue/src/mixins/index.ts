@@ -1,5 +1,8 @@
+// @ts-ignore
+
 import type { songFileUpload } from "@/model/songModel";
 
+// @ts-ignore
 export const _function = {
   // validate
   validateSongFileType(file: File): boolean {
@@ -55,6 +58,13 @@ export const _function = {
     });
   },
   // Array
+  chunkArray(array: any[], size: number): any[] {
+    const groups = [];
+    for (let i = 0; i < array.length; i += size) {
+      groups.push(array.slice(i, i + size));
+    }
+    return groups;
+  },
   pushItemtoArray(item: any, array: any[]): void {
     array.push(item);
   },

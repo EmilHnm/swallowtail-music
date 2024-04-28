@@ -342,6 +342,7 @@ const actions: ActionTree<RootState, RootState> = {
             if (data.songs.length) {
               context.commit("setQueue", data.songs);
               context.commit("setCurrentIndex", 0);
+              context.commit("setPlaying", true);
               document.dispatchEvent(new CustomEvent("play"));
               res({ status: "success", message: "Playing" });
             } else {
@@ -378,6 +379,7 @@ const actions: ActionTree<RootState, RootState> = {
           if (data.status === "success") {
             context.commit("setQueue", data.songs);
             context.commit("setCurrentIndex", 0);
+            context.commit("setPlaying", true);
             document.dispatchEvent(new CustomEvent("play"));
             res({ status: "success", message: "Playing" });
           } else {
