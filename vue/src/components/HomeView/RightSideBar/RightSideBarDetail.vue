@@ -496,6 +496,7 @@ export default defineComponent({
         overflow: hidden;
         max-height: 250px;
         overflow-y: scroll;
+        z-index: 20;
         & > * {
           cursor: pointer;
         }

@@ -27,8 +27,8 @@ declare global {
     ): Record<string, T[]>;
   }
   interface Window {
-    io: typeof io; // 👈️ turn off type checking
-    Echo: Echo; // 👈️ turn off type checking
+    io: typeof io;
+    Echo: Echo;
   }
 }
 

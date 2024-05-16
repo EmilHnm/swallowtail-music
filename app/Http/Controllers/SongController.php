@@ -93,7 +93,9 @@ class SongController extends Controller
             $song->save();
             $song->file->save();
             //            dispatch(new ProcessSongConvert(Song::find($id), $disk, $name_final));
-            ProcessSongConvert::dispatchSync(Song::find($id), 'raws_audio', $name_final);
+
+            ProcessSongConvert::dispatch(Song::find($id), 'raws_audio', $name_final);
+
             return response()->json(['uploaded' => true]);
         }
     }

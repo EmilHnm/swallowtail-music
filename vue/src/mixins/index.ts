@@ -157,7 +157,7 @@ export const _function = {
   },
   // chunk song file
   createChunks(file: songFileUpload, chunk_size: number) {
-    let chunks = Math.ceil(file.file.size / chunk_size);
+    const chunks = Math.ceil(file.file.size / chunk_size);
     for (let i = 0; i < chunks; i++) {
       file.blob.push(
         file.file.slice(

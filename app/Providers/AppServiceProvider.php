@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Http\Request;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Orchid\Platform\Models\User;
 use Orchid\Support\Facades\Dashboard;
@@ -36,5 +39,8 @@ class AppServiceProvider extends ServiceProvider
             ],
         ]);
 
+        RateLimiter::for('listens', function (Request $request) {
+            return Limit::perMinutes(1, 1)->by($request->ip());
+        });
     }
 }
