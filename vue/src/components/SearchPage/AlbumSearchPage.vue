@@ -29,7 +29,7 @@ import { environment } from "@/environment/environment";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
-import {mapActions} from "vuex";
+import { mapActions } from "vuex";
 
 type albumData = album & { song_count: number };
 declare module "@vue/runtime-core" {

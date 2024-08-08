@@ -56,10 +56,13 @@
       <div class="control__left--play">
         <IconPlay @click="playArtistSong" />
       </div>
-      <div class="control__left--menu" v-click-outside="() => (isMenuOpen = false)">
+      <div
+        class="control__left--menu"
+        v-click-outside="() => (isMenuOpen = false)"
+      >
         <IconHorizontalThreeDot @click="toggleMenu" />
         <transition name="playlist-menu">
-          <div class="playlist-menu" v-if="isMenuOpen">
+          <div class="playlist-menu" v-show="isMenuOpen">
             <BaseListItem @click="addArtistSongToQueue"
               >Add to Queue</BaseListItem
             >

@@ -140,7 +140,7 @@
       >
         <IconHorizontalThreeDot @click="toggleMenu" />
         <transition name="playlist-menu">
-          <div class="playlist-menu" v-if="isMenuOpen">
+          <div class="playlist-menu" v-show="isMenuOpen">
             <BaseListItem @click="scrollToSearch">Add Song</BaseListItem>
             <BaseListItem @click="addPlaylistToQueue"
               >Add to Queue</BaseListItem

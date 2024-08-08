@@ -68,7 +68,7 @@
           :space-between="10"
           navigation
         >
-          <swiper-slide v-for="album in latestAlbums">
+          <swiper-slide v-for="album in latestAlbums" :key="album.album_id">
             <BaseCardAlbum
               :key="album.album_id"
               :title="album.name"
@@ -87,7 +87,7 @@
           :space-between="10"
           navigation
         >
-          <swiper-slide v-for="i in 8">
+          <swiper-slide v-for="i in 8" :key="i">
             <BaseSkeletonsLoadingCard />
           </swiper-slide>
         </swiper>
@@ -102,7 +102,7 @@
           :space-between="10"
           navigation
         >
-          <swiper-slide v-for="album in topAlbums">
+          <swiper-slide v-for="album in topAlbums" :key="album.album_id">
             <BaseCardAlbum
               :key="album.album_id"
               :title="album.name"
@@ -121,7 +121,7 @@
           :space-between="10"
           navigation
         >
-          <swiper-slide v-for="i in 8">
+          <swiper-slide v-for="i in 8" :key="i">
             <BaseSkeletonsLoadingCard />
           </swiper-slide>
         </swiper>
@@ -134,7 +134,7 @@
           :space-between="10"
           navigation
         >
-          <swiper-slide v-for="artist in topArtist">
+          <swiper-slide v-for="artist in topArtist" :key="artist.artist_id">
             <BaseCardArtist :data="artist" @playArtistSong="playArtistSong" />
           </swiper-slide>
         </swiper>
@@ -144,7 +144,7 @@
           :space-between="10"
           navigation
         >
-          <swiper-slide v-for="i in 8">
+          <swiper-slide v-for="i in 8" :key="i">
             <BaseSkeletonsLoadingCard />
           </swiper-slide>
         </swiper>
@@ -184,12 +184,12 @@ import "swiper/css/navigation";
 import { Swiper, SwiperSlide } from "swiper/vue";
 
 import { defineComponent } from "vue";
-import {mapActions, mapGetters, mapMutations} from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { environment } from "@/environment/environment";
 import { useMeta } from "vue-meta";
 import type { album } from "@/model/albumModel";
 import type { artist } from "@/model/artistModel";
-import type {song, songData} from "@/model/songModel";
+import type { song, songData } from "@/model/songModel";
 import type { user } from "@/model/userModel";
 import IconPlay from "@/components/icons/IconPlay.vue";
 import BaseSkeletonsLoadingCard from "@/components/UI/BaseSkeletonsLoadingCard.vue";
@@ -200,7 +200,6 @@ import globalEmitListener from "@/shared/constants/globalEmitListener";
 import BaseTooltipVue from "@/components/UI/BaseTooltip.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
 import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
-
 
 type LatestSong = song & {
   artist: artist[];

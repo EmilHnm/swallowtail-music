@@ -50,6 +50,8 @@ app.use(metaManager);
 app.directive("lazyload", LazyLoadDirective);
 app.directive("click-outside", ClickOutsideDirective);
 
+app.provide("metaManager", metaManager);
+
 SwiperCore.use([Navigation]);
 
 app.mount("#app");

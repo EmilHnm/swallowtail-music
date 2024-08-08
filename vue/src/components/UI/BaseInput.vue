@@ -26,7 +26,8 @@
         :cols="size.cols"
         :rows="size.rows"
         @input="update($event)"
-      >{{ modelValue }}</textarea>
+        >{{ modelValue }}</textarea
+      >
     </div>
   </div>
 </template>
