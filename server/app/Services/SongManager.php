@@ -5,21 +5,19 @@ namespace App\Services;
 use App\Models\Song;
 use App\Models\SongMetadata;
 use App\Enum\SongMetadataStatusEnum;
-use App\Services\StorageManager;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Events\SongConvertedSuccessFull;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
-use App\Listeners\SendSongConvertedSuccessFullListener;
 use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
 
 
 
 class SongManager
 {
-    private ?Song $song = null;
+    private ?Song $song;
 
-    private ?SongMetadata $SongMetadata = null;
+    private ?SongMetadata $SongMetadata;
 
     private $directory = "song_src";
 

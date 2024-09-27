@@ -16,6 +16,11 @@ export const environment = {
 
   notification_channel: import.meta.env.VITE_NOTIFICATION_CHANNEL,
 
+  reverb_key: import.meta.env.VITE_REVERB_APP_KEY,
+  reverb_host: import.meta.env.VITE_REVERB_HOST,
+  reverb_port: import.meta.env.VITE_REVERB_PORT,
+  reverb_scheme: import.meta.env.VITE_REVERB_SCHEME,
+
   //cache
   cache_timeout: (import.meta.env.VITE_CACHE_TIMEOUT ?? 10) * 60 * 1000,
 };

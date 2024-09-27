@@ -221,7 +221,7 @@ export default defineComponent({
         this.dialogWaring.show = true;
         return;
       }
-      if (_function.validateSongFileType(this.songFile) === false) {
+      if (!_function.validateSongFileType(this.songFile)) {
         this.dialogWaring.content = "Please upload a valid song file";
         this.dialogWaring.show = true;
         return;
@@ -239,7 +239,7 @@ export default defineComponent({
           return;
         }
       }
-      if (this.dialogWaring.show === true) {
+      if (this.dialogWaring.show) {
         alert("Some thong went wrong! Please refresh the page and try again!");
         return;
       }
@@ -257,7 +257,7 @@ export default defineComponent({
       });
       songForm.append("genre", JSON.stringify(genreArrUpload));
       this.dialogWaring.content =
-        "Uploading Song Infomation! Please do not close tab when uploading";
+        "Uploading Song Information! Please do not close tab when uploading";
       this.dialogWaring.show = true;
       this.uploadSong({ songForm: songForm, token: this.userToken })
         .then((res) => {

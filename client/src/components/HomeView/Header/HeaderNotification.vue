@@ -155,10 +155,8 @@ export default defineComponent({
   created() {
     const echo = window.Echo;
     echo
-      .channel(
-        `${environment.api_name}_database_private-${environment.notification_channel}.${this.user.user_id}`
-      )
-      .listen(`.${environment.notification_channel}`, () => {
+      .private(`users.${this.user.user_id}`)
+      .listen(`.${environment.notification_channel}`, (e) => {
         setTimeout(() => {
           this.getNotification();
           this.hasUnreadMessage = true;
@@ -170,9 +168,7 @@ export default defineComponent({
   },
   unmounted() {
     const echo = window.Echo;
-    echo.leave(
-      `swallowtail_music_database_private-${environment.notification_channel}.${this.user.user_id}`
-    );
+    echo.leave(`users.${this.user.user_id}`);
   },
   components: {
     IconBell,

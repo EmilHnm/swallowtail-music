@@ -1,16 +1,18 @@
 <template>
-  <AccountViewHeader
-    :isSideBarActive="isSideBarActive"
-    @toggleLeftSideBar="toggleSideBar"
-  />
-  <div class="wrapper">
-    <AccountViewSideBar
+  <div class="account">
+    <account-view-header
       :isSideBarActive="isSideBarActive"
-      @closeSideBar="toggleSideBar"
+      @toggleLeftSideBar="toggleSideBar"
     />
-    <main>
-      <RouterView />
-    </main>
+    <div class="wrapper">
+      <account-view-side-bar
+        :isSideBarActive="isSideBarActive"
+        @closeSideBar="toggleSideBar"
+      />
+      <main>
+        <router-view />
+      </main>
+    </div>
   </div>
 </template>
 
@@ -38,6 +40,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 $screen-width: 1280px;
+.account {
+  width: 100vw;
+}
 .wrapper {
   display: flex;
   width: 80%;

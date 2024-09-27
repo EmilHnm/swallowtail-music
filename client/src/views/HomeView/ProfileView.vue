@@ -316,11 +316,11 @@ $tablet-width: 768px;
     width: 100%;
     height: 100%;
     background: linear-gradient(60deg, var(--color-primary), transparent);
+    z-index: -1;
+    filter: blur(6px);
     @container main (max-width: #{$tablet-width}) {
       background: linear-gradient(180deg, var(--color-primary), transparent);
     }
-    z-index: -1;
-    filter: blur(6px);
   }
   & .header__image {
     width: 190px;
@@ -401,7 +401,7 @@ $tablet-width: 768px;
 }
 .detail {
   width: 100%;
-  padding: 20px 0px;
+  padding: 20px 0;
   h2 {
     padding: 0 20px;
   }

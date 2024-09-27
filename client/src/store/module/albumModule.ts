@@ -1,4 +1,5 @@
 import { environment } from "@/environment/environment";
+import type { AlbumForm } from "@/model/albumModel";
 
 export const albumModule = {
   namespaced: true,
@@ -211,6 +212,41 @@ export const albumModule = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${userToken}`,
         },
+      });
+    },
+    uploadAlbum(
+      context: any,
+      payload: {
+        token: string;
+        album: AlbumForm;
+        onprogress: (percent: ProgressEvent) => any;
+      }
+    ): Promise<Response> {
+      return new Promise((resolve: (data: Response) => any, reject) => {
+        const form = new FormData();
+        form.append("albumImage", payload.album.image);
+        form.append("albumTitle", String(payload.album.title));
+        form.append("albumReleaseYear", String(payload.album.releaseYear));
+        form.append("albumType", payload.album.type);
+        payload.album.songs.forEach((song, index) => {
+          form.append(`songName_${index}`, song.name);
+          form.append(`songFile_${index}`, song.file);
+        });
+        form.append("songCount", String(payload.album.songs.length));
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `${environment.api}/album/upload`, true);
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.setRequestHeader("Authorization", `Bearer ${payload.token}`);
+        xhr.upload.onprogress = (e: ProgressEvent) => {
+          payload.onprogress(e);
+        };
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            resolve(xhr.response);
+          } else {
+            reject(xhr.response);
+          }
+        };
       });
     },
   },

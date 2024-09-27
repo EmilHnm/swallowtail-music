@@ -103,9 +103,6 @@ export default defineComponent({
   background: var(--background-blur-color-primary);
   width: max-content;
   max-width: 400px;
-  @media screen and (max-width: 768px) {
-    max-width: 200px;
-  }
   padding: 10px;
   border-radius: 5px;
   color: var(--text-color-primary);
@@ -113,6 +110,9 @@ export default defineComponent({
   backdrop-filter: blur(10px);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 9999;
+  @media screen and (max-width: 768px) {
+    max-width: 200px;
+  }
   &.top,
   &.bottom {
     transform: translateX(-50%);

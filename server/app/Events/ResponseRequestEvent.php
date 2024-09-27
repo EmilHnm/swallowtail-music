@@ -30,7 +30,7 @@ class ResponseRequestEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('notifications.' . $this->response->request->requester),
+            new PrivateChannel('users.' . $this->response->request->requester),
         ];
     }
 

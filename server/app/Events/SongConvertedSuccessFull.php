@@ -37,7 +37,7 @@ class SongConvertedSuccessFull implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('notifications.' . $this->user->user_id),
+            new PrivateChannel("users.{$this->user->user_id}"),
         ];
     }
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
-import io from "socket.io-client";
 import Echo from "laravel-echo";
+import Pusher from "pusher-js";
 import { computed, defineComponent } from "vue";
 import { Timer } from "@/mixins/Timer";
 import { mapActions, mapGetters, mapMutations } from "vuex";
@@ -285,10 +285,16 @@ export default defineComponent({
     },
   },
   created() {
-    window.io = io;
+    window.Pusher = Pusher;
     window.Echo = new Echo({
-      broadcaster: "socket.io",
-      host: `${environment.socket_url}:${environment.socket_port}`,
+      broadcaster: "reverb",
+      key: environment.reverb_key,
+      wsHost: environment.reverb_host,
+      wsPort: environment.reverb_port,
+      wssPort: environment.reverb_port,
+      enabledTransports: ["ws", "wss"],
+      forceTLS: false,
+      authEndpoint: `${environment.api}/broadcasting/auth`,
       auth: {
         headers: {
           Authorization: `Bearer ${this.token}`,
@@ -335,7 +341,7 @@ export default defineComponent({
     document.addEventListener("contextmenu", (e) => {
       e.preventDefault();
     });
-    window.addEventListener("beforeunload", (e) => {
+    window.addEventListener("beforeunload", () => {
       this.recordPlayedDuration();
     });
   },
@@ -349,52 +355,67 @@ export default defineComponent({
 </script>
 
 <template>
-  <teleport to="body">
-    <BaseDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseDialog>
-    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
-      <template #default>
-        <BaseLineLoad />
-      </template>
-      <template #action>
-        <div></div>
-      </template>
-    </BaseDialog>
-  </teleport>
-  <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
-  <div class="main-body">
-    <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
-    <main>
-      <router-view @updatePlaylist="loadPlaylist" v-slot="{ Component }">
-        <keep-alive include="mainPage">
-          <component :is="Component" />
-        </keep-alive>
-      </router-view>
-    </main>
-
-    <HomeViewRightSideBar
+  <div class="home-root">
+    <teleport to="body">
+      <BaseDialog
+        :open="dialogWaring.show"
+        :title="dialogWaring.title"
+        :mode="dialogWaring.mode"
+        @close="closeDialog"
+      >
+        <template #default>
+          <p>{{ dialogWaring.content }}</p>
+        </template>
+      </BaseDialog>
+      <BaseDialog
+        :open="isLoading"
+        :title="'Loading ...'"
+        :mode="'announcement'"
+      >
+        <template #default>
+          <BaseLineLoad />
+        </template>
+        <template #action>
+          <div></div>
+        </template>
+      </BaseDialog>
+    </teleport>
+    <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
+    <div class="main-body">
+      <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
+      <main>
+        <router-view @updatePlaylist="loadPlaylist" v-slot="{ Component }">
+          <keep-alive include="mainPage">
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
+      </main>
+      <HomeViewRightSideBar
+        v-if="getQueue.length > 0"
+        :isActive="isRightSideBarActive"
+      />
+      <HomeUploadBox :isPlaying="!!getCurrentSong"></HomeUploadBox>
+    </div>
+    <HomeViewPlayer
       v-if="getQueue.length > 0"
-      :isActive="isRightSideBarActive"
+      :isPlaying="isPlaying"
+      :isWating="isAudioWaitting"
+      @toggleRightSideBar="toggleRightSideBar"
+      @onSetProgress="onSetProgress"
     />
-    <HomeUploadBox :isPlaying="!!getCurrentSong"></HomeUploadBox>
   </div>
-  <HomeViewPlayer
-    v-if="getQueue.length > 0"
-    :isPlaying="isPlaying"
-    :isWating="isAudioWaitting"
-    @toggleRightSideBar="toggleRightSideBar"
-    @onSetProgress="onSetProgress"
-  />
 </template>
 <style lang="scss" scoped>
+.home-root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
 .main-body {
   display: flex;
   position: relative;

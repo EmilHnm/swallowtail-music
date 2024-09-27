@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\StatisticController;
+use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SongController;
@@ -36,6 +37,8 @@ Route::middleware(["auth:sanctum", 'counter.requests'])->group(function () {
             "verificationEmail",
         ]);
     });
+
+    Route::match(['get', 'post'], '/broadcasting/auth', [BroadcastController::class, 'authenticate']);
 
     Route::prefix("artist")->group(function () {
         Route::get("/", [ArtistController::class, "getAll"]);

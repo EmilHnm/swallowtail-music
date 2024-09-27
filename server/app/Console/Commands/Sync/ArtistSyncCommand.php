@@ -76,6 +76,7 @@ class ArtistSyncCommand extends Command
 //                        $client->get($item['avatar'], ['sink' => public_path('storage/upload/artist_image/' . $item['id'] . '/avatar.jpg')]);
                         $artist->image_path = $item['id'] . '/avatar.jpg';
                     } catch (\Exception $e) {
+                        \Log::error($e->getMessage(), ['artist_id' => $item['id'], 'avatar' => $item['avatar']]);
                         $this->error($item['id'] . " - avatar url error");
                     }
                 }

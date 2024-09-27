@@ -130,12 +130,12 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
-import { mapGetters, mapActions } from "vuex";
-import { environment } from "@/environment/environment";
+import { mapActions, mapGetters } from "vuex";
 import { _function } from "@/mixins/index";
 import BaseInput from "@/components/UI/BaseInput.vue";
 import BaseButton from "@/components/UI/BaseButton.vue";
 import BaseDialog from "@/components/UI/BaseDialog.vue";
+import type { AlbumForm } from "@/model/albumModel";
 
 export default defineComponent({
   data() {
@@ -161,7 +161,7 @@ export default defineComponent({
       },
       dialogProgress: {
         title: "Uploading! Do not close this tab",
-        mode: "anouncement",
+        mode: "announcement",
         progress: 0,
         show: true,
       },
@@ -192,7 +192,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("uploadQueue", ["addFileToQueue"]),
-    ...mapActions("album", ["getAlbumAvailableTypes"]),
+    ...mapActions("album", ["getAlbumAvailableTypes", "uploadAlbum"]),
     albumImageChange(e: any) {
       if (e.target.files.length > 0) {
         if (!_function.validateImageFileType(e.target.files[0])) {
@@ -244,7 +244,6 @@ export default defineComponent({
         this.dialogWaring.show = true;
         return;
       }
-      let i = 0;
       this.songForm.forEach((item) => {
         if (item.songName === "") {
           this.dialogWaring.content = "Please enter song name";
@@ -258,42 +257,33 @@ export default defineComponent({
         }
         i++;
       });
-      let albumForm = new FormData();
-      albumForm.append("albumImage", this.albumImage);
-      albumForm.append("albumTitle", this.albumTitle);
-      albumForm.append("albumReleaseYear", this.albumReleaseYear);
-      albumForm.append("albumType", this.albumType);
-      i = 0;
-      this.songForm.forEach((item) => {
-        albumForm.append("songName_" + i, item.songName);
-        if (item.songFile) albumForm.append("songFile_" + i, item.songFile);
-        i++;
-      });
-      albumForm.append("songCount", this.songForm.length.toString());
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `${environment.api}/album/upload`, true);
-      xhr.setRequestHeader("Authorization", `Bearer ${this.userToken}`);
-      xhr.setRequestHeader("Accept", "multipart/form-data");
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const percentComplete = (e.loaded / e.total) * 100;
-          this.dialogProgress.progress = percentComplete;
-        }
+      const finalData: AlbumForm = {
+        image: this.albumImage,
+        title: this.albumTitle,
+        releaseYear: this.albumReleaseYear,
+        type: this.albumType,
+        songs: this.songForm.map((item) => ({
+          name: item.songName,
+          file: item.songFile,
+        })),
       };
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const response = JSON.parse(xhr.response);
+      this.uploadAlbum({
+        token: this.userToken,
+        album: finalData,
+        onprogress: (e: ProgressEvent) => {
+          if (e.lengthComputable) {
+            this.dialogProgress.progress = (e.loaded / e.total) * 100;
+          }
+        },
+      })
+        .then((res) => {
+          const response = JSON.parse(res);
           if (response.status == "success") {
             this.dialogWaring.content = response.message;
             this.dialogWaring.show = true;
             this.dialogWaring.mode = "anouncement";
             response.songs.forEach(
               (element: { song_id: string; index: number }) => {
-                // this.$emit("uploadSong", [
-                //   this.songForm[element.index].songFile,
-                //   element.song_id,
-                // ]);
                 this.addFileToQueue({
                   file: this.songForm[element.index].songFile,
                   song_id: element.song_id,
@@ -312,20 +302,16 @@ export default defineComponent({
                 songFile: null,
               },
             ];
-          } else {
-            this.dialogWaring.content = response.message;
-            this.dialogWaring.show = true;
-            this.dialogWaring.mode = "warning";
           }
-          this.dialogProgress.progress = 0;
-        } else {
-          this.dialogWaring.content = "Something went wrong";
+        })
+        .catch((err) => {
+          this.dialogWaring.content = err.message ?? "Something went wrong";
           this.dialogWaring.show = true;
           this.dialogWaring.mode = "warning";
+        })
+        .finally(() => {
           this.dialogProgress.progress = 0;
-        }
-      };
-      xhr.send(albumForm);
+        });
     },
     closeDialog() {
       this.dialogWaring.show = false;

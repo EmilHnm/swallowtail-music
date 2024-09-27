@@ -17,7 +17,9 @@ import LazyLoadDirective from "./shared/directives/LazyLoadDirective";
 import ClickOutsideDirective from "./shared/directives/ClickOutsideDirective";
 import type Echo from "laravel-echo";
 import SwiperCore from "swiper";
+import Pusher from "pusher-js";
 import { Navigation } from "swiper/modules";
+import io from "socket.io-client";
 
 declare global {
   interface ObjectConstructor {
@@ -29,6 +31,7 @@ declare global {
   interface Window {
     io: typeof io;
     Echo: Echo;
+    Pusher: typeof Pusher;
   }
 }
 

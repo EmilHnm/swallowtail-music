@@ -34,17 +34,17 @@ class ReviewResponseEvent implements ShouldBroadcast
     {
         if($this->response->status === ResponseStatusEnum::REJECTED) {
             return [
-                new PrivateChannel('notifications.' . $this->response->responder),
+                new PrivateChannel('users.' . $this->response->responder),
             ];
         } elseif($this->response->status === ResponseStatusEnum::APPROVED) {
             $request = $this->response->request()->first();
             return $request->responses()->get()->map(function(Response $response) {
-                return new PrivateChannel('notifications.' . $response->responder);
+                return new PrivateChannel('users.' . $response->responder);
             })->toArray();
         }
         return  [];
     }
-    
+
 
 
 }

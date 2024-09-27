@@ -204,6 +204,7 @@ $tablet-width: 768px;
     padding: 2rem;
     max-width: $tablet-width;
     margin: auto;
+    width: 100%;
     &--result {
       flex: 1;
       display: flex;

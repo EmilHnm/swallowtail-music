@@ -26,6 +26,14 @@ export default defineComponent({
   border: none;
   font-weight: 600;
   background-color: var(--color-primary);
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   &.warning {
     background: var(--color-warning);
   }
@@ -42,18 +50,6 @@ export default defineComponent({
   &.accent {
     background: var(--color-accent);
   }
-
-  /* Material Design primary color */
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  font-size: 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-
-  /* Material Design shadow */
 
   &:hover {
     background-color: var(--color-secondary);

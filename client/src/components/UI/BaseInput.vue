@@ -91,11 +91,9 @@ export default defineComponent({
   width: 100%;
   &__label {
     display: block;
-    padding: 0px 2px;
-    font-size: 0.75rem;
+    padding: 0 2px;
     margin-bottom: 0.1rem;
     color: var(--color-primary);
-
     font-size: 1.2rem;
     transition: 0.3s;
     font-weight: bold;
@@ -118,7 +116,7 @@ export default defineComponent({
     width: 100%;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 5px 2px 5px 0px var(--color-primary-blur);
+    box-shadow: 5px 2px 5px 0 var(--color-primary-blur);
     backdrop-filter: blur(10px);
     background: var();
   }
