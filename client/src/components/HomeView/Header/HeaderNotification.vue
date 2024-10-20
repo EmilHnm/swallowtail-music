@@ -156,7 +156,7 @@ export default defineComponent({
     const echo = window.Echo;
     echo
       .private(`users.${this.user.user_id}`)
-      .listen(`.${environment.notification_channel}`, (e) => {
+      .listen(`.${environment.notification_channel}`, () => {
         setTimeout(() => {
           this.getNotification();
           this.hasUnreadMessage = true;

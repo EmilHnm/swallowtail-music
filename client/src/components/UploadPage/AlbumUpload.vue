@@ -255,17 +255,18 @@ export default defineComponent({
           this.dialogWaring.show = true;
           return;
         }
-        i++;
       });
       const finalData: AlbumForm = {
         image: this.albumImage,
         title: this.albumTitle,
-        releaseYear: this.albumReleaseYear,
+        releaseYear: Number(this.albumReleaseYear),
         type: this.albumType,
-        songs: this.songForm.map((item) => ({
-          name: item.songName,
-          file: item.songFile,
-        })),
+        songs: this.songForm
+          .filter((item) => item.songFile instanceof File)
+          .map((item) => ({
+            name: item.songName,
+            file: item.songFile as File,
+          })),
       };
       this.uploadAlbum({
         token: this.userToken,

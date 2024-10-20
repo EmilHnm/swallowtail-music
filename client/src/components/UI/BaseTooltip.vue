@@ -1,7 +1,7 @@
 <template>
   <span class="tooltip-container" ref="container">
-    <Teleport to="body">
-      <Transition>
+    <teleport to="body">
+      <transition>
         <div
           class="tooltips"
           :class="position"
@@ -14,8 +14,8 @@
         >
           {{ tooltipText }}
         </div>
-      </Transition>
-    </Teleport>
+      </transition>
+    </teleport>
     <slot />
   </span>
 </template>
@@ -23,7 +23,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 export default defineComponent({
-  name: "Tooltip",
   props: {
     tooltipText: {
       type: String,

@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <teleport to="body">
     <BaseFlatDialog
       :open="isOpen"
       :title="title"
@@ -22,7 +22,7 @@
         </button>
       </template>
     </BaseFlatDialog>
-  </Teleport>
+  </teleport>
   <div class="trigger" @click="isOpen = true">
     <slot />
   </div>

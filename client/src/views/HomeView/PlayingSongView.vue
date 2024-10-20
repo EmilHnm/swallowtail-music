@@ -83,7 +83,7 @@ import type { artist } from "@/model/artistModel";
 import type { like } from "@/model/likeModel";
 import type { song } from "@/model/songModel";
 import globalEmitListener from "@/shared/constants/globalEmitListener";
-import {mapGetters} from "vuex";
+import { mapGetters } from "vuex";
 type songData = song & {
   album: album;
   artist: artist[];

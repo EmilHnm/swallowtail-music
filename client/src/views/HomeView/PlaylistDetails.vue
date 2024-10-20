@@ -749,9 +749,6 @@ $tablet-width: 768px;
 
     &__title {
       font-size: 32px;
-      @container main (max-width: #{$tablet-width}) {
-        font-size: 28px;
-      }
       color: #fff;
       font-weight: 900;
       cursor: pointer;
@@ -761,6 +758,10 @@ $tablet-width: 768px;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+
+      @container main (max-width: #{$tablet-width}) {
+        font-size: 28px;
+      }
     }
 
     &__description {
