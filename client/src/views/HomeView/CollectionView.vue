@@ -69,8 +69,6 @@ import globalEmitListener from "@/shared/constants/globalEmitListener";
 import IconHeartFilled from "@/components/icons/IconHeartFilled.vue";
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import { useMeta } from "vue-meta";
-import BaseDialog from "@/components/UI/BaseDialog.vue";
-import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
 import type { song } from "@/model/songModel";
 import type { album } from "@/model/albumModel";
 import type { like } from "@/model/likeModel";
@@ -93,8 +91,6 @@ export default defineComponent({
     BaseListItem,
     BaseSongItem,
     IconHeartFilled,
-    BaseDialog,
-    BaseLineLoad,
     BaseCircleLoad,
   },
   data() {
@@ -216,14 +212,13 @@ $tablet-width: 768px;
     width: 100%;
     height: 100%;
     background: linear-gradient(60deg, var(--color-primary), transparent);
+    z-index: -1;
+    filter: blur(6px);
     @container main  (max-width: #{$tablet-width}) {
       & {
         background: linear-gradient(180deg, var(--color-primary), transparent);
       }
     }
-
-    z-index: -1;
-    filter: blur(6px);
   }
   & .header__icon {
     width: 190px;

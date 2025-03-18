@@ -1,32 +1,30 @@
 <template>
-  <teleport to="body">
-    <BaseDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseDialog>
-    <BaseDialog
-      :open="dialogAlert.show"
-      :title="dialogAlert.title"
-      :mode="dialogAlert.mode"
-      @close="confirmForgotPassword"
-    >
-      <template #default>
-        <p>{{ dialogAlert.content }}</p>
-      </template>
-    </BaseDialog>
-    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
-      <template #default>
-        <BaseLineLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseDialog>
-  </teleport>
+  <BaseDialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+  </BaseDialog>
+  <BaseDialog
+    :open="dialogAlert.show"
+    :title="dialogAlert.title"
+    :mode="dialogAlert.mode"
+    @close="confirmForgotPassword"
+  >
+    <template #default>
+      <p>{{ dialogAlert.content }}</p>
+    </template>
+  </BaseDialog>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseDialog>
   <div class="forgot">
     <div class="forgot__header">
       <h1 class="forgot__title">Forgot Password</h1>

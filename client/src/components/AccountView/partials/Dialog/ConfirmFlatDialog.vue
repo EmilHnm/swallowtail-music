@@ -1,28 +1,26 @@
 <template>
-  <Teleport to="body">
-    <BaseFlatDialog
-      :open="isOpen"
-      :title="title"
-      :mode="mode"
-      @close="isOpen = false"
-    >
-      <template #default>
-        <slot name="message" />
-      </template>
-      <template #action>
-        <button @click="isOpen = false">Cancel</button>
-        <button
-          class="confirm"
-          @click="
-            isOpen = false;
-            $emit('confirm', passingData);
-          "
-        >
-          Confirm
-        </button>
-      </template>
-    </BaseFlatDialog>
-  </Teleport>
+  <BaseFlatDialog
+    :open="isOpen"
+    :title="title"
+    :mode="mode"
+    @close="isOpen = false"
+  >
+    <template #default>
+      <slot name="message" />
+    </template>
+    <template #action>
+      <button @click="isOpen = false">Cancel</button>
+      <button
+        class="confirm"
+        @click="
+          isOpen = false;
+          $emit('confirm', passingData);
+        "
+      >
+        Confirm
+      </button>
+    </template>
+  </BaseFlatDialog>
   <div class="trigger" @click="isOpen = true">
     <slot />
   </div>

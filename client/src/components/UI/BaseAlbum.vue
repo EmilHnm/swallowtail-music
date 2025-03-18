@@ -1,38 +1,36 @@
 <template>
-  <teleport to="body">
-    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
-      <template #default>
-        <BaseLineLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseDialog>
-    <BaseDialog
-      :open="isPlaylistOpening"
-      :title="'Select Playlist'"
-      :mode="'announcement'"
-      @close="isPlaylistOpening = false"
-    >
-      <template #default>
-        <BaseListItem
-          v-for="playlist in playlists"
-          :key="playlist.playlist_id"
-          @click="onAddAlbumToPlaylist(playlist.playlist_id)"
-          >{{ playlist.title }}</BaseListItem
-        >
-      </template>
-      <template #action><div></div></template
-    ></BaseDialog>
-    <BaseDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseDialog>
-  </teleport>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseDialog>
+  <BaseDialog
+    :open="isPlaylistOpening"
+    :title="'Select Playlist'"
+    :mode="'announcement'"
+    @close="isPlaylistOpening = false"
+  >
+    <template #default>
+      <BaseListItem
+        v-for="playlist in playlists"
+        :key="playlist.playlist_id"
+        @click="onAddAlbumToPlaylist(playlist.playlist_id)"
+        >{{ playlist.title }}</BaseListItem
+      >
+    </template>
+    <template #action><div></div></template
+  ></BaseDialog>
+  <BaseDialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+  </BaseDialog>
   <div class="album-container" ref="albumContainer">
     <div class="album__details">
       <div class="album__details--cover">
@@ -108,7 +106,7 @@
 import { defineComponent } from "vue";
 import type { album } from "@/model/albumModel";
 import { environment } from "@/environment/environment";
-import {mapActions, mapGetters, mapMutations} from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import IconHeartFilled from "@/components/icons/IconHeartFilled.vue";
 import IconHorizontalThreeDot from "@/components/icons/IconHorizontalThreeDot.vue";
 import BaseSongItem from "./BaseSongItem.vue";

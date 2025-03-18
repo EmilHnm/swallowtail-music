@@ -1,29 +1,27 @@
 <template>
-  <teleport to="body">
-    <BaseFlatDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-      <template #action>
-        <div></div>
-      </template>
-    </BaseFlatDialog>
-    <BaseFlatDialog
-      :open="isUploading"
-      :title="'Uploading'"
-      :mode="'announcement'"
-      @close="closeDialog"
-    >
-      <template #default>
-        <BaseLineLoad />
-      </template>
-    </BaseFlatDialog>
-  </teleport>
+  <BaseFlatDialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+    <template #action>
+      <div></div>
+    </template>
+  </BaseFlatDialog>
+  <BaseFlatDialog
+    :open="isUploading"
+    :title="'Uploading'"
+    :mode="'announcement'"
+    @close="closeDialog"
+  >
+    <template #default>
+      <BaseLineLoad />
+    </template>
+  </BaseFlatDialog>
 
   <div class="container" ref="container">
     <h2>Change Avatar</h2>

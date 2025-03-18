@@ -1,24 +1,22 @@
 <template>
-  <teleport to="body">
-    <BaseDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseDialog>
-    <ArtistRequestDialog
-      :is-open="isRequsetingArtist"
-      @artist-request-close="isRequsetingArtist = false"
-    />
-    <GenreRequestDialog
-      :is-open="isRequsetingGenre"
-      @genre-request-close="isRequsetingGenre = false"
-    />
-  </teleport>
+  <base-dialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+  </base-dialog>
+  <ArtistRequestDialog
+    :is-open="isRequsetingArtist"
+    @artist-request-close="isRequsetingArtist = false"
+  />
+  <GenreRequestDialog
+    :is-open="isRequsetingGenre"
+    @genre-request-close="isRequsetingGenre = false"
+  />
   <form class="uploadform">
     <div class="uploadform__control">
       <div

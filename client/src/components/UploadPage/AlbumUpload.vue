@@ -1,33 +1,31 @@
 <template>
-  <teleport to="body">
-    <BaseDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseDialog>
-    <BaseDialog
-      :open="dialogProgress.progress > 0"
-      :title="dialogProgress.title"
-      :mode="dialogProgress.mode"
-    >
-      <template #default>
-        <div class="progress">
-          <div
-            class="progress-bar"
-            :style="{ width: dialogProgress.progress + '%' }"
-          ></div>
-        </div>
-      </template>
-      <template #action>
-        <div></div>
-      </template>
-    </BaseDialog>
-  </teleport>
+  <base-dialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+  </base-dialog>
+  <base-dialog
+    :open="dialogProgress.progress > 0"
+    :title="dialogProgress.title"
+    :mode="dialogProgress.mode"
+  >
+    <template #default>
+      <div class="progress">
+        <div
+          class="progress-bar"
+          :style="{ width: dialogProgress.progress + '%' }"
+        ></div>
+      </div>
+    </template>
+    <template #action>
+      <div></div>
+    </template>
+  </base-dialog>
   <form class="uploadform" @submit.prevent="onFormSubmit">
     <div class="uploadform__control" ref="wrapper">
       <div class="uploadform__control--album" :class="{ mobile: mobile }">
@@ -255,17 +253,21 @@ export default defineComponent({
           this.dialogWaring.show = true;
           return;
         }
-        i++;
       });
       const finalData: AlbumForm = {
         image: this.albumImage,
         title: this.albumTitle,
-        releaseYear: this.albumReleaseYear,
+        releaseYear: +this.albumReleaseYear,
         type: this.albumType,
-        songs: this.songForm.map((item) => ({
-          name: item.songName,
-          file: item.songFile,
-        })),
+        songs: this.songForm
+          .filter(
+            (item) =>
+              item.songName && item.songFile && item.songFile instanceof File
+          ) // Ensure songFile is a File
+          .map((item) => ({
+            name: item.songName,
+            file: item.songFile as File, // Safe cast to File type
+          })),
       };
       this.uploadAlbum({
         token: this.userToken,

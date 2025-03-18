@@ -1,16 +1,14 @@
 <template>
-  <teleport to="body">
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseCircleLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
-  </teleport>
+  <BaseFlatDialog
+    :open="isLoading"
+    :title="'Loading ...'"
+    :mode="'announcement'"
+  >
+    <template #default>
+      <BaseCircleLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseFlatDialog>
   <header class="header">
     <div
       class="header__menuToggle"

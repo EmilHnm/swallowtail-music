@@ -1,90 +1,88 @@
 <template>
-  <teleport to="body">
-    <BaseDialog
-      v-if="playlistDetail.user_id == user.user_id"
-      :open="playlistEditDialog.show"
-      :title="playlistEditDialog.title"
-      :mode="playlistEditDialog.mode"
-      @close="closeEditDetailsDialog"
-    >
-      <template #default>
-        <div class="playlist-edit-container">
-          <div class="edit__image">
-            <input type="file" id="file" @change="onImageFileChange" />
-            <img v-if="edit.img" v-lazyload :data-url="edit.img" />
-            <img
-              v-else
-              v-lazyload
-              :data-url="
-                playlistDetail.image_path
-                  ? `${environment.playlist_cover}/${playlistDetail.image_path}`
-                  : `${environment.default}/no_image.jpg`
-              "
-            />
-            <label>
-              <span><IconBallPen /></span>
-              <span>Choose Photo</span>
-            </label>
+  <BaseDialog
+    v-if="playlistDetail.user_id == user.user_id"
+    :open="playlistEditDialog.show"
+    :title="playlistEditDialog.title"
+    :mode="playlistEditDialog.mode"
+    @close="closeEditDetailsDialog"
+  >
+    <template #default>
+      <div class="playlist-edit-container">
+        <div class="edit__image">
+          <input type="file" id="file" @change="onImageFileChange" />
+          <img v-if="edit.img" v-lazyload :data-url="edit.img" />
+          <img
+            v-else
+            v-lazyload
+            :data-url="
+              playlistDetail.image_path
+                ? `${environment.playlist_cover}/${playlistDetail.image_path}`
+                : `${environment.default}/no_image.jpg`
+            "
+          />
+          <label>
+            <span><IconBallPen /></span>
+            <span>Choose Photo</span>
+          </label>
+        </div>
+        <div class="edit__detail">
+          <div class="edit__detail--title">
+            <label for="title">Title</label>
+            <input type="text" id="title" v-model="edit.title" />
           </div>
-          <div class="edit__detail">
-            <div class="edit__detail--title">
-              <label for="title">Title</label>
-              <input type="text" id="title" v-model="edit.title" />
-            </div>
-            <div class="edit__detail--description">
-              <label for="title">Description</label>
-              <textarea
-                name="description"
-                id="description"
-                cols="30"
-                rows="10"
-                v-model="edit.description"
-              ></textarea>
-            </div>
+          <div class="edit__detail--description">
+            <label for="title">Description</label>
+            <textarea
+              name="description"
+              id="description"
+              cols="30"
+              rows="10"
+              v-model="edit.description"
+            ></textarea>
           </div>
         </div>
-      </template>
-      <template #action>
-        <BaseButton @click="onUpdateDetails">Update</BaseButton>
-        <BaseButton :mode="'warning'" @click="closeEditDetailsDialog"
-          >Cancel</BaseButton
+      </div>
+    </template>
+    <template #action>
+      <BaseButton @click="onUpdateDetails">Update</BaseButton>
+      <BaseButton :mode="'warning'" @click="closeEditDetailsDialog"
+        >Cancel</BaseButton
+      >
+    </template>
+  </BaseDialog>
+  <BaseDialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+  </BaseDialog>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseDialog>
+  <BaseDialog
+    :open="addToPlaylistDialog.show"
+    :title="addToPlaylistDialog.title"
+    :mode="addToPlaylistDialog.mode"
+    @close="closeAddToPlaylist"
+  >
+    <template #default>
+      <div v-for="playlist in playlists" :key="playlist.playlist_id">
+        <BaseListItem
+          v-if="playlist.playlist_id != playlistDetail.playlist_id"
+          @click="onAddToPlaylist(playlist.playlist_id)"
         >
-      </template>
-    </BaseDialog>
-    <BaseDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseDialog>
-    <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
-      <template #default>
-        <BaseLineLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseDialog>
-    <BaseDialog
-      :open="addToPlaylistDialog.show"
-      :title="addToPlaylistDialog.title"
-      :mode="addToPlaylistDialog.mode"
-      @close="closeAddToPlaylist"
-    >
-      <template #default>
-        <div v-for="playlist in playlists" :key="playlist.playlist_id">
-          <BaseListItem
-            v-if="playlist.playlist_id != playlistDetail.playlist_id"
-            @click="onAddToPlaylist(playlist.playlist_id)"
-          >
-            {{ playlist.title }}
-          </BaseListItem>
-        </div>
-      </template>
-    </BaseDialog>
-  </teleport>
+          {{ playlist.title }}
+        </BaseListItem>
+      </div>
+    </template>
+  </BaseDialog>
   <div class="playlist-header">
     <div
       class="header__background"
@@ -554,7 +552,7 @@ export default defineComponent({
         token: this.token,
         song_id: id,
         playlist_id: this.playlistDetail.playlist_id,
-      }).then((res) => {
+      }).then(() => {
         this.isLoading = false;
         this.loadPlaylistSong();
         this.loadSearchResult(this.searchText);
@@ -749,9 +747,6 @@ $tablet-width: 768px;
 
     &__title {
       font-size: 32px;
-      @container main (max-width: #{$tablet-width}) {
-        font-size: 28px;
-      }
       color: #fff;
       font-weight: 900;
       cursor: pointer;
@@ -761,6 +756,9 @@ $tablet-width: 768px;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      @container main (max-width: #{$tablet-width}) {
+        font-size: 28px;
+      }
     }
 
     &__description {
@@ -1147,13 +1145,13 @@ $tablet-width: 768px;
   .edit__image {
     aspect-ratio: 1/1;
     width: 40%;
-    @media screen and (max-width: $tablet-width) {
-      width: 60%;
-    }
     position: relative;
     flex: 0 0 auto;
     border-radius: 10px;
     overflow: hidden;
+    @media screen and (max-width: $tablet-width) {
+      width: 60%;
+    }
     input {
       opacity: 0;
       width: 100%;

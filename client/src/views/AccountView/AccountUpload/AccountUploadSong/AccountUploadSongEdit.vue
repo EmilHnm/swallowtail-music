@@ -1,34 +1,32 @@
 <template>
-  <teleport to="body">
-    <BaseFlatDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseFlatDialog>
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseCircleLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
-    <GenreRequestFlatDialog
-      :isOpen="isOpenRequestGenre"
-      @genre-request-close="isOpenRequestGenre = false"
-    />
-    <ArtistRequestFlatDialog
-      :isOpen="isOpenRequestArtist"
-      @artist-request-close="isOpenRequestArtist = false"
-    />
-  </teleport>
+  <BaseFlatDialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+  </BaseFlatDialog>
+  <BaseFlatDialog
+    :open="isLoading"
+    :title="'Loading ...'"
+    :mode="'announcement'"
+  >
+    <template #default>
+      <BaseCircleLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseFlatDialog>
+  <GenreRequestFlatDialog
+    :isOpen="isOpenRequestGenre"
+    @genre-request-close="isOpenRequestGenre = false"
+  />
+  <ArtistRequestFlatDialog
+    :isOpen="isOpenRequestArtist"
+    @artist-request-close="isOpenRequestArtist = false"
+  />
   <div class="main">
     <h3>Song Edit</h3>
     <form class="form" @submit.prevent="onSubmit">

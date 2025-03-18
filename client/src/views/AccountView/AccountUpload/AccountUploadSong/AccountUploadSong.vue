@@ -1,16 +1,14 @@
 <template>
-  <teleport to="body">
-    <BaseFlatDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseFlatDialog>
-  </teleport>
+  <BaseFlatDialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+  </BaseFlatDialog>
   <div class="main" ref="main">
     <h3>Song Uploaded Management</h3>
     <div class="data" v-if="Object.keys(uploadedSongList).length">
@@ -218,7 +216,7 @@ export default defineComponent({
           if (err instanceof DOMException && err.name === "AbortError") {
             return;
           }
-        });;
+        });
     },
     onClickPage(index: number) {
       this.paginate.currentPage = index;

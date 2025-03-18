@@ -1,23 +1,21 @@
 <template>
-  <teleport to="body">
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseCircleLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
-    <BaseFlatDialog
-      :open="alertDialog.show"
-      :title="alertDialog.title"
-      :mode="alertDialog.mode"
-      @close="onCloseDialog"
-      >{{ alertDialog.message }}</BaseFlatDialog
-    >
-  </teleport>
+  <BaseFlatDialog
+    :open="isLoading"
+    :title="'Loading ...'"
+    :mode="'announcement'"
+  >
+    <template #default>
+      <BaseCircleLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseFlatDialog>
+  <BaseFlatDialog
+    :open="alertDialog.show"
+    :title="alertDialog.title"
+    :mode="alertDialog.mode"
+    @close="onCloseDialog"
+    >{{ alertDialog.message }}</BaseFlatDialog
+  >
   <div class="container">
     <h2>Account Overview</h2>
     <div class="accounts">

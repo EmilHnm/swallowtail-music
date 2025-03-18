@@ -1,26 +1,24 @@
 <template>
-  <teleport to="body">
-    <BaseFlatDialog
-      :open="dialogWaring.show"
-      :title="dialogWaring.title"
-      :mode="dialogWaring.mode"
-      @close="closeDialog"
-    >
-      <template #default>
-        <p>{{ dialogWaring.content }}</p>
-      </template>
-    </BaseFlatDialog>
-    <BaseFlatDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseCircleLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseFlatDialog>
-  </teleport>
+  <BaseFlatDialog
+    :open="dialogWaring.show"
+    :title="dialogWaring.title"
+    :mode="dialogWaring.mode"
+    @close="closeDialog"
+  >
+    <template #default>
+      <p>{{ dialogWaring.content }}</p>
+    </template>
+  </BaseFlatDialog>
+  <BaseFlatDialog
+    :open="isLoading"
+    :title="'Loading ...'"
+    :mode="'announcement'"
+  >
+    <template #default>
+      <BaseCircleLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseFlatDialog>
   <div class="container">
     <h2>Security</h2>
     <div class="password">

@@ -1,6 +1,6 @@
-import type { RouteLocationNormalized } from "vue-router";
+import type { RouteLocation, RouteRecordRaw } from "vue-router";
 
-export const mainPageRoute = [
+export const mainPageRoute: RouteRecordRaw[] = [
   {
     path: "/home",
     name: "mainPage",
@@ -64,7 +64,7 @@ export const mainPageRoute = [
   {
     path: "artist/:id",
     name: "artistPage",
-    redirect: (to: RouteLocationNormalized) => ({
+    redirect: (to: RouteLocation) => ({
       name: "artistOverviewPage",
       params: { id: to.params.id },
     }),

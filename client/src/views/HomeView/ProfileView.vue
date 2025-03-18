@@ -1,16 +1,10 @@
 <template>
-  <teleport to="body"
-    ><BaseDialog
-      :open="isLoading"
-      :title="'Loading ...'"
-      :mode="'announcement'"
-    >
-      <template #default>
-        <BaseLineLoad />
-      </template>
-      <template #action><div></div></template>
-    </BaseDialog>
-  </teleport>
+  <BaseDialog :open="isLoading" :title="'Loading ...'" :mode="'announcement'">
+    <template #default>
+      <BaseLineLoad />
+    </template>
+    <template #action><div></div></template>
+  </BaseDialog>
   <div class="user-header">
     <div class="header__background"></div>
     <div class="header__image">
@@ -54,7 +48,7 @@
         :space-between="10"
         navigation
       >
-        <swiper-slide v-for="artist in topArtist">
+        <swiper-slide v-for="artist in topArtist" :key="artist.artist_id">
           <BaseCardArtist :data="artist" @playArtistSong="playArtistSong" />
         </swiper-slide>
       </swiper>
@@ -82,7 +76,10 @@
         :space-between="10"
         :navigation="userPlaylist.length >= itemPerSlide"
       >
-        <swiper-slide v-for="playlist in userPlaylist">
+        <swiper-slide
+          v-for="playlist in userPlaylist"
+          :key="playlist.playlist_id"
+        >
           <BaseCardAlbum
             :key="playlist.playlist_id"
             :title="playlist.title"
@@ -110,7 +107,7 @@ import BaseButton from "@/components/UI/BaseButton.vue";
 import BaseCardArtist from "@/components/UI/BaseCardArtist.vue";
 import BaseSongItem from "@/components/UI/BaseSongItem.vue";
 import BaseCardAlbum from "@/components/UI/BaseCardAlbum.vue";
-import {mapActions, mapGetters, mapMutations} from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import type { user } from "@/model/userModel";
 import type { artist } from "@/model/artistModel";
 import { environment } from "@/environment/environment";

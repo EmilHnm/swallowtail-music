@@ -100,7 +100,7 @@ export default defineComponent({
     canplay() {
       this.isAudioWaitting = false;
       if (this.isPlaying)
-        this.audio?.play().catch((error) => {
+        this.audio?.play().catch(() => {
           return;
         });
     },
@@ -111,7 +111,7 @@ export default defineComponent({
     loadeddata() {
       this.isAudioWaitting = false;
       if (this.isPlaying)
-        this.audio?.play().catch((error) => {
+        this.audio?.play().catch(() => {
           return;
         });
     },
@@ -202,7 +202,7 @@ export default defineComponent({
     },
     isPlaying() {
       if (this.isPlaying) {
-        this.audio?.play().catch((error) => {
+        this.audio?.play().catch(() => {
           return;
         });
         // visualizer
@@ -356,33 +356,31 @@ export default defineComponent({
 
 <template>
   <div class="home-root">
-    <teleport to="body">
-      <BaseDialog
-        :open="dialogWaring.show"
-        :title="dialogWaring.title"
-        :mode="dialogWaring.mode"
-        @close="closeDialog"
-      >
-        <template #default>
-          <p>{{ dialogWaring.content }}</p>
-        </template>
-      </BaseDialog>
-      <BaseDialog
-        :open="isLoading"
-        :title="'Loading ...'"
-        :mode="'announcement'"
-      >
-        <template #default>
-          <BaseLineLoad />
-        </template>
-        <template #action>
-          <div></div>
-        </template>
-      </BaseDialog>
-    </teleport>
-    <HomeViewHeader @toggleLeftSideBar="toggleLeftSideBar" />
+    <base-dialog
+      :open="dialogWaring.show"
+      :title="dialogWaring.title"
+      :mode="dialogWaring.mode"
+      @close="closeDialog"
+    >
+      <template #default>
+        <p>{{ dialogWaring.content }}</p>
+      </template>
+    </base-dialog>
+    <base-dialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action>
+        <div></div>
+      </template>
+    </base-dialog>
+    <home-view-header @toggleLeftSideBar="toggleLeftSideBar" />
     <div class="main-body">
-      <HomeViewLeftSideBar :isActive="isLeftSideBarActive" />
+      <home-view-left-side-bar :isActive="isLeftSideBarActive" />
       <main>
         <router-view @updatePlaylist="loadPlaylist" v-slot="{ Component }">
           <keep-alive include="mainPage">
@@ -390,13 +388,13 @@ export default defineComponent({
           </keep-alive>
         </router-view>
       </main>
-      <HomeViewRightSideBar
+      <home-view-right-side-bar
         v-if="getQueue.length > 0"
         :isActive="isRightSideBarActive"
       />
-      <HomeUploadBox :isPlaying="!!getCurrentSong"></HomeUploadBox>
+      <home-upload-box :isPlaying="!!getCurrentSong"></home-upload-box>
     </div>
-    <HomeViewPlayer
+    <home-view-player
       v-if="getQueue.length > 0"
       :isPlaying="isPlaying"
       :isWating="isAudioWaitting"
