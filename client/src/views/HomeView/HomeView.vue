@@ -1,0 +1,436 @@
+<script lang="ts">
+import Echo from "laravel-echo";
+import Pusher from "pusher-js";
+import { computed, defineComponent } from "vue";
+import { Timer } from "@/mixins/Timer";
+import { mapActions, mapGetters, mapMutations } from "vuex";
+import { environment } from "@/environment/environment";
+import type { song } from "@/model/songModel";
+import type { album } from "@/model/albumModel";
+import type { artist } from "@/model/artistModel";
+import type { like } from "@/model/likeModel";
+import HomeViewLeftSideBar from "@/components/HomeView/HomeViewLeftSideBar.vue";
+import HomeViewRightSideBar from "@/components/HomeView/RightSideBar/HomeViewRightSideBar.vue";
+import HomeViewPlayer from "@/components/HomeView/HomeViewPlayer.vue";
+import HomeViewHeader from "@/components/HomeView/Header/HomeViewHeader.vue";
+import BaseDialog from "@/components/UI/BaseDialog.vue";
+import BaseLineLoad from "@/components/UI/BaseLineLoad.vue";
+import HomeUploadBox from "@/components/HomeView/HomeUpload/HomeUploadBox.vue";
+
+type songData = song & {
+  album: album;
+  artist: artist[];
+  like: like[];
+};
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    playingAudioSrc: string;
+    playingAudio: songData;
+    token: string;
+  }
+}
+
+export default defineComponent({
+  name: "HomeView",
+  components: {
+    HomeViewLeftSideBar,
+    HomeViewRightSideBar,
+    HomeViewPlayer,
+    HomeViewHeader,
+    BaseDialog,
+    BaseLineLoad,
+    HomeUploadBox,
+  },
+  data() {
+    return {
+      isLeftSideBarActive: false,
+      isRightSideBarActive: false,
+      audio: null as HTMLAudioElement | null,
+      timeOut: null as null | Timer,
+      songLoadController: null as AbortController | null,
+      songLoadSignal: null as AbortSignal | null,
+      //play song property
+      isAudioWaitting: false,
+      // visualizer
+      ctx: null as AudioContext | null,
+      audioSource: null as MediaElementAudioSourceNode | null,
+      analayzer: null as AnalyserNode | null,
+      frequencyData: null as Uint8Array | null,
+      //dialog
+      dialogWaring: {
+        title: "Warning",
+        mode: "warning",
+        content: "Please fill in all the fields",
+        show: false,
+      },
+      isLoading: false,
+    };
+  },
+  provide() {
+    return {
+      playingAudio: computed(() => this.playingAudio),
+      progress: computed(() => this.progress),
+      isPlaying: computed(() => this.isPlaying),
+      audio: computed(() => this.audio),
+      frequencyData: computed(() => this.frequencyData),
+    };
+  },
+  methods: {
+    ...mapActions("playlist", ["getAccountPlaylist"]),
+    ...mapActions("statistic", ["saveTotalPlayedDuration"]),
+    ...mapMutations("queue", [
+      "setProgress",
+      "setPlaying",
+      "setCurrentIndex",
+      "clearQueue",
+    ]),
+    // NOTE: Sidebar control
+    toggleLeftSideBar() {
+      this.isLeftSideBarActive = !this.isLeftSideBarActive;
+    },
+    toggleRightSideBar(value: boolean) {
+      this.isRightSideBarActive = value;
+    },
+    // NOTE: Song event control
+    onSetProgress(progress: number) {
+      this.audio.currentTime =
+        (progress * this.playingSong.file.duration) / 100;
+    },
+    canplay() {
+      this.isAudioWaitting = false;
+      if (this.isPlaying)
+        this.audio?.play().catch(() => {
+          return;
+        });
+    },
+    waiting() {
+      this.isAudioWaitting = true;
+      this.audio.pause();
+    },
+    loadeddata() {
+      this.isAudioWaitting = false;
+      if (this.isPlaying)
+        this.audio?.play().catch(() => {
+          return;
+        });
+    },
+    // NOTE:visualizer
+    renderFrame() {
+      if (this.frequencyData && this.analayzer) {
+        this.analayzer.getByteFrequencyData(this.frequencyData);
+      }
+    },
+    // NOTE:playlist
+    loadPlaylist() {
+      this.getAccountPlaylist(this.token);
+    },
+    ...mapActions("song", ["increaseSongListens"]),
+    // NOTE: dialog
+    closeDialog() {
+      this.dialogWaring.show = false;
+    },
+    // song
+    loadNewTimer() {
+      this.timeOut = null;
+      this.timeOut = new Timer(() => {
+        this.increaseSongListens({
+          token: this.token,
+          song_id: this.playingSong.song_id,
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.status === "success") {
+              this.timeOut = null;
+            }
+          });
+      }, 45000);
+      this.timeOut.resume();
+    },
+    loadNewSong() {
+      this.audio.src = "";
+      this.audio.pause();
+      this.audio.load();
+      this.waiting();
+      if (!this.songLoadController) {
+        this.songLoadController = new AbortController();
+      } else {
+        this.songLoadController.abort();
+        this.songLoadController = new AbortController();
+      }
+      this.songLoadSignal = this.songLoadController.signal;
+      fetch(`${environment.api}/song/${this.playingSong.song_id}/stream`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+        signal: this.songLoadSignal,
+      })
+        .then((res) => res.blob())
+        .then((blob) => {
+          this.audio.src = URL.createObjectURL(blob);
+          this.audio.load();
+          if (this.isPlaying)
+            this.audio.play().catch(() => {
+              return;
+            });
+        })
+        .catch((err) => {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            return;
+          } else {
+            this.setCurrentIndex(this.getCurrentIndex + 1);
+          }
+        });
+    },
+    recordPlayedDuration() {
+      const playedDuration = Math.floor(this.audio.currentTime);
+      if (playedDuration > 45) {
+        this.saveTotalPlayedDuration({
+          token: this.token,
+          duration: playedDuration,
+        });
+      }
+    },
+  },
+  watch: {
+    repeat(n) {
+      this.audio.loop = n === "one";
+    },
+    volume() {
+      this.audio.volume = this.volume / 100;
+    },
+    isPlaying() {
+      if (this.isPlaying) {
+        this.audio?.play().catch(() => {
+          return;
+        });
+        // visualizer
+        if (this.timeOut) this.timeOut.resume();
+        if (this.ctx === null) {
+          this.ctx = new AudioContext();
+          this.audioSource = this.ctx.createMediaElementSource(this.audio);
+          this.analayzer = this.ctx.createAnalyser();
+          if (this.analayzer) {
+            this.audioSource.connect(this.analayzer);
+            this.audioSource.connect(this.ctx.destination);
+            this.frequencyData = new Uint8Array(
+              this.analayzer.frequencyBinCount
+            ) as any;
+            if (this.frequencyData)
+              this.analayzer.getByteFrequencyData(
+                this.frequencyData as Uint8Array
+              );
+          }
+        }
+      } else {
+        if (this.timeOut) this.timeOut.pause();
+        this.audio?.pause();
+      }
+    },
+    progress() {
+      if (this.isPlaying) {
+        this.renderFrame();
+      }
+    },
+    "$store.state.uploadQueue.getUploadingFile": {
+      handler(n) {
+        if (n) {
+          window.onbeforeunload = () =>
+            "Some files are uploading. Are you sure you want to leave?";
+        } else {
+          window.onbeforeunload = () => {};
+        }
+      },
+      immediate: true,
+      deep: true,
+    },
+    playingSong: {
+      handler(n: songData | null, o: songData | null) {
+        if (n && n.song_id !== o?.song_id) {
+          this.loadNewTimer();
+          this.recordPlayedDuration();
+          this.loadNewSong();
+        }
+      },
+      deep: true,
+    },
+  },
+  computed: {
+    ...mapGetters({
+      token: "auth/userToken",
+      currentSong: "queue/getCurrentSong",
+      getVolume: "queue/getVolume",
+      getRepeat: "queue/getRepeat",
+      getCurrentProgress: "queue/getCurrentProgress",
+      getCurrentSong: "queue/getCurrentSong",
+      getPlaying: "queue/getPlaying",
+      getCurrentIndex: "queue/getCurrentIndex",
+      getQueue: "queue/getQueue",
+    }),
+    playingSong(): songData {
+      return this.currentSong;
+    },
+    volume(): number {
+      return this.getVolume;
+    },
+    repeat(): string {
+      return this.getRepeat;
+    },
+    progress(): number {
+      return this.getCurrentProgress;
+    },
+    isPlaying(): boolean {
+      return this.getPlaying;
+    },
+  },
+  created() {
+    window.Pusher = Pusher;
+    window.Echo = new Echo({
+      broadcaster: "reverb",
+      key: environment.reverb_key,
+      wsHost: environment.reverb_host,
+      wsPort: environment.reverb_port,
+      wssPort: environment.reverb_port,
+      enabledTransports: ["ws", "wss"],
+      forceTLS: false,
+      authEndpoint: `${environment.api}/broadcasting/auth`,
+      auth: {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      },
+    });
+    this.loadPlaylist();
+    this.audio = new Audio();
+    this.audio.crossOrigin = "anonymous";
+    this.audio.volume = this.volume / 100;
+    this.audio.ontimeupdate = () => {
+      this.setProgress(this.audio.currentTime);
+    };
+    // this.audio.ondurationchange = () => {
+    //   this.getDuration();
+    // };
+    this.audio.onended = () => {
+      this.setCurrentIndex(this.getCurrentIndex + 1);
+    };
+    this.audio.oncanplay = () => {
+      this.canplay();
+    };
+    this.audio.onwaiting = () => {
+      this.waiting();
+    };
+    this.audio.onloadeddata = () => {
+      this.loadeddata();
+    };
+
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) {
+        return;
+      }
+      if (e.key === " " && this.playingSong) {
+        e.preventDefault();
+        if (this.isPlaying) {
+          this.setPlaying(false);
+          return;
+        }
+        this.setPlaying(true);
+      }
+    });
+
+    document.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+    window.addEventListener("beforeunload", () => {
+      this.recordPlayedDuration();
+    });
+  },
+  unmounted() {
+    if (this.audio.src) this.audio.src = "";
+    this.setCurrentIndex(0);
+    this.setPlaying(false);
+    this.clearQueue();
+  },
+});
+</script>
+
+<template>
+  <div class="home-root">
+    <base-dialog
+      :open="dialogWaring.show"
+      :title="dialogWaring.title"
+      :mode="dialogWaring.mode"
+      @close="closeDialog"
+    >
+      <template #default>
+        <p>{{ dialogWaring.content }}</p>
+      </template>
+    </base-dialog>
+    <base-dialog
+      :open="isLoading"
+      :title="'Loading ...'"
+      :mode="'announcement'"
+    >
+      <template #default>
+        <BaseLineLoad />
+      </template>
+      <template #action>
+        <div></div>
+      </template>
+    </base-dialog>
+    <home-view-header @toggleLeftSideBar="toggleLeftSideBar" />
+    <div class="main-body">
+      <home-view-left-side-bar :isActive="isLeftSideBarActive" />
+      <main>
+        <router-view @updatePlaylist="loadPlaylist" v-slot="{ Component }">
+          <keep-alive include="mainPage">
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
+      </main>
+      <home-view-right-side-bar
+        v-if="getQueue.length > 0"
+        :isActive="isRightSideBarActive"
+      />
+      <home-upload-box :isPlaying="!!getCurrentSong"></home-upload-box>
+    </div>
+    <home-view-player
+      v-if="getQueue.length > 0"
+      :isPlaying="isPlaying"
+      :isWating="isAudioWaitting"
+      @toggleRightSideBar="toggleRightSideBar"
+      @onSetProgress="onSetProgress"
+    />
+  </div>
+</template>
+<style lang="scss" scoped>
+.home-root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.main-body {
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  justify-content: center;
+  width: calc(100% - 20px);
+  gap: 10px;
+  main {
+    flex: 1;
+    background: var(--background-glass-color-primary);
+    border-radius: 10px;
+    overflow-y: auto;
+    user-select: none;
+    container-name: main;
+    container-type: inline-size;
+    box-sizing: content-box;
+  }
+}
+</style>
